@@ -1,0 +1,32 @@
+node_modules
+dist
+dist-ssr
+*.local
+
+# 编辑器 / 系统
+.DS_Store
+.idea
+.vscode/*
+!.vscode/extensions.json
+
+# 日志
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# 构建期产物（S1.5 数据核对报告，可随时重跑生成）
+reports/
+
+# 本地环境与验证缓存
+.env
+.env.*
+!.env.example
+coverage/
+*.tsbuildinfo
+*.log
+.worklog/
+
+# 旧原型及历史数据；当前应用使用 src/db/
+/data/
+/prototype/

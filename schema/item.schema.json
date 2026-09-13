@@ -1,0 +1,140 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "YYS Checklist Item",
+  "description": "阴阳师奖励查漏清单 - 单条奖励条目定义（v1.4.1 数据模型）。已删除：value（主观价值档）/ time2（一天两次改为拆条）/ source（与 origin 语义重复）/ reward（与 gainKind 信息重复）/ entry + action（零消费且 92% 可由 path 推出）。运行时校验以 tools/build.js + src/domain/enums.ts 双轨校验为准，本文件用于编辑器提示与字段规格说明。",
+  "type": "object",
+  "required": ["id", "name", "cycle", "origin"],
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9_]+$",
+      "description": "全局唯一标识，小写字母数字下划线"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 2,
+      "maxLength": 24,
+      "description": "条目名称，显示在清单上"
+    },
+    "cycle": {
+      "type": "string",
+      "enum": ["once", "daily", "weekly", "monthly", "version", "limited", "season"],
+      "description": "周期是字段，不是分表依据。version/season 的重置锚点取 meta.periods，不套每日 05:00"
+    },
+    "days": {
+      "type": "array",
+      "items": { "type": "integer", "minimum": 0, "maximum": 6 },
+      "uniqueItems": true,
+      "description": "适用星期，0=周日。原 dayRules 表内联而成本字段；缺省 = 每天"
+    },
+    "path": {
+      "type": "string",
+      "maxLength": 40,
+      "description": "入口路径，如 商店 → 杂货铺 → 黑蛋（萌新救命字段）"
+    },
+    "gainKind": {
+      "type": "array",
+      "description": "奖励类型（数量可能浮动，但类型固定）。UI 徽章 + 顶部筛选依据，不进统计。逐条人工指定，禁止正则推断",
+      "items": {
+        "type": "string",
+        "enum": [
+          "jade", "blueTicket", "blackFrag", "blackDaruma", "skinTicket",
+          "medal", "merit", "soul", "bossSoul", "daruma",
+          "gold", "stamina", "exp", "shard", "ssr",
+          "skin", "token", "other"
+        ]
+      },
+      "uniqueItems": true,
+      "maxItems": 8,
+      "x-enum-labels": {
+        "jade": "勾玉", "blueTicket": "蓝票", "blackFrag": "黑碎", "blackDaruma": "黑蛋",
+        "skinTicket": "皮肤券", "medal": "勋章", "merit": "功勋", "soul": "御魂",
+        "bossSoul": "首领御魂", "daruma": "达摩", "gold": "金币", "stamina": "体力",
+        "exp": "经验", "shard": "碎片", "ssr": "SSR/SP", "skin": "皮肤外观",
+        "token": "代币积分", "other": "其他"
+      }
+    },
+    "gain": {
+      "type": "object",
+      "description": "固定可量化收益（保底），进统计页。缺省表示收益浮动，不计入统计",
+      "additionalProperties": false,
+      "properties": {
+        "jade": { "type": "number", "minimum": 0, "description": "勾玉数量" },
+        "blackFrag": { "type": "number", "minimum": 0, "description": "黑碎（御行达摩碎片），1 整颗黑蛋按 25 片折算" },
+        "blueTicket": { "type": "number", "minimum": 0, "description": "蓝票（神秘的符咒）数量" }
+      }
+    },
+    "gainNote": {
+      "type": "string",
+      "maxLength": 40,
+      "description": "收益口径说明，如「1黑蛋=25黑碎」「随机，不计入」"
+    },
+    "condition": {
+      "type": "string",
+      "maxLength": 40,
+      "description": "触发条件，如 仅周三周六 / 需一定练度"
+    },
+    "time": {
+      "type": "string",
+      "pattern": "^\\d{2}:\\d{2}$",
+      "description": "日常类开放时间 HH:mm。只提示，不限制勾选"
+    },
+    "timeEnd": {
+      "type": "string",
+      "pattern": "^\\d{2}:\\d{2}$",
+      "description": "结束时间 HH:mm，与 time 组成时间窗，超过则标「已结束」"
+    },
+    "timeNote": {
+      "type": "string",
+      "maxLength": 30,
+      "description": "时间备注，如 寮自定 / 全天"
+    },
+    "isGuildTime": {
+      "type": "boolean",
+      "description": "true 表示时间由所在寮自定，需在设置中配置"
+    },
+    "start": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}( \\d{2}:\\d{2})?$",
+      "description": "活动类开始日"
+    },
+    "deadline": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}( \\d{2}:\\d{2})?$",
+      "description": "活动类截止时间（截止后仍要提示去领）"
+    },
+    "until": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+      "description": "条目下线日 YYYY-MM-DD，过期自动归档。与 deadline 语义不同：deadline 是活动截止，until 是从清单下线"
+    },
+    "since": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+      "description": "条目生效日"
+    },
+    "autoDaily": {
+      "type": "boolean",
+      "description": "true 表示官方「一键日常」默认已覆盖。用户可逐项覆盖——版本更新后覆盖范围会变，所以必须可配置而非写死"
+    },
+    "isAutoHub": {
+      "type": "boolean",
+      "description": "true 表示这条就是一键日常入口本身，排序前置特判恒第 0 位，不参与痛感分比较（D1）"
+    },
+    "premium": {
+      "type": "boolean",
+      "description": "true 表示需付费前置（月卡 / 花札），未购者应在设置里关掉"
+    },
+    "note": {
+      "type": "string",
+      "maxLength": 60,
+      "description": "提醒备注，如 兑换截止≠活动结束"
+    },
+    "origin": {
+      "type": "string",
+      "enum": ["preset", "custom"],
+      "description": "区分预设条目与用户自建。source 删除后，这是唯一的自建标识；用户对 custom 条目可真删"
+    }
+  }
+}

@@ -1,0 +1,232 @@
+{
+  "items": [
+    {
+      "id": "daily_shiguang_sign",
+      "name": "拾光永恒·神木补给签到",
+      "cycle": "daily",
+      "path": "活动页 → 拾光永恒 → 神木补给",
+      "gainKind": [
+        "other"
+      ],
+      "start": "2026-09-09",
+      "until": "2026-09-30",
+      "note": "每日登录领取，累计最多 14 次，别断签（依据：虎牙活动详解 + 大神攻略）；活动 9/29 结束后本条删除",
+      "origin": "preset"
+    },
+    {
+      "id": "daily_shiguang_xuwei",
+      "name": "拾光永恒·虚无精锐",
+      "cycle": "daily",
+      "path": "活动页 → 拾光永恒 → 虚无精锐",
+      "gainKind": [
+        "soul",
+        "token"
+      ],
+      "start": "2026-09-09",
+      "until": "2026-09-30",
+      "note": "每日签到给「金花灵符」，通关定向掉 4 种指定御魂 + 磐长花币；额外挑战耗体力/卷轴，量力而行",
+      "origin": "preset"
+    },
+    {
+      "id": "daily_shiguang_river",
+      "name": "拾光永恒·巡于黄金之河",
+      "cycle": "daily",
+      "path": "活动页 → 拾光永恒 → 巡于黄金之河",
+      "gainKind": [
+        "other"
+      ],
+      "start": "2026-09-09",
+      "until": "2026-09-30",
+      "note": "每日开放新地图区块，探索事件招募伙伴、提升探索效率",
+      "origin": "preset"
+    },
+    {
+      "id": "daily_shiguang_tower",
+      "name": "拾光永恒·亘地回响爬塔",
+      "cycle": "daily",
+      "path": "活动页 → 拾光永恒 → 亘地回响",
+      "gainKind": [
+        "other"
+      ],
+      "start": "2026-09-09",
+      "until": "2026-09-30",
+      "note": "999 体力爬塔，掉白石晶（集 150 开宝箱）与灵彩（喂百鬼夜行图）；有体力尽量刷完，紧张时优先虚无精锐",
+      "origin": "preset"
+    },
+    {
+      "id": "ltd_shichangji",
+      "name": "石长姬登录即领",
+      "cycle": "limited",
+      "path": "庭院 → 石长姬小纸人",
+      "gainKind": [
+        "ssr"
+      ],
+      "start": "2026-09-09",
+      "deadline": "2026-10-06 23:59",
+      "until": "2026-10-07",
+      "note": "等级≥5即可，无门槛免费领",
+      "origin": "preset"
+    },
+    {
+      "id": "ltd_shilian_shijin",
+      "name": "拾光金眷·百次免费召唤",
+      "cycle": "limited",
+      "path": "活动页 → 拾光金眷",
+      "gainKind": [
+        "ssr",
+        "blueTicket"
+      ],
+      "start": "2026-09-09",
+      "deadline": "2026-10-06 23:59",
+      "until": "2026-10-07",
+      "note": "首次SSR/SP必出未收录",
+      "origin": "preset"
+    },
+    {
+      "id": "ltd_shiguang_yongheng",
+      "name": "拾光永恒 版本活动",
+      "cycle": "limited",
+      "path": "活动页 → 拾光永恒",
+      "gainKind": [
+        "skin",
+        "blueTicket",
+        "blackDaruma",
+        "other"
+      ],
+      "start": "2026-09-09",
+      "deadline": "2026-09-29 23:59",
+      "until": "2026-09-30",
+      "note": "重点：SP 少羽大天狗皮肤「樱时之忆」、SSR/SP 召唤券、契约书·御行达摩、动态头像框；磐语商店兑换延至 10/13，金石礼帖领奖延至 10/6；本体 9/29 结束，爬塔积分清零",
+      "origin": "preset"
+    },
+    {
+      "id": "ltd_jinli_fudiaochang",
+      "name": "锦鲤福钓场",
+      "cycle": "limited",
+      "path": "活动页 → 锦鲤福钓场",
+      "gainKind": [
+        "skin",
+        "other"
+      ],
+      "start": "2026-09-09",
+      "deadline": "2026-09-22 23:59",
+      "until": "2026-09-23",
+      "note": "钓鱼券兑换；重点：动态庭院「玉岚狐庭」、限时返场外观",
+      "origin": "preset"
+    },
+    {
+      "id": "ltd_shizai_huanxin",
+      "name": "十载焕新礼",
+      "cycle": "limited",
+      "path": "活动页 → 十载焕新礼",
+      "gainKind": [
+        "skin"
+      ],
+      "start": "2026-09-09",
+      "deadline": "2026-10-06 23:59",
+      "until": "2026-10-07",
+      "note": "登录即领，免费庭院皮肤「狐栖归处」",
+      "origin": "preset"
+    },
+    {
+      "id": "ltd_miwen_guanzhong",
+      "name": "秘闻副本·棺中奇梦",
+      "cycle": "limited",
+      "path": "探索 → 秘闻副本",
+      "gainKind": [
+        "skin",
+        "daruma"
+      ],
+      "start": "2026-09-16",
+      "deadline": "2026-10-16 23:59",
+      "until": "2026-10-17",
+      "note": "9/16 开启；重点：跳跳哥哥皮肤「奇陵寻金」、御行达摩、符咒",
+      "origin": "preset"
+    },
+    {
+      "id": "ltd_qingdian_yanchu",
+      "name": "十周年庆典演出",
+      "cycle": "limited",
+      "path": "活动页 → 庆典演出",
+      "gainKind": [
+        "skin",
+        "other"
+      ],
+      "start": "2026-09-23 19:00",
+      "deadline": "2026-09-23 19:00",
+      "until": "2026-09-24",
+      "note": "定点直播，错过无补",
+      "origin": "preset"
+    },
+    {
+      "id": "ltd_shenjuan_yongheng",
+      "name": "神眷符咒·永恒兑换",
+      "cycle": "limited",
+      "path": "商店 → 寻契心缘",
+      "gainKind": [
+        "ssr",
+        "token"
+      ],
+      "deadline": "2026-10-06 23:59",
+      "until": "2026-10-07",
+      "note": "指定 SSR/SP、未收录兑换券；全集赏玩家可换",
+      "origin": "preset"
+    },
+    {
+      "id": "ltd_xingju_huigui",
+      "name": "星聚回归系列",
+      "cycle": "limited",
+      "path": "活动页 → 星聚回归",
+      "gainKind": [
+        "other"
+      ],
+      "start": "2026-09-09",
+      "deadline": "2026-09-22 23:59",
+      "until": "2026-09-23",
+      "note": "回归玩家专属奖励",
+      "origin": "preset"
+    },
+    {
+      "id": "ltd_fushen_baochuan",
+      "name": "福神宝船·拾光游宴",
+      "cycle": "limited",
+      "path": "活动页 → 福神宝船",
+      "gainKind": [
+        "skin"
+      ],
+      "start": "2026-09-09",
+      "deadline": "2026-09-29 23:59",
+      "until": "2026-09-30",
+      "note": "重点：外观；注意 9/23 19:00 庆典演出节点",
+      "origin": "preset"
+    },
+    {
+      "id": "ltd_jinshi_litie",
+      "name": "金石礼帖",
+      "cycle": "limited",
+      "path": "活动页 → 金石礼帖",
+      "gainKind": [
+        "daruma"
+      ],
+      "start": "2026-09-09",
+      "deadline": "2026-09-29 23:59",
+      "until": "2026-10-07",
+      "note": "本体 9/29 结束，领奖延至 10/6 23:59；重点：黑蛋等",
+      "origin": "preset"
+    },
+    {
+      "id": "ltd_nianfu_hugan",
+      "name": "纪念服护肝活动",
+      "cycle": "limited",
+      "path": "活动页 → 护肝活动",
+      "gainKind": [
+        "other"
+      ],
+      "start": "2026-09-09",
+      "deadline": "2026-10-18 23:59",
+      "until": "2026-10-19",
+      "note": "护肝减负向",
+      "origin": "preset"
+    }
+  ]
+}

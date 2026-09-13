@@ -1,0 +1,243 @@
+/**
+ * 备份校验测试。核心不是"能通过合法文件"，而是**畸形 / 敌意输入不会流进用户数据分片**：
+ * 备份是用户手上的外部数据，可能来自旧版本、被手工改过、或干脆选错了文件。
+ *
+ * 注意：这里的构造器刻意**不打 `UserDataBundle` 类型** —— 要造的就是畸形数据，
+ * 而 `validateBundle` 的入参本来就是 `unknown`（未经信任的 JSON）。
+ */
+import { describe, expect, it } from 'vitest';
+import type { UserDataBundle } from '../api/types';
+import {
+  dataFreshness,
+  MAX_BUNDLE_CHARS,
+  parseBundleText,
+  serializeBundle,
+  STALE_DAYS,
+  summarize,
+  validateBundle,
+} from './backup';
+
+const NOW = new Date(2026, 8, 10);
+
+const profile = (id: string, name: string, sort: number) => ({
+  id,
+  userId: 'u_local',
+  name,
+  isDefault: sort === 1,
+  sort,
+  archived: false,
+  createdAt: '',
+  updatedAt: '',
+});
+
+const row = (profileId: string, checked: Record<string, unknown> = {}) => ({
+  profileId,
+  state: { userId: 'u_local', profileId, checked, updatedAt: '2026-09-10T00:00:00.000Z' },
+  view: { profileId, sortBy: 'weight', showKinds: [], minWeight: 0, hideDone: false, pinned: [], updatedAt: '' },
+  overrides: { profileId, custom: [], hidden: [], order: [], updatedAt: '' },
+});
+
+const bundle = (patch: Record<string, unknown> = {}) => ({
+  schemaVersion: '1.4.0',
+  exportedAt: '2026-09-10T06:00:00.000Z',
+  profiles: [profile('p_main', '大号', 1)],
+  data: [row('p_main', { daily_sign: 1, daily_pet: 2 })],
+  ...patch,
+});
+
+describe('validateBundle：拒绝畸形输入', () => {
+  it('非对象 → 拒绝，且提示是给用户看的', () => {
+    const notObj = validateBundle(null, '1.4.0');
+    expect(notObj.ok).toBe(false);
+    if (!notObj.ok) expect(notObj.error).toContain('不是一个 JSON 对象');
+    expect(validateBundle([], '1.4.0').ok).toBe(false);
+  });
+
+  it('缺 schemaVersion / profiles 不是数组 → 拒绝', () => {
+    expect(validateBundle({ profiles: [] }, '1.4.0').ok).toBe(false);
+    expect(validateBundle({ schemaVersion: '1.0.0', profiles: 'x' }, '1.4.0').ok).toBe(false);
+  });
+});
+
+describe('validateBundle：结构与归一化', () => {
+  it('合法文件通过，并给出摘要', () => {
+    const r = validateBundle(bundle(), '1.4.0');
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    expect(r.warnings).toEqual([]);
+    expect(r.summary).toEqual({ profiles: 1, checked: 2, custom: 0, hidden: 0, order: 0 });
+  });
+
+  it('不同 schemaVersion 通过但**必须警告**（不能静默让用户以为没问题）', () => {
+    const r = validateBundle(bundle({ schemaVersion: '1.2.0' }), '1.4.0');
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    expect(r.warnings[0]).toContain('1.2.0');
+    expect(r.warnings[0]).toContain('1.4.0');
+  });
+
+  it('缺 id/userId 的档案行被跳过并警告', () => {
+    const r = validateBundle(bundle({ profiles: [profile('p_main', '大号', 1), { name: '没有 id 的坏行' }] }), '1.4.0');
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    expect(r.bundle.profiles).toHaveLength(1);
+    expect(r.warnings.some((w) => w.includes('缺少 id/userId'))).toBe(true);
+  });
+
+  it('勾选记录里的非数字值被丢弃（畸形数据不进分片）', () => {
+    const dirty = bundle({
+      data: [{ ...row('p_main'), state: { userId: 'u_local', profileId: 'p_main', checked: { ok: 1, bad: 'oops', alsoBad: null, nan: Number.NaN }, updatedAt: '' } }],
+    });
+    const r = validateBundle(dirty, '1.4.0');
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    expect(r.bundle.data[0].state.checked).toEqual({ ok: 1 });
+  });
+
+  it('对不上档案的数据行被跳过并警告', () => {
+    const r = validateBundle(bundle({ data: [row('p_main'), row('p_ghost')] }), '1.4.0');
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    expect(r.bundle.data.map((d) => d.profileId)).toEqual(['p_main']);
+    expect(r.warnings.some((w) => w.includes('对不上'))).toBe(true);
+  });
+
+  it('**所有**数据行都对不上 → 拒绝（文件多半已损坏）', () => {
+    const r = validateBundle(bundle({ data: [row('p_ghost')] }), '1.4.0');
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.error).toContain('损坏');
+  });
+
+  it('空档案列表通过但给出提醒（导入后什么都不会变）', () => {
+    const r = validateBundle(bundle({ profiles: [], data: [] }), '1.4.0');
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    expect(r.warnings.some((w) => w.includes('没有任何档案'))).toBe(true);
+  });
+
+  it('归一化只保留已知字段（不留 schemaVersion 之外的野字段）', () => {
+    const r = validateBundle({ ...bundle(), 恶意字段: { a: 1 } }, '1.4.0');
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    expect(Object.keys(r.bundle).sort()).toEqual(['data', 'exportedAt', 'profiles', 'schemaVersion']);
+  });
+
+  it('时间戳只透传、不发明（领域层保持纯函数）', () => {
+    const r = validateBundle(bundle(), '1.4.0');
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    expect(r.bundle.data[0].state.updatedAt).toBe('2026-09-10T00:00:00.000Z');
+    /* 缺 updatedAt 时留空串，由写入方（mock 的 shard 保存）自己盖时间 */
+    const noStamp = validateBundle(bundle({ data: [{ ...row('p_main'), state: { userId: 'u', profileId: 'p_main', checked: { a: 1 } } }] }), '1.4.0');
+    expect(noStamp.ok).toBe(true);
+    if (noStamp.ok) expect(noStamp.bundle.data[0].state.updatedAt).toBe('');
+  });
+});
+
+describe('summarize', () => {
+  it('跨档案求和', () => {
+    const b = bundle({
+      profiles: [profile('a', 'A', 1), profile('b', 'B', 2)],
+      data: [
+        row('a', { x: 1, y: 2 }),
+        { ...row('b', { z: 3 }), overrides: { profileId: 'b', custom: [{ id: 'c1' }], hidden: ['h1'], order: ['o1'], updatedAt: '' } },
+      ],
+    });
+    expect(summarize(b as unknown as UserDataBundle)).toEqual({ profiles: 2, checked: 3, custom: 1, hidden: 1, order: 1 });
+  });
+
+  it('空 bundle 不抛错', () => {
+    const b = bundle({ profiles: [], data: [] });
+    expect(summarize(b as unknown as UserDataBundle)).toEqual({ profiles: 0, checked: 0, custom: 0, hidden: 0, order: 0 });
+  });
+});
+
+describe('dataFreshness', () => {
+  it('今天 / N 天前', () => {
+    expect(dataFreshness('2026-09-10', NOW)).toMatchObject({ days: 0, stale: false, text: '数据快照更新于 9/10（今天）' });
+    expect(dataFreshness('2026-09-08', NOW)).toMatchObject({ days: 2, stale: false });
+    expect(dataFreshness('2026-09-08', NOW).text).toContain('2 天前');
+  });
+
+  it('超过阈值转 stale 提示', () => {
+    const old = new Date(NOW.getTime() - (STALE_DAYS + 5) * 86400000);
+    const iso = `${old.getFullYear()}-${String(old.getMonth() + 1).padStart(2, '0')}-${String(old.getDate()).padStart(2, '0')}`;
+    expect(dataFreshness(iso, NOW).stale).toBe(true);
+    expect(dataFreshness(iso, NOW).days).toBe(STALE_DAYS + 5);
+  });
+
+  it('缺字段 / 格式非法 → 不报 stale，也不抛错', () => {
+    expect(dataFreshness(undefined, NOW)).toEqual({ days: null, stale: false, text: '更新日期未知' });
+    expect(dataFreshness('乱填', NOW).days).toBeNull();
+  });
+});
+
+describe('serializeBundle / parseBundleText：复制粘贴的载体', () => {
+  it('序列化成缩进 2 空格的 JSON，首尾可肉眼看出结构（便于发现粘贴被截断）', () => {
+    const text = serializeBundle(bundle() as unknown as UserDataBundle);
+    expect(text.startsWith('{\n  "schemaVersion"')).toBe(true);
+    expect(text.trimEnd().endsWith('}')).toBe(true);
+    expect(text.split('\n').length).toBeGreaterThan(5);
+  });
+
+  it('往返一致：序列化 → 解析 → 校验通过且摘要不变', () => {
+    const text = serializeBundle(bundle() as unknown as UserDataBundle);
+    const parsed = parseBundleText(text);
+    expect(parsed.ok).toBe(true);
+    if (!parsed.ok) return;
+    const r = validateBundle(parsed.value, '1.4.0');
+    expect(r.ok).toBe(true);
+    if (r.ok) expect(r.summary).toEqual({ profiles: 1, checked: 2, custom: 0, hidden: 0, order: 0 });
+  });
+
+  it('空内容 / 只有空白 → 提示先粘贴', () => {
+    for (const empty of ['', '   ', '\n\n']) {
+      const r = parseBundleText(empty);
+      expect(r.ok).toBe(false);
+      if (!r.ok) expect(r.error).toContain('内容为空');
+    }
+  });
+
+  it('粘贴被截断的 JSON → 给出可据以行动的原因，而不是抛 SyntaxError', () => {
+    const truncated = serializeBundle(bundle() as unknown as UserDataBundle).slice(0, 60);
+    const r = parseBundleText(truncated);
+    expect(r.ok).toBe(false);
+    if (!r.ok) {
+      expect(r.error).toContain('不是合法的 JSON');
+      expect(r.error).toContain('粘贴不完整');
+    }
+  });
+
+  it('粘错东西（超长）→ 拒绝并说明正常备份的量级', () => {
+    const r = parseBundleText('x'.repeat(MAX_BUNDLE_CHARS + 1));
+    expect(r.ok).toBe(false);
+    if (!r.ok) expect(r.error).toContain('粘错了');
+  });
+
+  it('合法 JSON 但不是对象时能解析出来，交给 validateBundle 拒绝', () => {
+    const r = parseBundleText('123');
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    expect(validateBundle(r.value, '1.4.0').ok).toBe(false);
+  });
+});
+
+describe('常量', () => {
+  it('粘贴长度上限是 MB 字符量级（正常备份不到 100 KB）', () => {
+    expect(MAX_BUNDLE_CHARS).toBeGreaterThanOrEqual(1024 * 1024);
+  });
+});
+
+describe('与真实契约往返', () => {
+  it('导出的真实 bundle 能通过校验，摘要与数据一致，且**零警告**', async () => {
+    const { api } = await import('../api');
+    const meta = await api.getMeta();
+    const raw = await api.exportUserData({ userId: 'u_local', profileId: 'p_main' });
+    const r = validateBundle(raw, meta.version);
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    expect(r.warnings).toEqual([]);
+    expect(r.summary.profiles).toBe(raw.profiles.length);
+    expect(r.bundle.data).toHaveLength(raw.data.length);
+  });
+});

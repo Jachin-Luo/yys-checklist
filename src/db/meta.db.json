@@ -1,0 +1,388 @@
+{
+  "meta": {
+    "version": "1.4.0",
+    "dataVersion": "2026.09.13-十周年勾玉查漏",
+    "updated": "2026-09-13",
+    "resetHour": 5,
+    "resetNote": "阴阳师日常为每日 05:00 重置（非 0 点），周常为周一 05:00",
+    "periods": {
+      "version": {
+        "key": "2026.09.09",
+        "startAt": "2026-09-09T09:00",
+        "note": "十周年版本（2026-09-09 开服）· 版本惯例 09:00，官方偶有提前/延后，待核对"
+      },
+      "season": {
+        "key": "寻龙逐英",
+        "startAt": "2026-07-06T06:00",
+        "note": "斗技赛年制「寻龙逐英」：2026-07-06 6:00 – 2027-03，含 2 个赛季 · 此前记的 S31 是《决战！平安京》的赛季号（张冠李戴），本体具体赛季号待官方核对"
+      }
+    },
+    "disclaimer": "本工具为纯手动记录工具，不读取任何游戏数据、不模拟点击、不代为操作。所有完成状态由玩家自行勾选。",
+    "gainKindNote": "奖励类型标注：91/91 条已逐条人工按枚举指定。其中 16 条有 gain 的，类型由 gain 精确推出（属事实）；其余由人工核定。禁止用正则从文本推断——正则匹配是启发式，猜对大部分但对数据可信度无意义（历史教训：曾用正则从旧版 reward 文本推断 87 条，出现「免费黑蛋礼包」被标成 黑碎+黑蛋+达摩+碎片、「地域鬼王 皮肤券」被拆成 皮肤+券 等子串重叠误判，已全部回滚）。2026-09-11 该文本字段 reward 已从数据模型整体删除：它与 gainKind 本是同一事实的两份编码（后者正是人工读前者核定的），同时保留必然同义反复。",
+    "weightNote": "痛感分 = 周期权重（一次性/限时/版本/赛季 40 > 每月 30 > 每周 20 > 每日 10）+ 稀缺性加成（有 deadline/until +15）+ 固定收益加成（有 gain +10）。由 domain/weight.ts 派生，不人工打分；一键日常入口恒第 0 位、不参与该比较。",
+    "viewNote": "视图偏好按档案分片（yys:view:{profileId}），与勾选状态解耦。控件：排序（痛感/周期/截止/自定义/名称）+ 按奖励类型筛选（showKinds）+ 痛感门槛（minWeight）+ 单条 ☆ 置顶 + 隐藏已完成。三档预设模板已废弃。",
+    "stateKeySpec": "yys:state:{profileId}"
+  },
+  "dicts": [
+    {
+      "type": "cycle",
+      "code": "daily",
+      "label": "每日",
+      "sort": 1
+    },
+    {
+      "type": "cycle",
+      "code": "weekly",
+      "label": "每周",
+      "sort": 2
+    },
+    {
+      "type": "cycle",
+      "code": "monthly",
+      "label": "每月",
+      "sort": 3
+    },
+    {
+      "type": "cycle",
+      "code": "version",
+      "label": "版本",
+      "sort": 4
+    },
+    {
+      "type": "cycle",
+      "code": "season",
+      "label": "赛季",
+      "sort": 5
+    },
+    {
+      "type": "cycle",
+      "code": "limited",
+      "label": "限时",
+      "sort": 6
+    },
+    {
+      "type": "cycle",
+      "code": "once",
+      "label": "一次性",
+      "sort": 7
+    },
+    {
+      "type": "gainKind",
+      "code": "jade",
+      "label": "勾玉",
+      "sort": 1
+    },
+    {
+      "type": "gainKind",
+      "code": "blueTicket",
+      "label": "蓝票",
+      "sort": 2
+    },
+    {
+      "type": "gainKind",
+      "code": "blackFrag",
+      "label": "黑碎",
+      "sort": 3
+    },
+    {
+      "type": "gainKind",
+      "code": "blackDaruma",
+      "label": "黑蛋",
+      "sort": 4
+    },
+    {
+      "type": "gainKind",
+      "code": "skinTicket",
+      "label": "皮肤券",
+      "sort": 5
+    },
+    {
+      "type": "gainKind",
+      "code": "medal",
+      "label": "勋章",
+      "sort": 6
+    },
+    {
+      "type": "gainKind",
+      "code": "merit",
+      "label": "功勋",
+      "sort": 7
+    },
+    {
+      "type": "gainKind",
+      "code": "soul",
+      "label": "御魂",
+      "sort": 8
+    },
+    {
+      "type": "gainKind",
+      "code": "bossSoul",
+      "label": "首领御魂",
+      "sort": 9
+    },
+    {
+      "type": "gainKind",
+      "code": "daruma",
+      "label": "达摩",
+      "sort": 10
+    },
+    {
+      "type": "gainKind",
+      "code": "gold",
+      "label": "金币",
+      "sort": 11
+    },
+    {
+      "type": "gainKind",
+      "code": "stamina",
+      "label": "体力",
+      "sort": 12
+    },
+    {
+      "type": "gainKind",
+      "code": "exp",
+      "label": "经验",
+      "sort": 13
+    },
+    {
+      "type": "gainKind",
+      "code": "shard",
+      "label": "碎片",
+      "sort": 14
+    },
+    {
+      "type": "gainKind",
+      "code": "ssr",
+      "label": "SSR/SP",
+      "sort": 15
+    },
+    {
+      "type": "gainKind",
+      "code": "skin",
+      "label": "皮肤外观",
+      "sort": 16
+    },
+    {
+      "type": "gainKind",
+      "code": "token",
+      "label": "代币积分",
+      "sort": 17
+    },
+    {
+      "type": "gainKind",
+      "code": "other",
+      "label": "其他",
+      "sort": 18
+    },
+    {
+      "type": "weekday",
+      "code": "1",
+      "label": "周一",
+      "sort": 1,
+      "meta": {
+        "dow": 1
+      }
+    },
+    {
+      "type": "weekday",
+      "code": "2",
+      "label": "周二",
+      "sort": 2,
+      "meta": {
+        "dow": 2
+      }
+    },
+    {
+      "type": "weekday",
+      "code": "3",
+      "label": "周三",
+      "sort": 3,
+      "meta": {
+        "dow": 3
+      }
+    },
+    {
+      "type": "weekday",
+      "code": "4",
+      "label": "周四",
+      "sort": 4,
+      "meta": {
+        "dow": 4
+      }
+    },
+    {
+      "type": "weekday",
+      "code": "5",
+      "label": "周五",
+      "sort": 5,
+      "meta": {
+        "dow": 5
+      }
+    },
+    {
+      "type": "weekday",
+      "code": "6",
+      "label": "周六",
+      "sort": 6,
+      "meta": {
+        "dow": 6
+      }
+    },
+    {
+      "type": "weekday",
+      "code": "0",
+      "label": "周日",
+      "sort": 7,
+      "meta": {
+        "dow": 0
+      }
+    },
+    {
+      "type": "yuhunSection",
+      "code": "orochi",
+      "label": "八岐大蛇系",
+      "sort": 1,
+      "note": "魂1-10 → 魂土(悲鸣) → 魂王(神罚) → 魂13·虚无 · 同源四本，四套轮换别记混"
+    },
+    {
+      "type": "yuhunSection",
+      "code": "eien",
+      "label": "永生之海（魂海）",
+      "sort": 2,
+      "note": "老魂跟随魂十当天 + 专属海鲜每日轮换 · 每周 30 次加成"
+    },
+    {
+      "type": "yuhunSection",
+      "code": "nichirin",
+      "label": "日轮之陨",
+      "sort": 3,
+      "note": "掉落固定不挑日子 · 周一至五共 50 次加成，周末每日 50 次"
+    },
+    {
+      "type": "yuhunSection",
+      "code": "other",
+      "label": "其他御魂来源",
+      "sort": 4,
+      "note": "首领御魂 / 特殊产出"
+    },
+    {
+      "type": "yuhunSection",
+      "code": "gogyo",
+      "label": "业原火（门票制）",
+      "sort": 5,
+      "note": "优先级低 · 刷八岐攒门票才需要"
+    },
+    {
+      "type": "spotKind",
+      "code": "探索章节",
+      "label": "探索章节",
+      "sort": 1
+    },
+    {
+      "type": "spotKind",
+      "code": "章节挑战",
+      "label": "章节挑战",
+      "sort": 2
+    },
+    {
+      "type": "spotKind",
+      "code": "御魂层",
+      "label": "御魂层",
+      "sort": 3
+    },
+    {
+      "type": "spotKind",
+      "code": "妖气封印",
+      "label": "妖气封印",
+      "sort": 4
+    },
+    {
+      "type": "spotKind",
+      "code": "秘闻副本",
+      "label": "秘闻副本",
+      "sort": 5
+    },
+    {
+      "type": "spotKind",
+      "code": "业原火",
+      "label": "业原火",
+      "sort": 6
+    },
+    {
+      "type": "soulCategory",
+      "code": "首领",
+      "label": "首领",
+      "sort": 1
+    },
+    {
+      "type": "soulCategory",
+      "code": "攻击",
+      "label": "攻击",
+      "sort": 2
+    },
+    {
+      "type": "soulCategory",
+      "code": "生命",
+      "label": "生命",
+      "sort": 3
+    },
+    {
+      "type": "soulCategory",
+      "code": "防御",
+      "label": "防御",
+      "sort": 4
+    },
+    {
+      "type": "soulCategory",
+      "code": "暴击",
+      "label": "暴击",
+      "sort": 5
+    },
+    {
+      "type": "soulCategory",
+      "code": "效果抵抗",
+      "label": "效果抵抗",
+      "sort": 6
+    },
+    {
+      "type": "soulCategory",
+      "code": "效果命中",
+      "label": "效果命中",
+      "sort": 7
+    }
+  ],
+  "sortOptions": [
+    {
+      "id": "weight",
+      "label": "痛感",
+      "desc": "周期 × 稀缺性 × 固定收益派生：越不可重复、越有截止越靠前"
+    },
+    {
+      "id": "cycle",
+      "label": "周期",
+      "desc": "按周期顺序：每日 → 每周 → 每月 → 版本 → 赛季 → 限时 → 一次性"
+    },
+    {
+      "id": "deadline",
+      "label": "截止",
+      "desc": "有截止日的按剩余天数升序，无截止的一律沉底"
+    },
+    {
+      "id": "custom",
+      "label": "自定义",
+      "desc": "拖动卡片或点 ▲▼ 调序，顺序按档案保存在本机"
+    },
+    {
+      "id": "name",
+      "label": "名称",
+      "desc": "按条目名字典序，便于按熟悉程度找"
+    }
+  ],
+  "viewDefaults": {
+    "sortBy": "weight",
+    "showKinds": [],
+    "minWeight": 0,
+    "hideDone": false,
+    "pinned": []
+  }
+}

@@ -1,0 +1,118 @@
+/**
+ * 极少量全局基础样式（重置、字体栈、滚动条、可访问性基线）—— 设计文档 §8.1。
+ * 颜色 / 字号一律 @apply 令牌类，不写 #RRGGBB，保持"改一处令牌即全局生效"。
+ *
+ * 注意：本文件独立于 index.css 被 PostCSS 处理，因此外层不套 `@layer base`
+ * （Tailwind 要求 `@layer` 与 `@tailwind base` 同文件），改用普通选择器表达同等优先级。
+ * 这个"副作用"是**有意依赖**的：普通选择器的优先级高于 Tailwind 的 `@layer utilities`，
+ * 所以下面的全局规则能盖住组件里遗留的 `outline-none` 之类工具类。
+ */
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+/*
+ * 移动端视口高度。
+ * `100%`（等价于 `100vh`）跟的是**布局视口**，不随地址栏 / 工具栏伸缩；
+ * 而本应用是"固定高度壳 + 内部滚动"，没有页面级滚动可以自救 ——
+ * iOS Safari 地址栏展开时，底部 Tab 条会被推出可视区，且滚不回来。
+ * `dvh` 跟随实际可见高度；不支持的浏览器会忽略第二条声明，退回 `100%`。
+ */
+@supports (height: 100dvh) {
+  html,
+  body,
+  #root {
+    height: 100dvh;
+  }
+}
+
+/*
+ * 文档级滚动禁用（2026-09-11）：本应用是「固定高度壳（h-full 链）+ main 内层滚动」架构，
+ * **html/body 层面的滚动永远是 bug** —— 内容滚动只允许发生在 main（及弹层、下拉）内部。
+ * 背景：引入 100dvh 后，Windows 分数缩放（125%/150%）下浏览器视口计算的亚像素舍入差
+ * 可把 body 撑出 ≤1px 的溢出，PC 端于是出现「body 一条 + main 一条」的双滚动条。
+ * overflow:hidden 直接掐掉文档级滚动，保证全站最多一条（main 的）滚动条。
+ * 注意：不要给 aside 加 overflow —— ProfileSwitcher 的下拉是 absolute，会被裁掉。
+ */
+html,
+body {
+  overflow: hidden;
+}
+
+body {
+  @apply bg-surface-2 font-sans text-ink antialiased;
+  margin: 0;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border-width: 0;
+  padding: 0;
+  cursor: pointer;
+  text-align: inherit;
+}
+
+/*
+ * 焦点可见性：**全站唯一来源**（2026-09-11 新增）。
+ * 此前全站 0 处作者级焦点样式：约 70 个按钮只剩各家浏览器默认环（与设计语言无关），
+ * 8 个输入框更糟 —— 用 `outline-none` 去掉默认环后只靠 1px 边框变色提示，
+ * 其中式神搜索框连 `focus:` 类都没有，键盘聚焦后完全没有视觉变化。
+ * 用 `:focus-visible` 而非 `:focus`：鼠标点击不亮环，键盘 Tab 才亮，不干扰日常使用。
+ */
+:focus-visible {
+  @apply outline outline-2 outline-offset-2 outline-brand;
+}
+
+/*
+ * 触屏按下反馈（2026-09-11 新增）。
+ * 下面那条 `-webkit-tap-highlight-color: transparent` 关掉了系统级点击高亮，
+ * 而触屏上没有 hover、全站此前也没有任何 `:active` 样式 —— 点按钮会出现
+ * "不确定点到没有"的空窗（导出日历、发测试通知这类异步操作尤其明显）。
+ */
+button:active:not(:disabled),
+[role='button']:active {
+  opacity: 0.72;
+}
+
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/*
+ * iOS 安全区（2026-09-11 新增）。
+ * `index.html` 声明了 `viewport-fit=cover`（内容铺满整屏），代价是**必须自己让开**
+ * 刘海与 Home 指示条区（竖屏底部约 34px）。此前全库 0 处 `env(safe-area-inset-*)`：
+ * 竖屏在 Safari 里侥幸不出问题（浏览器自己占着那块），
+ * 但一旦启用 PWA（standalone 模式）会立刻普遍暴露 —— 而 PWA 只是暂缓，不是取消。
+ * `max()` 保证没有安全区时退回原设计间距。
+ */
+.safe-top {
+  padding-top: max(0.875rem, env(safe-area-inset-top));
+}
+
+.safe-bottom {
+  padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
+}
+
+.safe-x {
+  padding-left: max(1rem, env(safe-area-inset-left));
+  padding-right: max(1rem, env(safe-area-inset-right));
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply rounded-full bg-line;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}

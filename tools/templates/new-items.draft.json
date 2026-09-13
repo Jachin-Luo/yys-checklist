@@ -1,0 +1,27 @@
+{
+  "_comment": "新版本条目草稿：填好后把 items 合并进 src/db/items.db.json，再跑 npm run db:check",
+  "items": [
+    {
+      "id": "version_xxx_yyy",
+      "name": "（新条目名，2–24 字）",
+      "cycle": "version",
+      "path": "（入口路径，≤40 字）",
+      "gainKind": [
+        "jade",
+        "other"
+      ],
+      "gain": {
+        "jade": 0
+      },
+      "gainNote": "（口径说明，≤40 字；浮动收益写「不计入」）",
+      "condition": "（触发条件，可选）",
+      "time": "00:00",
+      "timeEnd": "00:00",
+      "start": "2026-09-09",
+      "deadline": "2026-10-06 23:59",
+      "until": "2026-10-07",
+      "note": "（提醒备注，≤60 字）",
+      "origin": "preset"
+    }
+  ]
+}

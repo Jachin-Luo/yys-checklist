@@ -1,0 +1,1690 @@
+{
+  "shikigami": [
+    {
+      "id": "大天狗",
+      "name": "大天狗"
+    },
+    {
+      "id": "椒图",
+      "name": "椒图"
+    },
+    {
+      "id": "妖狐",
+      "name": "妖狐"
+    },
+    {
+      "id": "鲤鱼精",
+      "name": "鲤鱼精"
+    },
+    {
+      "id": "三尾狐",
+      "name": "三尾狐"
+    },
+    {
+      "id": "山童",
+      "name": "山童"
+    },
+    {
+      "id": "鬼使黑",
+      "name": "鬼使黑"
+    },
+    {
+      "id": "鬼使白",
+      "name": "鬼使白"
+    },
+    {
+      "id": "独眼小僧",
+      "name": "独眼小僧"
+    },
+    {
+      "id": "座敷童子",
+      "name": "座敷童子"
+    },
+    {
+      "id": "桃花妖",
+      "name": "桃花妖"
+    },
+    {
+      "id": "童女",
+      "name": "童女"
+    },
+    {
+      "id": "童男",
+      "name": "童男"
+    },
+    {
+      "id": "海坊主",
+      "name": "海坊主"
+    },
+    {
+      "id": "天邪鬼黄",
+      "name": "天邪鬼黄"
+    },
+    {
+      "id": "天邪鬼青",
+      "name": "天邪鬼青"
+    },
+    {
+      "id": "天邪鬼赤",
+      "name": "天邪鬼赤"
+    },
+    {
+      "id": "傀儡师",
+      "name": "傀儡师"
+    },
+    {
+      "id": "镰鼬",
+      "name": "镰鼬"
+    },
+    {
+      "id": "食梦貘",
+      "name": "食梦貘"
+    },
+    {
+      "id": "涂壁",
+      "name": "涂壁"
+    },
+    {
+      "id": "河童",
+      "name": "河童"
+    },
+    {
+      "id": "萤草",
+      "name": "萤草"
+    },
+    {
+      "id": "鸦天狗",
+      "name": "鸦天狗"
+    },
+    {
+      "id": "青蛙瓷器",
+      "name": "青蛙瓷器"
+    },
+    {
+      "id": "蝴蝶精",
+      "name": "蝴蝶精"
+    },
+    {
+      "id": "孟婆",
+      "name": "孟婆"
+    },
+    {
+      "id": "犬神",
+      "name": "犬神"
+    },
+    {
+      "id": "阎魔",
+      "name": "阎魔"
+    },
+    {
+      "id": "兵俑",
+      "name": "兵俑"
+    },
+    {
+      "id": "丑时之女",
+      "name": "丑时之女"
+    },
+    {
+      "id": "雨女",
+      "name": "雨女"
+    },
+    {
+      "id": "吸血姬",
+      "name": "吸血姬"
+    },
+    {
+      "id": "跳跳哥哥",
+      "name": "跳跳哥哥"
+    },
+    {
+      "id": "骨女",
+      "name": "骨女"
+    },
+    {
+      "id": "巫蛊师",
+      "name": "巫蛊师"
+    },
+    {
+      "id": "青坊主",
+      "name": "青坊主"
+    },
+    {
+      "id": "酒吞童子",
+      "name": "酒吞童子"
+    },
+    {
+      "id": "判官",
+      "name": "判官"
+    }
+  ],
+  "spots": [
+    {
+      "id": "第15章",
+      "name": "第15章",
+      "kind": "探索章节"
+    },
+    {
+      "id": "第18章",
+      "name": "第18章",
+      "kind": "探索章节"
+    },
+    {
+      "id": "御魂4层",
+      "name": "御魂4层",
+      "kind": "御魂层"
+    },
+    {
+      "id": "御魂10层",
+      "name": "御魂10层",
+      "kind": "御魂层"
+    },
+    {
+      "id": "暴风之巅",
+      "name": "暴风之巅",
+      "kind": "秘闻副本"
+    },
+    {
+      "id": "御魂3层",
+      "name": "御魂3层",
+      "kind": "御魂层"
+    },
+    {
+      "id": "御魂8层",
+      "name": "御魂8层",
+      "kind": "御魂层"
+    },
+    {
+      "id": "御魂9层",
+      "name": "御魂9层",
+      "kind": "御魂层"
+    },
+    {
+      "id": "妖气封印·椒图",
+      "name": "妖气封印·椒图",
+      "kind": "妖气封印"
+    },
+    {
+      "id": "业原火·痴",
+      "name": "业原火·痴",
+      "kind": "业原火"
+    },
+    {
+      "id": "第7章",
+      "name": "第7章",
+      "kind": "探索章节"
+    },
+    {
+      "id": "御魂2层",
+      "name": "御魂2层",
+      "kind": "御魂层"
+    },
+    {
+      "id": "暴风之巅8层",
+      "name": "暴风之巅8层",
+      "kind": "秘闻副本"
+    },
+    {
+      "id": "第6章",
+      "name": "第6章",
+      "kind": "探索章节"
+    },
+    {
+      "id": "第3章挑战",
+      "name": "第3章挑战",
+      "kind": "章节挑战"
+    },
+    {
+      "id": "御魂1层",
+      "name": "御魂1层",
+      "kind": "御魂层"
+    },
+    {
+      "id": "第8章",
+      "name": "第8章",
+      "kind": "探索章节"
+    },
+    {
+      "id": "第16章",
+      "name": "第16章",
+      "kind": "探索章节"
+    },
+    {
+      "id": "河畔童谣2层",
+      "name": "河畔童谣2层",
+      "kind": "秘闻副本"
+    },
+    {
+      "id": "御魂7层",
+      "name": "御魂7层",
+      "kind": "御魂层"
+    },
+    {
+      "id": "第24章",
+      "name": "第24章",
+      "kind": "探索章节"
+    },
+    {
+      "id": "妖气封印·鬼使黑",
+      "name": "妖气封印·鬼使黑",
+      "kind": "妖气封印"
+    },
+    {
+      "id": "暴风之巅6层",
+      "name": "暴风之巅6层",
+      "kind": "秘闻副本"
+    },
+    {
+      "id": "第11章",
+      "name": "第11章",
+      "kind": "探索章节"
+    },
+    {
+      "id": "第18章挑战",
+      "name": "第18章挑战",
+      "kind": "章节挑战"
+    },
+    {
+      "id": "御魂5层",
+      "name": "御魂5层",
+      "kind": "御魂层"
+    },
+    {
+      "id": "第2章",
+      "name": "第2章",
+      "kind": "探索章节"
+    },
+    {
+      "id": "第23章",
+      "name": "第23章",
+      "kind": "探索章节"
+    },
+    {
+      "id": "雨女副本1层",
+      "name": "雨女副本1层",
+      "kind": "秘闻副本"
+    },
+    {
+      "id": "御魂6层",
+      "name": "御魂6层",
+      "kind": "御魂层"
+    },
+    {
+      "id": "第8章挑战",
+      "name": "第8章挑战",
+      "kind": "章节挑战"
+    },
+    {
+      "id": "第3章",
+      "name": "第3章",
+      "kind": "探索章节"
+    },
+    {
+      "id": "第12章挑战",
+      "name": "第12章挑战",
+      "kind": "章节挑战"
+    },
+    {
+      "id": "荒川副本2层",
+      "name": "荒川副本2层",
+      "kind": "秘闻副本"
+    },
+    {
+      "id": "河畔童谣1层",
+      "name": "河畔童谣1层",
+      "kind": "秘闻副本"
+    },
+    {
+      "id": "第12章",
+      "name": "第12章",
+      "kind": "探索章节"
+    },
+    {
+      "id": "荒川副本8层",
+      "name": "荒川副本8层",
+      "kind": "秘闻副本"
+    },
+    {
+      "id": "妖气封印·海坊主",
+      "name": "妖气封印·海坊主",
+      "kind": "妖气封印"
+    },
+    {
+      "id": "第5章",
+      "name": "第5章",
+      "kind": "探索章节"
+    },
+    {
+      "id": "第10章",
+      "name": "第10章",
+      "kind": "探索章节"
+    },
+    {
+      "id": "妖刀姬副本1层",
+      "name": "妖刀姬副本1层",
+      "kind": "秘闻副本"
+    },
+    {
+      "id": "妖刀姬副本2层",
+      "name": "妖刀姬副本2层",
+      "kind": "秘闻副本"
+    },
+    {
+      "id": "妖刀姬副本3层",
+      "name": "妖刀姬副本3层",
+      "kind": "秘闻副本"
+    },
+    {
+      "id": "第13章",
+      "name": "第13章",
+      "kind": "探索章节"
+    },
+    {
+      "id": "第14章",
+      "name": "第14章",
+      "kind": "探索章节"
+    },
+    {
+      "id": "河畔童谣4层",
+      "name": "河畔童谣4层",
+      "kind": "秘闻副本"
+    },
+    {
+      "id": "第4章",
+      "name": "第4章",
+      "kind": "探索章节"
+    },
+    {
+      "id": "第7章挑战",
+      "name": "第7章挑战",
+      "kind": "章节挑战"
+    },
+    {
+      "id": "雨女副本8层",
+      "name": "雨女副本8层",
+      "kind": "秘闻副本"
+    },
+    {
+      "id": "暴风之巅7层",
+      "name": "暴风之巅7层",
+      "kind": "秘闻副本"
+    },
+    {
+      "id": "第9章",
+      "name": "第9章",
+      "kind": "探索章节"
+    },
+    {
+      "id": "第17章",
+      "name": "第17章",
+      "kind": "探索章节"
+    },
+    {
+      "id": "荒川副本4层",
+      "name": "荒川副本4层",
+      "kind": "秘闻副本"
+    },
+    {
+      "id": "第4章挑战",
+      "name": "第4章挑战",
+      "kind": "章节挑战"
+    },
+    {
+      "id": "雨女副本10层",
+      "name": "雨女副本10层",
+      "kind": "秘闻副本"
+    },
+    {
+      "id": "第21章",
+      "name": "第21章",
+      "kind": "探索章节"
+    },
+    {
+      "id": "雨女副本7层",
+      "name": "雨女副本7层",
+      "kind": "秘闻副本"
+    },
+    {
+      "id": "第10章挑战",
+      "name": "第10章挑战",
+      "kind": "章节挑战"
+    },
+    {
+      "id": "妖气封印·跳跳哥哥",
+      "name": "妖气封印·跳跳哥哥",
+      "kind": "妖气封印"
+    },
+    {
+      "id": "雨女副本4层",
+      "name": "雨女副本4层",
+      "kind": "秘闻副本"
+    },
+    {
+      "id": "妖气封印·骨女",
+      "name": "妖气封印·骨女",
+      "kind": "妖气封印"
+    },
+    {
+      "id": "第6章挑战",
+      "name": "第6章挑战",
+      "kind": "章节挑战"
+    },
+    {
+      "id": "第22章",
+      "name": "第22章",
+      "kind": "探索章节"
+    },
+    {
+      "id": "河畔童谣8层",
+      "name": "河畔童谣8层",
+      "kind": "秘闻副本"
+    }
+  ],
+  "shikigamiSpots": [
+    {
+      "shikigamiId": "大天狗",
+      "spotId": "第15章",
+      "count": 1
+    },
+    {
+      "shikigamiId": "大天狗",
+      "spotId": "第18章",
+      "count": 1
+    },
+    {
+      "shikigamiId": "大天狗",
+      "spotId": "御魂4层",
+      "count": 1
+    },
+    {
+      "shikigamiId": "大天狗",
+      "spotId": "御魂10层",
+      "count": 2
+    },
+    {
+      "shikigamiId": "大天狗",
+      "spotId": "暴风之巅",
+      "count": 1
+    },
+    {
+      "shikigamiId": "椒图",
+      "spotId": "御魂3层",
+      "count": 1
+    },
+    {
+      "shikigamiId": "椒图",
+      "spotId": "御魂8层",
+      "count": 1
+    },
+    {
+      "shikigamiId": "椒图",
+      "spotId": "御魂9层",
+      "count": 1
+    },
+    {
+      "shikigamiId": "椒图",
+      "spotId": "御魂10层",
+      "count": 1
+    },
+    {
+      "shikigamiId": "椒图",
+      "spotId": "妖气封印·椒图",
+      "count": 3
+    },
+    {
+      "shikigamiId": "椒图",
+      "spotId": "业原火·痴",
+      "count": 1
+    },
+    {
+      "shikigamiId": "妖狐",
+      "spotId": "第7章",
+      "count": 1
+    },
+    {
+      "shikigamiId": "妖狐",
+      "spotId": "御魂2层",
+      "count": 1
+    },
+    {
+      "shikigamiId": "妖狐",
+      "spotId": "暴风之巅8层",
+      "count": 5
+    },
+    {
+      "shikigamiId": "妖狐",
+      "spotId": "业原火·痴",
+      "count": 1
+    },
+    {
+      "shikigamiId": "鲤鱼精",
+      "spotId": "第7章",
+      "count": 7
+    },
+    {
+      "shikigamiId": "鲤鱼精",
+      "spotId": "御魂2层",
+      "count": 1
+    },
+    {
+      "shikigamiId": "鲤鱼精",
+      "spotId": "御魂3层",
+      "count": 1
+    },
+    {
+      "shikigamiId": "鲤鱼精",
+      "spotId": "御魂9层",
+      "count": 1
+    },
+    {
+      "shikigamiId": "三尾狐",
+      "spotId": "第6章",
+      "count": 1
+    },
+    {
+      "shikigamiId": "三尾狐",
+      "spotId": "第18章",
+      "count": 6
+    },
+    {
+      "shikigamiId": "三尾狐",
+      "spotId": "第3章挑战",
+      "count": 14
+    },
+    {
+      "shikigamiId": "三尾狐",
+      "spotId": "御魂1层",
+      "count": 1
+    },
+    {
+      "shikigamiId": "山童",
+      "spotId": "第8章",
+      "count": 1
+    },
+    {
+      "shikigamiId": "山童",
+      "spotId": "第16章",
+      "count": 6
+    },
+    {
+      "shikigamiId": "山童",
+      "spotId": "河畔童谣2层",
+      "count": 3
+    },
+    {
+      "shikigamiId": "山童",
+      "spotId": "御魂1层",
+      "count": 1
+    },
+    {
+      "shikigamiId": "山童",
+      "spotId": "御魂7层",
+      "count": 1
+    },
+    {
+      "shikigamiId": "鬼使黑",
+      "spotId": "第16章",
+      "count": 1
+    },
+    {
+      "shikigamiId": "鬼使黑",
+      "spotId": "第24章",
+      "count": 6
+    },
+    {
+      "shikigamiId": "鬼使黑",
+      "spotId": "御魂4层",
+      "count": 1
+    },
+    {
+      "shikigamiId": "鬼使黑",
+      "spotId": "妖气封印·鬼使黑",
+      "count": 3
+    },
+    {
+      "shikigamiId": "鬼使白",
+      "spotId": "第16章",
+      "count": 1
+    },
+    {
+      "shikigamiId": "鬼使白",
+      "spotId": "御魂4层",
+      "count": 1
+    },
+    {
+      "shikigamiId": "鬼使白",
+      "spotId": "暴风之巅6层",
+      "count": 2
+    },
+    {
+      "shikigamiId": "独眼小僧",
+      "spotId": "第11章",
+      "count": 7
+    },
+    {
+      "shikigamiId": "独眼小僧",
+      "spotId": "第18章挑战",
+      "count": 14
+    },
+    {
+      "shikigamiId": "独眼小僧",
+      "spotId": "御魂1层",
+      "count": 1
+    },
+    {
+      "shikigamiId": "独眼小僧",
+      "spotId": "御魂5层",
+      "count": 1
+    },
+    {
+      "shikigamiId": "座敷童子",
+      "spotId": "第2章",
+      "count": 1
+    },
+    {
+      "shikigamiId": "座敷童子",
+      "spotId": "第23章",
+      "count": 4
+    },
+    {
+      "shikigamiId": "座敷童子",
+      "spotId": "雨女副本1层",
+      "count": 3
+    },
+    {
+      "shikigamiId": "座敷童子",
+      "spotId": "御魂3层",
+      "count": 1
+    },
+    {
+      "shikigamiId": "座敷童子",
+      "spotId": "御魂6层",
+      "count": 1
+    },
+    {
+      "shikigamiId": "桃花妖",
+      "spotId": "第8章挑战",
+      "count": 14
+    },
+    {
+      "shikigamiId": "桃花妖",
+      "spotId": "暴风之巅8层",
+      "count": 5
+    },
+    {
+      "shikigamiId": "桃花妖",
+      "spotId": "御魂3层",
+      "count": 1
+    },
+    {
+      "shikigamiId": "童女",
+      "spotId": "第3章",
+      "count": 1
+    },
+    {
+      "shikigamiId": "童女",
+      "spotId": "第12章挑战",
+      "count": 14
+    },
+    {
+      "shikigamiId": "童女",
+      "spotId": "荒川副本2层",
+      "count": 3
+    },
+    {
+      "shikigamiId": "童女",
+      "spotId": "御魂2层",
+      "count": 1
+    },
+    {
+      "shikigamiId": "童女",
+      "spotId": "御魂4层",
+      "count": 1
+    },
+    {
+      "shikigamiId": "童男",
+      "spotId": "第12章挑战",
+      "count": 14
+    },
+    {
+      "shikigamiId": "童男",
+      "spotId": "河畔童谣1层",
+      "count": 3
+    },
+    {
+      "shikigamiId": "童男",
+      "spotId": "御魂4层",
+      "count": 1
+    },
+    {
+      "shikigamiId": "海坊主",
+      "spotId": "第12章",
+      "count": 2
+    },
+    {
+      "shikigamiId": "海坊主",
+      "spotId": "第24章",
+      "count": 6
+    },
+    {
+      "shikigamiId": "海坊主",
+      "spotId": "荒川副本8层",
+      "count": 5
+    },
+    {
+      "shikigamiId": "海坊主",
+      "spotId": "御魂3层",
+      "count": 1
+    },
+    {
+      "shikigamiId": "海坊主",
+      "spotId": "妖气封印·海坊主",
+      "count": 3
+    },
+    {
+      "shikigamiId": "天邪鬼黄",
+      "spotId": "第3章",
+      "count": 1
+    },
+    {
+      "shikigamiId": "天邪鬼黄",
+      "spotId": "第5章",
+      "count": 4
+    },
+    {
+      "shikigamiId": "天邪鬼黄",
+      "spotId": "第12章",
+      "count": 1
+    },
+    {
+      "shikigamiId": "天邪鬼黄",
+      "spotId": "妖气封印·海坊主",
+      "count": 3
+    },
+    {
+      "shikigamiId": "天邪鬼青",
+      "spotId": "第2章",
+      "count": 1
+    },
+    {
+      "shikigamiId": "天邪鬼青",
+      "spotId": "第5章",
+      "count": 1
+    },
+    {
+      "shikigamiId": "天邪鬼青",
+      "spotId": "第6章",
+      "count": 1
+    },
+    {
+      "shikigamiId": "天邪鬼青",
+      "spotId": "第10章",
+      "count": 1
+    },
+    {
+      "shikigamiId": "天邪鬼青",
+      "spotId": "第11章",
+      "count": 1
+    },
+    {
+      "shikigamiId": "天邪鬼青",
+      "spotId": "妖刀姬副本1层",
+      "count": 4
+    },
+    {
+      "shikigamiId": "天邪鬼青",
+      "spotId": "妖刀姬副本2层",
+      "count": 4
+    },
+    {
+      "shikigamiId": "天邪鬼青",
+      "spotId": "妖刀姬副本3层",
+      "count": 4
+    },
+    {
+      "shikigamiId": "天邪鬼赤",
+      "spotId": "第13章",
+      "count": 6
+    },
+    {
+      "shikigamiId": "天邪鬼赤",
+      "spotId": "第14章",
+      "count": 6
+    },
+    {
+      "shikigamiId": "天邪鬼赤",
+      "spotId": "御魂1层",
+      "count": 1
+    },
+    {
+      "shikigamiId": "傀儡师",
+      "spotId": "第10章",
+      "count": 4
+    },
+    {
+      "shikigamiId": "傀儡师",
+      "spotId": "御魂5层",
+      "count": 1
+    },
+    {
+      "shikigamiId": "镰鼬",
+      "spotId": "第18章挑战",
+      "count": 14
+    },
+    {
+      "shikigamiId": "镰鼬",
+      "spotId": "河畔童谣4层",
+      "count": 1
+    },
+    {
+      "shikigamiId": "镰鼬",
+      "spotId": "御魂5层",
+      "count": 1
+    },
+    {
+      "shikigamiId": "食梦貘",
+      "spotId": "第14章",
+      "count": 6
+    },
+    {
+      "shikigamiId": "食梦貘",
+      "spotId": "御魂4层",
+      "count": 1
+    },
+    {
+      "shikigamiId": "食梦貘",
+      "spotId": "御魂9层",
+      "count": 1
+    },
+    {
+      "shikigamiId": "涂壁",
+      "spotId": "第4章",
+      "count": 1
+    },
+    {
+      "shikigamiId": "涂壁",
+      "spotId": "第14章",
+      "count": 6
+    },
+    {
+      "shikigamiId": "涂壁",
+      "spotId": "御魂1层",
+      "count": 1
+    },
+    {
+      "shikigamiId": "河童",
+      "spotId": "第7章挑战",
+      "count": 14
+    },
+    {
+      "shikigamiId": "河童",
+      "spotId": "雨女副本8层",
+      "count": 5
+    },
+    {
+      "shikigamiId": "河童",
+      "spotId": "御魂2层",
+      "count": 1
+    },
+    {
+      "shikigamiId": "萤草",
+      "spotId": "业原火·痴",
+      "count": 4
+    },
+    {
+      "shikigamiId": "萤草",
+      "spotId": "暴风之巅7层",
+      "count": 4
+    },
+    {
+      "shikigamiId": "萤草",
+      "spotId": "御魂2层",
+      "count": 1
+    },
+    {
+      "shikigamiId": "萤草",
+      "spotId": "御魂9层",
+      "count": 1
+    },
+    {
+      "shikigamiId": "萤草",
+      "spotId": "御魂10层",
+      "count": 1
+    },
+    {
+      "shikigamiId": "鸦天狗",
+      "spotId": "第3章",
+      "count": 1
+    },
+    {
+      "shikigamiId": "鸦天狗",
+      "spotId": "第9章",
+      "count": 1
+    },
+    {
+      "shikigamiId": "鸦天狗",
+      "spotId": "第12章",
+      "count": 1
+    },
+    {
+      "shikigamiId": "鸦天狗",
+      "spotId": "第17章",
+      "count": 1
+    },
+    {
+      "shikigamiId": "鸦天狗",
+      "spotId": "荒川副本4层",
+      "count": 4
+    },
+    {
+      "shikigamiId": "鸦天狗",
+      "spotId": "御魂6层",
+      "count": 1
+    },
+    {
+      "shikigamiId": "青蛙瓷器",
+      "spotId": "第4章挑战",
+      "count": 14
+    },
+    {
+      "shikigamiId": "青蛙瓷器",
+      "spotId": "雨女副本10层",
+      "count": 5
+    },
+    {
+      "shikigamiId": "青蛙瓷器",
+      "spotId": "御魂3层",
+      "count": 1
+    },
+    {
+      "shikigamiId": "蝴蝶精",
+      "spotId": "第6章",
+      "count": 1
+    },
+    {
+      "shikigamiId": "蝴蝶精",
+      "spotId": "第8章",
+      "count": 1
+    },
+    {
+      "shikigamiId": "蝴蝶精",
+      "spotId": "妖刀姬副本2层",
+      "count": 3
+    },
+    {
+      "shikigamiId": "蝴蝶精",
+      "spotId": "御魂3层",
+      "count": 1
+    },
+    {
+      "shikigamiId": "蝴蝶精",
+      "spotId": "御魂8层",
+      "count": 1
+    },
+    {
+      "shikigamiId": "孟婆",
+      "spotId": "第9章",
+      "count": 2
+    },
+    {
+      "shikigamiId": "孟婆",
+      "spotId": "御魂5层",
+      "count": 1
+    },
+    {
+      "shikigamiId": "孟婆",
+      "spotId": "御魂6层",
+      "count": 1
+    },
+    {
+      "shikigamiId": "犬神",
+      "spotId": "第10章",
+      "count": 2
+    },
+    {
+      "shikigamiId": "犬神",
+      "spotId": "御魂4层",
+      "count": 1
+    },
+    {
+      "shikigamiId": "阎魔",
+      "spotId": "御魂6层",
+      "count": 1
+    },
+    {
+      "shikigamiId": "兵俑",
+      "spotId": "第3章",
+      "count": 2
+    },
+    {
+      "shikigamiId": "兵俑",
+      "spotId": "第10章",
+      "count": 1
+    },
+    {
+      "shikigamiId": "兵俑",
+      "spotId": "第21章",
+      "count": 3
+    },
+    {
+      "shikigamiId": "兵俑",
+      "spotId": "雨女副本7层",
+      "count": 4
+    },
+    {
+      "shikigamiId": "兵俑",
+      "spotId": "御魂2层",
+      "count": 1
+    },
+    {
+      "shikigamiId": "丑时之女",
+      "spotId": "第10章",
+      "count": 2
+    },
+    {
+      "shikigamiId": "丑时之女",
+      "spotId": "第21章",
+      "count": 7
+    },
+    {
+      "shikigamiId": "丑时之女",
+      "spotId": "第10章挑战",
+      "count": 14
+    },
+    {
+      "shikigamiId": "丑时之女",
+      "spotId": "御魂5层",
+      "count": 1
+    },
+    {
+      "shikigamiId": "丑时之女",
+      "spotId": "御魂7层",
+      "count": 1
+    },
+    {
+      "shikigamiId": "雨女",
+      "spotId": "第4章",
+      "count": 1
+    },
+    {
+      "shikigamiId": "雨女",
+      "spotId": "妖刀姬副本3层",
+      "count": 3
+    },
+    {
+      "shikigamiId": "雨女",
+      "spotId": "御魂6层",
+      "count": 1
+    },
+    {
+      "shikigamiId": "吸血姬",
+      "spotId": "御魂2层",
+      "count": 1
+    },
+    {
+      "shikigamiId": "跳跳哥哥",
+      "spotId": "第10章",
+      "count": 1
+    },
+    {
+      "shikigamiId": "跳跳哥哥",
+      "spotId": "第12章",
+      "count": 1
+    },
+    {
+      "shikigamiId": "跳跳哥哥",
+      "spotId": "第24章",
+      "count": 6
+    },
+    {
+      "shikigamiId": "跳跳哥哥",
+      "spotId": "御魂5层",
+      "count": 1
+    },
+    {
+      "shikigamiId": "跳跳哥哥",
+      "spotId": "御魂10层",
+      "count": 1
+    },
+    {
+      "shikigamiId": "跳跳哥哥",
+      "spotId": "妖气封印·跳跳哥哥",
+      "count": 3
+    },
+    {
+      "shikigamiId": "骨女",
+      "spotId": "第10章",
+      "count": 1
+    },
+    {
+      "shikigamiId": "骨女",
+      "spotId": "第11章",
+      "count": 1
+    },
+    {
+      "shikigamiId": "骨女",
+      "spotId": "第13章",
+      "count": 1
+    },
+    {
+      "shikigamiId": "骨女",
+      "spotId": "第17章",
+      "count": 1
+    },
+    {
+      "shikigamiId": "骨女",
+      "spotId": "雨女副本4层",
+      "count": 4
+    },
+    {
+      "shikigamiId": "骨女",
+      "spotId": "御魂5层",
+      "count": 1
+    },
+    {
+      "shikigamiId": "骨女",
+      "spotId": "御魂6层",
+      "count": 2
+    },
+    {
+      "shikigamiId": "骨女",
+      "spotId": "妖气封印·骨女",
+      "count": 3
+    },
+    {
+      "shikigamiId": "巫蛊师",
+      "spotId": "第6章挑战",
+      "count": 14
+    },
+    {
+      "shikigamiId": "巫蛊师",
+      "spotId": "御魂6层",
+      "count": 1
+    },
+    {
+      "shikigamiId": "青坊主",
+      "spotId": "第22章",
+      "count": 3
+    },
+    {
+      "shikigamiId": "青坊主",
+      "spotId": "河畔童谣8层",
+      "count": 3
+    },
+    {
+      "shikigamiId": "酒吞童子",
+      "spotId": "第10章",
+      "count": 1
+    },
+    {
+      "shikigamiId": "判官",
+      "spotId": "第16章",
+      "count": 1
+    }
+  ],
+  "shikigamiClues": [
+    {
+      "shikigamiId": "大天狗",
+      "word": "大翅膀"
+    },
+    {
+      "shikigamiId": "大天狗",
+      "word": "风扇"
+    },
+    {
+      "shikigamiId": "大天狗",
+      "word": "羽毛"
+    },
+    {
+      "shikigamiId": "大天狗",
+      "word": "笛子"
+    },
+    {
+      "shikigamiId": "大天狗",
+      "word": "扇"
+    },
+    {
+      "shikigamiId": "大天狗",
+      "word": "风"
+    },
+    {
+      "shikigamiId": "椒图",
+      "word": "贝壳"
+    },
+    {
+      "shikigamiId": "椒图",
+      "word": "扇子"
+    },
+    {
+      "shikigamiId": "椒图",
+      "word": "尾巴"
+    },
+    {
+      "shikigamiId": "椒图",
+      "word": "水"
+    },
+    {
+      "shikigamiId": "妖狐",
+      "word": "纸扇"
+    },
+    {
+      "shikigamiId": "妖狐",
+      "word": "书生"
+    },
+    {
+      "shikigamiId": "妖狐",
+      "word": "面具"
+    },
+    {
+      "shikigamiId": "鲤鱼精",
+      "word": "水池"
+    },
+    {
+      "shikigamiId": "鲤鱼精",
+      "word": "水泡"
+    },
+    {
+      "shikigamiId": "鲤鱼精",
+      "word": "尾巴"
+    },
+    {
+      "shikigamiId": "鲤鱼精",
+      "word": "河流"
+    },
+    {
+      "shikigamiId": "鲤鱼精",
+      "word": "荷叶"
+    },
+    {
+      "shikigamiId": "三尾狐",
+      "word": "樱花树"
+    },
+    {
+      "shikigamiId": "三尾狐",
+      "word": "红色"
+    },
+    {
+      "shikigamiId": "三尾狐",
+      "word": "杖"
+    },
+    {
+      "shikigamiId": "三尾狐",
+      "word": "妖艳"
+    },
+    {
+      "shikigamiId": "三尾狐",
+      "word": "红尾"
+    },
+    {
+      "shikigamiId": "山童",
+      "word": "单眼"
+    },
+    {
+      "shikigamiId": "山童",
+      "word": "石锤"
+    },
+    {
+      "shikigamiId": "山童",
+      "word": "怪力"
+    },
+    {
+      "shikigamiId": "鬼使黑",
+      "word": "黑镰"
+    },
+    {
+      "shikigamiId": "鬼使黑",
+      "word": "短刀"
+    },
+    {
+      "shikigamiId": "鬼使白",
+      "word": "冥界"
+    },
+    {
+      "shikigamiId": "鬼使白",
+      "word": "白"
+    },
+    {
+      "shikigamiId": "鬼使白",
+      "word": "夺命"
+    },
+    {
+      "shikigamiId": "独眼小僧",
+      "word": "单眼"
+    },
+    {
+      "shikigamiId": "独眼小僧",
+      "word": "石菩萨"
+    },
+    {
+      "shikigamiId": "独眼小僧",
+      "word": "金刚经"
+    },
+    {
+      "shikigamiId": "座敷童子",
+      "word": "鬼火"
+    },
+    {
+      "shikigamiId": "座敷童子",
+      "word": "角"
+    },
+    {
+      "shikigamiId": "座敷童子",
+      "word": "财富"
+    },
+    {
+      "shikigamiId": "座敷童子",
+      "word": "幸运"
+    },
+    {
+      "shikigamiId": "桃花妖",
+      "word": "花"
+    },
+    {
+      "shikigamiId": "桃花妖",
+      "word": "舞"
+    },
+    {
+      "shikigamiId": "童女",
+      "word": "翅膀"
+    },
+    {
+      "shikigamiId": "童女",
+      "word": "羽衣"
+    },
+    {
+      "shikigamiId": "童女",
+      "word": "幼女"
+    },
+    {
+      "shikigamiId": "童男",
+      "word": "翅膀"
+    },
+    {
+      "shikigamiId": "童男",
+      "word": "羽衣"
+    },
+    {
+      "shikigamiId": "童男",
+      "word": "献祭"
+    },
+    {
+      "shikigamiId": "海坊主",
+      "word": "渔夫"
+    },
+    {
+      "shikigamiId": "海坊主",
+      "word": "海"
+    },
+    {
+      "shikigamiId": "海坊主",
+      "word": "胡须"
+    },
+    {
+      "shikigamiId": "海坊主",
+      "word": "杖"
+    },
+    {
+      "shikigamiId": "天邪鬼黄",
+      "word": "鼓"
+    },
+    {
+      "shikigamiId": "天邪鬼黄",
+      "word": "单眼"
+    },
+    {
+      "shikigamiId": "天邪鬼青",
+      "word": "青皮肤"
+    },
+    {
+      "shikigamiId": "天邪鬼青",
+      "word": "风筝"
+    },
+    {
+      "shikigamiId": "天邪鬼赤",
+      "word": "红鬼"
+    },
+    {
+      "shikigamiId": "天邪鬼赤",
+      "word": "拍屁股"
+    },
+    {
+      "shikigamiId": "傀儡师",
+      "word": "人偶"
+    },
+    {
+      "shikigamiId": "傀儡师",
+      "word": "操纵"
+    },
+    {
+      "shikigamiId": "傀儡师",
+      "word": "傀儡"
+    },
+    {
+      "shikigamiId": "镰鼬",
+      "word": "锤子"
+    },
+    {
+      "shikigamiId": "镰鼬",
+      "word": "钉耙"
+    },
+    {
+      "shikigamiId": "镰鼬",
+      "word": "剑"
+    },
+    {
+      "shikigamiId": "食梦貘",
+      "word": "铃铛"
+    },
+    {
+      "shikigamiId": "食梦貘",
+      "word": "噩梦"
+    },
+    {
+      "shikigamiId": "涂壁",
+      "word": "石"
+    },
+    {
+      "shikigamiId": "涂壁",
+      "word": "青苔"
+    },
+    {
+      "shikigamiId": "涂壁",
+      "word": "石墙"
+    },
+    {
+      "shikigamiId": "河童",
+      "word": "水球"
+    },
+    {
+      "shikigamiId": "河童",
+      "word": "河流"
+    },
+    {
+      "shikigamiId": "河童",
+      "word": "荷叶"
+    },
+    {
+      "shikigamiId": "萤草",
+      "word": "蒲公英"
+    },
+    {
+      "shikigamiId": "萤草",
+      "word": "治疗"
+    },
+    {
+      "shikigamiId": "萤草",
+      "word": "叮"
+    },
+    {
+      "shikigamiId": "鸦天狗",
+      "word": "雉刀"
+    },
+    {
+      "shikigamiId": "鸦天狗",
+      "word": "翅膀"
+    },
+    {
+      "shikigamiId": "鸦天狗",
+      "word": "面具"
+    },
+    {
+      "shikigamiId": "青蛙瓷器",
+      "word": "二筒"
+    },
+    {
+      "shikigamiId": "青蛙瓷器",
+      "word": "瓷"
+    },
+    {
+      "shikigamiId": "青蛙瓷器",
+      "word": "出千"
+    },
+    {
+      "shikigamiId": "蝴蝶精",
+      "word": "手鼓"
+    },
+    {
+      "shikigamiId": "蝴蝶精",
+      "word": "小妖精"
+    },
+    {
+      "shikigamiId": "蝴蝶精",
+      "word": "可爱"
+    },
+    {
+      "shikigamiId": "孟婆",
+      "word": "汤碗"
+    },
+    {
+      "shikigamiId": "孟婆",
+      "word": "琴"
+    },
+    {
+      "shikigamiId": "孟婆",
+      "word": "牙牙"
+    },
+    {
+      "shikigamiId": "犬神",
+      "word": "剑雀屋"
+    },
+    {
+      "shikigamiId": "犬神",
+      "word": "柴犬"
+    },
+    {
+      "shikigamiId": "犬神",
+      "word": "守护"
+    },
+    {
+      "shikigamiId": "阎魔",
+      "word": "云"
+    },
+    {
+      "shikigamiId": "阎魔",
+      "word": "鬼面"
+    },
+    {
+      "shikigamiId": "阎魔",
+      "word": "冥界"
+    },
+    {
+      "shikigamiId": "兵俑",
+      "word": "剑"
+    },
+    {
+      "shikigamiId": "兵俑",
+      "word": "坚甲"
+    },
+    {
+      "shikigamiId": "兵俑",
+      "word": "石化"
+    },
+    {
+      "shikigamiId": "丑时之女",
+      "word": "稻草人"
+    },
+    {
+      "shikigamiId": "丑时之女",
+      "word": "咒锥"
+    },
+    {
+      "shikigamiId": "雨女",
+      "word": "泪珠"
+    },
+    {
+      "shikigamiId": "雨女",
+      "word": "雨"
+    },
+    {
+      "shikigamiId": "雨女",
+      "word": "伞"
+    },
+    {
+      "shikigamiId": "吸血姬",
+      "word": "血"
+    },
+    {
+      "shikigamiId": "吸血姬",
+      "word": "蝙蝠"
+    },
+    {
+      "shikigamiId": "跳跳哥哥",
+      "word": "蜡烛"
+    },
+    {
+      "shikigamiId": "跳跳哥哥",
+      "word": "棺材"
+    },
+    {
+      "shikigamiId": "骨女",
+      "word": "骷髅"
+    },
+    {
+      "shikigamiId": "骨女",
+      "word": "怨恨"
+    },
+    {
+      "shikigamiId": "骨女",
+      "word": "剑"
+    },
+    {
+      "shikigamiId": "巫蛊师",
+      "word": "蛊"
+    },
+    {
+      "shikigamiId": "巫蛊师",
+      "word": "虫子"
+    },
+    {
+      "shikigamiId": "青坊主",
+      "word": "和尚"
+    },
+    {
+      "shikigamiId": "青坊主",
+      "word": "木鱼"
+    },
+    {
+      "shikigamiId": "酒吞童子",
+      "word": "酒"
+    },
+    {
+      "shikigamiId": "酒吞童子",
+      "word": "葫芦"
+    },
+    {
+      "shikigamiId": "酒吞童子",
+      "word": "鬼王"
+    },
+    {
+      "shikigamiId": "判官",
+      "word": "判官"
+    },
+    {
+      "shikigamiId": "判官",
+      "word": "笔"
+    },
+    {
+      "shikigamiId": "判官",
+      "word": "生死簿"
+    }
+  ]
+}

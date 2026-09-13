@@ -1,0 +1,60 @@
+{
+  "users": [
+    {
+      "id": "u_local",
+      "nickname": "本地用户",
+      "authType": "local",
+      "createdAt": "2026-09-09T00:00:00+08:00",
+      "lastActiveAt": "2026-09-09T00:00:00+08:00"
+    }
+  ],
+  "profiles": [
+    {
+      "id": "p_main",
+      "userId": "u_local",
+      "name": "大号",
+      "server": "平安京",
+      "channel": "网易官服",
+      "isDefault": true,
+      "sort": 1,
+      "archived": false,
+      "createdAt": "2026-09-09T00:00:00+08:00",
+      "updatedAt": "2026-09-09T00:00:00+08:00"
+    }
+  ],
+  "states": [
+    {
+      "profileId": "p_main",
+      "userId": "u_local",
+      "checked": {},
+      "updatedAt": "2026-09-09T00:00:00+08:00"
+    }
+  ],
+  "viewPrefs": [
+    {
+      "profileId": "p_main",
+      "sortBy": "weight",
+      "showKinds": [],
+      "minWeight": 0,
+      "hideDone": false,
+      "pinned": [],
+      "updatedAt": "2026-09-09T00:00:00+08:00"
+    }
+  ],
+  "itemOverrides": [
+    {
+      "profileId": "p_main",
+      "custom": [],
+      "hidden": [],
+      "order": [],
+      "updatedAt": "2026-09-09T00:00:00+08:00"
+    }
+  ],
+  "sessions": [
+    {
+      "userId": "u_local",
+      "profileId": "p_main",
+      "updatedAt": "2026-09-09T00:00:00+08:00"
+    }
+  ]
+}
