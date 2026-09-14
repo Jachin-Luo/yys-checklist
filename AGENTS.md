@@ -80,6 +80,20 @@ Mock 的分片键由 `src/api/mock/persist.ts` 封装（`KEY` / `removeProfileSh
 
 **唯一例外（仍要保留的廉价防御）**：过滤「当前运行期就可能出现」的非法输入 —— 例如某档案的配置里引用了已被删除 / 已下线的条目 id。这类过滤只有一两行，去掉换来的却是运行期异常，不值得省。
 
+### 10. 提交身份要显式指定（本机未配置 git user）
+
+本机**没有**配置 `user.name` / `user.email`，git 会按系统账户推断出 `Luo <ykluok@isoftstone.com>`，与仓库历史（`Jachin-Luo <Jachin-Luo@users.noreply.github.com>`）不一致。
+
+**不要修改 git 配置**（`git config user.*`），提交时显式指定即可 —— `--author` 只管 author，committer 要靠环境变量：
+
+```powershell
+$env:GIT_AUTHOR_NAME = "Jachin-Luo"; $env:GIT_AUTHOR_EMAIL = "Jachin-Luo@users.noreply.github.com"
+$env:GIT_COMMITTER_NAME = "Jachin-Luo"; $env:GIT_COMMITTER_EMAIL = "Jachin-Luo@users.noreply.github.com"
+git commit --message="..."
+```
+
+提交后用 `git log -1 --format='A:%an <%ae> | C:%cn <%ce>'` 复核一眼。
+
 ---
 
 ## 二、常用命令

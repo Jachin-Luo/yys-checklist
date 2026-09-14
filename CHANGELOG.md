@@ -36,6 +36,7 @@
 - 统一措辞（纯注释与用例名）：`domain/autoDaily` 及相关用例里「兼容旧配置」的说法改为「已失效 id / 运行期脏数据」—— 这些过滤防的是**运行期**情况（条目被删、活动条目下线），不是跨版本兼容，按新约定容易被误删
 
 - 开发依赖升级：`vite` 5 → 8、`vitest` 2 → 5、`@vitejs/plugin-react` 4 → 5（`npm audit` 5 个漏洞清零；构建、单测、数据校验已验证通过）
+- AGENTS.md 增加「提交身份要显式指定」约定（红线第 10 条）：本机未配置 git user，提交时用环境变量 + `--author` 指定 `Jachin-Luo <Jachin-Luo@users.noreply.github.com>`，不改 git 配置；同时修正了本轮两次提交的身份
 
 ### 修复
 
