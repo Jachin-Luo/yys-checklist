@@ -30,3 +30,6 @@ coverage/
 # 旧原型及历史数据；当前应用使用 src/db/
 /data/
 /prototype/
+
+# 本机部署脚本（含服务器上的绝对路径，不随仓库分发）
+/update.sh
