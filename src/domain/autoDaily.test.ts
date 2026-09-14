@@ -32,11 +32,15 @@ const EXCLUDED_ITEMS = [EVENT_UNTIL, EVENT_DEADLINE, WEEKLY];
 const HUB_WITH_FLAG = mk({ id: 'daily_auto_daily', isAutoHub: true, autoDaily: true });
 const ITEMS: Item[] = [HUB, SIGN, DRAW, FENGMO];
 
-describe('isAutoDailyCandidate：仅常驻每日可配置覆盖', () => {
-  it('常驻每日可选，不要求已标 autoDaily，也支持自建条目', () => {
+describe('isAutoDailyCandidate：只有官方会覆盖的条目可配置', () => {
+  it('常驻每日 + 标了 autoDaily → 可配置', () => {
     expect(isAutoDailyCandidate(SIGN)).toBe(true);
-    expect(isAutoDailyCandidate(FENGMO)).toBe(true);
-    expect(isAutoDailyCandidate(mk({ origin: 'custom' }))).toBe(true);
+    expect(isAutoDailyCandidate(DRAW)).toBe(true);
+  });
+
+  it('未标 autoDaily 的常驻每日不算候选 —— 官方不会代做，勾了等于伪造进度', () => {
+    expect(isAutoDailyCandidate(FENGMO)).toBe(false);
+    expect(isAutoDailyCandidate(mk({ origin: 'custom' }))).toBe(false);
   });
 
   it('排除入口、带下线日或截止日的每日任务，以及非每日条目', () => {
@@ -70,23 +74,27 @@ describe('effectiveAutoSet：归一（未自定义 → 数据默认）', () => {
 
   it('显式数组以用户配置为准；显式空数组 = 全部关掉（不回落默认）', () => {
     expect(effectiveAutoSet(ITEMS, { autoSet: [DRAW.id] })).toEqual([DRAW.id]);
-    expect(effectiveAutoSet(ITEMS, { autoSet: [FENGMO.id] })).toEqual([FENGMO.id]);
     expect(effectiveAutoSet(ITEMS, { autoSet: [] })).toEqual([]);
     expect(effectiveAutoSet([HUB_WITH_FLAG], { autoSet: [HUB_WITH_FLAG.id] })).toEqual([]);
+  });
+
+  it('未被官方覆盖的每日任务即使被显式写进配置，也会被剔除（2026-09-14 收窄）', () => {
+    expect(effectiveAutoSet(ITEMS, { autoSet: [FENGMO.id] })).toEqual([]);
+    expect(effectiveAutoSet(ITEMS, { autoSet: [SIGN.id, FENGMO.id] })).toEqual([SIGN.id]);
   });
 
   it('剔除已不存在的 id，并对重复项去重', () => {
     expect(effectiveAutoSet(ITEMS, { autoSet: [SIGN.id, 'ghost_item', SIGN.id] })).toEqual([SIGN.id]);
   });
 
-  it('旧配置只保留常驻每日，不修改传入配置', () => {
+  it('已失效 id 会被剔除，且不修改传入的配置', () => {
     const autoSet = [SIGN.id, EVENT_UNTIL.id, HUB.id, EVENT_DEADLINE.id, WEEKLY.id];
     const snapshot = [...autoSet];
     expect(effectiveAutoSet([...ITEMS, ...EXCLUDED_ITEMS], { autoSet })).toEqual([SIGN.id]);
     expect(autoSet).toEqual(snapshot);
   });
 
-  it('旧配置只含活动任务时得到空集合，不回落到数据默认', () => {
+  it('集合里只有失效 id 时得到空集合，不回落到数据默认', () => {
     expect(effectiveAutoSet([...ITEMS, EVENT_UNTIL], { autoSet: [EVENT_UNTIL.id] })).toEqual([]);
   });
 
@@ -110,7 +118,7 @@ describe('isCovered / hubItem', () => {
     expect(hubItem([SIGN, DRAW])).toBeUndefined();
   });
 
-  it('旧覆盖配置不会使活动任务或非每日条目被覆盖、隐藏', () => {
+  it('已失效 id 不会使活动任务或非每日条目被覆盖、隐藏', () => {
     const autoSet = [HUB.id, SIGN.id, ...EXCLUDED_ITEMS.map((item) => item.id)];
     for (const item of [HUB, ...EXCLUDED_ITEMS]) {
       expect(isCovered(item, autoSet)).toBe(false);
@@ -136,9 +144,13 @@ describe('cascadeTargets / cascadeBatch：级联目标', () => {
     expect(cascadeBatch(ITEMS, HUB.id, [SIGN.id, DRAW.id])).toEqual([HUB.id, SIGN.id, DRAW.id]);
   });
 
-  it('未归一的旧覆盖集合也不能级联到活动任务或非每日条目', () => {
+  it('未归一的集合也不能级联到活动任务、非候选条目或已失效 id', () => {
     const autoSet = [SIGN.id, ...EXCLUDED_ITEMS.map((item) => item.id)];
     expect(cascadeBatch([...ITEMS, ...EXCLUDED_ITEMS], HUB.id, autoSet)).toEqual([HUB.id, SIGN.id]);
+  });
+
+  it('未被官方覆盖的每日任务不会被级联勾选（否则等于把没做的任务标成已完成）', () => {
+    expect(cascadeBatch(ITEMS, HUB.id, [SIGN.id, FENGMO.id])).toEqual([HUB.id, SIGN.id]);
   });
 
   it('空覆盖集合时只操作入口自身（不会误伤其它条目）', () => {

@@ -58,15 +58,20 @@ export default function DesktopShell() {
           })}
         </nav>
 
+        {/* 侧栏宽 224px：带区服的完整形态放不下（区服会被截断，等于看不全），
+            因此与移动端头部一致用 `compact` —— 只显示档案名，区服信息在「我的 · 档案」里看 */}
         <div className="mt-auto rounded-md border border-line-soft bg-surface-3 px-2.5 py-2">
-          <p className="text-sm text-ink-3">当前档案</p>
-          <div className="mt-1">
-            <ProfileSwitcher direction="up" />
+          {/* label 与切换器**同一行**：竖排两行在 224px 宽的卡片里既空又多占一行高度 */}
+          <div className="flex items-center justify-between gap-2">
+            <p className="flex-none text-sm text-ink-3">当前档案</p>
+            <ProfileSwitcher direction="up" compact />
           </div>
         </div>
       </aside>
 
       <main className="flex-1 overflow-y-auto">
+        {/* 内容区上限（1024）与整体框架在这里；窄页（统计 768 / 工具 896 / 我的 672）
+            各自 `mx-auto` 让内容在大屏居中，不由这一层替它们居中 */}
         <div className="mx-auto max-w-5xl">
           <NavContent variant="desktop" />
         </div>

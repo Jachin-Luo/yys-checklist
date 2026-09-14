@@ -34,7 +34,7 @@ TypeScript 为严格模式（`tsconfig.app.json`），`npm run build` 会先跑 
 | --- | --- | --- |
 | 1 | 只统计固定数值（浮动收益不进分子分母） | `domain/stats.ts` `summarizeGain`（按 `gain` 过滤）、`PERIOD_META` |
 | 2 | 覆盖 / 隐藏只影响渲染，绝不影响统计 | `domain/stats.ts`（不读 `coverMode`）、`hooks/useChecklist.ts`（`hiddenByCover` 只作用于列表）、`domain/autoDaily.ts` |
-| 3 | 漏失明细只列事实，不折算不估算 | `domain/stats.ts` `missGroups` |
+| 3 | 漏失明细只列事实，不折算不估算 | `domain/stats.ts` `missGroups`（2026-09-14 起页面不再展示这两块，但纪律仍约束 domain 层与该函数的实现） |
 | 4 | 统计忽略「隐藏已完成」 | `pages/StatsPage.tsx` 直接吃原始 `checked`；`domain/sort.ts` `isVisible` 的 `keepDone` 豁免口 |
 | 5 | 时间字段只提示，不限制勾选 | `domain/countdown.ts`；到期条目在数据层被 `domain/reset.activeItems` 过滤，不在渲染层判 |
 | 6 | 单一数据出口（页面不直连种子） | `src/api/index.ts` 唯一入口；`src/api/contract.ts` 唯一定义 |
@@ -43,10 +43,10 @@ TypeScript 为严格模式（`tsconfig.app.json`），`npm run build` 会先跑 
 
 | 周期 | 重置口径 | 锚点值位置 |
 | --- | --- | --- |
-| 每日 | 05:00 | `meta.resetHour` = 5 |
-| 每周 | 周一 05:00 | 同上 |
-| 每月 | 自然月 | 同上 |
-| 版本 | 开服锚点 `2026-09-09 09:00` | `meta.periods.version` |
+| 每日 | 0 点刷新 | `meta.resetHour` = 0 |
+| 每周 | 周一 0 点刷新 | 同上 |
+| 每月 | 自然月（1 日 0 点起算） | 同上 |
+| 版本 | 开服锚点 = 上线当日维护完成时刻（通常 9:00）`2026-09-09 09:00` | `meta.periods.version` |
 | 赛季 | 赛年「寻龙逐英」锚点 `2026-07-06 06:00` | `meta.periods.season` |
 
 - 重置**靠时间戳比对**（`domain/reset.periodStartOf` + `mergeChecked`），不靠定时器清数据。
@@ -139,5 +139,23 @@ TypeScript 为严格模式（`tsconfig.app.json`），`npm run build` 会先跑 
 | 在业务代码 import `@/db/items.db.json` | ESLint error 级拦截 | 新数据在 `api/mock/db.ts` 加载并经契约暴露 |
 | 把 `reports/` 提交入库 | 该目录是工具产物 | 已在 `.gitignore` 中忽略，保持忽略 |
 | 给条目增加新字段但不更新白名单 | `db:check` 会报未知字段 | 同步更新 `tools/build.js` 的字段白名单与 `schema/item.schema.json` |
+
+## 8. 开发阶段的数据兼容边界（2026-09-14 起）
+
+项目**尚未正式发布给真实用户**，因此：
+
+| 不需要做 | 说明 |
+| --- | --- |
+| 旧 `localStorage` 分片的迁移 | 分片键或字段结构可以直接改，不写升级逻辑 |
+| 旧备份文本的降级 | `domain/backup` 的 `schemaVersion` 差异提示是给**未来**用户的，开发期不必为它加分支 |
+| 「id 曾经合法、现在不再合法」的兼容 | 例如一键日常覆盖集合里可能残留已不在候选内的 id —— 无需为这类历史数据设计路径 |
+
+**仍要保留的廉价防御**（成本一两行，收益是避免运行期异常）：
+
+- `domain/autoDaily.effectiveAutoSet` / `cascadeTargets` 过滤「当前不存在或已下线」的 id —— 它同时处理**运行期**就会出现的情况（条目被删、活动条目下线），不只是历史数据；
+- `domain/reset.mergeChecked` 清理已下线条目的键（防状态对象无限膨胀）；
+- `api/mock/userStore.assertScope` 的越权校验。
+
+结论：**新逻辑不必背兼容包袱；已有的廉价防御不要为了"精简"而删掉。**
 
 下一篇：`docs/04-handover-guide.md`（上手步骤与改动任务手册）。

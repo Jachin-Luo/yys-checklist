@@ -2,7 +2,8 @@ import type { ReactNode } from 'react';
 import { ChevronRight } from 'lucide-react';
 
 /**
- * 列表顶部提示条：今日页「本周高痛感还剩 N 项」/ 本周页「周一 05:00 重置」。
+ * 列表顶部提示条：今日页「本周高痛感还剩 N 项」（当前由 `SHOW_WEEKLY_ALERT` 关闭）、
+ * 限时页的「N 个活动在跑」临期预警与「版本 / 赛季按开服锚点重置」提示（2026-09-14 从本周页移来）。
  *
  * **没有 `onClick` 时不再渲染成按钮**（2026-09-11 修正）：此前无条件渲染 `<button>`
  * 并带一个 `ChevronRight`，于是本周页那条纯提示"长得能点、Tab 能聚焦、按下去什么都不发生"

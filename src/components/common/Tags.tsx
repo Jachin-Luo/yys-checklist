@@ -30,7 +30,11 @@ export function TimeTag({ item, now }: { item: Item; now?: Date }) {
   );
 }
 
-/** 截止徽章：≤3 天红、≤7 天橙（活动页与今日页共用） */
+/**
+ * 截止徽章：≤3 天红、≤7 天橙（活动页与今日页共用）。
+ * 2026-09-14 起渲染在**标题行内**（不再独占卡片右侧一列），因此内边距与
+ * `TimeTag` 等同行徽章统一为 `py-0.5`，避免同一行里高度参差。
+ */
 export function DeadlineTag({ item, now }: { item: Item; now?: Date }) {
   const badge = deadlineBadge(item, now);
   const style =
@@ -40,7 +44,7 @@ export function DeadlineTag({ item, now }: { item: Item; now?: Date }) {
         ? 'bg-warn-soft text-warn'
         : 'bg-surface-3 text-ink-2';
   return (
-    <span className={`flex-none rounded-sm px-1.5 py-1 text-sm ${style}`}>
+    <span className={`flex-none rounded-sm px-1.5 py-0.5 text-sm ${style}`}>
       {badge.level === 'hot' && badge.days !== null && badge.days <= 0 ? <AlertTriangle size={10} className="mr-1 inline" /> : null}
       {badge.text}
     </span>

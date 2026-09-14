@@ -71,7 +71,8 @@ export default function ToolsPage({ variant }: { variant: 'mobile' | 'desktop' }
   }
 
   return (
-    <div className="max-w-4xl">
+    /* `mx-auto`：桌面内容容器上限 1024，本页上限 896 —— 不居中会整体贴左（与统计 / 我的两页同一口径） */
+    <div className="mx-auto max-w-4xl">
       <div className="mx-3 mt-3 flex gap-1 rounded-md bg-surface-3 p-1">
         {TABS.map((t) => (
           <button

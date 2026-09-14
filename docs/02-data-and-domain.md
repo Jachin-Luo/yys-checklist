@@ -30,7 +30,7 @@
 | --- | --- |
 | `Item` | 条目实体（周期、痛感来源字段、`gain`、时间窗、`isAutoHub` 等）。**注意：字段 `reward` / `entry` / `action` 已被有意删除**，文件内有长注释说明原因 |
 | `Gain` | 固定（保底）收益，三个可选数值字段：`jade`（勾玉）、`blackFrag`（黑碎）、`blueTicket`（蓝票）。**缺省 = 收益浮动，不进统计** |
-| `Meta` | 元数据：`version`、`dataVersion`、`resetHour`（= 5）、`periods` 锚点、`dicts` 等 |
+| `Meta` | 元数据：`version`、`dataVersion`、`resetHour`（= 0）、`periods` 锚点、`dicts` 等 |
 | `DictEntry` / `SortOption` / `ViewDefaults` | 字典行、排序选项、视图默认值 |
 | `User` / `Profile` / `Session` | 用户、档案、会话 |
 | `CheckState` / `ViewPrefs` / `ItemOverrides` | 用户数据三件套 |
@@ -108,7 +108,7 @@ VITE_API_MODE === 'http' ? new HttpApi(baseURL) : new MockApi()
 
 常驻 + 活动总计 **91 条**条目。
 
-`meta` 关键字段：`version`（应用版本，如 `1.4.0`）、`dataVersion`（如 `2026.09.13-十周年勾玉查漏`）、`resetHour`（= 5）、`periods`（版本 / 赛季锚点）。
+`meta` 关键字段：`version`（应用版本，如 `1.4.0`）、`dataVersion`（如 `2026.09.13-十周年勾玉查漏`）、`resetHour`（= 0）、`periods`（版本 / 赛季锚点）。
 
 ### 4.2 条目字段规格
 
@@ -161,9 +161,9 @@ src/domain/enums.ts 的字面量联合类型  ←── 双向校验 ──→  
 
 ## 7. 特殊机制（改动前务必理解）
 
-### 7.1 周期重置：05:00 口径 + 时间戳比对
+### 7.1 周期重置：0 点口径 + 时间戳比对
 
-- 日常 05:00 重置、周常周一 05:00 重置、版本按锚点 `2026-09-09 09:00`、赛季「寻龙逐英」按锚点 `2026-07-06 06:00`（值在 `src/db/meta.db.json` 的 `meta.periods`）。
+- 每日与周常都在 0 点刷新（周常落在周一 0 点；`meta.resetHour` = 0，`resetNote` 里有说明）；版本 / 赛季按开服锚点重置，锚点就是**版本上线当日维护完成的时刻**（通常 9:00）—— 当前版本 `2026-09-09 09:00`、赛年「寻龙逐英」`2026-07-06 06:00`（值在 `src/db/meta.db.json` 的 `meta.periods`）。
 - 实现方式：`domain/reset.periodStartOf` 计算周期起点，`mergeChecked` 在读取时把「上一个周期的勾选」归零 —— **不是靠定时器清数据**。
 - 前台刷新由 `hooks/usePeriodRefresh.ts` 在分钟边界 / 窗口聚焦 / 可见性变化时触发，只重算内存态、不写盘。
 - 结论：**不要在页面里判周期**，也不要在 store 里存「今天是否重置过」。
@@ -188,6 +188,7 @@ src/domain/enums.ts 的字面量联合类型  ←── 双向校验 ──→  
 - `hubItem` 取唯一入口条目（`isAutoHub`）；`isCovered` / `hiddenByCover` 只影响渲染。
 - 级联：`cascadeTargets` / `cascadeBatch` 计算入口勾选时要一起勾上的条目；`stores/check.toggleWithCascade` 执行。
 - **关键约束**：单独取消某个被覆盖项的勾选，不会把它移出覆盖集合 —— 避免「状态变化偷偷改配置」。显示方式（弱化 / 隐藏）只影响列表渲染，**不影响统计与漏失口径**。
+- 候选范围（2026-09-14 收窄）：只有**常驻每日 + 数据里标了 `autoDaily`** 的条目可被覆盖（当前 14 条）。斗技、逢魔之时、地域鬼王、寮活动等官方不代做的每日任务既不出现在配置界面，也不会被级联勾选 —— 否则点入口会把玩家没做的任务标成已完成。旧配置中混入的此类 id 会在 `effectiveAutoSet` 归一化时自动失效。
 
 ### 7.4 寮时间：展示层叠加
 
@@ -211,7 +212,8 @@ src/domain/enums.ts 的字面量联合类型  ←── 双向校验 ──→  
 
 ### 7.8 统计
 
-`domain/stats.summarizeGain` 只累加带固定数值的 `gain`（勾玉 / 黑碎 / 蓝票）；`missGroups` 按痛感分级列漏失条目名，不折算不估算。口径定义在 `PERIOD_META`。
+`domain/stats.summarizeGain` 只累加带固定数值的 `gain`（勾玉 / 黑碎 / 蓝票），口径定义在 `PERIOD_META`。
+`missGroups`（按痛感分级列漏失条目名、不折算不估算）仍保留在 domain 层并有单测保护，但自 2026-09-14 起**没有页面消费它** —— 统计页只展示三条收益进度条。
 
 ## 8. 数据录入流程（改数据的标准路径）
 

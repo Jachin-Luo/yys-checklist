@@ -140,7 +140,7 @@ export function missGroups(
 
 /** 统计口径文案（页面副标题用，避免页面里散落魔法字符串） */
 export const PERIOD_META: Record<StatPeriod, { label: string; note: string }> = {
-  day: { label: '本日', note: '每日 05:00 重置' },
-  week: { label: '本周', note: '周一 05:00 重置' },
-  month: { label: '本月 · 版本', note: '版本 / 赛季按开服锚点重置，活动结束清零' },
+  day: { label: '本日', note: '每日 0 点刷新' },
+  week: { label: '本周', note: '周一 0 点刷新' },
+  month: { label: '本月 · 版本', note: '版本 / 赛季按上线锚点重置，活动结束清零' },
 };

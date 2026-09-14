@@ -24,7 +24,8 @@ export default function MePage() {
   const meta = useItemStore((s) => s.meta);
 
   return (
-    <div className="max-w-2xl px-3.5 py-5 pb-10">
+    /* `mx-auto`：本页上限 672，桌面内容容器 1024 —— 不居中时设置分区整体贴左（与统计 / 工具两页同一口径） */
+    <div className="mx-auto max-w-2xl px-3.5 py-5 pb-10">
       <div className="flex items-center justify-between gap-2">
         <h2 className="text-xl font-medium text-ink">我的</h2>
         <ProfileSwitcher />

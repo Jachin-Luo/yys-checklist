@@ -42,6 +42,7 @@ import { DeadlineTag, TimeTag } from './Tags';
  */
 interface Props {
   item: Item;
+  /** 在**标题行内**显示截止徽章（限时页用）—— 不独占右侧列，避免压窄正文导致备注提前折行 */
   showDeadline?: boolean;
   dimmed?: boolean;
   /** 覆盖默认的勾选行为（一键日常入口需要走双向级联） */
@@ -81,6 +82,10 @@ function ChecklistItem({ item, showDeadline = false, dimmed = false, onToggle }:
           }`}
         >
           {item.name}
+          {/* 截止徽章放**标题行内**：原先它独占卡片右侧一列，那一列会把内容区压窄，
+              使下方备注提前换行 —— 而限时页里备注最长的恰恰都是带 deadline 的条目
+              （2026-09-14 用户反馈）。时间类徽章现在都集中在标题行：截止 → 覆盖 → 会员 → 时间窗 */}
+          {showDeadline ? <DeadlineTag item={item} /> : null}
           {item.autoDaily ? <CoveredTag /> : null}
           {item.premium ? <PremiumTag /> : null}
           <TimeTag item={item} />
@@ -93,8 +98,6 @@ function ChecklistItem({ item, showDeadline = false, dimmed = false, onToggle }:
         {item.condition ? <Field kind="condition" value={item.condition} /> : null}
         {item.note ? <Field kind="note" value={item.note} /> : null}
       </div>
-
-      {showDeadline ? <DeadlineTag item={item} /> : null}
 
       <button
         type="button"

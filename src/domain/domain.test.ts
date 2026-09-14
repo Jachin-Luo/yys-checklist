@@ -15,7 +15,7 @@ const item = (over: Partial<Item>): Item => ({
 });
 
 const CTX: ResetCtx = {
-  resetHour: 5,
+  resetHour: 0,
   periods: {
     version: { key: '2026.09.09', startAt: '2026-09-09T09:00' },
     season: { key: '寻龙逐英', startAt: '2026-09-09T09:00' },
@@ -23,26 +23,27 @@ const CTX: ResetCtx = {
 };
 
 describe('periodStartOf：7 档周期分派（§7）', () => {
-  it('daily：06:00 → 当天 05:00；03:00 → 昨天 05:00（跨天）', () => {
+  it('daily：0 点为界 —— 当天任意时刻归当天 0 点，前一天 23:59 归前一天 0 点（跨天）', () => {
     const it = item({});
-    expect(periodStartOf(it, new Date(2026, 8, 10, 6, 0), CTX)).toBe(new Date(2026, 8, 10, 5, 0).getTime());
-    expect(periodStartOf(it, new Date(2026, 8, 10, 3, 0), CTX)).toBe(new Date(2026, 8, 9, 5, 0).getTime());
+    expect(periodStartOf(it, new Date(2026, 8, 10, 6, 0), CTX)).toBe(new Date(2026, 8, 10, 0, 0).getTime());
+    expect(periodStartOf(it, new Date(2026, 8, 9, 23, 59), CTX)).toBe(new Date(2026, 8, 9, 0, 0).getTime());
   });
 
-  it('weekly：周三与周日都归到本周一 05:00（跨周）', () => {
+  it('weekly：周三与周日都归到本周一 0 点（跨周）', () => {
     const it = item({ cycle: 'weekly' });
-    const monday = new Date(2026, 8, 7, 5, 0).getTime();
+    const monday = new Date(2026, 8, 7, 0, 0).getTime();
     expect(periodStartOf(it, new Date(2026, 8, 9, 12, 0), CTX)).toBe(monday);
     expect(periodStartOf(it, new Date(2026, 8, 13, 12, 0), CTX)).toBe(monday);
   });
 
-  it('monthly：1 日 03:00 → 上月 1 日 05:00（跨月）', () => {
+  it('monthly：跨月以 0 点为界 —— 8/31 23:59 仍属上月，9/1 00:00 进入本月', () => {
     const it = item({ cycle: 'monthly' });
-    expect(periodStartOf(it, new Date(2026, 8, 15, 6, 0), CTX)).toBe(new Date(2026, 8, 1, 5, 0).getTime());
-    expect(periodStartOf(it, new Date(2026, 8, 1, 3, 0), CTX)).toBe(new Date(2026, 7, 1, 5, 0).getTime());
+    expect(periodStartOf(it, new Date(2026, 8, 15, 6, 0), CTX)).toBe(new Date(2026, 8, 1, 0, 0).getTime());
+    expect(periodStartOf(it, new Date(2026, 7, 31, 23, 59), CTX)).toBe(new Date(2026, 7, 1, 0, 0).getTime());
+    expect(periodStartOf(it, new Date(2026, 8, 1, 0, 0), CTX)).toBe(new Date(2026, 8, 1, 0, 0).getTime());
   });
 
-  it('version / season：按 meta.periods 锚点，不套每日 05:00（D2）', () => {
+  it('version / season：按 meta.periods 锚点，不套每日 0 点（D2）', () => {
     const anchor = new Date(2026, 8, 9, 9, 0).getTime();
     expect(periodStartOf(item({ cycle: 'version' }), new Date(2026, 8, 10, 6, 0), CTX)).toBe(anchor);
     expect(periodStartOf(item({ cycle: 'season' }), new Date(2026, 8, 10, 3, 0), CTX)).toBe(anchor);
@@ -51,7 +52,7 @@ describe('periodStartOf：7 档周期分派（§7）', () => {
   it('once / limited 不自动重置；锚点缺失时退化为不重置', () => {
     expect(periodStartOf(item({ cycle: 'once' }), new Date(), CTX)).toBe(0);
     expect(periodStartOf(item({ cycle: 'limited' }), new Date(), CTX)).toBe(0);
-    expect(periodStartOf(item({ cycle: 'version' }), new Date(), { resetHour: 5, periods: {} })).toBe(0);
+    expect(periodStartOf(item({ cycle: 'version' }), new Date(), { resetHour: 0, periods: {} })).toBe(0);
   });
 });
 

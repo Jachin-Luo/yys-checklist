@@ -97,7 +97,7 @@ describe('一键日常：双向级联', () => {
     expect(useCheckStore.getState().checked).toEqual({ [HUB_ID]: expect.any(Number) });
   });
 
-  it('旧配置中的活动每日不被级联勾选或取消，已有手动完成记录保持不变', async () => {
+  it('已失效的活动每日 id 不被级联勾选或取消，已有手动完成记录保持不变', async () => {
     await useViewStore.getState().setAutoSet([
       'daily_sign', 'daily_shiguang_sign', 'daily_shiguang_tower',
     ]);
@@ -264,16 +264,16 @@ describe('保存失败与连续操作', () => {
     expect(useCheckStore.getState().error).toBeNull();
   });
 
-  it('跨过重置时刻后，取消失败也不能恢复上一日勾选', async () => {
+  it('跨过刷新时刻后，取消失败也不能恢复上一日勾选', async () => {
     vi.useFakeTimers({ toFake: ['Date'] });
-    vi.setSystemTime(new Date(2026, 8, 14, 4, 59));
+    vi.setSystemTime(new Date(2026, 8, 14, 23, 59));
     useItemStore.setState({ meta: await api.getMeta() });
     await useCheckStore.getState().toggle('daily_sign');
     vi.spyOn(console, 'error').mockImplementation(() => undefined);
     vi.spyOn(api, 'setChecked').mockRejectedValue(new Error('Save failed'));
 
     const pending = useCheckStore.getState().toggle('daily_sign');
-    vi.setSystemTime(new Date(2026, 8, 14, 5, 1));
+    vi.setSystemTime(new Date(2026, 8, 15, 0, 1));
     await pending;
 
     expect(useCheckStore.getState().checked).toEqual({});

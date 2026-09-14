@@ -111,6 +111,11 @@ export default function LimitedPage({ variant }: { variant: 'mobile' | 'desktop'
       {/* 版本 / 赛季分区：随周期滚动、无固定截止，与倒计时型限时活动分开渲染 */}
       {extraPending.length || extraDone.length ? (
         <>
+          {/* 重置提示（2026-09-14 从本周页移来）：版本活动在上线当日维护完成后才计入，
+              锚点是维护完成那一刻（通常 9:00），不是当天 0 点 —— 所以维护期间不会提前翻篇 */}
+          <Alert tone="warn">
+            版本 / 赛季按开服锚点重置 · 版本活动于上线当日维护完成后（通常 9:00）才计入
+          </Alert>
           <SectionTitle>
             版本 / 赛季 · {extraPending.length} 项待做
             {extraDone.length ? ` · 已完成 ${extraDone.length}` : ''}

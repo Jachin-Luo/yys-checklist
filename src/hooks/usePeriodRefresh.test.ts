@@ -25,13 +25,13 @@ beforeEach(async () => {
 });
 
 describe('refreshPeriodState', () => {
-  it('resets daily checks at 05:00 without writing any storage shard', () => {
-    const at = new Date(2026, 8, 15, 4, 59);
+  it('resets daily checks at 00:00 without writing any storage shard', () => {
+    const at = new Date(2026, 8, 14, 23, 59);
     checkAll(at);
     refreshPeriodState(at);
     expect(useCheckStore.getState().checked.daily).toBe(at.getTime());
 
-    refreshPeriodState(new Date(2026, 8, 15, 5, 0));
+    refreshPeriodState(new Date(2026, 8, 15, 0, 0));
 
     expect(useCheckStore.getState().checked).toEqual(
       Object.fromEntries(items.filter((item) => item.id !== 'daily').map((item) => [item.id, at.getTime()])),
@@ -39,13 +39,13 @@ describe('refreshPeriodState', () => {
     expect(storage.written).toEqual([]);
   });
 
-  it('resets weekly checks on Monday at 05:00', () => {
-    const at = new Date(2026, 8, 14, 4, 59);
+  it('resets weekly checks on Monday at 00:00', () => {
+    const at = new Date(2026, 8, 13, 23, 59);
     checkAll(at);
     refreshPeriodState(at);
     expect(useCheckStore.getState().checked.weekly).toBe(at.getTime());
 
-    refreshPeriodState(new Date(2026, 8, 14, 5, 0));
+    refreshPeriodState(new Date(2026, 8, 14, 0, 0));
 
     const { checked } = useCheckStore.getState();
     expect(checked.daily).toBeUndefined();
@@ -54,13 +54,13 @@ describe('refreshPeriodState', () => {
     expect(checked.once).toBe(at.getTime());
   });
 
-  it('resets monthly checks on day one at 05:00', () => {
-    const at = new Date(2026, 9, 1, 4, 59);
+  it('resets monthly checks on day one at 00:00', () => {
+    const at = new Date(2026, 8, 30, 23, 59);
     checkAll(at);
     refreshPeriodState(at);
     expect(useCheckStore.getState().checked.monthly).toBe(at.getTime());
 
-    refreshPeriodState(new Date(2026, 9, 1, 5, 0));
+    refreshPeriodState(new Date(2026, 9, 1, 0, 0));
 
     const { checked } = useCheckStore.getState();
     expect(checked.monthly).toBeUndefined();
@@ -85,11 +85,11 @@ describe('refreshPeriodState', () => {
   });
 
   it('keeps current optimistic checks and does not dismiss a save error', () => {
-    const at = new Date(2026, 8, 15, 5, 0, 1);
+    const at = new Date(2026, 8, 15, 0, 0, 1);
     const error = new Error('Save failed');
     useCheckStore.setState({ checked: { daily: at.getTime() }, error });
 
-    refreshPeriodState(new Date(2026, 8, 15, 5, 1));
+    refreshPeriodState(new Date(2026, 8, 15, 0, 1));
 
     expect(useCheckStore.getState().checked).toEqual({ daily: at.getTime() });
     expect(useCheckStore.getState().error).toBe(error);
@@ -101,7 +101,7 @@ describe('refreshPeriodState', () => {
     if (state === 'missing-meta') useItemStore.setState({ meta: null });
     else useUiStore.setState({ bootstrapLoading: true });
 
-    refreshPeriodState(new Date(2026, 8, 15, 5, 0));
+    refreshPeriodState(new Date(2026, 8, 15, 0, 0));
 
     expect(useCheckStore.getState().checked).toBe(checked);
     expect(useItemStore.getState().items).toBe(items);

@@ -1,4 +1,3 @@
-import Alert from '../components/common/Alert';
 import ChecklistItem from '../components/common/ChecklistItem';
 import { EmptyState, SectionTitle } from '../components/common/EmptyState';
 import ViewBar from '../components/common/ViewBar';
@@ -18,13 +17,13 @@ export default function WeekPage({ variant }: { variant: 'mobile' | 'desktop' })
     <div className="pb-6">
       <ViewBar mode={variant} />
 
-      {/* 顶部日期：自然周周一–周日，纯展示 —— 与「周一 05:00 重置」的勾选语义无关（domain/dateLabel） */}
+      {/* 顶部日期：自然周周一–周日，纯展示 —— 与「周一 0 点刷新」的勾选语义无关（domain/dateLabel） */}
       <p className="px-3.5 pt-2.5 text-sm text-ink-3">
         本周 <b className="font-medium text-ink">{weekRangeLabel(new Date())}</b>
       </p>
 
-      <Alert tone="warn">周常周一 05:00 重置 · 版本与赛季按开服锚点重置</Alert>
-
+      {/* 重置提示已移到限时页的「版本 / 赛季」分区（2026-09-14）：周常 0 点刷新是常识，
+          而"版本 / 赛季按锚点重置"只对那一类条目有意义 */}
       <SectionTitle>本周 · {pending.length} 项未完成</SectionTitle>
       {pending.length ? (
         <div className={CHECKLIST_GRID}>

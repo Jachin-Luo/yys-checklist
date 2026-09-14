@@ -62,7 +62,7 @@ export default function TodayPage({ variant }: { variant: 'mobile' | 'desktop' }
     <div className="pb-6">
       <ViewBar mode={variant} />
 
-      {/* 顶部日期：纯展示（自然日历），与勾选重置（05:00）语义无关 —— 见 domain/dateLabel */}
+      {/* 顶部日期：纯展示（自然日历），与勾选重置（0 点）语义无关 —— 见 domain/dateLabel */}
       <p className="px-3.5 pt-2.5 text-sm text-ink-3">
         今天 <b className="font-medium text-ink">{todayDateLabel(new Date())}</b>
       </p>
@@ -96,7 +96,7 @@ export default function TodayPage({ variant }: { variant: 'mobile' | 'desktop' }
           ) : (
             <EmptyState
               title="今天的常驻清单已清空"
-              hint="新增或恢复条目可在「我的」里调整；重置时间为每日 05:00。"
+              hint="新增或恢复条目可在「我的」里调整；刷新时间为每日 0 点。"
             />
           )}
 

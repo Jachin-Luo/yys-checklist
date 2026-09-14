@@ -104,6 +104,19 @@ button:active:not(:disabled),
   padding-right: max(1rem, env(safe-area-inset-right));
 }
 
+/*
+ * 滚动条槽位常驻（2026-09-14）：修「我的」页展开折叠分区时的横向抖动。
+ *
+ * `main` 是全站唯一的内层滚动容器（`html/body` 的滚动见上）。展开 / 收起折叠分区会改变
+ * 内容高度，一旦跨越"是否需要滚动"的阈值，滚动条的出现 / 消失会让 main 的可用宽度少 8px
+ * （见下方 `::-webkit-scrollbar` 的 width），内部的 `mx-auto` 容器随之重新居中 ——
+ * 视觉上就是"内容整体横向错位一下"。
+ * `stable` 让槽位始终保留，宽度恒定；不支持的浏览器忽略该声明、退回原行为（不劣化）。
+ */
+main {
+  scrollbar-gutter: stable;
+}
+
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;

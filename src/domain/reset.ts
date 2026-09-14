@@ -2,11 +2,12 @@
  * 周期重置（设计文档 §7 / D2）—— 纯函数，无 IO。
  *
  * 核心：**靠时间戳比对，不靠定时器**。
- * 定时器在凌晨 5 点用户没开应用时根本不执行，跨时区还会错。
+ * 定时器在跨天那一刻用户没开应用时根本不执行，跨时区还会错。
  *
  * 7 档周期不是同一种时间模型：
- *   - daily / weekly / monthly：时基周期，按 `meta.resetHour`（阴阳师为 05:00）推算
+ *   - daily / weekly / monthly：时基周期，按 `meta.resetHour`（阴阳师为 0 点）推算
  *   - version / season：事件驱动周期，锚点取 `meta.periods[cycle].startAt`
+ *     —— 版本活动在上线当日维护完成后（通常 9:00）才计入，锚点就是那一刻
  *   - once / limited：不自动重置，只靠 `until` 归档
  */
 import type { Item, Meta } from '../api/types';
@@ -25,7 +26,7 @@ function lastHour(now: Date, resetHour: number): number {
   return d.getTime();
 }
 
-/** 本周一 `resetHour` 时刻（周一 05:00 为周常重置点） */
+/** 本周一 `resetHour` 时刻（周一 0 点，周常刷新点） */
 function lastMondayHour(now: Date, resetHour: number): number {
   const base = new Date(lastHour(now, resetHour));
   const dow = base.getDay(); // 0=周日

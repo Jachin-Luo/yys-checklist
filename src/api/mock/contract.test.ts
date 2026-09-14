@@ -41,7 +41,7 @@ describe('getBootstrap：首屏聚合（§3.3）', () => {
     expect(storage.written).toEqual([]);
   });
 
-  it('版本 / 赛季条目不受每日 05:00 重置影响（D2）', async () => {
+  it('版本 / 赛季条目不受每日 0 点刷新影响（D2）', async () => {
     const b = await api.getBootstrap(scope);
     expect(b.meta.periods.version?.startAt).toBe('2026-09-09T09:00');
     expect(b.items.filter((i) => i.cycle === 'version').length).toBe(5);
@@ -79,7 +79,7 @@ describe('勾选：增量写 + 分片验证（E-02 / §3.2）', () => {
   });
 
   it('周期重置：daily 的过期勾选读取时归零；version 的保留', async () => {
-    /* 读取时刻为真实 now：daily 起点 = 当天 05:00，故 09-09 03:00 的勾选会被归零 */
+    /* 读取时刻为真实 now：daily 起点 = 当天 0 点，09-09 的勾选必然早于它，故被归零 */
     const versionItem = { id: 'version_event_climb', cycle: 'version' as const };
     const dailyItem = { id: 'daily_sign', cycle: 'daily' as const };
     await api.setChecked(scope, versionItem.id, new Date(2026, 8, 9, 10).getTime());
