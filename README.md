@@ -196,6 +196,21 @@ Mock 的延迟是**故意**注入的（读 0–30ms、写 80–150ms），并且
 
 ---
 
+## 开发者文档
+
+以上各节面向玩家；面向开发与协作（含 AI 助手）的文档在 [`docs/`](./docs/README.md)，动手改代码前建议先读根目录的 [`AGENTS.md`](./AGENTS.md)（红线与命令速查）：
+
+| 文档 | 内容 |
+| --- | --- |
+| [`AGENTS.md`](./AGENTS.md) | 分层铁律、口径纪律红线、常用命令、代码禁区、文档索引 |
+| [`docs/01-architecture.md`](./docs/01-architecture.md) | 目录逐层职责、启动到首屏的调用链、store 依赖方向、双布局差异 |
+| [`docs/02-data-and-domain.md`](./docs/02-data-and-domain.md) | 数据契约、Mock 与分片持久化、8 个种子文件的结构与规模、domain 导出表、特殊机制 |
+| [`docs/03-conventions-and-tests.md`](./docs/03-conventions-and-tests.md) | 被工具强制的约束、口径纪律的代码落点、测试体系、数据录入流程、常见坑 |
+| [`docs/04-handover-guide.md`](./docs/04-handover-guide.md) | 上手步骤、六类改动任务手册、未完成项与路线图、问题排查 |
+| [`CHANGELOG.md`](./CHANGELOG.md) | 变更记录：按版本分组的改动流水（每次改动的唯一登记处） |
+
+---
+
 ## 本地运行
 
 需要 Node.js 18 以上（Vite 5 的要求；本项目的开发与验收在 Node 22 下跑通）。

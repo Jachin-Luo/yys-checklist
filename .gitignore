@@ -8,6 +8,7 @@ dist-ssr
 .idea
 .vscode/*
 !.vscode/extensions.json
+.codebuddy/
 
 # 日志
 npm-debug.log*
