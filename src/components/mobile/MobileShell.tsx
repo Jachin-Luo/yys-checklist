@@ -1,4 +1,5 @@
 import NavContent from '../common/NavContent';
+import NurtureBadge from '../common/NurtureBadge';
 import ProfileSwitcher from '../common/ProfileSwitcher';
 import { useChecklist } from '../../hooks/useChecklist';
 import { NAV_ITEMS, useUiStore } from '../../stores/ui';
@@ -27,7 +28,9 @@ export default function MobileShell() {
     <div className="flex h-full flex-col bg-surface-2">
       <header className="safe-top safe-x flex-none border-b border-line-soft bg-surface pb-3">
         <div className="flex items-center justify-between gap-2">
-          <h1 className="text-xl font-medium text-ink">阴阳师查漏清单</h1>
+          <h1 className="min-w-0 flex-1 truncate text-xl font-medium text-ink">阴阳师查漏清单</h1>
+          {/* 与档案切换器同一行：紧凑形态只留「图标 + 剩多久」，完整时刻在 title 里 */}
+          <NurtureBadge compact />
           <ProfileSwitcher compact />
         </div>
         <p className="mt-1 text-sm text-ink-3">
@@ -42,7 +45,7 @@ export default function MobileShell() {
         <NavContent variant="mobile" />
       </main>
 
-      <nav className="safe-bottom grid flex-none grid-cols-6 border-t border-line-soft bg-surface pt-1.5">
+      <nav className="safe-bottom grid flex-none grid-cols-7 border-t border-line-soft bg-surface pt-1.5">
         {NAV_ITEMS.map(({ key, label }) => (
           <button
             key={key}

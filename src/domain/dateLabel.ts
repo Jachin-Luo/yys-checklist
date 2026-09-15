@@ -32,3 +32,15 @@ export function weekRangeLabel(now: Date): string {
   const sunday = new Date(monday.getFullYear(), monday.getMonth(), monday.getDate() + 6);
   return `${md(monday)} - ${md(sunday)}`;
 }
+
+/**
+ * 本月页标签：`9月1日 - 9月30日`。
+ * 同样纯展示：本月 1 日 0 点是月常的**重置**点（`domain/reset.periodStartOf('monthly')`），
+ * 而这里只画自然月区间 —— 两者刻意分开，别把重置语义混进区间算法。
+ * 月末用「下月 0 点回退一天」得到，不查月份天数表（闰年自动正确）。
+ */
+export function monthRangeLabel(now: Date): string {
+  const first = new Date(now.getFullYear(), now.getMonth(), 1);
+  const last = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+  return `${md(first)} - ${md(last)}`;
+}

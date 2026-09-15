@@ -6,8 +6,11 @@ import { useChecklist } from '../hooks/useChecklist';
 import { CHECKLIST_GRID } from '../styles/layout';
 
 /**
- * 本周页（设计文档 §9 S4b-1）：周常 + 月常 / 版本 / 赛季条目。
- * 月常与版本条目并入本周视图，是因为它们的截止压力同样需要被看见（§4.2 时间字段三规则）。
+ * 本周页（设计文档 §9 S4b-1）：周常条目。
+ *
+ * 月常已于 2026-09-15 拆到「本月」页 —— 两者刷新口径不同（周一 0 点 vs 每月 1 日 0 点），
+ * 混在一页时"哪几条下周才会翻篇"看不出来。版本 / 赛季条目在限时页的专属分区
+ * （随 `meta.periods` 锚点滚动，与"周"无关）。
  */
 export default function WeekPage({ variant }: { variant: 'mobile' | 'desktop' }) {
   const { pending, done, coveredSet, coverMode } = useChecklist('week');

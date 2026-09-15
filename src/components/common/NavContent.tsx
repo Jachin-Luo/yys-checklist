@@ -1,5 +1,6 @@
 import LimitedPage from '../../pages/LimitedPage';
 import MePage from '../../pages/MePage';
+import MonthPage from '../../pages/MonthPage';
 import StatsPage from '../../pages/StatsPage';
 import TodayPage from '../../pages/TodayPage';
 import ToolsPage from '../../pages/ToolsPage';
@@ -30,6 +31,8 @@ export default function NavContent({ variant }: { variant: 'mobile' | 'desktop' 
       return <TodayPage variant={variant} />;
     case 'week':
       return <WeekPage variant={variant} />;
+    case 'month':
+      return <MonthPage variant={variant} />;
     case 'limited':
       return <LimitedPage variant={variant} />;
     case 'stats':

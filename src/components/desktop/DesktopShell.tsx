@@ -1,18 +1,21 @@
 import {
   BarChart3,
   CalendarClock,
+  CalendarDays,
   CheckSquare,
   Hammer,
   Settings,
   Sparkles,
 } from 'lucide-react';
 import NavContent from '../common/NavContent';
+import NurtureBadge from '../common/NurtureBadge';
 import ProfileSwitcher from '../common/ProfileSwitcher';
 import { NAV_ITEMS, useUiStore, type NavKey } from '../../stores/ui';
 
 const ICONS: Record<NavKey, typeof CheckSquare> = {
   today: CheckSquare,
   week: CalendarClock,
+  month: CalendarDays,
   limited: Sparkles,
   stats: BarChart3,
   tools: Hammer,
@@ -66,6 +69,8 @@ export default function DesktopShell() {
             <p className="flex-none text-sm text-ink-3">当前档案</p>
             <ProfileSwitcher direction="up" compact />
           </div>
+          {/* 下一个结界卡收/续点；没有进行中的任务时组件自己返回 null，不留空隙 */}
+          <NurtureBadge className="mt-2" />
         </div>
       </aside>
 

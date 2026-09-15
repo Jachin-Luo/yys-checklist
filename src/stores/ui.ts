@@ -4,11 +4,12 @@ import { create } from 'zustand';
  * 纯 UI 状态（导航 / 首屏加载态 / 二次确认）。
  * 不含业务数据 —— 业务数据一律走 api 契约（§2 分层铁律）。
  */
-export type NavKey = 'today' | 'week' | 'limited' | 'stats' | 'tools' | 'me';
+export type NavKey = 'today' | 'week' | 'month' | 'limited' | 'stats' | 'tools' | 'me';
 
 export const NAV_ITEMS: ReadonlyArray<{ key: NavKey; label: string }> = [
   { key: 'today', label: '今日' },
   { key: 'week', label: '本周' },
+  { key: 'month', label: '本月' },
   { key: 'limited', label: '限时' },
   { key: 'stats', label: '统计' },
   { key: 'tools', label: '工具' },
@@ -30,7 +31,17 @@ interface UiState {
   confirmState: ConfirmOptions | null;
   /** 首屏重载计数：导入备份这类"整库变了"的场景 +1，让 `useBootstrap` 整体重跑 */
   bootstrapTick: number;
+  /**
+   * 一次性「跳转请求」：目标页面 + 目标分区 / 分段。两个调用点：
+   *   - 今日页一键日常入口卡的「去设置」→ `{ nav: 'me', section: 'autoDaily' }`
+   *   - 壳层的结界卡徽章 → `{ nav: 'tools', section: 'nurture' }`
+   * 目标页面在挂载时消费它（展开 / 选中对应分区、必要时滚动）后立即清空。
+   * 用一次性标记而不是常驻开关：跳过来时生效一次，之后用户自己切来切去不受影响。
+   */
+  navRequest: { nav: NavKey; section?: string } | null;
   setNav: (nav: NavKey) => void;
+  requestNav: (req: { nav: NavKey; section?: string }) => void;
+  clearNavRequest: () => void;
   setBootstrapLoading: (loading: boolean) => void;
   setBootstrapError: (error: Error | null) => void;
   /**
@@ -57,8 +68,12 @@ export const useUiStore = create<UiState>((set) => ({
   bootstrapError: null,
   confirmState: null,
   bootstrapTick: 0,
+  navRequest: null,
 
   setNav: (nav) => set({ nav }),
+
+  requestNav: (req) => set({ nav: req.nav, navRequest: req }),
+  clearNavRequest: () => set({ navRequest: null }),
   setBootstrapLoading: (bootstrapLoading) => set({ bootstrapLoading }),
   setBootstrapError: (bootstrapError) => set({ bootstrapError }),
 
