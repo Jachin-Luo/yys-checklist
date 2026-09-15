@@ -1,6 +1,7 @@
 import type { Item } from '../../api/types';
 import { useAutoDaily } from '../../hooks/useAutoDaily';
 import { useCheckStore } from '../../stores/check';
+import { useUiStore } from '../../stores/ui';
 import CheckBox from './CheckBox';
 import { FieldIcon } from './ItemField';
 
@@ -12,6 +13,10 @@ import { FieldIcon } from './ItemField';
  * 勾选侧是**双向级联**：勾选即勾选全部被覆盖项，取消即一并取消（`useAutoDaily.toggleHub`）。
  * 点击整张卡即勾选。
  *
+ * 右侧按钮**不再重复勾选动作**（2026-09-15 用户要求）：原文案「去完成」与"点整张卡"效果完全一样，
+ * 等于白占一个按钮位 —— 而这一屏真正缺的入口是"改覆盖集合"。现在文案为「去设置」，
+ * 点击跳到「我的 · 一键日常覆盖」并自动展开该分区（见 `stores/ui.requestSection`）。
+ *
  * 2026-09-11：说明行改用与清单卡片**同一套图标语言**（`ItemField`）——
  * 入口用 📍 蓝、备注用 🗒 灰。同一屏两张卡各用一套符号系统，是上一版最刺眼的不一致。
  * 这边的底色是品牌浅紫（#EEEDFA）而不是卡片白，所以备注值取深一档的 `ink-2`，
@@ -20,6 +25,7 @@ import { FieldIcon } from './ItemField';
 export default function HubCard({ item }: { item: Item }) {
   const checked = useCheckStore((s) => s.checked[item.id] !== undefined);
   const { toggleHub, coveredCount } = useAutoDaily();
+  const requestNav = useUiStore((s) => s.requestNav);
   const label = `${checked ? '取消完成' : '标记完成'}：${item.name}（同时${checked ? '取消' : '勾选'}被覆盖的 ${coveredCount} 项）`;
 
   return (
@@ -61,13 +67,14 @@ export default function HubCard({ item }: { item: Item }) {
       <button
         type="button"
         onClick={(e) => {
+          /* 按钮在可点击的 article 内部：必须阻止冒泡，否则会连带触发整卡的勾选 */
           e.stopPropagation();
-          toggleHub();
+          requestNav({ nav: 'me', section: 'autoDaily' });
         }}
-        title={label}
+        title="去「我的」配置被一键日常覆盖的条目"
         className="mt-0.5 flex-none cursor-pointer rounded-sm bg-brand px-2 py-1 text-sm text-white transition-colors duration-120 hover:bg-brand-deep"
       >
-        {checked ? '取消' : '去完成'}
+        去设置
       </button>
 
       <CheckBox checked={checked} onToggle={toggleHub} label={label} />

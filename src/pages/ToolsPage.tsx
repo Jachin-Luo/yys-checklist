@@ -2,6 +2,7 @@ import { useEffect, useState, type ReactNode } from 'react';
 import { AlertTriangle, RotateCw } from 'lucide-react';
 import { Skeleton } from '../components/common/EmptyState';
 import { useToolsStore, type ToolTab } from '../stores/tools';
+import { useUiStore } from '../stores/ui';
 import BountySection from './tools/BountySection';
 import NurtureSection from './tools/NurtureSection';
 import YuhunSection from './tools/YuhunSection';
@@ -23,8 +24,16 @@ const TABS: ReadonlyArray<{ key: ToolTab; label: string; hint: string }> = [
   { key: 'nurture', label: '结界寄养', hint: '6h 收续点' },
 ];
 
+/** 只接受三个合法分段名 —— 跳转请求来自外部，不能盲信字符串 */
+const isToolTab = (v?: string): v is ToolTab => v === 'yuhun' || v === 'bounty' || v === 'nurture';
+
 export default function ToolsPage({ variant }: { variant: 'mobile' | 'desktop' }) {
-  const [tab, setTab] = useState<ToolTab>('yuhun');
+  /* 壳层带分段跳过来时（如侧栏 / 头部常驻的结界卡徽章）初始就选中它 */
+  const requestedTab = useUiStore((s) =>
+    s.navRequest?.nav === 'tools' ? s.navRequest.section : undefined,
+  );
+  const clearNavRequest = useUiStore((s) => s.clearNavRequest);
+  const [tab, setTab] = useState<ToolTab>(() => (isToolTab(requestedTab) ? requestedTab : 'yuhun'));
   const ensure = useToolsStore((s) => s.ensure);
   const loading = useToolsStore((s) => s.loading);
   const error = useToolsStore((s) => s.error);
@@ -35,6 +44,11 @@ export default function ToolsPage({ variant }: { variant: 'mobile' | 'desktop' }
   useEffect(() => {
     void ensure(tab);
   }, [ensure, tab]);
+
+  /* 标记是一次性的：本页消费后立刻清空，免得下次从别处进工具页又被带过去 */
+  useEffect(() => {
+    if (requestedTab) clearNavRequest();
+  }, [requestedTab, clearNavRequest]);
 
   const ready = tab === 'yuhun' ? Boolean(yuhun && souls) : tab === 'bounty' ? Boolean(bounty) : true;
   const busy = loading === tab;

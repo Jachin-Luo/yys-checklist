@@ -19,6 +19,8 @@ import { ChevronRight } from 'lucide-react';
  *    代价是 CSS 隐藏的元素仍在 DOM 里，这些分区都很轻，可以接受。
  */
 export interface CollapsibleSectionProps {
+  /** 供锚点跳转用的 DOM id（例如今日页入口卡的「去设置」跳过来后滚动定位到本分区） */
+  id?: string;
   title: string;
   /** 右侧常驻内容：操作按钮或「只读」这类标记 */
   aside?: ReactNode;
@@ -32,6 +34,7 @@ export interface CollapsibleSectionProps {
 }
 
 export default function CollapsibleSection({
+  id,
   title,
   aside,
   summary,
@@ -44,6 +47,7 @@ export default function CollapsibleSection({
 
   return (
     <section
+      id={id}
       className={`mt-4 overflow-hidden rounded-lg border bg-surface ${
         danger ? 'border-danger-line' : 'border-line-soft'
       }`}

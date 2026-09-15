@@ -1,9 +1,11 @@
+import { useEffect } from 'react';
 import { RotateCcw } from 'lucide-react';
 import CheckBox from '../../components/common/CheckBox';
 import CollapsibleSection from '../../components/common/CollapsibleSection';
 import { dataDefaultAutoSet, isAutoDailyCandidate } from '../../domain/autoDaily';
 import { useAutoDaily } from '../../hooks/useAutoDaily';
 import { useItemStore } from '../../stores/items';
+import { useUiStore } from '../../stores/ui';
 
 /**
  * 「我的 · 一键日常」分区。
@@ -28,8 +30,25 @@ export default function AutoDailySection() {
   const candidates = items.filter(isAutoDailyCandidate);
   const dataDefaultCount = dataDefaultAutoSet(items).length;
 
+  /* 今日页入口卡的「去设置」跳过来时自动展开自己 —— 标记是一次性的，消费后立即清空 */
+  const requested = useUiStore((s) => s.navRequest?.section === 'autoDaily');
+  const clearNavRequest = useUiStore((s) => s.clearNavRequest);
+  useEffect(() => {
+    if (!requested) return;
+    clearNavRequest();
+    /* 等展开后的布局生效再滚，否则会按收起时的高度算位置、滚不到实处 */
+    requestAnimationFrame(() => {
+      document.getElementById('auto-daily-section')?.scrollIntoView({
+        block: 'start',
+        behavior: 'smooth',
+      });
+    });
+  }, [requested, clearNavRequest]);
+
   return (
     <CollapsibleSection
+      id="auto-daily-section"
+      defaultOpen={requested}
       title="一键日常覆盖"
       summary={`已覆盖 ${coveredCount} 项 · 数据默认 ${dataDefaultCount} 项`}
       aside={
