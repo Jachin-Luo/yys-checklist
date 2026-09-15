@@ -31,7 +31,6 @@ export default function LimitedPage({ variant }: { variant: 'mobile' | 'desktop'
     const now = new Date();
     const visibility = {
       showKinds: view.showKinds as string[],
-      minWeight: view.minWeight,
       hideDone: view.hideDone,
       today: now.getDay(),
     };

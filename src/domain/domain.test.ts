@@ -150,13 +150,14 @@ describe('buildComparator：优先级 ① 一键入口 → ② 置顶 → ③ so
   });
 });
 
-describe('isVisible：minWeight / showKinds / hideDone / days（K1 / D4）', () => {
-  const base = { showKinds: [], minWeight: 0, hideDone: false, today: 4 };
+describe('isVisible：showKinds / hideDone / days（D4）', () => {
+  const base = { showKinds: [], hideDone: false, today: 4 };
   const daily = item({ id: 'd', gainKind: ['jade'] });
 
-  it('minWeight 门槛：低于阈值的条目不显示；一键入口豁免', () => {
-    expect(isVisible(daily, undefined, { ...base, minWeight: 20 })).toBe(false);
-    expect(isVisible(item({ id: 'hub', isAutoHub: true }), undefined, { ...base, minWeight: 999 })).toBe(true);
+  /* 2026-09-15：原先的「minWeight 门槛」用例随该门槛删除 —— 痛感只作默认排序键，不再是筛选维度 */
+  it('一键日常入口豁免全部筛选（showKinds / hideDone / days 都不作用在它身上）', () => {
+    const hub = item({ id: 'hub', isAutoHub: true });
+    expect(isVisible(hub, 123, { ...base, showKinds: ['soul'], hideDone: true, today: 1 })).toBe(true);
   });
 
   it('showKinds 空数组 = 全部显示；非空则取交集', () => {

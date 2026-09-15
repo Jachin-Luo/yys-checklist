@@ -6,7 +6,6 @@ import { useModalFocus } from '../../hooks/useModalFocus';
 import { useDeviceStore } from '../../stores/device';
 import { useItemStore } from '../../stores/items';
 import { useSessionStore } from '../../stores/session';
-import { useViewStore } from '../../stores/view';
 
 const STEPS = ['选择档案', '配置寮时间', '开始自查'] as const;
 
@@ -30,7 +29,6 @@ export default function OnboardingDialog() {
   const session = useSessionStore((s) => s.session);
   const profiles = useSessionStore((s) => s.profiles);
   const switchProfile = useSessionStore((s) => s.switchProfile);
-  const setMinWeight = useViewStore((s) => s.setMinWeight);
   const { guildTime, setGuildTime } = useDevicePrefs();
   const [step, setStep] = useState(0);
 
@@ -41,10 +39,9 @@ export default function OnboardingDialog() {
 
   if (!hydrated || onboarded || !items.length) return null;
 
-  const finish = (minWeight: number) => {
-    void setMinWeight(minWeight);
-    markOnboarded();
-  };
+  /* 引导只写设备级「已引导」标记。2026-09-15 起痛感只作默认排序键 ——
+     原先第三步"首屏显示范围（只看高痛感 / 全部）"的持久偏好写入已移除 */
+  const finish = () => markOnboarded();
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/40 px-4 py-6">
@@ -137,15 +134,9 @@ export default function OnboardingDialog() {
                 清单默认按<b>痛感分</b>排序（越不可重复、越有截止越靠前），
                 想自己排顺序就到「我的 → 条目管理」拖动调整。
               </p>
-              <p className="mt-3 text-sm text-ink-3">
-                首屏显示范围
-              </p>
-              <div className="mt-2 flex flex-col gap-2">
-                <button type="button" onClick={() => finish(20)} className={btnPrimary}>
-                  只显示高痛感条目（推荐先看这些）
-                </button>
-                <button type="button" onClick={() => finish(0)} className={btnGhost}>
-                  显示全部条目
+              <div className="mt-3">
+                <button type="button" onClick={finish} className={btnPrimary}>
+                  开始使用
                 </button>
               </div>
             </div>

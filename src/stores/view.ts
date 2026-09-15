@@ -7,7 +7,8 @@ import { useSessionStore } from './session';
 
 /**
  * 视图偏好（设计文档 §7.3）。
- * 落盘键：`yys:view:{profileId}`；写入时机：改排序 / 筛选 / 置顶 / 一键日常覆盖配置。
+ * 落盘键：`yys:view:{profileId}`；写入时机：改筛选 / 置顶 / 一键日常覆盖配置
+ * （排序与痛感门槛已按产品决策取消写入，见下方 action 注释）。
  * 与勾选状态解耦：调视图不会丢勾选。
  */
 export type CoverMode = 'dim' | 'hide';
@@ -17,8 +18,17 @@ interface ViewState {
   defaults: ViewDefaults | null;
   error: Error | null;
   applyView: (view: ViewPrefs, defaults: ViewDefaults) => void;
+  /**
+   * ⚠️ 已无调用方（排序控件按产品决策取消）：生效排序由 `effectiveSortBy(order)` 派生，
+   * `ViewPrefs.sortBy` 字段仅为不动契约形状而保留。**不要据此新增排序 UI**。
+   */
   setSortBy: (sortBy: SortBy) => Promise<void>;
   setShowKinds: (kinds: GainKind[]) => Promise<void>;
+  /**
+   * ⚠️ 已无调用方（2026-09-15：痛感收敛为「只作默认排序键」，门槛判断已从
+   * `domain/sort.isVisible` 移除）。与 `setSortBy` 同一处理方式：字段与 action 留在数据层，
+   * **不要据此新增筛选 UI**。
+   */
   setMinWeight: (minWeight: number) => Promise<void>;
   toggleHideDone: () => Promise<void>;
   togglePin: (itemId: string) => Promise<void>;

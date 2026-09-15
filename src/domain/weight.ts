@@ -40,9 +40,6 @@ export function cycleRank(it: Item): number {
   return idx < 0 ? order.length : idx;
 }
 
-/** 供 UI 图例展示的痛感分说明（与 meta.weightNote 一致，避免两处各写一份） */
-export const WEIGHT_LEGEND: ReadonlyArray<{ key: string; label: string; value: string }> = [
-  { key: 'cycle', label: '周期', value: '一次性/限时/版本/赛季 40 · 每月 30 · 每周 20 · 每日 10' },
-  { key: 'scarce', label: '稀缺性', value: '有截止日或下线日 +15' },
-  { key: 'gain', label: '固定收益', value: '有保底数值 +10' },
-];
+/* 2026-09-15：原先的 `WEIGHT_LEGEND`（UI 图例数据）已删除 ——
+   全库没有消费方，且痛感已收敛为"只作默认排序键"，不再需要向用户解释分数构成。
+   公式本身仍写在 README「核心思路」与 `meta.weightNote` 里（数据层文案，不动）。 */

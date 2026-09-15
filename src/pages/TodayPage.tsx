@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import type { Item } from '../api/types';
-import Alert from '../components/common/Alert';
 import ChecklistItem from '../components/common/ChecklistItem';
 import { EmptyState, SectionTitle } from '../components/common/EmptyState';
 import HubCard from '../components/common/HubCard';
@@ -8,21 +7,14 @@ import ViewBar from '../components/common/ViewBar';
 import { todayDateLabel } from '../domain/dateLabel';
 import { useAutoDaily } from '../hooks/useAutoDaily';
 import { useChecklist } from '../hooks/useChecklist';
-import { useUiStore } from '../stores/ui';
 import { CHECKLIST_GRID } from '../styles/layout';
 
 /**
- * 顶部「本周高痛感还有 N 项没做」警示条 —— **2026-09-10 按产品要求暂时隐藏**。
- *
- * 为什么留成开关而不是删掉：这是「截止日前置」在今日页的唯一入口，
- * 只是当前阶段不想要这层压迫感。置 `true` 即恢复；`weeklyHighWeightLeft` 的计算
- * 仍留在 `useChecklist` 里，恢复时不需要动数据层。
- * 显式标注类型是为了避免被当成字面量常量（否则静态检查会认为条件恒为假）。
- */
-const SHOW_WEEKLY_ALERT: boolean = false;
-
-/**
  * 今日页（设计文档 §9 S4b-1）。
+ *
+ * 2026-09-15：顶部那条「本周高痛感还有 N 项没做」警示条**已删除**（它自 2026-09-10 起
+ * 就被 `SHOW_WEEKLY_ALERT` 关着）。随「痛感只用于默认排序」的收敛，`useChecklist`
+ * 也不再计算 `weeklyHighWeightLeft` —— 痛感现在只影响排序，不再驱动任何提示或筛选。
  *
  * 2026-09-11 拆「常驻 / 活动」双 Tab（用户决策；曾考虑用边框色标识、最终仍选 Tab 分层）：
  *   - **常驻** = 长期每日模板：一键日常入口 + `items.db.json` 的 daily 条目；
@@ -33,10 +25,8 @@ const SHOW_WEEKLY_ALERT: boolean = false;
  * 入口卡属于常驻模板，归常驻 Tab；已完成分区里取消勾选同样走双向级联。
  */
 export default function TodayPage({ variant }: { variant: 'mobile' | 'desktop' }) {
-  const { hub, hubDone, pending, done, weeklyHighWeightLeft, coveredSet, coverMode } =
-    useChecklist('today');
+  const { hub, hubDone, pending, done, coveredSet, coverMode } = useChecklist('today');
   const { toggleHub } = useAutoDaily();
-  const setNav = useUiStore((s) => s.setNav);
   const [tab, setTab] = useState<'resident' | 'event'>('resident');
 
   const isEvent = (it: Item) => Boolean(it.until || it.deadline);
@@ -75,12 +65,6 @@ export default function TodayPage({ variant }: { variant: 'mobile' | 'desktop' }
           活动 · {pendingEvent.length} 项
         </button>
       </div>
-
-      {SHOW_WEEKLY_ALERT && weeklyHighWeightLeft > 0 ? (
-        <Alert tone="danger" onClick={() => setNav('week')}>
-          本周高痛感还有 {weeklyHighWeightLeft} 项没做
-        </Alert>
-      ) : null}
 
       {tab === 'resident' ? (
         <>

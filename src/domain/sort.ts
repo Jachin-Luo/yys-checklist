@@ -171,16 +171,17 @@ export function buildComparator(ctx: SortContext): (a: Item, b: Item) => number 
 
 /**
  * 列表是否可见（视图筛选）：
- *   - 痛感门槛 `minWeight`（K1，默认 0 = 不过滤）
  *   - 奖励类型 `showKinds`（空数组 = 全部）
  *   - 隐藏已完成
  *   - 今天是否适用（`days`）
  *
- * `keepDone` 供统计 / 漏失场景豁免「隐藏已完成」——否则已勾的条目不算已获得，统计会归零。
+ * 2026-09-15「痛感只用于默认排序」：原先的 `minWeight` 门槛已删除 ——
+ * 痛感不再是筛选维度，只作排序键（见 `buildComparator`）。
+ *
+ * `keepDone` 供统计场景豁免「隐藏已完成」——否则已勾的条目不算已获得，统计会归零。
  */
 export interface VisibilityContext {
   showKinds: string[];
-  minWeight: number;
   hideDone: boolean;
   keepDone?: boolean;
   today: number;
@@ -188,7 +189,6 @@ export interface VisibilityContext {
 
 export function isVisible(it: Item, checkedAt: number | undefined, ctx: VisibilityContext): boolean {
   if (!it.isAutoHub) {
-    if (weightOf(it) < ctx.minWeight) return false;
     if (ctx.showKinds.length && !(it.gainKind || []).some((k) => ctx.showKinds.includes(k))) return false;
     if (ctx.hideDone && !ctx.keepDone && checkedAt !== undefined) return false;
     if (it.days && it.days.length && !it.days.includes(ctx.today)) return false;
