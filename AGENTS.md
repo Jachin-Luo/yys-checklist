@@ -42,8 +42,7 @@ Mock 的分片键由 `src/api/mock/persist.ts` 封装（`KEY` / `removeProfileSh
 | 纪律 | 含义 | 落点 |
 | --- | --- | --- |
 | 只统计固定数值 | 浮动收益（只有类型没有数值）不进分子分母 | `domain/stats.ts` `summarizeGain` |
-| 覆盖 / 隐藏只影响渲染 | 绝不影响统计与漏失口径 | `domain/stats.ts`、`hooks/useChecklist.ts` |
-| 漏失只列事实 | 不折算、不估算 | `domain/stats.ts` `missGroups` |
+| 覆盖 / 隐藏只影响渲染 | 绝不影响统计口径 | `domain/stats.ts`、`hooks/useChecklist.ts` |
 | 统计忽略「隐藏已完成」 | 统计直接吃原始勾选状态 | `pages/StatsPage.tsx` |
 | 时间只提示不限制勾选 | 到期条目在**数据层**过滤，不在渲染层判 | `domain/reset.ts` `activeItems`、`domain/countdown.ts` |
 | 单一数据出口 | 页面不直连种子，一律 store → api 契约 | `src/api/index.ts` / `src/api/contract.ts` |
@@ -101,7 +100,7 @@ git commit --message="..."
 ```bash
 npm ci                    # 按 lockfile 安装（Node 18+，实测 Node 22）
 npm run dev               # 开发服务，默认 http://localhost:5173/
-npm test                  # vitest run，单元测试（19 文件 / 251 用例）
+npm test                  # vitest run，单元测试（21 文件 / 302 用例）
 npm run lint              # eslint
 npm run build             # tsc -b && vite build
 npm run db:check          # 数据校验 + 枚举双轨对齐，产物 reports/data-check.md

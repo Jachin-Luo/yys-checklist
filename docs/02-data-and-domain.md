@@ -11,7 +11,7 @@
 只定义形状，不含实现。两个导出：
 
 - `DataScope`：`{ userId, profileId }` —— **显式双参数**，所有用户数据方法都要求它，Mock 用 `assertScope` 做越权校验。
-- `ApiClient`：30 个方法，分五组：
+- `ApiClient`：31 个方法，分五组（2026-09-15 新增 `saveCheckLog`）：
 
 | 组 | 方法 |
 | --- | --- |
@@ -34,9 +34,9 @@
 | `DictEntry` / `SortOption` / `ViewDefaults` | 字典行、排序选项、视图默认值 |
 | `User` / `Profile` / `Session` | 用户、档案、会话 |
 | `CheckState` / `ViewPrefs` / `ItemOverrides` | 用户数据三件套 |
-| `BootstrapPayload` | 首屏聚合载荷（meta + items + session + state + view + overrides） |
+| `BootstrapPayload` | 首屏聚合载荷（meta + items + session + state + view + overrides + **log**） |
 | `ItemDraft` / `ProfileDraft` | 新增/编辑入参 |
-| `UserDataBundle` | 备份载体（导入导出用） |
+| `UserDataBundle` | 备份载体（导入导出用）：每个档案含 state / view / overrides / **log**（勾选日志） |
 | `MetaDbFile` / `UsersDbFile` / `VersionRow` | 种子文件形状 |
 | 工具资料 | `Dungeon` / `DungeonMode` / `DayTip` / `YuhunDb`、`Shikigami` / `Spot` / `ShikigamiSpot` / `ShikigamiClue` / `BountyDb`、`SoulRow` / `SoulsDb` |
 
@@ -64,13 +64,16 @@ VITE_API_MODE === 'http' ? new HttpApi(baseURL) : new MockApi()
 | --- | --- | --- |
 | `session` | `yys:meta:session` | 当前会话 / 当前档案 |
 | `profiles` | `yys:profiles` | 档案列表（含归档） |
-| `state(profileId)` | `yys:state:{profileId}` | 该档案的勾选状态 |
+| `state(profileId)` | `yys:state:{profileId}` | 该档案的**当前周期**勾选状态（`itemId → 时间戳`） |
+| `checklog(profileId)` | `yys:checklog:{profileId}` | 该档案的勾选日志（`YYYY-MM-DD → itemId[]`，历史事实，保留 90 天） |
 | `view(profileId)` | `yys:view:{profileId}` | 该档案的视图偏好 |
 | `ovr(profileId)` | `yys:ovr:{profileId}` | 该档案的条目覆盖层（隐藏 / 自建 / 自定义顺序 / 一键日常配置） |
 
 设备级键（不挂档案，定义在 `services/localStore.ts` 的 `DEVICE_KEY`）：`yys:guildTime`、`yys:onboarded`、`yys:plans`。
 
-**分片是硬约束**：勾选一条只重写 `yys:state:{profileId}`，其他档案分片不受影响；由 `api/mock/contract.test.ts` 的「分片写入验证」用例守护。
+**分片是硬约束**：勾选一条只重写**本档案**的分片（`yys:state:{profileId}` 逐条增量 + 一次 `yys:checklog:{profileId}` 整表），其他档案不受影响；由 `api/mock/contract.test.ts` 的「分片写入验证」与 `stores/check.test.ts` 的「整批只写」用例守护。
+
+`state` 与 `checklog` 的分工（2026-09-15 新增日志）：前者只留每条条目**最近一次**勾选时间戳，周期重置靠它与周期起点比对；后者按日期分桶留历史，回答"哪天做过什么"（统计页日历与近 N 天收益全靠它）。**周期重置不动日志**；只有取消勾选才回退，且按该条目的**周期起点**回退（见 `stores/check` 的 `logAfter` 与 `domain/checkLog.removeEntrySince`）。
 
 ### 2.2 延迟与失败注入（有意为之）
 
@@ -97,8 +100,8 @@ VITE_API_MODE === 'http' ? new HttpApi(baseURL) : new MockApi()
 
 | 文件 | 顶层 key | 规模 |
 | --- | --- | --- |
-| `items.db.json` | `items: Item[]` | **75 条**常驻模板（每日 36 / 每周 29 / 每月 4 / 版本 5 / 赛季 1） |
-| `limited.db.json` | `items: Item[]` | **16 条**活动期条目（到期自动下线） |
+| `items.db.json` | `items: Item[]` | **69 条**真正的常驻（每日 36 / 每周 29 / 每月 4） |
+| `limited.db.json` | `items: Item[]` | **22 条**非常驻（活动期每日 4 / 限时活动 12 / 版本 5 / 赛季 1；带 `until` 的到期自动下线，版本与赛季条目随版本维护） |
 | `yuhun.db.json` | `dungeons[]`、`dayTips[]`、`excluded[]` | 副本 **11**、日提示 **10**、排除项 **8** |
 | `souls.db.json` | `rows: SoulRow[]` | **70** 种御魂（`effect2` 70 条；`effect4` 57 条，13 种首领御魂无四件套） |
 | `bounty.db.json` | `shikigami[]`、`spots[]`、`shikigamiSpots[]`、`shikigamiClues[]` | 式神 **39**、地点 **64**、出处关系 **148**、线索词 **116** |
@@ -150,11 +153,13 @@ src/domain/enums.ts 的字面量联合类型  ←── 双向校验 ──→  
 | `weight.ts` | `weightOf`、`cycleRank`、`WEIGHT_LEGEND` | 痛感分计算与图例 |
 | `sort.ts` | `SortContext`、`effectiveSortBy`、`seedOrder`、`moveBefore`、`moveAfter`、`moveWithinGroup`、`buildComparator`、`VisibilityContext`、`isVisible` | 排序、置顶、自定义顺序、可见性 |
 | `countdown.ts` | `parseTs`、`daysLeft`、`DeadlineLevel`、`DeadlineBadge`、`deadlineBadge`、`TimeWindowState`、`TimeWindow`、`timeWindow`、`appliesToday` | 截止倒计时与时间窗状态（**只提示，不限制勾选**） |
-| `stats.ts` | `StatPeriod`、`GainSummary` / `GainRow` / `GainReport`、`periodItems`、`summarizeGain`、`MissLevel` / `MissItem` / `MissGroup`、`missGroups`、`PERIOD_META` | 三口径统计与漏失分级（只吃 `gain`） |
+| `stats.ts` | `StatPeriod`、`GainSummary` / `GainRow` / `GainReport`、`periodItems`、`summarizeGain`、`RangeGain` / `RangeDayGain`、`summarizeRangeGain`、`MissLevel` / `MissItem` / `MissGroup`、`missGroups`、`PERIOD_META` | 周期进度统计（本日 / 本周 / 本月，只吃 `gain`）、**按日期区间**的收益累计（统计页改版后由它承担）、漏失分级 |
+| `checkLog.ts` | `LogDays`、`LOG_KEEP_DAYS`(90)、`dayKeyOf` / `dayKey` / `keyToTs` / `shiftDayKey`、`dayCount`、`addEntry`、`removeEntrySince` / `removeEntriesSince`、`pruneDays`、`eachDay` | 勾选日志（按日期分桶的历史）：幂等写入、按周期起点回退、90 天修剪、区间枚举 |
+| `calendar.ts` | `CalendarCell` / `MonthGrid`、`WEEKDAY_HEAD`、`monthTitle`、`buildMonthGrid` | 月历网格排版（周一起始、固定 6 行、含前后补位格） |
 | `autoDaily.ts` | `hubItem`、`isAutoDailyCandidate`、`dataDefaultAutoSet`、`effectiveAutoSet`、`isCovered`、`hiddenByCover`、`cascadeTargets`、`cascadeBatch` | 一键日常覆盖集合与级联 |
-| `backup.ts` | `MAX_BUNDLE_CHARS`(4_000_000)、`STALE_DAYS`(45)、`BundleSummary`、`ValidateResult`、`summarize`、`validateBundle`、`Freshness`、`dataFreshness`、`serializeBundle`、`parseBundleText` | 备份文本的校验、归一化与新鲜度 |
+| `backup.ts` | `MAX_BUNDLE_CHARS`(4_000_000)、`STALE_DAYS`(45)、`BundleSummary`（含 `logDays`）、`ValidateResult`、`summarize`、`validateBundle`、`Freshness`、`dataFreshness`、`serializeBundle`、`parseBundleText` | 备份文本的校验、归一化（含勾选日志；旧备份缺 `log` 字段时补空日志而非判为损坏）与新鲜度 |
 | `guildTime.ts` | `GuildTimePrefs`、`isValidHm`、`guildTimeTargets`、`configuredCount`、`applyGuildTime`、`applyGuildTimeAll`、`withGuildTime` | 寮时间在展示层叠加（**不写回主数据**） |
-| `nurture.ts` | `NURTURE_HOURS`(6)、`MAX_NURTURE_N`(5)、`NurtureRecord` / `NurturePoint`、`isHM` / `normalizeHM` / `nowHM`、`nurturePoints`、`nextPointIndex`、`pointStats`、`nurtureId`、`makeNurture`、`sortNurture` | 结界寄养 6 小时收 / 续点派生 |
+| `nurture.ts` | `NURTURE_HOURS`(6)、`MAX_NURTURE_N`(5)、`NurtureRecord`（含 `dones`）/ `NurturePoint`（含 `index` / `doneAt`）、`isHM` / `normalizeHM` / `nowHM` / `hmToDate`、`baseTsOf` / `nurturePointsFrom` / `recordPoints` / `nurturePoints`、`markPointDone` / `clearPointDone` / `nextPendingPoint`、`pointStats`、`NurtureDue` / `nextDue` / `dueText`、`nurtureId`、`makeNurture`、`sortNurture` | 结界寄养 6 小时收 / 续点派生：点列表 = 上卡点 + 逐点递推（`dones` 逐点记实际完成时间）；`nextDue` / `dueText` 供壳层常驻徽章用 |
 | `yuhun.ts` | `MODE_LABEL`、`WEEK_ORDER`、`DungeonDay`、`hasDayGrid`、`dungeonDay`、`resolveFollow`、`OldFollowInfo`、`oldFollowInfo`、`groupBySection` | 御魂副本轮换与掉落派生 |
 | `bounty.ts` | `BountySpotRef` / `BountyEntry` / `BountyUnionRow`、`buildBountyEntries`、`matchBounty`、`bountyUnion`、`fullCoverage`、`RankedEntry`、`pinMatches` | 悬赏出处派生、线索反查与并集 |
 | `dateLabel.ts` | `todayDateLabel`、`weekRangeLabel` | 顶部日期标签（纯展示，与重置口径无关） |
@@ -177,10 +182,12 @@ src/domain/enums.ts 的字面量联合类型  ←── 双向校验 ──→  
 固定收益：标注了 gain（具体数值）  +10
 ```
 
-- 实现在 `domain/weight.weightOf` / `cycleRank`，图例由 `WEIGHT_LEGEND` 提供。
+- 实现在 `domain/weight.weightOf` / `cycleRank`。**痛感只用于排序**（2026-09-15 收敛）：
+  原先的 `minWeight` 筛选门槛、今日页「本周高痛感还剩 N 项」警示条、`missGroups` 漏失分级
+  与 `WEIGHT_LEGEND` 图例均已删除 —— 界面里除了「默认排序」不会再出现痛感的任何出口。
 - 一键日常入口恒排第 0 位：`domain/sort.buildComparator` 的前置特判，**不参与上面的比较**。
 - 排序优先级：星标置顶 > （自定义顺序若已调过则接管）> 痛感分；同分兜底依次为截止日 → 周期 → 自定义顺序。
-- 可见性：`domain/sort.isVisible`（奖励类型筛选 + 痛感门槛 + 隐藏已完成 + 一键日常覆盖导致隐藏）。
+- 可见性：`domain/sort.isVisible`（奖励类型筛选 + 隐藏已完成 + 一键日常覆盖导致隐藏）。
 
 ### 7.3 一键日常：配置 ≠ 状态
 
@@ -203,7 +210,8 @@ src/domain/enums.ts 的字面量联合类型  ←── 双向校验 ──→  
 
 ### 7.6 结界寄养
 
-`domain/nurture`：填卡时间（`HH:mm`）后按 6 小时间隔派生最多 5 个收 / 续点，跨天标「明天 / 后天 / 日期」。任务态与计划态刻意分离（`points` 的状态由 `pointStats` / `nextPointIndex` 计算，计划态不背状态）。
+`domain/nurture`：填卡时间（`HH:mm`）后按 6 小时间隔派生最多 5 个收 / 续点，跨天标「明天 / 后天 / 日期」。任务态与计划态刻意分离（完成情况由 `pointStats` / `nextPendingPoint` 计算，计划态不背状态）。
+点模型（2026-09-15 重构）：`recordPoints` 输出 `[上卡点(index 0), 收/续点 1..n]`，第 k 点的预计时刻 = 前一点的「实际完成时间（`dones[k-1]`，没有就用它的预计时刻）」+ 6h。于是「记某个点完成」只把它**之后**的点往后挪、之前的点不动（早先那版整条重推会让用户以为任务被初始化了）；上卡点天然已完成且不接受改写，它由 `base` 决定。`baseTsOf` 是唯一的基准入口，展示 / 徽章 / `nextDue` 共用。
 
 ### 7.7 御魂与悬赏派生
 
@@ -212,8 +220,12 @@ src/domain/enums.ts 的字面量联合类型  ←── 双向校验 ──→  
 
 ### 7.8 统计
 
-`domain/stats.summarizeGain` 只累加带固定数值的 `gain`（勾玉 / 黑碎 / 蓝票），口径定义在 `PERIOD_META`。
-`missGroups`（按痛感分级列漏失条目名、不折算不估算）仍保留在 domain 层并有单测保护，但自 2026-09-14 起**没有页面消费它** —— 统计页只展示三条收益进度条。
+统计页于 2026-09-15 整版改版（「周期进度条」→「月度日历 + 区间收益」），现在吃**两份**数据：
+
+- **上方日历**：`domain/calendar.buildMonthGrid` 排版 + `domain/checkLog.dayCount` 取每天条数，按**当月单日最大值**相对分 4 档着色（类贡献图）；
+- **下方区间收益**：`domain/stats.summarizeRangeGain(items, log, fromKey, toKey)` —— 输入是**勾选日志**而非 `checked`（后者只留最近一次，回答不了"近 7 天"），同一条目多天各完成一次就累计多次，因此没有"总量 / 已得 / 还差"。口径仍是只吃固定数值的 `gain`。
+
+保留但**当前无页面消费**：`summarizeGain` / `PERIOD_META`（周期进度口径）与 `missGroups`（漏失分级），以及 `components/common/GainBar.tsx` / `ProgressBar.tsx` —— 都有单测保护，想恢复"周期进度条"时只改页面。
 
 ## 8. 数据录入流程（改数据的标准路径）
 

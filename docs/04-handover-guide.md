@@ -16,7 +16,7 @@
 ```bash
 npm ci
 npm run db:check     # 先确认种子数据自洽（不依赖 node_modules 之外的东西）
-npm test             # 基线：19 文件 / 251 用例应全绿
+npm test             # 基线：21 文件 / 302 用例应全绿
 npm run dev          # http://localhost:5173/
 ```
 
@@ -32,7 +32,7 @@ npm run dev          # http://localhost:5173/
 
 1. 通读 `AGENTS.md`（红线与导航）→ `docs/01` → `docs/02` → `docs/03` → 本文；顺手看一眼根目录 `CHANGELOG.md`，了解最近改了什么（每次改动都登记在那里）。
 2. `node tools/verify.js` 跑一次完整验收，把 `reports/verify-<date>.md` 当作**基线快照**留档。
-3. `npm run dev` 手动点一遍六个页面（今日 / 本周 / 限时 / 统计 / 工具 / 我的），并：
+3. `npm run dev` 手动点一遍七个页面（今日 / 本周 / 本月 / 限时 / 统计 / 工具 / 我的），并：
    - 勾一条看勾选是否落盘（刷新页面仍在）、统计页进度条是否变化；
    - 在「我的 · 数据备份」导出一次，确认文本能出现；
    - 切到手机宽度（< 768px）确认切到底部 Tab 布局。
@@ -44,7 +44,7 @@ npm run dev          # http://localhost:5173/
 
 | 项 | 内容 |
 | --- | --- |
-| 触点文件 | `src/db/items.db.json`（常驻）、`src/db/limited.db.json`（活动期）、`src/db/dataVersion.db.json`（版本行）、`src/db/meta.db.json`（`meta.dataVersion`） |
+| 触点文件 | `src/db/items.db.json`（真正的常驻：每日 / 每周 / 每月）、`src/db/limited.db.json`（非常驻：活动期 / 限时 / 版本 / 赛季）、`src/db/dataVersion.db.json`（版本行）、`src/db/meta.db.json`（`meta.dataVersion`） |
 | 需要同步 | 若新增字段 → `tools/build.js` 的字段白名单 + `schema/item.schema.json`；若引入新枚举 code → `src/domain/enums.ts` 与 `meta.db.json` 的 `dicts` 两侧同步；若带固定收益 → 填 `gain` 的 `jade` / `blackFrag` / `blueTicket` 数值（`gainKind` 是奖励类型枚举，与 `GAIN_KIND` 对齐；不写 `gain` 即视为浮动、不进统计） |
 | 必须跑 | `npm run db:check` → `npm test` → `node tools/verify.js` |
 | 验证 | 开发服务里能在对应页面看到条目；痛感分排序与 `weightOf` 预期一致；带 `gain` 的条目会让统计页对应进度条变化 |
@@ -65,7 +65,7 @@ npm run dev          # http://localhost:5173/
 | --- | --- |
 | 触点文件 | 新建 `src/pages/XxxPage.tsx` |
 | 需要同步（4 处，缺一即编译报错或 UI 不对） | ① `src/stores/ui.ts` 的 `NavKey` 加 key；② 同文件 `NAV_ITEMS` 加 `{ key, label }`；③ `src/components/common/NavContent.tsx` 的 `switch (nav)` 加 `case`；④ `src/components/desktop/DesktopShell.tsx` 的 `ICONS: Record<NavKey, …>` 补图标（Lucide） |
-| 容易漏的第 5 处 | `src/components/mobile/MobileShell.tsx` 底部 Tab 的 `grid-cols-6` 要改成对应列数，否则 Tab 换行错位 |
+| 容易漏的第 5 处 | `src/components/mobile/MobileShell.tsx` 底部 Tab 的 `grid-cols-<页数>`（当前 7 页 = `grid-cols-7`）要同步改成对应列数，否则 Tab 换行错位 |
 | 骨架屏例外 | `NavContent` 里 `loading && nav !== 'me' && nav !== 'tools'` 决定是否显示骨架 —— 新页面若不需要首屏骨架，把 key 加入这个例外 |
 | 必须跑 | `npm run lint` → `npm run build`（`tsc -b` 会因 `ICONS` 缺项直接失败） |
 | 验证 | 桌面侧栏与手机底部 Tab 都能进入该页面；两端布局都正常 |
@@ -99,10 +99,10 @@ npm run dev          # http://localhost:5173/
 | 项 | 内容 |
 | --- | --- |
 | 触点文件 | `src/api/http/adapter.ts`（当前所有方法 `this.fail()` 抛 `NOT_IMPLEMENTED`，文件头有端点映射参考与 `TODO(S2 之后 / M2)`） |
-| 需要保持 | ① 契约形状不变（`ApiClient` 30 个方法）；② `DataScope` 显式传 `userId` + `profileId`，服务端据此校验越权；③ 错误统一用 `ApiError`（带 `code`）；④ `listProfiles` 返回**含归档的全部档案**，归档过滤留在 UI |
+| 需要保持 | ① 契约形状不变（`ApiClient` 31 个方法）；② `DataScope` 显式传 `userId` + `profileId`，服务端据此校验越权；③ 错误统一用 `ApiError`（带 `code`）；④ `listProfiles` 返回**含归档的全部档案**，归档过滤留在 UI |
 | 不改的地方 | 页面、store、domain、hooks 一律不动 —— 契约是唯一边界，切换靠 `VITE_API_MODE=http` + `VITE_API_BASE_URL` |
 | 必须跑 | `npm test`（`api/mock/contract.test.ts` 是 Mock 的行为基准，可对照着验证 Http 实现语义一致）；`npm run build` |
-| 验证 | 关掉 Mock（设 `VITE_API_MODE=http`）后六个页面功能等价；离线 / 报错时 `SaveErrorNotice` 与 `ErrorScreen` 有正确表现 |
+| 验证 | 关掉 Mock（设 `VITE_API_MODE=http`）后七个页面功能等价；离线 / 报错时 `SaveErrorNotice` 与 `ErrorScreen` 有正确表现 |
 
 注意：Mock 的注入延迟与 AbortSignal 语义是**前端 UI 的既成前提**（loading 态、竞态守卫都已按异步写），接后端时不需要在 http 层「补偿」，但也不要因此把前端的 loading/竞态处理删掉。
 
@@ -123,8 +123,8 @@ npm run dev          # http://localhost:5173/
 | PWA 打包 | **暂缓但未取消**：已有图标与移动端适配（`safe-area` / `dvh`），缺 `manifest`、Service Worker、安装图标；`main.tsx` 明确不注册 SW | `index.html`、`src/main.tsx`、`src/styles/base.css` |
 | 数据快照热更新 | 不做：条目库随包发布 | `src/components/settings/DataVersionSection.tsx` |
 | 提醒能力 | 2026-09-11 已整体下线（非待办）：无浏览器通知，相关存储键已删 | —— |
-| 今日页高痛感警示条 | 有逻辑但被开关关闭 | `src/pages/TodayPage.tsx` 的 `SHOW_WEEKLY_ALERT` |
 | 排序控件 | 按产品决策取消：排序由「默认痛感 + 置顶 + 自定义顺序」决定；`ViewPrefs.sortBy` 字段保留在数据层 | `src/components/common/ViewBar.tsx`、`src/domain/sort.ts` |
+| 痛感的其他出口 | 2026-09-15 收敛为「只作默认排序键」：`minWeight` 门槛（筛选项 + `isVisible` 判断）、今日页高痛感警示条（原 `SHOW_WEEKLY_ALERT`）、`missGroups` 漏失分级、`WEIGHT_LEGEND` 图例 **全部删除**（不是隐藏） | `domain/sort.ts`、`domain/stats.ts`、`domain/weight.ts`、`pages/TodayPage.tsx`、`components/common/ViewBar.tsx`、`components/common/OnboardingDialog.tsx` |
 | 读取游戏数据 | **长期不做**，属于产品定位而非待办 | `README.md` |
 
 ### 已登记但暂不修复的技术债（2026-09-14 评估）
@@ -133,15 +133,15 @@ npm run dev          # http://localhost:5173/
 
 | # | 问题 | 影响面 | 何时才会真的咬人 |
 | --- | --- | --- | --- |
-| 1 | UI 层零测试（`src/**/*.test.tsx` 为 0，19 个测试文件全在 domain / stores / hooks / services / api） | 组件与双布局无回归网 | 改组件或布局后只能手点验证，问题到线上才暴露 |
-| 2 | localStorage 分片无版本号与迁移机制（备份 bundle 有 `schemaVersion`，`yys:state\|view\|ovr:{profileId}` 没有） | 老用户的本地数据 | 改数据结构并升级版本时，旧分片会被静默读入、不报警 |
+| 1 | UI 层零测试（`src/**/*.test.tsx` 为 0，21 个测试文件全在 domain / stores / hooks / services / api） | 组件与双布局无回归网 | 改组件或布局后只能手点验证，问题到线上才暴露 |
+| 2 | localStorage 分片无版本号与迁移机制（备份 bundle 有 `schemaVersion`，`yys:state\|view\|ovr\|checklog:{profileId}` 没有） | 老用户的本地数据 | 改数据结构并升级版本时，旧分片会被静默读入、不报警 |
 | 3 | `hooks/useBootstrap` 的「按序清空 items → check → view 再写回」是手工维护的隐式契约 | 切号正确性 | 新增 store 时漏改，出现「切号残留上一档案数据」 |
 | 4 | 保留但不可达的开关未在代码内标注：`SHOW_WEEKLY_ALERT`（今日页警示条）、`ViewPrefs.sortBy`（UI 不再写入）、`hideDone` / `isVisible` 保留口 | 可读性 | 后来者误以为它在生效，或误删相关逻辑 |
 | 5 | `schema/item.schema.json` 与 `tools/build.js` 双轨校验 | 数据录入体验 | 两处规则漂移时，编辑器提示与运行时校验不一致 |
 | 6 | 三个「版本号」并存：`meta.version`（同时是备份 `schemaVersion`）、`meta.dataVersion`、`dataVersion.db.json` 的行版本 | 认知成本 | 写迁移或备份逻辑时用错号 |
 | 7 | 统计只覆盖 16 条带固定收益的条目 | 期望管理 | 不属缺陷，是「只统计固定数值」的既定口径 |
 
-附带记录：仓库内已发现三处过时注释 —— `tools/verify.js` 的「215 测试通过」、`src/domain/reset.ts` 的「当前 89 条」、`src/domain/yuhun.ts` 的「10 副本」，实测分别为 **251 用例 / 91 条 / 11 个副本**。修正它们属于代码改动，本轮未执行。
+附带记录：仓库内已发现三处过时注释 —— `tools/verify.js` 的「215 测试通过」、`src/domain/reset.ts` 的「当前 89 条」、`src/domain/yuhun.ts` 的「10 副本」，实测分别为 **302 用例 / 91 条 / 11 个副本**。修正它们属于代码改动，本轮未执行。
 
 ## 5. 问题排查
 

@@ -56,11 +56,11 @@ yys-checklist/
 | `src/` | 入口与根组件 | `main.tsx`、`App.tsx`、`vite-env.d.ts` |
 | `src/api/` | 唯一的对外数据边界：契约 + 适配器 + DTO | `contract.ts`、`index.ts`、`types.ts`、`http/adapter.ts`、`mock/adapter.ts`、`mock/db.ts`、`mock/userStore.ts`、`mock/persist.ts`、`mock/latency.ts`、`mock/contract.test.ts`、`mock/persistence.test.ts` |
 | `src/db/` | 种子主数据，只允许被 `api/mock/db.ts` import | `items.db.json`、`limited.db.json`、`yuhun.db.json`、`souls.db.json`、`bounty.db.json`、`meta.db.json`、`users.db.json`、`dataVersion.db.json` |
-| `src/domain/` | 纯函数业务规则（无 IO，全部可单测） | `enums.ts`、`reset.ts`、`merge.ts`、`weight.ts`、`sort.ts`、`countdown.ts`、`stats.ts`、`autoDaily.ts`、`backup.ts`、`guildTime.ts`、`nurture.ts`、`yuhun.ts`、`bounty.ts`、`dateLabel.ts` + 10 个 `*.test.ts` |
+| `src/domain/` | 纯函数业务规则（无 IO，全部可单测） | `enums.ts`、`reset.ts`、`merge.ts`、`weight.ts`、`sort.ts`、`countdown.ts`、`stats.ts`、`autoDaily.ts`、`backup.ts`、`guildTime.ts`、`nurture.ts`、`yuhun.ts`、`bounty.ts`、`dateLabel.ts`、`checkLog.ts`、`calendar.ts` + 12 个 `*.test.ts` |
 | `src/stores/` | Zustand 状态容器（按领域分片） | `session.ts`、`items.ts`、`check.ts`、`view.ts`、`device.ts`、`ui.ts`、`tools.ts`、`nurture.ts` + 5 个 `*.test.ts` |
 | `src/hooks/` | 编排与副作用封装（竞态、首屏、断点、焦点、周期刷新） | `useApi.ts`、`useBootstrap.ts`、`useChecklist.ts`、`useAutoDaily.ts`、`useBreakpoint.ts`、`useDevicePrefs.ts`、`useModalFocus.ts`、`usePeriodRefresh.ts`、`useScope.ts` + `usePeriodRefresh.test.ts` |
-| `src/pages/` | 页面容器（只管排列） | `TodayPage.tsx`、`WeekPage.tsx`、`LimitedPage.tsx`、`StatsPage.tsx`、`ToolsPage.tsx`、`MePage.tsx`；`pages/settings/`：`ProfileSection.tsx`、`AutoDailySection.tsx`、`ItemManagerSection.tsx`、`GuildTimeSection.tsx`；`pages/tools/`：`YuhunSection.tsx`、`BountySection.tsx`、`NurtureSection.tsx` |
-| `src/components/` | 展示原子件与布局骨架 | `common/`（17）：`Alert.tsx`、`CheckBox.tsx`、`ChecklistItem.tsx`、`CollapsibleSection.tsx`、`ConfirmDialog.tsx`、`EmptyState.tsx`、`GainBadges.tsx`、`GainBar.tsx`、`HubCard.tsx`、`ItemField.tsx`、`NavContent.tsx`、`OnboardingDialog.tsx`、`ProfileSwitcher.tsx`、`ProgressBar.tsx`、`SaveErrorNotice.tsx`、`Tags.tsx`、`ViewBar.tsx`；`desktop/DesktopShell.tsx`；`mobile/MobileShell.tsx`；`settings/BackupSection.tsx`、`settings/DataVersionSection.tsx` |
+| `src/pages/` | 页面容器（只管排列） | `TodayPage.tsx`、`WeekPage.tsx`、`MonthPage.tsx`、`LimitedPage.tsx`、`StatsPage.tsx`、`ToolsPage.tsx`、`MePage.tsx`；`pages/settings/`：`ProfileSection.tsx`、`AutoDailySection.tsx`、`ItemManagerSection.tsx`、`GuildTimeSection.tsx`；`pages/tools/`：`YuhunSection.tsx`、`BountySection.tsx`、`NurtureSection.tsx` |
+| `src/components/` | 展示原子件与布局骨架 | `common/`（18）：`Alert.tsx`、`CheckBox.tsx`、`ChecklistItem.tsx`、`CollapsibleSection.tsx`、`ConfirmDialog.tsx`、`EmptyState.tsx`、`GainBadges.tsx`、`GainBar.tsx`、`HubCard.tsx`、`ItemField.tsx`、`NavContent.tsx`、`NurtureBadge.tsx`、`OnboardingDialog.tsx`、`ProfileSwitcher.tsx`、`ProgressBar.tsx`、`SaveErrorNotice.tsx`、`Tags.tsx`、`ViewBar.tsx`；`desktop/DesktopShell.tsx`；`mobile/MobileShell.tsx`；`settings/BackupSection.tsx`、`settings/DataVersionSection.tsx` |
 | `src/services/` | 跨域用例编排与基础设施 | `localStore.ts`、`backupService.ts`、`clipboard.ts` + `localStore.test.ts` |
 | `src/styles/` | 设计令牌与共享容器类 | `index.css`、`base.css`、`layout.ts`、`tokens.ts` |
 | `src/test/` | 单测垫片 | `memoryStorage.ts` |
@@ -103,7 +103,7 @@ sequenceDiagram
     App->>App: usePeriodRefresh() 周期重估；hydrate() 读设备级偏好
     App->>Shell: breakpoint === 'mobile' ? MobileShell : DesktopShell
     Shell->>Nav: <NavContent variant="desktop|mobile">
-    Nav->>Nav: switch(nav) 分派 6 个一级页面
+    Nav->>Nav: switch(nav) 分派 7 个一级页面
 ```
 
 关键文件与位置：
@@ -123,7 +123,7 @@ sequenceDiagram
 **没有 react-router**。导航是自研的 view store：
 
 - `src/stores/ui.ts`：`NavKey`（type）、`NAV_ITEMS`（导航项数组）、`setNav`、state 字段 `nav` / `bootstrapLoading` / `bootstrapError` / `confirmState` / `bootstrapTick`。
-- `src/components/common/NavContent.tsx`：`switch (nav)` 分派 6 个一级页面；首屏 `bootstrapLoading` 时渲染 `Skeleton`。
+- `src/components/common/NavContent.tsx`：`switch (nav)` 分派 7 个一级页面；首屏 `bootstrapLoading` 时渲染 `Skeleton`。
 - 两套骨架各自渲染导航：`DesktopShell.tsx`（左侧固定 `w-56` 侧栏 + 底部 `ProfileSwitcher`）、`MobileShell.tsx`（顶部应用栏 + 进度条 + 底部固定 Tab，带 `safe-area` 与 `dvh` 处理）。
 - 断点判据唯一来源：`src/hooks/useBreakpoint.ts`，`matchMedia('(min-width: 768px)')`；模块级首帧缓存避免闪烁。
 
@@ -138,7 +138,7 @@ sequenceDiagram
 | `stores/check.ts` | `useCheckStore`、`resetCheckMemory`、`isChecked` | `checked`、`loading`、`error` | `applyChecked`、`toggle`、`setMany`、`toggleWithCascade`、`clearAll` |
 | `stores/view.ts` | `useViewStore`、`resetViewMemory`、`normalizeView`、`CoverMode` | `view`、`defaults`、`error` | `applyView`、`setSortBy`、`setShowKinds`、`setMinWeight`、`toggleHideDone`、`togglePin`、`setCoverMode`、`setAutoSet`、`resetAutoSet` |
 | `stores/device.ts` | `useDeviceStore` | `guildTime`、`onboarded`、`hydrated`、`error` | `hydrate`、`setGuildTime`、`clearGuildTime`、`markOnboarded`、`resetOnboarding` |
-| `stores/ui.ts` | `useUiStore`、`NAV_ITEMS`、`NavKey`、`ConfirmOptions` | `nav`、`bootstrapLoading`、`bootstrapError`、`confirmState`、`bootstrapTick` | `setNav`、`setBootstrapLoading`、`setBootstrapError`、`refreshBootstrap`、`askConfirm`、`answerConfirm` |
+| `stores/ui.ts` | `useUiStore`、`NAV_ITEMS`、`NavKey`、`ConfirmOptions` | `nav`、`navRequest`、`bootstrapLoading`、`bootstrapError`、`confirmState`、`bootstrapTick` | `setNav`、`requestNav`、`clearNavRequest`、`setBootstrapLoading`、`setBootstrapError`、`refreshBootstrap`、`askConfirm`、`answerConfirm` |
 | `stores/tools.ts` | `useToolsStore`、`ToolTab` | `yuhun`、`souls`、`bounty`、`loading`、`error` | `ensure`（模块级 `inflight` 去重） |
 | `stores/nurture.ts` | `useNurtureStore`、`resetNurtureMemory` | `records`、`hydrated`、`error` | `hydrate`、`add`、`promote`、`remove`、`clearAll` |
 
@@ -188,9 +188,10 @@ api.getBootstrap
 | 页面 | 主要依赖 |
 | --- | --- |
 | `TodayPage.tsx` | `useChecklist`（`useAutoDaily` 提供一键日常卡片与级联） |
-| `WeekPage.tsx` | `useChecklist`（周常 / 月常 / 版本 / 赛季统一收口） |
+| `WeekPage.tsx` | `useChecklist('week')`（周常；月常已于 2026-09-15 拆到 `MonthPage`） |
+| `MonthPage.tsx` | `useChecklist('month')`（月常；每月 1 日 0 点刷新，页面顶部标本月区间） |
 | `LimitedPage.tsx` | `useChecklist`（限时分区，固定按剩余天数升序，无排序控件） |
-| `StatsPage.tsx` | 直接吃 `stores/check` 的原始 `checked` + `domain/stats`（不受「隐藏已完成」影响） |
+| `StatsPage.tsx` | `domain/calendar.buildMonthGrid`（月历）+ `stores/check` 的 `log` + `domain/stats.summarizeRangeGain`（区间收益）—— **不经过 `useChecklist`**，因此不受「隐藏已完成 / 覆盖隐藏」影响 |
 | `ToolsPage.tsx` | `stores/tools.ensure`（御魂 / 悬赏 / 寄养三段懒加载） |
 | `MePage.tsx` | `pages/settings/*` 四个分区 + `components/settings/*` 两个分区 |
 
@@ -209,8 +210,8 @@ api.getBootstrap
 | --- | --- |
 | 一键日常入口永远排第 0 位 | `domain/sort.ts` 的前置特判，不参与 `weightOf` 比较 |
 | 日期显示与勾选重置口径不一致 | 顶部日期纯展示（`domain/dateLabel.ts`），重置按周期口径（`domain/reset.ts`） |
-| `ViewPrefs.sortBy` 有字段但 UI 不写 | 排序已由「默认痛感 + 置顶 + 自定义顺序」决定，字段保留在数据层可恢复 |
-| 今日页看不到高痛感警示条 | `pages/TodayPage.tsx` 的 `SHOW_WEEKLY_ALERT = false`，逻辑仍在 `useChecklist` |
+| `ViewPrefs.sortBy` / `minWeight` 有字段但 UI 不写 | 排序已由「默认痛感 + 置顶 + 自定义顺序」决定；痛感自 2026-09-15 起只作排序键。两个字段保留在数据层（不动契约形状），**勿据此新增控件** |
+| 界面里找不到任何「痛感」字样 | 2026-09-15 收敛：今日页「本周高痛感还剩 N 项」警示条已删除，`minWeight` 门槛与 `WEIGHT_LEGEND` 图例一并移除 —— 痛感只剩「默认排序」一个出口 |
 | `api/http/adapter.ts` 全是「未实现」 | 本期只留类型占位，接后端时替换，见 `docs/04-handover-guide.md` |
 | `stores/*` 里的 `CheckState` / `ItemState` 等接口没有导出 | 属内部实现细节，新增对外符号请显式 export |
 

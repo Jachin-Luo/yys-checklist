@@ -28,16 +28,18 @@ TypeScript 为严格模式（`tsconfig.app.json`），`npm run build` 会先跑 
 
 ## 2. 口径纪律的代码落点
 
-改动统计 / 勾选 / 显示相关代码前，先确认没有破坏以下六条：
+改动统计 / 勾选 / 显示相关代码前，先确认没有破坏以下五条：
 
 | # | 纪律 | 落点 |
 | --- | --- | --- |
 | 1 | 只统计固定数值（浮动收益不进分子分母） | `domain/stats.ts` `summarizeGain`（按 `gain` 过滤）、`PERIOD_META` |
 | 2 | 覆盖 / 隐藏只影响渲染，绝不影响统计 | `domain/stats.ts`（不读 `coverMode`）、`hooks/useChecklist.ts`（`hiddenByCover` 只作用于列表）、`domain/autoDaily.ts` |
-| 3 | 漏失明细只列事实，不折算不估算 | `domain/stats.ts` `missGroups`（2026-09-14 起页面不再展示这两块，但纪律仍约束 domain 层与该函数的实现） |
-| 4 | 统计忽略「隐藏已完成」 | `pages/StatsPage.tsx` 直接吃原始 `checked`；`domain/sort.ts` `isVisible` 的 `keepDone` 豁免口 |
-| 5 | 时间字段只提示，不限制勾选 | `domain/countdown.ts`；到期条目在数据层被 `domain/reset.activeItems` 过滤，不在渲染层判 |
-| 6 | 单一数据出口（页面不直连种子） | `src/api/index.ts` 唯一入口；`src/api/contract.ts` 唯一定义 |
+| 3 | 统计忽略「隐藏已完成」 | `pages/StatsPage.tsx` 直接吃原始 `checked`；`domain/sort.ts` `isVisible` 的 `keepDone` 豁免口 |
+| 4 | 时间字段只提示，不限制勾选 | `domain/countdown.ts`；到期条目在数据层被 `domain/reset.activeItems` 过滤，不在渲染层判 |
+| 5 | 单一数据出口（页面不直连种子） | `src/api/index.ts` 唯一入口；`src/api/contract.ts` 唯一定义 |
+
+> 2026-09-15 删去原第 3 条「漏失明细只列事实，不折算不估算」—— `missGroups` 已随
+> 「痛感只用于默认排序」一并删除（统计页自 2026-09-14 起也不再展示漏失明细）。
 
 ## 3. 周期与重置口径
 
@@ -62,7 +64,7 @@ TypeScript 为严格模式（`tsconfig.app.json`），`npm run build` 会先跑 
 | 运行器 | Vitest 2，`environment: 'node'`，`include: ['src/**/*.test.ts']` |
 | 位置约定 | **测试与被测代码同目录**（无独立 `tests/` 目录） |
 | localStorage 垫片 | `src/test/memoryStorage.ts`（`MemoryStorage` 记录每次 `setItem`；`installMemoryStorage()` 注入 `window.localStorage`） |
-| 总量 | **19 个测试文件 / 251 个用例**（69 个 `describe`） |
+| 总量 | **21 个测试文件 / 302 个用例** |
 
 ### 4.2 分布
 
@@ -70,19 +72,21 @@ TypeScript 为严格模式（`tsconfig.app.json`），`npm run build` 会先跑 
 | --- | --- |
 | `api/mock/contract.test.ts` | 21 |
 | `api/mock/persistence.test.ts` | 7 |
-| `domain/autoDaily.test.ts` | 19 |
-| `domain/backup.test.ts` | 24 |
+| `domain/autoDaily.test.ts` | 22 |
+| `domain/backup.test.ts` | 27 |
 | `domain/bounty.test.ts` | 21 |
-| `domain/dateLabel.test.ts` | 6 |
+| `domain/calendar.test.ts` | 7 |
+| `domain/checkLog.test.ts` | 15 |
+| `domain/dateLabel.test.ts` | 10 |
 | `domain/domain.test.ts` | 26（reset / sort / weight / merge / countdown 跨天跨周跨月跨版本跨赛季边界） |
 | `domain/guildTime.test.ts` | 10 |
-| `domain/nurture.test.ts` | 12 |
+| `domain/nurture.test.ts` | 24 |
 | `domain/sort.test.ts` | 18 |
-| `domain/stats.test.ts` | 9 |
+| `domain/stats.test.ts` | 12 |
 | `domain/yuhun.test.ts` | 15 |
 | `hooks/usePeriodRefresh.test.ts` | 8 |
 | `services/localStore.test.ts` | 6 |
-| `stores/check.test.ts` | 19 |
+| `stores/check.test.ts` | 23 |
 | `stores/device.test.ts` | 7 |
 | `stores/items.test.ts` | 7 |
 | `stores/nurture.test.ts` | 5 |
@@ -109,7 +113,7 @@ TypeScript 为严格模式（`tsconfig.app.json`），`npm run build` 会先跑 
 
 `reports/` 已被 `.gitignore` 忽略（可随时重跑生成），不要把它提交进仓库。
 
-> 提示：`tools/verify.js` 内部注释里的用例数（历史值）可能滞后于真实值，**以 `npm test` 输出为准**（当前 19 文件 / 251 用例）。
+> 提示：`tools/verify.js` 内部注释里的用例数（历史值）可能滞后于真实值，**以 `npm test` 输出为准**（当前 21 文件 / 302 用例）。
 
 ## 6. 数据录入流程
 
