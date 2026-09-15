@@ -12,7 +12,7 @@
  * 版本差异**只警告不拒绝**：`schemaVersion` 不同不必然不兼容，
  * 拒绝会让用户连"试试看"的机会都没有；但必须显式告知，免得他以为"导入成功了所以没问题"。
  */
-import type { UserDataBundle } from '../api/types';
+import type { CheckLog, UserDataBundle } from '../api/types';
 
 /** 粘贴内容长度上限：正常备份 < 100 KB，超过这个量级八成是粘错了东西 */
 export const MAX_BUNDLE_CHARS = 4_000_000;
@@ -30,6 +30,8 @@ export interface BundleSummary {
   hidden: number;
   /** 自定义排序条目数 */
   order: number;
+  /** 勾选日志覆盖的天数（跨全部档案求和，2026-09-15 加入） */
+  logDays: number;
 }
 
 export type ValidateResult =
@@ -49,6 +51,22 @@ function normalizeChecked(v: unknown): Record<string, number> {
   return out;
 }
 
+/**
+ * 勾选日志归一化：只留 `YYYY-MM-DD` 键与非空字符串数组，并去重。
+ * 旧备份（2026-09-15 之前导出的）没有这个字段 —— 归一成空日志即可，
+ * 那是**真实情况**（那时确实没有日志），不该当成文件损坏。
+ */
+function normalizeLogDays(v: unknown): CheckLog['days'] {
+  if (!isObj(v)) return {};
+  const out: CheckLog['days'] = {};
+  for (const [key, val] of Object.entries(v)) {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(key)) continue;
+    const ids = [...new Set(strArray(val))];
+    if (ids.length) out[key] = ids;
+  }
+  return out;
+}
+
 const str = (v: unknown): string => (typeof v === 'string' ? v : '');
 
 const strArray = (v: unknown): string[] =>
@@ -59,13 +77,15 @@ export function summarize(bundle: UserDataBundle): BundleSummary {
   let custom = 0;
   let hidden = 0;
   let order = 0;
+  let logDays = 0;
   for (const row of bundle.data) {
     checked += Object.keys(row.state?.checked ?? {}).length;
     custom += row.overrides?.custom?.length ?? 0;
     hidden += row.overrides?.hidden?.length ?? 0;
     order += row.overrides?.order?.length ?? 0;
+    logDays += Object.keys(row.log?.days ?? {}).length;
   }
-  return { profiles: bundle.profiles.length, checked, custom, hidden, order };
+  return { profiles: bundle.profiles.length, checked, custom, hidden, order, logDays };
 }
 
 /**
@@ -108,6 +128,7 @@ export function validateBundle(raw: unknown, currentSchemaVersion: string): Vali
     const stateRaw = isObj(row.state) ? row.state : {};
     const viewRaw = isObj(row.view) ? row.view : {};
     const ovRaw = isObj(row.overrides) ? row.overrides : {};
+    const logRaw = isObj(row.log) ? row.log : {};
     const owner = profiles.find((p) => p.id === profileId);
 
     data.push({
@@ -129,6 +150,12 @@ export function validateBundle(raw: unknown, currentSchemaVersion: string): Vali
         hidden: strArray(ovRaw.hidden),
         order: strArray(ovRaw.order),
         updatedAt: str(ovRaw.updatedAt),
+      },
+      log: {
+        profileId,
+        userId: str(logRaw.userId) || owner?.userId || '',
+        days: normalizeLogDays(logRaw.days),
+        updatedAt: str(logRaw.updatedAt),
       },
     });
   }

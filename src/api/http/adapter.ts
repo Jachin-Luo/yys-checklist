@@ -50,6 +50,7 @@ export class HttpApi implements ApiClient {
   setChecked = async () => this.fail();
   clearChecked = async () => this.fail();
   clearAllChecked = async () => this.fail();
+  saveCheckLog = async () => this.fail();
   getView = async () => this.fail();
   saveView = async () => this.fail();
   getOverrides = async () => this.fail();

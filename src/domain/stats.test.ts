@@ -1,11 +1,13 @@
 /**
- * 统计与漏失单测。重点锁定三条口径纪律：
+ * 统计单测。重点锁定三条口径纪律：
  *   ① 只统计固定数值（浮动收益不进分子分母）
  *   ② 被覆盖项照样计入（coverMode 不参与计算）
  *   ③ 忽略「隐藏已完成」—— 已勾条目的收益必须算进「已获得」，否则会归零
+ *
+ * 2026-09-15：漏失明细（`missGroups`）与其用例已随「痛感只用于默认排序」删除。
  */
 import { describe, expect, it } from 'vitest';
-import { missGroups, periodItems, summarizeGain } from './stats';
+import { periodItems, summarizeGain, summarizeRangeGain } from './stats';
 import type { Item } from '../api/types';
 
 const mk = (over: Partial<Item>): Item => ({
@@ -78,27 +80,52 @@ describe('summarizeGain：固定收益汇总', () => {
   });
 });
 
-describe('missGroups：漏失明细（只列事实、不折算）', () => {
-  it('按痛感分级，入口不计入漏失，已勾项不出现', () => {
-    const groups = missGroups(ITEMS, { d_card: Date.now() }, 'day');
-    const ids = groups.flatMap((g) => g.items.map((i) => i.id));
-    expect(ids).not.toContain('hub');
-    expect(ids).not.toContain('d_card');
-    /* 免费黑蛋礼包 daily + gain → 20 分 → 中痛感；逢魔之时 daily 无 gain → 低痛感 */
-    expect(groups.find((g) => g.level === 'mid')?.items.map((i) => i.id)).toContain('d_daruma');
-    expect(groups.find((g) => g.level === 'low')?.items.map((i) => i.id)).toContain('d_fengmo');
+describe('summarizeRangeGain：按日期区间的收益（统计页改版 2026-09-15）', () => {
+  it('同一条目多天各勾一次就累计多次（每日签到 7 天 = 7 份）', () => {
+    const days = {
+      '2026-09-13': ['d_card'],
+      '2026-09-14': ['d_card', 'd_daruma'],
+      '2026-09-15': ['d_card'],
+    };
+    const r = summarizeRangeGain(ITEMS, days, '2026-09-13', '2026-09-15');
+    expect(r.jade).toBe(60); // 20 × 3 天
+    expect(r.blackFrag).toBe(0.5); // 0.5 × 1 天
+    expect(r.entries).toBe(4);
   });
 
-  it('限时 / 版本类落到高痛感（weightOf ≥ 40）', () => {
-    const groups = missGroups(ITEMS, {}, 'month');
-    expect(groups[0].level).toBe('high');
-    expect(groups[0].items.map((i) => i.id)).toContain('v_shop');
+  it('byDay 逐日明细，未记录的日子全 0（日历着色与单日卡片共用同一份）', () => {
+    const r = summarizeRangeGain(ITEMS, { '2026-09-15': ['d_card'] }, '2026-09-14', '2026-09-15');
+    expect(r.byDay['2026-09-14']).toEqual({ entries: 0, jade: 0, blackFrag: 0, blueTicket: 0 });
+    expect(r.byDay['2026-09-15']).toMatchObject({ entries: 1, jade: 20 });
   });
 
-  it('全部完成时返回空分组', () => {
-    const all = { hub: 1, d_card: 1, d_daruma: 1, d_fengmo: 1, w_medal: 1, v_shop: 1 };
-    expect(missGroups(ITEMS, all, 'day')).toEqual([]);
-    expect(missGroups(ITEMS, all, 'week')).toEqual([]);
-    expect(missGroups(ITEMS, all, 'month')).toEqual([]);
+  it('浮动收益条目计入条数、不计入数值（口径纪律不变）', () => {
+    const r = summarizeRangeGain(ITEMS, { '2026-09-15': ['d_fengmo'] }, '2026-09-15', '2026-09-15');
+    expect(r.entries).toBe(1);
+    expect(r.jade).toBe(0);
+    expect(r.blackFrag).toBe(0);
+  });
+
+  it('已删除 / 历史 id 计入条数但不计收益，不抛错', () => {
+    const r = summarizeRangeGain(ITEMS, { '2026-09-15': ['gone_id', 'd_card'] }, '2026-09-15', '2026-09-15');
+    expect(r.entries).toBe(2);
+    expect(r.jade).toBe(20);
+  });
+
+  it('区间外 / 空日志 → 全 0', () => {
+    const days = { '2026-09-15': ['d_card'] };
+    expect(summarizeRangeGain(ITEMS, days, '2026-09-16', '2026-09-20').entries).toBe(0);
+    expect(summarizeRangeGain(ITEMS, {}, '2026-09-15', '2026-09-15').jade).toBe(0);
+  });
+
+  it('小数累加无浮点噪声（0.5 + 0.5 = 1）', () => {
+    const r = summarizeRangeGain(
+      ITEMS,
+      { '2026-09-14': ['d_daruma'], '2026-09-15': ['d_daruma'] },
+      '2026-09-14',
+      '2026-09-15',
+    );
+    expect(r.blackFrag).toBe(1);
+    expect(r.byDay['2026-09-14'].blackFrag).toBe(0.5);
   });
 });

@@ -9,7 +9,7 @@ import { resetViewMemory, useViewStore } from '../stores/view';
 /**
  * 首屏唯一入口（设计文档 §3.3）。
  *
- * `getBootstrap(scope)` 一次拿全 `meta + items + session + state + view + overrides`，
+ * `getBootstrap(scope)` 一次拿全 `meta + items + session + state + view + overrides + log`，
  * 因此**首屏没有加载闪烁，也没有破坏"契约是唯一数据通道"**（不用同步直读 localStorage）。
  * 骨架屏只用于懒加载的工具页。
  *
@@ -45,7 +45,7 @@ export function useBootstrap(): void {
         useSessionStore.setState({ profiles });
         useItemStore.getState().applyBootstrap(payload);
         useViewStore.getState().applyView(payload.view, payload.meta.viewDefaults);
-        useCheckStore.getState().applyChecked(payload.state.checked);
+        useCheckStore.getState().applyChecked(payload.state.checked, payload.log.days);
         useUiStore.getState().setBootstrapError(null);
       } catch (e) {
         console.error('[bootstrap] 首屏加载失败', e);

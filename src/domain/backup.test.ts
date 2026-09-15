@@ -65,7 +65,41 @@ describe('validateBundle：结构与归一化', () => {
     expect(r.ok).toBe(true);
     if (!r.ok) return;
     expect(r.warnings).toEqual([]);
-    expect(r.summary).toEqual({ profiles: 1, checked: 2, custom: 0, hidden: 0, order: 0 });
+    expect(r.summary).toEqual({ profiles: 1, checked: 2, custom: 0, hidden: 0, order: 0, logDays: 0 });
+  });
+
+  /* 旧备份（2026-09-15 之前导出的）没有 log 字段 —— 那是真实情况，不该当成文件损坏 */
+  it('缺 log 字段 → 归一成空日志，而不是判为不合格', () => {
+    const r = validateBundle(bundle(), '1.4.0');
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    expect(r.bundle.data[0].log.days).toEqual({});
+  });
+
+  it('日志里的畸形条目被丢弃，合法项保留', () => {
+    const r = validateBundle(
+      bundle({
+        data: [
+          {
+            ...row('p_main', { daily_sign: 1 }),
+            log: {
+              profileId: 'p_main',
+              userId: 'u_local',
+              days: { '2026-09-10': ['a', 'a', 42, null], 'not-a-day': ['b'], '2026-13-40': ['c'] },
+              updatedAt: '',
+            },
+          },
+        ],
+      }),
+      '1.4.0',
+    );
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    /* 去重 + 丢弃非字符串项 */
+    expect(r.bundle.data[0].log.days['2026-09-10']).toEqual(['a']);
+    /* 键只做形状校验（`YYYY-MM-DD`），不校验日历合法性 —— 保持这一层是纯形状归一化 */
+    expect(r.bundle.data[0].log.days['not-a-day']).toBeUndefined();
+    expect(r.bundle.data[0].log.days['2026-13-40']).toEqual(['c']);
   });
 
   it('不同 schemaVersion 通过但**必须警告**（不能静默让用户以为没问题）', () => {
@@ -143,12 +177,36 @@ describe('summarize', () => {
         { ...row('b', { z: 3 }), overrides: { profileId: 'b', custom: [{ id: 'c1' }], hidden: ['h1'], order: ['o1'], updatedAt: '' } },
       ],
     });
-    expect(summarize(b as unknown as UserDataBundle)).toEqual({ profiles: 2, checked: 3, custom: 1, hidden: 1, order: 1 });
+    expect(summarize(b as unknown as UserDataBundle)).toEqual({
+      profiles: 2, checked: 3, custom: 1, hidden: 1, order: 1, logDays: 0,
+    });
   });
 
   it('空 bundle 不抛错', () => {
     const b = bundle({ profiles: [], data: [] });
-    expect(summarize(b as unknown as UserDataBundle)).toEqual({ profiles: 0, checked: 0, custom: 0, hidden: 0, order: 0 });
+    expect(summarize(b as unknown as UserDataBundle)).toEqual({
+      profiles: 0, checked: 0, custom: 0, hidden: 0, order: 0, logDays: 0,
+    });
+  });
+
+  /* 勾选日志（2026-09-15 纳入备份）：天数进摘要 —— 用户靠它判断"这份备份里带了多少历史" */
+  it('统计勾选日志覆盖的天数', () => {
+    const withLog = bundle({
+      profiles: [profile('p_main', '大号', 1), profile('p_x', '小号', 2)],
+      data: [
+        {
+          ...row('p_main', { daily_sign: 1 }),
+          log: {
+            profileId: 'p_main',
+            userId: 'u_local',
+            days: { '2026-09-09': ['a'], '2026-09-10': ['a', 'b'] },
+            updatedAt: '',
+          },
+        },
+        row('p_x', {}),
+      ],
+    });
+    expect(summarize(withLog as unknown as UserDataBundle).logDays).toBe(2);
   });
 });
 
@@ -187,7 +245,7 @@ describe('serializeBundle / parseBundleText：复制粘贴的载体', () => {
     if (!parsed.ok) return;
     const r = validateBundle(parsed.value, '1.4.0');
     expect(r.ok).toBe(true);
-    if (r.ok) expect(r.summary).toEqual({ profiles: 1, checked: 2, custom: 0, hidden: 0, order: 0 });
+    if (r.ok) expect(r.summary).toEqual({ profiles: 1, checked: 2, custom: 0, hidden: 0, order: 0, logDays: 0 });
   });
 
   it('空内容 / 只有空白 → 提示先粘贴', () => {

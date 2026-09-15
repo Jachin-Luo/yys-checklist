@@ -10,6 +10,7 @@ import type { Cycle, GainKind } from '../domain/enums';
 import type {
   BountyDb,
   BootstrapPayload,
+  CheckLog,
   CheckState,
   Item,
   ItemDraft,
@@ -75,6 +76,12 @@ export interface ApiClient {
   clearChecked(scope: DataScope, itemIds: string[]): Promise<void>;
   /** 清空本档案全部勾选（K7：独立方法，避免"漏传参数 = 清全库"） */
   clearAllChecked(scope: DataScope): Promise<void>;
+  /**
+   * 勾选日志整表落盘（2026-09-15）：日志在勾选时按内存态整体重算一次，
+   * 体积小（90 天 × 每日若干 id）、频率与勾选一致，不需要增量协议。
+   * 读路径走 `getBootstrap` 的 `log` 字段 —— 与 `state` 同一个首屏入口。
+   */
+  saveCheckLog(scope: DataScope, log: CheckLog): Promise<void>;
   getView(scope: DataScope): Promise<ViewPrefs>;
   saveView(scope: DataScope, view: ViewPrefs): Promise<void>;
   getOverrides(scope: DataScope): Promise<ItemOverrides>;

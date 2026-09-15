@@ -9,7 +9,7 @@
  * 并发：写操作串行化（简单队列），避免 localStorage 互相覆盖。
  */
 import type { DataScope } from '../contract';
-import type { CheckState, ItemOverrides, Profile, Session, User, ViewPrefs } from '../types';
+import type { CheckLog, CheckState, ItemOverrides, Profile, Session, User, ViewPrefs } from '../types';
 import { ApiError } from './latency';
 import { KEY, read, removeProfileShards, write } from './persist';
 import { seedUsersDb } from './db';
@@ -21,6 +21,8 @@ export interface UserStore {
   states: Record<string, CheckState>;
   views: Record<string, ViewPrefs | undefined>;
   overrides: Record<string, ItemOverrides | undefined>;
+  /** 勾选日志（按日期分桶的历史，2026-09-15 新增） */
+  logs: Record<string, CheckLog | undefined>;
 }
 
 export const nowIso = (): string => new Date().toISOString();
@@ -31,6 +33,14 @@ export function emptyState(profileId: string, userId: string, at = nowIso()): Ch
 
 export function emptyOverrides(profileId: string, at = nowIso()): ItemOverrides {
   return { profileId, custom: [], hidden: [], order: [], updatedAt: at };
+}
+
+/**
+ * 空日志。新档案、或从没勾过东西的档案都是这个形状。
+ * 种子库里**没有**日志（`users.db.json` 不含该字段）—— 它是纯运行期数据，从无到有累积。
+ */
+export function emptyLog(profileId: string, userId: string, at = nowIso()): CheckLog {
+  return { profileId, userId, days: {}, updatedAt: at };
 }
 
 let cached: UserStore | null = null;
@@ -63,6 +73,7 @@ export function ensureStore(): UserStore {
   const states: UserStore['states'] = {};
   const views: UserStore['views'] = {};
   const overrides: UserStore['overrides'] = {};
+  const logs: UserStore['logs'] = {};
   for (const p of profiles) {
     states[p.id] = read<CheckState>(KEY.state(p.id))
       ?? seedUsersDb.states.find((s) => s.profileId === p.id)
@@ -72,8 +83,9 @@ export function ensureStore(): UserStore {
     overrides[p.id] = read<ItemOverrides>(KEY.ovr(p.id))
       ?? seedUsersDb.itemOverrides.find((o) => o.profileId === p.id)
       ?? emptyOverrides(p.id);
+    logs[p.id] = read<CheckLog>(KEY.checklog(p.id)) ?? emptyLog(p.id, p.userId);
   }
-  cached = { users: seedUsersDb.users.slice(), session, profiles, states, views, overrides };
+  cached = { users: seedUsersDb.users.slice(), session, profiles, states, views, overrides, logs };
   return cached;
 }
 
@@ -144,12 +156,25 @@ export function saveOverridesShard(ov: ItemOverrides): void {
   s.overrides[ov.profileId] = next;
 }
 
+export function readLogShard(profileId: string): CheckLog {
+  const s = ensureStore();
+  return s.logs[profileId] ?? emptyLog(profileId, s.session.userId);
+}
+
+export function saveLogShard(log: CheckLog): void {
+  const s = ensureStore();
+  const next = { ...log, updatedAt: nowIso() };
+  write(KEY.checklog(log.profileId), next);
+  s.logs[log.profileId] = next;
+}
+
 export function dropProfileShards(profileId: string): void {
   const s = ensureStore();
   removeProfileShards(profileId);
   delete s.states[profileId];
   delete s.views[profileId];
   delete s.overrides[profileId];
+  delete s.logs[profileId];
 }
 
 /* ── 写操作串行队列 ── */

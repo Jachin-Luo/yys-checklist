@@ -9,11 +9,12 @@
  *   3. **忽略「隐藏已完成」**：本文件直接吃原始 `checked`，
  *      不存在"已勾条目被过滤 → 已获得归零"的可能（原型为此专门传 `keepDone=true`）。
  *
- * 漏失明细**只列事实、不折算、不估算**（Q6）：列出漏掉的条目名与奖励，让用户自己判断痛不痛。
+ * 2026-09-15：原先末尾那条「漏失明细只列事实、不折算、不估算」（Q6）随 `missGroups` 一并删除 ——
+ * 详见文件下半部分的说明。
  */
 import type { Gain, Item } from '../api/types';
+import { eachDay, type LogDays } from './checkLog';
 import type { Cycle } from './enums';
-import { weightOf } from './weight';
 
 export type StatPeriod = 'day' | 'week' | 'month';
 
@@ -90,53 +91,9 @@ export function summarizeGain(
   };
 }
 
-export type MissLevel = 'high' | 'mid' | 'low';
-
-export interface MissItem {
-  id: string;
-  name: string;
-  weight: number;
-}
-
-export interface MissGroup {
-  level: MissLevel;
-  label: string;
-  items: MissItem[];
-}
-
-const LEVEL_LABEL: Record<MissLevel, string> = {
-  high: '高痛感',
-  mid: '中痛感',
-  low: '低痛感',
-};
-
-/**
- * 按痛感分级列出漏掉的条目（只列事实，不折算）。
- * 分级口径直接复用 `weightOf`：≥40 高（一次性/限时/版本/赛季）、20–39 中（周常/月常/带收益的日常）、<20 低。
- */
-export function missGroups(
-  items: Item[],
-  checked: Record<string, number>,
-  period: StatPeriod,
-): MissGroup[] {
-  const buckets: Record<MissLevel, MissItem[]> = { high: [], mid: [], low: [] };
-
-  for (const it of periodItems(items, period)) {
-    if (it.isAutoHub) continue; // 入口已由被覆盖项代表，不计入漏失
-    if (checked[it.id] !== undefined) continue;
-    const weight = weightOf(it);
-    const level: MissLevel = weight >= 40 ? 'high' : weight >= 20 ? 'mid' : 'low';
-    buckets[level].push({ id: it.id, name: it.name, weight });
-  }
-
-  return (['high', 'mid', 'low'] as MissLevel[])
-    .map((level) => ({
-      level,
-      label: LEVEL_LABEL[level],
-      items: buckets[level].sort((a, b) => b.weight - a.weight || a.name.localeCompare(b.name, 'zh')),
-    }))
-    .filter((g) => g.items.length > 0);
-}
+/* 2026-09-15：原先的「漏失明细」整块（`MissLevel` / `MissItem` / `MissGroup` / `LEVEL_LABEL` / `missGroups`）
+   已删除 —— 它按痛感分给漏掉的条目分级（高 / 中 / 低），是痛感在排序之外的第二个用途，
+   随「痛感只用于默认排序」的收敛一并移除；统计页自 2026-09-14 起也不再展示这一块。 */
 
 /** 统计口径文案（页面副标题用，避免页面里散落魔法字符串） */
 export const PERIOD_META: Record<StatPeriod, { label: string; note: string }> = {
@@ -144,3 +101,77 @@ export const PERIOD_META: Record<StatPeriod, { label: string; note: string }> = 
   week: { label: '本周', note: '周一 0 点刷新' },
   month: { label: '本月 · 版本', note: '版本 / 赛季按上线锚点重置，活动结束清零' },
 };
+
+/* ───────────────────────── 按日期区间的收益（2026-09-15） ───────────────────────── */
+
+export interface RangeDayGain {
+  /** 当天勾选的条数（含无固定收益的 —— 日历着色看的是"做了多少事"） */
+  entries: number;
+  jade: number;
+  blackFrag: number;
+  blueTicket: number;
+}
+
+export interface RangeGain {
+  jade: number;
+  blackFrag: number;
+  blueTicket: number;
+  /** 区间内的完成记录总数（同一条目在多天各勾一次就计多次） */
+  entries: number;
+  /** 每天明细：日历着色与单日卡片共用同一份数据，日历不必再算一遍 */
+  byDay: Record<string, RangeDayGain>;
+}
+
+/**
+ * 按**日期区间**汇总固定收益（统计页的「近 7 天 / 近 30 天 / 某一天」）。
+ *
+ * 与 `summarizeGain` 的区别：那个按**周期**（本日 / 本周 / 本月）算"当前周期的完成进度"
+ * （分子分母都限定在周期内，有"总量 / 还差"）；这个算"这段时间里实际拿到了多少" ——
+ * 同一条目多天各勾一次就计多次（每日签到 7 天就是 7 份），因此没有总量与百分比。
+ *
+ * 数据源是**勾选日志**（`CheckLog.days`）：`checked` 只留最近一次，回答不了区间问题。
+ * 口径纪律不变：只统计 `gain` 里的固定数值，浮动收益不折算。
+ */
+export function summarizeRangeGain(
+  items: Item[],
+  days: LogDays,
+  fromKey: string,
+  toKey: string,
+): RangeGain {
+  const byId = new Map(items.map((it) => [it.id, it]));
+  const byDay: Record<string, RangeDayGain> = {};
+  let entries = 0;
+  let jade = 0;
+  let blackFrag = 0;
+  let blueTicket = 0;
+
+  for (const key of eachDay(fromKey, toKey)) {
+    const day: RangeDayGain = { entries: 0, jade: 0, blackFrag: 0, blueTicket: 0 };
+    for (const id of days[key] ?? []) {
+      day.entries += 1;
+      /* 条目可能已被删除、或已是历史 id（活动条目下线）—— 计入条数但不计收益，
+         不报错也不过滤整条记录：那天确实勾过，日历该有痕迹（运行期脏数据，见 AGENTS 红线） */
+      const gain = byId.get(id)?.gain;
+      if (!gain) continue;
+      day.jade += gain.jade ?? 0;
+      day.blackFrag += gain.blackFrag ?? 0;
+      day.blueTicket += gain.blueTicket ?? 0;
+    }
+    day.jade = round1(day.jade);
+    day.blackFrag = round1(day.blackFrag);
+    day.blueTicket = round1(day.blueTicket);
+    byDay[key] = day;
+    entries += day.entries;
+    jade += day.jade;
+    blackFrag += day.blackFrag;
+    blueTicket += day.blueTicket;
+  }
+
+  return {
+    jade: round1(jade),
+    blackFrag: round1(blackFrag),
+    blueTicket: round1(blueTicket),
+    entries,
+    byDay,
+  };
+}

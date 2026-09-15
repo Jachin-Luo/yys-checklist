@@ -8,7 +8,7 @@
 import { nanoid } from 'nanoid';
 import type { ApiClient, DataScope } from '../contract';
 import type {
-  BountyDb, BootstrapPayload, CheckState, Item, ItemDraft, ItemOverrides, Meta,
+  BountyDb, BootstrapPayload, CheckLog, CheckState, Item, ItemDraft, ItemOverrides, Meta,
   Profile, ProfileDraft, Session, SoulsDb, User, UserDataBundle, ViewPrefs, YuhunDb,
 } from '../types';
 import { activeItems, mergeChecked, type ResetCtx } from '../../domain/reset';
@@ -62,6 +62,9 @@ export class MockApi implements ApiClient {
       state: computedState(scope.profileId, items, now),
       view: effectiveView(meta.viewDefaults, store.readViewShard(scope.profileId)),
       overrides: rawOverrides,
+      /* 日志与 state 同一入口：两者都是「勾选」这件事的两个侧面
+         （当前周期状态 / 历史事实），分两次请求只会让它们可能来自不同时刻 */
+      log: store.readLogShard(scope.profileId),
     };
   }
 
@@ -168,10 +171,11 @@ export class MockApi implements ApiClient {
         updatedAt: at,
       };
       store.saveProfiles([...s.profiles, profile]);
-      /* 立刻初始化该档案的三份空数据（设计文档 §5.5 ProfileDraft 说明） */
+      /* 立刻初始化该档案的四份空数据（设计文档 §5.5 ProfileDraft 说明 + 2026-09-15 的日志分片） */
       store.saveStateShard(store.emptyState(profile.id, userId, at));
       store.saveViewShard(effectiveView(seedMetaDb.viewDefaults, { profileId: profile.id }));
       store.saveOverridesShard(store.emptyOverrides(profile.id, at));
+      store.saveLogShard(store.emptyLog(profile.id, userId, at));
       return profile;
     });
   }
@@ -273,6 +277,20 @@ export class MockApi implements ApiClient {
     await store.enqueue(() => {
       store.assertScope(scope);
       store.saveStateShard({ ...store.readStateShard(scope.profileId), checked: {} });
+    });
+  }
+
+  /**
+   * 勾选日志整表落盘。
+   * 日志由 `stores/check` 按内存态重算后整体提交（含修剪到 90 天），因此这里是覆盖式写入 —— 
+   * 它不需要 `setChecked` 那种增量协议：一次勾选只产生一个新对象，规则（幂等、周期回退）在 domain 与 store。
+   */
+  async saveCheckLog(scope: DataScope, log: CheckLog): Promise<void> {
+    injectFailure('saveCheckLog');
+    await writeDelay();
+    await store.enqueue(() => {
+      store.assertScope(scope);
+      store.saveLogShard({ ...log, profileId: scope.profileId, userId: scope.userId });
     });
   }
 
@@ -411,6 +429,7 @@ export class MockApi implements ApiClient {
         state: store.readStateShard(p.id),
         view: effectiveView(seedMetaDb.viewDefaults, store.readViewShard(p.id)),
         overrides: store.readOverridesShard(p.id),
+        log: store.readLogShard(p.id),
       })),
     };
   }
@@ -429,6 +448,8 @@ export class MockApi implements ApiClient {
         store.saveStateShard({ ...row.state, profileId: row.profileId });
         store.saveViewShard({ ...row.view, profileId: row.profileId });
         store.saveOverridesShard({ ...row.overrides, profileId: row.profileId });
+        /* `log` 由 `domain/backup.validateBundle` 归一化保证存在（旧备份缺字段时补空日志） */
+        store.saveLogShard({ ...row.log, profileId: row.profileId });
       }
     });
   }

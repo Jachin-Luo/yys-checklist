@@ -11,6 +11,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { api } from '../api';
 import { resetStoreForTest } from '../api/mock/userStore';
 import { cascadeBatch, effectiveAutoSet, hubItem } from '../domain/autoDaily';
+import { dayKey } from '../domain/checkLog';
 import type { Item } from '../api/types';
 import { installMemoryStorage } from '../test/memoryStorage';
 import { resetCheckMemory, useCheckStore } from './check';
@@ -83,11 +84,16 @@ describe('一键日常：双向级联', () => {
     expect(useCheckStore.getState().checked).toEqual({});
   });
 
-  it('整批只写 yys:state:p_main 一个分片', async () => {
+  it('整批只写 yys:state:p_main（逐条增量）+ 一次 yys:checklog:p_main', async () => {
     storage.clear();
     await useCheckStore.getState().toggleWithCascade(HUB_ID, cascadeIds());
-    expect(storage.written).toEqual(['yys:state:p_main', 'yys:state:p_main', 'yys:state:p_main']);
-    expect(new Set(storage.written)).toEqual(new Set(['yys:state:p_main']));
+    expect(storage.written).toEqual([
+      'yys:state:p_main',
+      'yys:state:p_main',
+      'yys:state:p_main',
+      'yys:checklog:p_main',
+    ]);
+    expect(new Set(storage.written)).toEqual(new Set(['yys:state:p_main', 'yys:checklog:p_main']));
   });
 
   it('用户把覆盖集合改成空 → 点入口只影响自己（不误伤其它条目）', async () => {
@@ -278,6 +284,46 @@ describe('保存失败与连续操作', () => {
 
     expect(useCheckStore.getState().checked).toEqual({});
     expect(useCheckStore.getState().error).toBeTruthy();
+  });
+});
+
+/**
+ * 勾选日志（2026-09-15）：`checked` 只留最近一次，统计页的日历与区间收益靠这份日志，
+ * 所以"勾选时到底记了什么"必须有回归保护。
+ */
+describe('勾选日志', () => {
+  it('勾选时按当天记一条，并落到 yys:checklog:p_main；取消则清掉', async () => {
+    const key = dayKey(new Date());
+    await useCheckStore.getState().toggle('daily_sign');
+
+    expect(useCheckStore.getState().log[key]).toEqual(['daily_sign']);
+    expect(storage.getItem('yys:checklog:p_main')).toContain('daily_sign');
+
+    await useCheckStore.getState().toggle('daily_sign');
+    expect(useCheckStore.getState().log).toEqual({});
+  });
+
+  it('同一天多条累积在同一天；重复勾同一条不重复记（幂等）', async () => {
+    const key = dayKey(new Date());
+    await useCheckStore.getState().setMany(['daily_sign', 'daily_fengmo'], Date.now());
+    expect(useCheckStore.getState().log[key]?.slice().sort()).toEqual(['daily_fengmo', 'daily_sign']);
+
+    await useCheckStore.getState().setMany(['daily_sign'], Date.now());
+    expect(useCheckStore.getState().log[key]).toHaveLength(2);
+  });
+
+  it('清空全部勾选 → 日志一并清空（与"当作没做过"一致）', async () => {
+    await useCheckStore.getState().toggle('daily_sign');
+    await useCheckStore.getState().clearAll();
+    expect(useCheckStore.getState().log).toEqual({});
+  });
+
+  it('首屏 / 切号时日志随 applyChecked 一起灌入；resetCheckMemory 一并清空', () => {
+    useCheckStore.getState().applyChecked({ daily_sign: 1 }, { '2026-09-14': ['daily_sign'] });
+    expect(useCheckStore.getState().log).toEqual({ '2026-09-14': ['daily_sign'] });
+
+    resetCheckMemory();
+    expect(useCheckStore.getState().log).toEqual({});
   });
 });
 

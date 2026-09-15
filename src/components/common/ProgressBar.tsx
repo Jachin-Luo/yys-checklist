@@ -6,6 +6,10 @@ import { tokens } from '../../styles/tokens';
  *
  * 2026-09-11：原来的 `height` prop 是静态值（唯一调用方 `GainBar` 从不传、永远取默认 3），
  * 按"内联只留给动态值"的纪律换成类。高度收成固定 3px —— 三个 GainBar 本来就必须等高。
+ *
+ * 2026-09-15：`GainBar`（唯一调用方）随统计页改版失去消费方，本组件目前也没有别的引用 ——
+ * 一并保留，理由同 `GainBar` 的文件头说明。移动端头部那条 3px 进度条是 `MobileShell`
+ * 自己内联的 `div`，与本组件无关。
  */
 export default function ProgressBar({
   pct,

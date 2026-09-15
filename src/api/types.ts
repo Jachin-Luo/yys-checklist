@@ -200,7 +200,11 @@ export interface ViewDefaults {
   sortBy: SortBy;
   /** 按奖励类型筛选，空数组 = 全部显示 */
   showKinds: GainKind[];
-  /** 痛感门槛：weightOf 低于此值的条目不显示。0 = 不过滤 */
+  /**
+   * ⚠️ 已废弃（2026-09-15）：痛感收敛为「只作默认排序键」，筛选门槛的判断已从
+   * `domain/sort.isVisible` 移除，UI 也不再写入。字段与 `viewDefaults.minWeight`
+   * 保留是为了不动契约形状与既有校验（与 `sortBy` 同一处理方式），**勿据此新增筛选 UI**。
+   */
   minWeight: number;
   hideDone: boolean;
   pinned: string[];
@@ -274,6 +278,25 @@ export interface CheckState {
   updatedAt: string;
 }
 
+/**
+ * 勾选日志（2026-09-15 新增）：`YYYY-MM-DD` → 当日勾选的 itemId。
+ *
+ * 与 `CheckState.checked` 的分工：`checked` 每条只保留**最近一次**勾选时间戳
+ * （周期重置靠它比对），所以"前天做过什么"一勾新的一笔就查不到了。
+ * 统计页的日历与「近 N 天收益」要的正是历史，因此单独留一份按日期分桶的日志。
+ *
+ * 语义：**历史事实** —— 周期重置**不会**清它（那天确实完成过）；
+ * 只有用户取消勾选才回退，且按该条目的**周期起点**回退（见 `stores/check`）。
+ * 只保留最近 `LOG_KEEP_DAYS`（90）天，写入时顺手修剪（见 `domain/checkLog`）。
+ */
+export interface CheckLog {
+  profileId: string;
+  userId: string;
+  /** `YYYY-MM-DD` → 当日勾选的 itemId（去重，无序） */
+  days: Record<string, string[]>;
+  updatedAt: string;
+}
+
 export interface ViewPrefs {
   profileId: string;
   /**
@@ -323,6 +346,8 @@ export interface BootstrapPayload {
   state: CheckState;
   view: ViewPrefs;
   overrides: ItemOverrides;
+  /** 勾选日志：与 `state` 同一入口取，周期重置不参与（它是历史事实） */
+  log: CheckLog;
 }
 
 /** 新建自建条目的入参：不含 id / origin（由实现生成，杜绝 id 冲突与 origin 伪造） */
@@ -357,6 +382,8 @@ export interface UserDataBundle {
     state: CheckState;
     view: ViewPrefs;
     overrides: ItemOverrides;
+    /** 勾选日志（2026-09-15 起纳入备份）：不带它的话，导入后统计页日历会是空的 */
+    log: CheckLog;
   }>;
 }
 
