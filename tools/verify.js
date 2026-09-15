@@ -33,7 +33,7 @@ const STEPS = [
   },
   {
     name: 'vitest run（单测）',
-    cmd: 'npx vitest run --reporter=basic',
+    cmd: 'npx vitest run --reporter=default',
     pick: [/Test Files/, /Tests\s/, /FAIL/],
   },
   {
