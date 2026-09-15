@@ -80,7 +80,8 @@ for (const [type, codes] of PAIRS) {
 const ALLOWED = new Set(['id', 'name', 'cycle', 'days', 'path',
   'gainKind', 'gain', 'gainNote', 'condition', 'time', 'timeEnd', 'timeNote', 'isGuildTime',
   'start', 'deadline', 'until', 'since', 'autoDaily', 'isAutoHub', 'premium', 'note', 'origin']);
-/* 条目双文件（2026-09-11）：items = 常驻模板，limited = 活动期条目（到期即删）。
+/* 条目双文件（2026-09-11；2026-09-15 收紧常驻口径）：items = 真正的常驻（每日/每周/每月），
+   limited = 非常驻（活动期每日 / 限时 / 版本 / 赛季；带 until 的到期即删）。
    校验一律作用在**合并集**上 —— id 查重 / isAutoHub 全局恰 1 / 字典约束都跨文件生效 */
 const items = [...itemsDb.items, ...limitedDb.items];
 const fileOf = new Map([
