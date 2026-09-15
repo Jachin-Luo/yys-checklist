@@ -1,6 +1,18 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Plus, Trash2 } from 'lucide-react';
-import { MAX_NURTURE_N, nextPointIndex, normalizeHM, nowHM, nurturePoints, pointStats, sortNurture, type NurtureRecord } from '../../domain/nurture';
+import { Check, Plus, Trash2 } from 'lucide-react';
+import {
+  hmToDate,
+  MAX_NURTURE_N,
+  nextPendingPoint,
+  normalizeHM,
+  nowHM,
+  nurturePoints,
+  pointStats,
+  recordPoints,
+  sortNurture,
+  type NurturePoint,
+  type NurtureRecord,
+} from '../../domain/nurture';
 import { useNurtureStore } from '../../stores/nurture';
 import { useUiStore } from '../../stores/ui';
 
@@ -9,32 +21,77 @@ import { useUiStore } from '../../stores/ui';
  *
  * 规则：每次 6 小时，一天理论 4 次。填上卡时间 → 自动排出往后每 6h 的收/续点。
  *
- * **两个列表是刻意的**：添加时先问「立即开始 / 仅存计划」。
- * 任务才记录已过/未到（灰=已过、绿=未到、紫描边=下一个）；计划纯查看不背状态，
+ * ## 点模型（2026-09-15 重构，规则见 `domain/nurture` 文件头）
+ *
+ * 点列表由**上卡点打头**（它也是任务的起点，之前只存在 `base` 里、界面上看不到），
+ * 之后是收/续点。每个收/续点都能**单独**记完成，记完之后只有它**之后**的点按
+ * 实际时间 + 6h 递推 —— 早先那版「一个按钮把整条任务重推一遍」会让人以为任务被初始化了。
+ *
+ * ## 两个列表是刻意的
+ *
+ * 添加时先问「立即开始 / 仅存计划」：任务才记完成状态，计划纯查看（虚线、不可点），
  * 决定开刷时点「开始」转正。用户常常只是"打算这个点寄"，不想一存就被判成未到。
  *
  * 数据落在设备级键（`yys:plans`）：与玩哪个号无关，见 stores/nurture.ts 的说明。
  */
 
-/** 任务状态的 chip：已过灰 / 下一个品牌描边 / 未到绿 */
-function PointChips({ record, now }: { record: NurtureRecord; now: Date }) {
-  const points = nurturePoints(record.base, record.n, now);
-  const next = record.started ? nextPointIndex(points) : -1;
+/** 点 chip 的语气：已完成 / 过期未完成（该收了）/ 未到；计划态一律虚线只读 */
+function toneOf(point: NurturePoint, selected: boolean, planned: boolean): string {
+  if (planned) return 'border border-dashed border-line text-ink-3';
+  if (selected) return 'border border-brand bg-brand-soft text-brand';
+  if (point.doneAt !== undefined) return 'bg-success/10 text-success-deep';
+  if (point.past) return 'bg-warn-soft text-warn';
+  return 'bg-surface-3 text-ink-2';
+}
+
+function PointChips({
+  record,
+  now,
+  selected,
+  onSelect,
+}: {
+  record: NurtureRecord;
+  now: Date;
+  selected: number | null;
+  onSelect: (index: number) => void;
+}) {
+  const points = recordPoints(record, now);
+  const planned = !record.started;
+
   return (
     <div className="flex flex-wrap gap-1">
-      {points.map((p, i) => {
-        const tone = !record.started
-          ? 'border border-dashed border-line text-ink-3'
-          : p.past
-            ? 'bg-surface-3 text-ink-3'
-            : i === next
-              ? 'border border-brand bg-brand-soft text-brand'
-              : 'bg-surface-3 text-success-deep';
+      {points.map((p) => {
+        const tone = toneOf(p, selected === p.index, planned);
+        const body = (
+          <>
+            <span className="flex items-center gap-0.5">
+              {p.doneAt !== undefined ? <Check size={10} strokeWidth={3} /> : null}
+              {p.hm}
+            </span>
+            <i className="text-xs not-italic opacity-80">{p.index === 0 ? '上卡' : p.dayLabel}</i>
+          </>
+        );
+
+        /* 上卡点是任务起点、由 `base` 决定，不接受"记完成" —— 渲染成只读 chip */
+        if (planned || p.index === 0) {
+          return (
+            <span key={p.index} className={`flex flex-col items-center rounded-sm px-1.5 py-0.5 text-sm ${tone}`}>
+              {body}
+            </span>
+          );
+        }
+
         return (
-          <span key={p.ts} className={`flex flex-col items-center rounded-sm px-1.5 py-0.5 text-sm ${tone}`}>
-            {p.hm}
-            <i className="text-xs not-italic opacity-80">{p.dayLabel}</i>
-          </span>
+          <button
+            key={p.index}
+            type="button"
+            aria-pressed={selected === p.index}
+            onClick={() => onSelect(p.index)}
+            title={`${p.hm} 收/续点 · 点一下选中它，再记完成时间`}
+            className={`flex cursor-pointer flex-col items-center rounded-sm px-1.5 py-0.5 text-sm transition-colors duration-120 ${tone}`}
+          >
+            {body}
+          </button>
         );
       })}
     </div>
@@ -46,6 +103,8 @@ export default function NurtureSection() {
   const hydrate = useNurtureStore((s) => s.hydrate);
   const add = useNurtureStore((s) => s.add);
   const promote = useNurtureStore((s) => s.promote);
+  const markPoint = useNurtureStore((s) => s.markPoint);
+  const clearPoint = useNurtureStore((s) => s.clearPoint);
   const remove = useNurtureStore((s) => s.remove);
   const askConfirm = useUiStore((s) => s.askConfirm);
 
@@ -54,13 +113,17 @@ export default function NurtureSection() {
   const [draftError, setDraftError] = useState('');
   /** 待确认的草稿：`{ base, n }`，等用户选「立即开始 / 仅存计划」 */
   const [ask, setAsk] = useState<{ base: string; n: number } | null>(null);
+  /** 当前选中的点（每条记录各自的操作对象）；没选时操作条作用于"下一个待办点" */
+  const [active, setActive] = useState<{ id: string; index: number } | null>(null);
+  /** 每行「实际完成时间」的草稿（`HH:mm`；留空 = 现在） */
+  const [doneDraft, setDoneDraft] = useState<Record<string, string>>({});
   const [now, setNow] = useState(() => new Date());
 
   useEffect(() => {
     hydrate();
   }, [hydrate]);
 
-  /* 每分钟刷新一次 now：让"已过/未到"自己走，不用用户手动刷新页面。
+  /* 每分钟刷新一次 now：让"已过 / 该收了"自己走，不用用户手动刷新页面。
      6h 粒度下 60s 足够，也不会有明显的重渲染成本。 */
   useEffect(() => {
     const timer = window.setInterval(() => setNow(new Date()), 60000);
@@ -99,8 +162,27 @@ export default function NurtureSection() {
     if (ok) remove(r.id);
   };
 
+  /** 当前行的操作对象：优先用户点选的，否则取下一个未完成的收/续点 */
+  const targetOf = (r: NurtureRecord): NurturePoint | null => {
+    const points = recordPoints(r, now);
+    const picked = active?.id === r.id ? points.find((p) => p.index === active.index) : undefined;
+    return picked ?? nextPendingPoint(r, now);
+  };
+
+  /** 记完成：留空按「现在」，填了按输入的实际时间（`type=time` 已保证格式合法） */
+  const submitDone = (r: NurtureRecord, point: NurturePoint) => {
+    const raw = (doneDraft[r.id] ?? '').trim();
+    markPoint(r.id, point.index, raw ? (hmToDate(raw, now) ?? new Date()) : new Date());
+    setDoneDraft((s) => ({ ...s, [r.id]: '' }));
+    setActive(null);
+  };
+
   const row = (r: NurtureRecord) => {
-    const stats = r.started ? pointStats(nurturePoints(r.base, r.n, now)) : null;
+    const points = recordPoints(r, now);
+    const stats = r.started ? pointStats(points) : null;
+    const target = r.started ? targetOf(r) : null;
+    const pickedIndex = active?.id === r.id ? active.index : null;
+
     return (
       <div key={r.id} className="flex flex-wrap items-start gap-2 border-b border-line-faint px-3 py-2.5 last:border-0">
         <span className="w-24 flex-none">
@@ -108,13 +190,22 @@ export default function NurtureSection() {
           <span className="block text-sm text-ink-3">每 6h × {r.n}</span>
           {stats ? (
             <span className="block text-sm text-ink-3">
-              已过 {stats.past} · 未到 {stats.future}
+              已完成 {stats.done} · 待收 {stats.pending}
             </span>
           ) : null}
         </span>
+
         <span className="min-w-0 flex-1">
-          <PointChips record={r} now={now} />
+          <PointChips
+            record={r}
+            now={now}
+            selected={pickedIndex}
+            onSelect={(index) =>
+              setActive((cur) => (cur?.id === r.id && cur.index === index ? null : { id: r.id, index }))
+            }
+          />
         </span>
+
         {!r.started ? (
           <button
             type="button"
@@ -123,7 +214,54 @@ export default function NurtureSection() {
           >
             开始
           </button>
-        ) : null}
+        ) : target ? (
+          /* 操作条只作用于 `target`（选中点，或下一个待办点）—— 记完成只影响它之后的点 */
+          <span className="flex flex-none flex-wrap items-center gap-1">
+            <span className="text-sm text-ink-3">
+              {target.doneAt !== undefined
+                ? `${target.hm} 已完成`
+                : target.past
+                  ? `${target.hm} 该收了`
+                  : `${target.hm} 待收`}
+            </span>
+            <input
+              type="time"
+              value={doneDraft[r.id] ?? ''}
+              onChange={(e) => setDoneDraft((s) => ({ ...s, [r.id]: e.target.value }))}
+              aria-label={`${target.hm} 的实际完成时间（留空 = 现在）`}
+              title="实际完成时间；留空表示现在就完成了"
+              className="w-[5.6rem] rounded-sm border border-line bg-surface px-1.5 py-1 text-sm text-ink transition-colors duration-120 focus:border-brand"
+            />
+            <button
+              type="button"
+              onClick={() => submitDone(r, target)}
+              title={
+                target.doneAt !== undefined
+                  ? '改这个点的实际完成时间（之后的点会跟着重算）'
+                  : '记这个点完成；之后的点按实际时间 + 6h 顺延'
+              }
+              className="flex-none cursor-pointer rounded-sm bg-brand px-2 py-1 text-sm text-white transition-colors duration-120 hover:bg-brand-deep"
+            >
+              {target.doneAt !== undefined ? '改时间' : '记完成'}
+            </button>
+            {target.doneAt !== undefined ? (
+              <button
+                type="button"
+                onClick={() => {
+                  clearPoint(r.id, target.index);
+                  setActive(null);
+                }}
+                title="取消这个点的完成记录，回到按预计时间推"
+                className="flex-none cursor-pointer rounded-sm border border-line px-2 py-1 text-sm text-ink-2 transition-colors duration-120 hover:border-ink-4"
+              >
+                取消完成
+              </button>
+            ) : null}
+          </span>
+        ) : (
+          <span className="flex-none text-sm text-success-deep">全部完成</span>
+        )}
+
         <button
           type="button"
           aria-label="删除记录"
@@ -139,10 +277,12 @@ export default function NurtureSection() {
   return (
     <div className="pb-6">
       <div className="mx-3.5 mt-3 rounded-md bg-surface-3 px-3 py-2.5 text-sm leading-relaxed text-ink-2">
-        <b className="text-ink">结界寄养每次 6 小时</b>，一天理论可寄 4 次。记下上卡时间，自动排出之后每 6h
-        的收/续点（跨天标明天/后天）。
-        <b className="text-ink">添加时先问你要不要「立即开始」</b> —— 开始才算任务、才记录已过/未到；
-        仅存计划的纯查看，不背状态。
+        <b className="text-ink">结界寄养每次 6 小时</b>，一天理论可寄 4 次。填上卡时间 → 自动排出之后每 6h
+        的收/续点（跨天标明天/后天），<b className="text-ink">上卡时刻也作为一个点显示在任务里</b>。
+        <b className="text-ink">每个点各自记完成</b>：点一下那个时间点，再用「现在」或填实际时间 ——
+        只有它之后的点会按实际时间 + 6h 顺延，之前已完成的点不动。
+        <b className="text-ink">添加时先问你要不要「立即开始」</b> —— 开始才算任务、才记录完成；
+        仅存计划的纯查看（虚线），不背状态。
       </div>
 
       <div className="mx-3.5 mt-3 rounded-md border border-line-soft bg-surface px-3 py-2.5">
@@ -234,13 +374,13 @@ export default function NurtureSection() {
 
       <div className="flex items-baseline justify-between px-3.5 pb-1 pt-4">
         <span className="text-sm text-ink-3">进行中的任务 · {tasks.length} 条</span>
-        <span className="text-sm text-ink-3">绿=未到 · 灰=已过 · 紫描边=下一个</span>
+        <span className="text-sm text-ink-3">✓=已完成 · 橙=该收了 · 点时间点可记完成</span>
       </div>
       {tasks.length ? (
         <div className="mx-3.5 overflow-hidden rounded-md border border-line-soft bg-surface">{tasks.map(row)}</div>
       ) : (
         <p className="mx-3.5 rounded-md bg-surface-3 px-3 py-2.5 text-sm leading-relaxed text-ink-3">
-          没有进行中的任务 —— 表单填好时间点，选「立即开始」后这里才开始记录已过/未到。
+          没有进行中的任务 —— 表单填好时间点，选「立即开始」后这里才开始记录完成情况。
         </p>
       )}
 

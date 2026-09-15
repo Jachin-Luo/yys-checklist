@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { makeNurture, type NurtureRecord } from '../domain/nurture';
+import { clearPointDone, makeNurture, markPointDone, type NurtureRecord } from '../domain/nurture';
 import { DEVICE_KEY, read, write } from '../services/localStore';
 
 /**
@@ -16,11 +16,19 @@ interface NurtureState {
   records: NurtureRecord[];
   hydrated: boolean;
   error: Error | null;
-  /** 首次进工具页时读一次本机（懒加载，不必进首屏） */
+  /**
+   * 读一次本机数据（幂等，已 hydration 则直接返回）。
+   * 2026-09-15 起壳层的结界卡徽章会在首屏就调用它 —— 徽章要常驻显示"下一次该收"，
+   * 就不能等用户进工具页；这份数据极小（几条记录），进首屏没有负担。
+   */
   hydrate: () => void;
   add: (base: string, n: number, started: boolean) => void;
   /** 计划 → 任务（「开始」转正） */
   promote: (id: string) => void;
+  /** 记某个收/续点完成（`at` 省略 = 现在）；该点之后的点按它的实际时间递推 */
+  markPoint: (id: string, index: number, at?: Date) => void;
+  /** 取消某个点的完成记录（点错了 / 想重记时间） */
+  clearPoint: (id: string, index: number) => void;
   remove: (id: string) => void;
   clearAll: () => void;
 }
@@ -53,6 +61,14 @@ export const useNurtureStore = create<NurtureState>((set, get) => {
   promote: (id) => {
     const next = get().records.map((r) => (r.id === id ? { ...r, started: true } : r));
     persist(next);
+  },
+
+  markPoint: (id, index, at = new Date()) => {
+    persist(get().records.map((r) => (r.id === id ? markPointDone(r, index, at) : r)));
+  },
+
+  clearPoint: (id, index) => {
+    persist(get().records.map((r) => (r.id === id ? clearPointDone(r, index) : r)));
   },
 
   remove: (id) => {
