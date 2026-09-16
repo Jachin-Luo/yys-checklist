@@ -11,6 +11,7 @@
  *   两种形态都不需要改前端业务代码。
  */
 import type { Item, ItemOverrides, Meta, ViewDefaults, ViewPrefs } from '../api/types';
+import { effectiveCardDisplay } from './cardDisplay';
 import { mergeChecked, type ResetCtx } from './reset';
 
 export { mergeChecked };
@@ -37,6 +38,9 @@ export function effectiveView(defaults: ViewDefaults, pref?: Partial<ViewPrefs> 
     minWeight: typeof p.minWeight === 'number' && p.minWeight >= 0 ? p.minWeight : defaults.minWeight,
     hideDone: typeof p.hideDone === 'boolean' ? p.hideDone : defaults.hideDone,
     pinned: Array.isArray(p.pinned) ? p.pinned : [...defaults.pinned],
+    /* 卡片字段显示（2026-09-16）：老数据没有 `card`，这里补成"全部显示"，
+       因此新字段的引入不改变任何现有观感 */
+    card: effectiveCardDisplay(p.card),
     coverMode: p.coverMode ?? 'dim',
     /* 一键日常覆盖集合：未自定义时**保持 undefined**（不是回落为空数组）——
        undefined 的语义是「跟随数据默认」，由 domain/autoDaily.effectiveAutoSet 归一。 */

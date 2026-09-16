@@ -139,7 +139,7 @@ TypeScript 为严格模式（`tsconfig.app.json`），`npm run build` 会先跑 
 | 让「隐藏已完成 / 一键日常隐藏」参与统计 | 会造成「隐藏 = 少算收益」 | 统计只吃原始 `checked`（`pages/StatsPage.tsx`） |
 | 删掉 Mock 的延迟或 AbortSignal 处理 | 会写出没有 loading / 竞态的 UI，接后端时集中爆雷 | 保留 `api/mock/latency.ts` 的延迟语义 |
 | 直接 `window.localStorage.setItem` | 破坏「唯一出口」，且绕过分片键封装 | 走 `services/localStore.ts` 或 `api/mock/persist.ts` 的 `KEY` |
-| 把寮时间写进种子数据 | 各寮时间不同，写死即错 | 用户配置走 `stores/device.guildTime`，展示层叠加 |
+| 把寮时间写进种子数据 | 各寮时间不同，写死即错 | 用户配置走 `stores/guildTime`（**档案级**，2026-09-16 由设备级升格），展示层叠加 |
 | 在业务代码 import `@/db/items.db.json` | ESLint error 级拦截 | 新数据在 `api/mock/db.ts` 加载并经契约暴露 |
 | 把 `reports/` 提交入库 | 该目录是工具产物 | 已在 `.gitignore` 中忽略，保持忽略 |
 | 给条目增加新字段但不更新白名单 | `db:check` 会报未知字段 | 同步更新 `tools/build.js` 的字段白名单与 `schema/item.schema.json` |

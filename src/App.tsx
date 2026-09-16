@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import ConfirmDialog from './components/common/ConfirmDialog';
 import OnboardingDialog from './components/common/OnboardingDialog';
+import ProfilePickDialog from './components/common/ProfilePickDialog';
 import SaveErrorNotice from './components/common/SaveErrorNotice';
 import DesktopShell from './components/desktop/DesktopShell';
 import MobileShell from './components/mobile/MobileShell';
@@ -55,6 +56,9 @@ export default function App() {
       <SaveErrorNotice />
       <OnboardingDialog />
       <ConfirmDialog />
+      {/* 跨档案勾选的选择器（清单长按触发）：与确认框同一位置，
+          调用点只 `await askPick({...})`，不必各自维护弹层状态 */}
+      <ProfilePickDialog />
     </>
   );
 }

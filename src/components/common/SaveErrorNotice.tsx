@@ -1,6 +1,7 @@
 import { X } from 'lucide-react';
 import { useCheckStore } from '../../stores/check';
 import { useDeviceStore } from '../../stores/device';
+import { useGuildTimeStore } from '../../stores/guildTime';
 import { useItemStore } from '../../stores/items';
 import { useNurtureStore } from '../../stores/nurture';
 import { useViewStore } from '../../stores/view';
@@ -8,15 +9,18 @@ import { useViewStore } from '../../stores/view';
 export default function SaveErrorNotice() {
   const checkError = useCheckStore((s) => s.error);
   const deviceError = useDeviceStore((s) => s.error);
+  const guildTimeError = useGuildTimeStore((s) => s.error);
   const itemError = useItemStore((s) => s.error);
   const nurtureError = useNurtureStore((s) => s.error);
   const viewError = useViewStore((s) => s.error);
-  const error = checkError ?? deviceError ?? itemError ?? nurtureError ?? viewError;
+  const error =
+    checkError ?? deviceError ?? guildTimeError ?? itemError ?? nurtureError ?? viewError;
   if (!error) return null;
 
   const dismiss = () => {
     useCheckStore.setState({ error: null });
     useDeviceStore.setState({ error: null });
+    useGuildTimeStore.setState({ error: null });
     useItemStore.setState({ error: null });
     useNurtureStore.setState({ error: null });
     useViewStore.setState({ error: null });

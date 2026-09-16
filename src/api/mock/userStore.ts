@@ -9,7 +9,18 @@
  * 并发：写操作串行化（简单队列），避免 localStorage 互相覆盖。
  */
 import type { DataScope } from '../contract';
-import type { CheckLog, CheckState, ItemOverrides, Profile, Session, User, ViewPrefs } from '../types';
+import type {
+  CheckLog,
+  CheckState,
+  GuildTimePrefs,
+  ItemOverrides,
+  NurturePlans,
+  Profile,
+  Session,
+  User,
+  ViewPrefs,
+} from '../types';
+import { sanitizePlans } from '../../domain/nurture';
 import { ApiError } from './latency';
 import { KEY, read, removeProfileShards, write } from './persist';
 import { seedUsersDb } from './db';
@@ -23,6 +34,10 @@ export interface UserStore {
   overrides: Record<string, ItemOverrides | undefined>;
   /** 勾选日志（按日期分桶的历史，2026-09-15 新增） */
   logs: Record<string, CheckLog | undefined>;
+  /** 寮时间（档案级，2026-09-16 由设备级升格） */
+  guildTimes: Record<string, GuildTimePrefs | undefined>;
+  /** 结界寄养任务 / 计划（档案级，2026-09-16 由设备级升格） */
+  plans: Record<string, NurturePlans | undefined>;
 }
 
 export const nowIso = (): string => new Date().toISOString();
@@ -42,6 +57,15 @@ export function emptyOverrides(profileId: string, at = nowIso()): ItemOverrides 
 export function emptyLog(profileId: string, userId: string, at = nowIso()): CheckLog {
   return { profileId, userId, days: {}, updatedAt: at };
 }
+
+/**
+ * 空寮时间 / 空寄养列表。
+ * 与 `emptyLog` 同理：两者都是纯运行期数据，种子库不含，从无到有累积。
+ * 它们的空值就是"一个字面量"，所以不再包一层 `{ profileId, ... }` 结构
+ * （分片键里已经有 profileId，重复写一遍只会多一处可能不一致的地方）。
+ */
+export const emptyGuildTime = (): GuildTimePrefs => ({});
+export const emptyPlans = (): NurturePlans => [];
 
 let cached: UserStore | null = null;
 
@@ -74,6 +98,8 @@ export function ensureStore(): UserStore {
   const views: UserStore['views'] = {};
   const overrides: UserStore['overrides'] = {};
   const logs: UserStore['logs'] = {};
+  const guildTimes: UserStore['guildTimes'] = {};
+  const plans: UserStore['plans'] = {};
   for (const p of profiles) {
     states[p.id] = read<CheckState>(KEY.state(p.id))
       ?? seedUsersDb.states.find((s) => s.profileId === p.id)
@@ -84,8 +110,22 @@ export function ensureStore(): UserStore {
       ?? seedUsersDb.itemOverrides.find((o) => o.profileId === p.id)
       ?? emptyOverrides(p.id);
     logs[p.id] = read<CheckLog>(KEY.checklog(p.id)) ?? emptyLog(p.id, p.userId);
+    /* 这两片没有种子来源：种子库里不存在设备级 → 档案级的迁移，
+       旧版本残留的 `yys:guildTime` / `yys:plans` 按用户决策**不做迁移**（直接作废） */
+    guildTimes[p.id] = read<GuildTimePrefs>(KEY.guild(p.id)) ?? emptyGuildTime();
+    plans[p.id] = read<NurturePlans>(KEY.plans(p.id)) ?? emptyPlans();
   }
-  cached = { users: seedUsersDb.users.slice(), session, profiles, states, views, overrides, logs };
+  cached = {
+    users: seedUsersDb.users.slice(),
+    session,
+    profiles,
+    states,
+    views,
+    overrides,
+    logs,
+    guildTimes,
+    plans,
+  };
   return cached;
 }
 
@@ -168,6 +208,31 @@ export function saveLogShard(log: CheckLog): void {
   s.logs[log.profileId] = next;
 }
 
+export function readGuildTimeShard(profileId: string): GuildTimePrefs {
+  return ensureStore().guildTimes[profileId] ?? emptyGuildTime();
+}
+
+export function saveGuildTimeShard(profileId: string, prefs: GuildTimePrefs): void {
+  const s = ensureStore();
+  const next = { ...prefs };
+  write(KEY.guild(profileId), next);
+  s.guildTimes[profileId] = next;
+}
+
+export function readPlansShard(profileId: string): NurturePlans {
+  /* 净化放在**读取入口**：分片字节是本机文件、备份是用户手上的外部文件，两者都可能被改坏，
+     而一条 `base` 非法的记录会让 `recordPoints` 递推出 NaN（界面显示 "NaN:NaN"）。
+     数据规则在 `domain/nurture.sanitizePlans` —— Mock 只做 IO，不写规则。 */
+  return sanitizePlans(ensureStore().plans[profileId] ?? []);
+}
+
+export function savePlansShard(profileId: string, plans: NurturePlans): void {
+  const s = ensureStore();
+  const next = [...plans];
+  write(KEY.plans(profileId), next);
+  s.plans[profileId] = next;
+}
+
 export function dropProfileShards(profileId: string): void {
   const s = ensureStore();
   removeProfileShards(profileId);
@@ -175,6 +240,8 @@ export function dropProfileShards(profileId: string): void {
   delete s.views[profileId];
   delete s.overrides[profileId];
   delete s.logs[profileId];
+  delete s.guildTimes[profileId];
+  delete s.plans[profileId];
 }
 
 /* ── 写操作串行队列 ── */

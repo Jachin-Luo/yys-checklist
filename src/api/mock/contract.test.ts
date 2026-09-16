@@ -257,3 +257,99 @@ describe('档案归档语义（§6.4）', () => {
     expect(list.some((x) => x.id === s.profileId)).toBe(true);
   });
 });
+
+/* ── 档案级偏好分片（2026-09-16）─────────────────────────────────────────────
+   寮时间与结界寄养任务由**设备级**升为**档案级**。这一组锁住四件事：
+     ① 两个分片**按档案隔离**（换号看到的是各自的一份 —— 这是本次改动的全部意义）；
+     ② 它们**随 bootstrap 下发**（壳层徽章与时间徽章不必再单独请求）；
+     ③ 它们**随备份往返**（用户要求"所有配置项均可备份"，这是前提）；
+     ④ 删档时**不留孤儿键**（`removeProfileShards` 漏掉新分片会攒垃圾）。
+   另外补 `getCheckLog`：清单长按跨档案勾选时，靠它读**目标档案**的日志来合并新记录。 */
+describe('档案级偏好分片（寮时间 / 寄养任务 / 日志读取）', () => {
+  const p2scope = (profileId: string) => ({ userId: scope.userId, profileId });
+
+  it('寮时间按档案隔离：一档一份，互不覆盖', async () => {
+    const p2 = await api.createProfile(scope.userId, { name: '小号' });
+    await api.saveGuildTime(scope, { daily_daoguan: '20:00' });
+    await api.saveGuildTime(p2scope(p2.id), { daily_daoguan: '21:30', weekly_banquet: '20:30' });
+
+    expect(await api.getGuildTime(scope)).toEqual({ daily_daoguan: '20:00' });
+    expect(await api.getGuildTime(p2scope(p2.id))).toEqual({
+      daily_daoguan: '21:30',
+      weekly_banquet: '20:30',
+    });
+  });
+
+  it('寄养任务按档案隔离（换号不会看到另一个号的寄养列表）', async () => {
+    const p2 = await api.createProfile(scope.userId, { name: '小号' });
+    const plan = { id: 'n_1', base: '08:00', n: 2, started: true, createdAt: 1, dones: { 1: 100 } };
+
+    await api.savePlans(scope, [plan]);
+    expect(await api.getPlans(scope)).toEqual([plan]);
+    expect(await api.getPlans(p2scope(p2.id))).toEqual([]);
+  });
+
+  it('getBootstrap 一并带上两个新分片', async () => {
+    await api.saveGuildTime(scope, { daily_daoguan: '20:00' });
+    await api.savePlans(scope, [{ id: 'n_1', base: '08:00', n: 1, started: false, createdAt: 1 }]);
+
+    const payload = await api.getBootstrap(scope);
+    expect(payload.guildTime).toEqual({ daily_daoguan: '20:00' });
+    expect(payload.plans).toHaveLength(1);
+    expect(payload.plans[0].base).toBe('08:00');
+  });
+
+  it('导出带上两项；清库后导入原样还原', async () => {
+    await api.saveGuildTime(scope, { daily_daoguan: '20:00' });
+    await api.savePlans(scope, [{ id: 'n_1', base: '08:00', n: 2, started: true, createdAt: 1 }]);
+
+    const bundle = await api.exportUserData(scope);
+    expect(bundle.data[0].guildTime).toEqual({ daily_daoguan: '20:00' });
+    expect(bundle.data[0].plans[0].id).toBe('n_1');
+
+    storage.clear();
+    resetStoreForTest();
+    await api.importUserData(scope, bundle);
+
+    expect(await api.getGuildTime(scope)).toEqual({ daily_daoguan: '20:00' });
+    expect((await api.getPlans(scope))[0].base).toBe('08:00');
+  });
+
+  it('分片里的畸形寄养记录在**读取时**就被净化掉（base 非法会让递推算出 NaN）', async () => {
+    /* 直接往分片里塞坏数据：模拟旧版本残留 / 被手工改坏 */
+    storage.setItem('yys:plans:p_main', JSON.stringify([
+      { id: 'n_ok', base: '08:00', n: 2, started: true, createdAt: 1 },
+      { id: 'n_bad_base', base: '99:99', n: 1, started: true, createdAt: 1 },
+      { id: 'n_bad_n', base: '08:00', n: 999, started: true, createdAt: 1 },
+      { nope: true },
+    ]));
+    resetStoreForTest();
+
+    const plans = await api.getPlans(scope);
+    expect(plans).toHaveLength(1);
+    expect(plans[0].id).toBe('n_ok');
+  });
+
+  it('getCheckLog 读的是**传入 scope** 的日志，而不是当前档案的', async () => {
+    const p2 = await api.createProfile(scope.userId, { name: '小号' });
+    await api.saveCheckLog(p2scope(p2.id), {
+      profileId: p2.id,
+      userId: scope.userId,
+      days: { '2026-09-16': ['daily_sign'] },
+      updatedAt: '2026-09-16T00:00:00.000Z',
+    });
+
+    expect((await api.getCheckLog(p2scope(p2.id))).days['2026-09-16']).toEqual(['daily_sign']);
+    expect((await api.getCheckLog(scope)).days).toEqual({});
+  });
+
+  it('删除档案时两个新分片一并清除（不留孤儿键）', async () => {
+    const p2 = await api.createProfile(scope.userId, { name: '小号' });
+    await api.saveGuildTime(p2scope(p2.id), { daily_daoguan: '20:00' });
+    await api.savePlans(p2scope(p2.id), [{ id: 'n_1', base: '08:00', n: 1, started: false, createdAt: 1 }]);
+
+    await api.deleteProfile(scope, p2.id);
+    expect(storage.getItem(`yys:guild:${p2.id}`)).toBeNull();
+    expect(storage.getItem(`yys:plans:${p2.id}`)).toBeNull();
+  });
+});

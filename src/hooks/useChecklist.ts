@@ -4,10 +4,10 @@ import { hiddenByCover } from '../domain/autoDaily';
 import { applyGuildTimeAll } from '../domain/guildTime';
 import { buildComparator, effectiveSortBy, isVisible } from '../domain/sort';
 import { useCheckStore } from '../stores/check';
+import { useGuildTimeStore } from '../stores/guildTime';
 import { useItemStore } from '../stores/items';
 import { useViewStore } from '../stores/view';
 import { useAutoDaily } from './useAutoDaily';
-import { useDevicePrefs } from './useDevicePrefs';
 
 /**
  * 清单数据编排（状态层）：把「过滤 + 排序 + 分组」组合出来给两端布局用。
@@ -44,7 +44,8 @@ export function useChecklist(target: ChecklistTarget): Checklist {
   const checked = useCheckStore((s) => s.checked);
   const view = useViewStore((s) => s.view);
   const { coveredSet, coverMode } = useAutoDaily();
-  const { guildTime } = useDevicePrefs();
+  /* 寮时间 2026-09-16 由设备级升为档案级：换号会跟着换，所以清单页的寮自定时间也随之变 */
+  const guildTime = useGuildTimeStore((s) => s.guildTime);
 
   const order = overrides?.order;
   const orderKey = (order ?? []).join(',');

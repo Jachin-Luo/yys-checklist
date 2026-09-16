@@ -1,8 +1,11 @@
 import { memo } from 'react';
 import { Star } from 'lucide-react';
 import type { Item } from '../../api/types';
+import { DEFAULT_CARD_DISPLAY } from '../../domain/cardDisplay';
+import { LONG_PRESS_MS, useLongPress } from '../../hooks/useLongPress';
 import { useCheckStore } from '../../stores/check';
 import { dictIndexOf, useItemStore } from '../../stores/items';
+import { useUiStore } from '../../stores/ui';
 import { useViewStore } from '../../stores/view';
 import CheckBox from './CheckBox';
 import { CoveredTag, GainBadges, KindBadges, PremiumTag } from './GainBadges';
@@ -47,16 +50,54 @@ interface Props {
   dimmed?: boolean;
   /** 覆盖默认的勾选行为（一键日常入口需要走双向级联） */
   onToggle?: () => void;
+  /**
+   * 长按跨档案勾选时**一并写入**的额外条目 id。
+   * 一键日常入口卡传它的覆盖项，使跨档案范围与当前档案的级联范围一致。
+   */
+  cascadeIds?: string[];
 }
 
-function ChecklistItem({ item, showDeadline = false, dimmed = false, onToggle }: Props) {
+function ChecklistItem({
+  item,
+  showDeadline = false,
+  dimmed = false,
+  onToggle,
+  cascadeIds,
+}: Props) {
   const checked = useCheckStore((s) => s.checked[item.id] !== undefined);
   const toggle = useCheckStore((s) => s.toggle);
   const meta = useItemStore((s) => s.meta);
   const pinned = useViewStore((s) => s.view.pinned.includes(item.id));
   const togglePin = useViewStore((s) => s.togglePin);
+  /* 卡片显示哪些字段（2026-09-16 用户需求，设置页「视图偏好」）。
+     `?? DEFAULT` 只是类型兜底：store 里的 view 已过 `effectiveView`，实际总带 card
+     （老数据也在那里被补成"全部显示"，所以这个功能的引入不改变任何人的现有观感）。 */
+  const card = useViewStore((s) => s.view.card) ?? DEFAULT_CARD_DISPLAY;
+
+  const askPick = useUiStore((s) => s.askPick);
+  const toggleInProfiles = useCheckStore((s) => s.toggleInProfiles);
 
   const handleToggle = onToggle ?? (() => void toggle(item.id));
+
+  /*
+   * 长按 = 跨档案勾选（2026-09-16 用户需求）：弹出档案选择器，确认后这一组条目写进选中的其他档案。
+   * 这里**没有** await 的 UI 阻塞：其他档案的写盘在后台进行，当前档案走既有的乐观更新，
+   * 用户点完立刻能看到本档的状态变化。
+   *
+   * `cascadeIds` 由调用点给出：一键日常入口卡把自己的**覆盖项**传进来，
+   * 于是跨档案写入与当前档案的级联范围一致 —— 否则目标档案会出现
+   * "入口已完成、被覆盖项没勾"的不一致状态（统计口径上最难被发现的那类坏数据）。
+   */
+  const { handlers, pressing, swallowClick } = useLongPress({
+    duration: LONG_PRESS_MS,
+    onLongPress: () => {
+      void (async () => {
+        const picked = await askPick({ itemId: item.id, itemName: item.name, checked });
+        if (!picked?.length) return;
+        await toggleInProfiles([item.id, ...(cascadeIds ?? [])], picked);
+      })();
+    },
+  });
 
   const kindLabels = dictIndexOf(meta, 'gainKind');
   const labelMap = new Map([...kindLabels.entries()].map(([k, v]) => [k, v.label]));
@@ -65,12 +106,33 @@ function ChecklistItem({ item, showDeadline = false, dimmed = false, onToggle }:
 
   return (
     <article
-      className={`flex min-w-0 items-start gap-2.5 rounded-md border border-line-soft bg-surface px-3.5 py-3 transition-colors duration-120 hover:border-line ${opacity} cursor-pointer`}
-      onClick={handleToggle}
+      {...handlers}
+      className={`relative flex min-w-0 items-start gap-2.5 overflow-hidden rounded-md border bg-surface px-3.5 py-3 transition-all duration-120 ${opacity} cursor-pointer ${
+        pressing ? 'scale-[0.985] border-brand bg-brand-soft/40' : 'border-line-soft hover:border-line'
+      }`}
+      onClick={() => {
+        /* 长按刚触发过：这次 click 是 Web 事件序列的副作用，吞掉它，
+           否则用户"长按选档案"会顺手把当前档案也勾上 */
+        if (swallowClick()) return;
+        handleToggle();
+      }}
     >
+      {/* 长按进度（2026-09-16 用户要求"让用户知道正在被长按"）：
+          常驻元素 + 条件宽度，而不是按住时才挂载 —— 动态挂载的 width 过渡没有起始值，
+          浏览器不会插值，进度条会一帧闪满，看不到"正在按住"的过程。
+          取消时用 `transition-none` 立即跳回，否则会看到它慢慢缩回去。 */}
+      <span
+        aria-hidden
+        className={`absolute bottom-0 left-0 h-0.5 bg-brand ${
+          pressing ? 'w-full transition-[width] duration-500 ease-linear' : 'w-0 transition-none'
+        }`}
+      />
       <CheckBox
         checked={checked}
-        onToggle={handleToggle}
+        onToggle={() => {
+          if (swallowClick()) return;
+          handleToggle();
+        }}
         label={`${checked ? '取消完成' : '标记完成'}：${item.name}`}
       />
 
@@ -85,24 +147,29 @@ function ChecklistItem({ item, showDeadline = false, dimmed = false, onToggle }:
           {/* 截止徽章放**标题行内**：原先它独占卡片右侧一列，那一列会把内容区压窄，
               使下方备注提前换行 —— 而限时页里备注最长的恰恰都是带 deadline 的条目
               （2026-09-14 用户反馈）。时间类徽章现在都集中在标题行：截止 → 覆盖 → 会员 → 时间窗 */}
-          {showDeadline ? <DeadlineTag item={item} /> : null}
-          {item.autoDaily ? <CoveredTag /> : null}
-          {item.premium ? <PremiumTag /> : null}
-          <TimeTag item={item} />
+          {card.tags && showDeadline ? <DeadlineTag item={item} /> : null}
+          {card.tags && item.autoDaily ? <CoveredTag /> : null}
+          {card.tags && item.premium ? <PremiumTag /> : null}
+          {/* 关掉 `tags` 时 `TimeTag` 一并消失 —— 它在没有时间窗时会渲染 `timeNote`
+             那句说明，同属"时间信息"，拆开反而会出现"关了一半"的怪异状态 */}
+          {card.tags ? <TimeTag item={item} /> : null}
         </h3>
 
-        <GainBadges gain={item.gain} note={item.gainNote} />
-        <KindBadges kinds={item.gainKind} gain={item.gain} labels={labelMap} />
+        {card.gain ? <GainBadges gain={item.gain} note={item.gainNote} /> : null}
+        {card.kinds ? <KindBadges kinds={item.gainKind} gain={item.gain} labels={labelMap} /> : null}
 
-        {item.path ? <Field kind="path" value={item.path} /> : null}
-        {item.condition ? <Field kind="condition" value={item.condition} /> : null}
-        {item.note ? <Field kind="note" value={item.note} /> : null}
+        {/* 这三行是卡片高度的主要来源，也是「只想打卡」时最不需要的内容 —— 逐项可关 */}
+        {card.path && item.path ? <Field kind="path" value={item.path} /> : null}
+        {card.condition && item.condition ? <Field kind="condition" value={item.condition} /> : null}
+        {card.note && item.note ? <Field kind="note" value={item.note} /> : null}
       </div>
 
       <button
         type="button"
         aria-label={pinned ? `取消置顶：${item.name}` : `置顶：${item.name}`}
         title={pinned ? '取消置顶' : '置顶这条'}
+        /* 星标是独立控件：按下就阻止冒泡，否则在它身上按住会触发整卡的长按选择器 */
+        onPointerDown={(e) => e.stopPropagation()}
         onClick={(e) => {
           e.stopPropagation();
           void togglePin(item.id);

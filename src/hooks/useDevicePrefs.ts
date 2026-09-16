@@ -1,29 +1,23 @@
 import { useDeviceStore } from '../stores/device';
 
 /**
- * 设备级偏好的统一入口（寮时间 / 引导标记）。
+ * 设备级状态的统一入口（2026-09-16 起只剩引导标记）。
  *
- * 「设备级」的含义：**不随档案走、不上后端**。同一台手机切大号小号时，
- * 寮还是那个寮、引导也不该重看 —— 所以它们不放进用户数据分片。
+ * 「设备级」的含义：**不随档案走、不上后端**。
  *
- * 2026-09-11：随 `S7 提醒能力` 下线，`notify`（通知开关）与 `reminded`（已提醒标记）
- * 已从这里与 `stores/device` 一并移除。
+ * 寮时间已从这里移出（迁到 `stores/guildTime` 的档案级 store）—— 它不再满足上面两条：
+ * 不同号可能在**不同的寮**，且用户要求所有配置项都能被备份带走。这个 hook 的名字
+ * 之所以不改，是因为"设备级"这个分层本身仍然存在，只是成员只剩引导标记一个。
  */
 export function useDevicePrefs() {
-  const guildTime = useDeviceStore((s) => s.guildTime);
   const onboarded = useDeviceStore((s) => s.onboarded);
   const hydrated = useDeviceStore((s) => s.hydrated);
-  const setGuildTime = useDeviceStore((s) => s.setGuildTime);
-  const clearGuildTime = useDeviceStore((s) => s.clearGuildTime);
   const markOnboarded = useDeviceStore((s) => s.markOnboarded);
   const resetOnboarding = useDeviceStore((s) => s.resetOnboarding);
 
   return {
-    guildTime,
     onboarded,
     hydrated,
-    setGuildTime,
-    clearGuildTime,
     markOnboarded,
     resetOnboarding,
   };

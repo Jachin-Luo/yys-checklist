@@ -3,13 +3,16 @@
  *
  * 关键决定：用户配置的寮时间**不改主数据**，而是在展示层做一次叠加。
  * 理由：主数据里的 `time` 只是"参考值"（`isGuildTime: true` 已在数据里标明），
- * 把它写回 `items.db.json` 会让换寮/换号的用户拿到前一个人的时间；
- * 而寮时间属于**设备/人**的属性（见 `services/localStore.DEVICE_KEY`）。
+ * 把它写回 `items.db.json` 会让换寮/换号的用户拿到前一个人的时间。
+ *
+ * 2026-09-16：寮时间由**设备级升为档案级**（用户决策）。原注释写的理由是"同一个寮"，
+ * 但那只对"所有号都在自己寮"成立；代管他人的号、或两个号分处两寮时会互相污染。
+ * 类型因此移到 `api/types`（`api/types` 不能反向 import 本文件 —— 它要 import 这里的
+ * `Item` 作为输入），此处 re-export，既有 import 点不用改。
  */
-import type { Item } from '../api/types';
+import type { GuildTimePrefs, Item } from '../api/types';
 
-/** 设备级寮时间偏好：`itemId -> 'HH:mm'` */
-export type GuildTimePrefs = Record<string, string>;
+export type { GuildTimePrefs };
 
 const HHMM = /^([01]\d|2[0-3]):[0-5]\d$/;
 

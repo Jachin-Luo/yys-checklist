@@ -3,6 +3,7 @@ import { Clock, RotateCcw } from 'lucide-react';
 import CollapsibleSection from '../../components/common/CollapsibleSection';
 import { isValidHm, guildTimeTargets, configuredCount } from '../../domain/guildTime';
 import { useDevicePrefs } from '../../hooks/useDevicePrefs';
+import { useGuildTimeStore } from '../../stores/guildTime';
 import { useItemStore } from '../../stores/items';
 
 /* 去掉 `outline-none`，焦点环交给 `styles/base.css` 的全局 `:focus-visible` */
@@ -14,13 +15,20 @@ const inputCls =
  *
  * 道馆 / 宴会 / 首领退治 / 狭间暗域等集体活动的时间**各寮自定，写死即错**，
  * 所以数据里的 `time` 只是参考值，用户配置的值在展示层叠加（`domain/guildTime.applyGuildTime`）。
- * 配置存在设备级键 `yys:guildTime` —— 换号不用重配，换手机才需要。
+ *
+ * **2026-09-16 改为档案级**（`yys:guild:{profileId}`）：原设计存在设备级键里、
+ * "换号不用重配"，但那只对"所有号都在自己寮"成立。现在每个号各有一份，
+ * 需要多号共用时走下面的「同步到其他档案」。
  *
  * 卡内分割：说明文字在上（配置前提），逐条录入在下（明细）。
  */
 export default function GuildTimeSection() {
   const items = useItemStore((s) => s.items);
-  const { guildTime, setGuildTime, clearGuildTime, resetOnboarding } = useDevicePrefs();
+  const guildTime = useGuildTimeStore((s) => s.guildTime);
+  const setGuildTime = useGuildTimeStore((s) => s.setGuildTime);
+  const clearGuildTime = useGuildTimeStore((s) => s.clearGuildTime);
+  /* 引导标记仍是设备级：它是"这台设备看过引导没有"，与哪个档案无关 */
+  const { resetOnboarding } = useDevicePrefs();
 
   const targets = useMemo(() => guildTimeTargets(items), [items]);
   const done = configuredCount(items, guildTime);
@@ -33,7 +41,7 @@ export default function GuildTimeSection() {
         <button
           type="button"
           disabled={done === 0}
-          onClick={() => clearGuildTime()}
+          onClick={() => void clearGuildTime()}
           className="flex cursor-pointer items-center gap-1 rounded-sm border border-line px-2 py-1 text-sm text-ink-2 transition-colors duration-120 hover:border-ink-4 disabled:cursor-not-allowed disabled:opacity-50"
         >
           <RotateCcw size={12} strokeWidth={2} />
@@ -66,13 +74,13 @@ export default function GuildTimeSection() {
                   type="time"
                   aria-label={`${it.name} 的寮时间`}
                   value={value}
-                  onChange={(e) => setGuildTime(it.id, e.target.value)}
+                  onChange={(e) => void setGuildTime(it.id, e.target.value)}
                   className={inputCls}
                 />
                 {value ? (
                   <button
                     type="button"
-                    onClick={() => setGuildTime(it.id, '')}
+                    onClick={() => void setGuildTime(it.id, '')}
                     className="cursor-pointer rounded-sm border border-line px-2 py-1 text-sm text-ink-2 transition-colors duration-120 hover:border-ink-4"
                   >
                     清除
@@ -89,7 +97,8 @@ export default function GuildTimeSection() {
         })}
 
         <p className="mt-2.5 text-sm text-ink-3">
-          配置保存在本机（设备级），换号不用重配；换设备需要重新配置。
+          配置按<b className="text-ink-2">档案</b>保存：每个号各有一份，切号即切换。
+          多个号在同一个寮时，用下面的「同步到其他档案」一次铺开，不必逐个填。
         </p>
         <button
           type="button"

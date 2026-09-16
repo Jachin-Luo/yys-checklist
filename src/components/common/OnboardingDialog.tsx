@@ -1,9 +1,9 @@
 import { useMemo, useState } from 'react';
 import { Check, Clock, UserRound } from 'lucide-react';
 import { guildTimeTargets } from '../../domain/guildTime';
-import { useDevicePrefs } from '../../hooks/useDevicePrefs';
 import { useModalFocus } from '../../hooks/useModalFocus';
 import { useDeviceStore } from '../../stores/device';
+import { useGuildTimeStore } from '../../stores/guildTime';
 import { useItemStore } from '../../stores/items';
 import { useSessionStore } from '../../stores/session';
 
@@ -29,7 +29,10 @@ export default function OnboardingDialog() {
   const session = useSessionStore((s) => s.session);
   const profiles = useSessionStore((s) => s.profiles);
   const switchProfile = useSessionStore((s) => s.switchProfile);
-  const { guildTime, setGuildTime } = useDevicePrefs();
+  /* 寮时间是**档案级**（2026-09-16 起）：第 2 步配的就是"当前这个号所在寮的时间"。
+     引导本身仍是设备级一次性标记（`yys:onboarded`），两者归属不同、互不影响。 */
+  const guildTime = useGuildTimeStore((s) => s.guildTime);
+  const setGuildTime = useGuildTimeStore((s) => s.setGuildTime);
   const [step, setStep] = useState(0);
 
   const targets = useMemo(() => guildTimeTargets(items), [items]);
@@ -114,7 +117,7 @@ export default function OnboardingDialog() {
                       type="time"
                       aria-label={`${it.name} 的寮时间`}
                       value={guildTime[it.id] ?? ''}
-                      onChange={(e) => setGuildTime(it.id, e.target.value)}
+                      onChange={(e) => void setGuildTime(it.id, e.target.value)}
                       className="w-28 flex-none rounded-sm border border-line bg-surface px-2 py-1 text-lg text-ink focus:border-brand"
                     />
                   </div>

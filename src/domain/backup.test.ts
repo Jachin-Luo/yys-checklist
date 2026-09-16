@@ -65,7 +65,9 @@ describe('validateBundle：结构与归一化', () => {
     expect(r.ok).toBe(true);
     if (!r.ok) return;
     expect(r.warnings).toEqual([]);
-    expect(r.summary).toEqual({ profiles: 1, checked: 2, custom: 0, hidden: 0, order: 0, logDays: 0 });
+    expect(r.summary).toEqual({
+      profiles: 1, checked: 2, custom: 0, hidden: 0, order: 0, logDays: 0, guildTime: 0, plans: 0,
+    });
   });
 
   /* 旧备份（2026-09-15 之前导出的）没有 log 字段 —— 那是真实情况，不该当成文件损坏 */
@@ -178,14 +180,14 @@ describe('summarize', () => {
       ],
     });
     expect(summarize(b as unknown as UserDataBundle)).toEqual({
-      profiles: 2, checked: 3, custom: 1, hidden: 1, order: 1, logDays: 0,
+      profiles: 2, checked: 3, custom: 1, hidden: 1, order: 1, logDays: 0, guildTime: 0, plans: 0,
     });
   });
 
   it('空 bundle 不抛错', () => {
     const b = bundle({ profiles: [], data: [] });
     expect(summarize(b as unknown as UserDataBundle)).toEqual({
-      profiles: 0, checked: 0, custom: 0, hidden: 0, order: 0, logDays: 0,
+      profiles: 0, checked: 0, custom: 0, hidden: 0, order: 0, logDays: 0, guildTime: 0, plans: 0,
     });
   });
 
@@ -207,6 +209,58 @@ describe('summarize', () => {
       ],
     });
     expect(summarize(withLog as unknown as UserDataBundle).logDays).toBe(2);
+  });
+
+  /* 寮时间与寄养任务（2026-09-16 纳入备份）：此前它们是设备级、根本不进备份，
+     导致"清理浏览器数据后导入"会**永久丢失** —— 清 localStorage 时设备级键一起没了，
+     而备份里没有副本。这一组用例锁住"从 bundle 进摘要 / 进出参"这条链路。 */
+  it('统计寮时间条数与寄养任务数', () => {
+    const withExtras = bundle({
+      data: [
+        {
+          ...row('p_main', { x: 1 }),
+          guildTime: { daily_daoguan: '20:00', weekly_banquet: '20:30' },
+          plans: [{ id: 'n_1', base: '08:00', n: 2, started: true, createdAt: 1 }],
+        },
+      ],
+    });
+    const s = summarize(withExtras as unknown as UserDataBundle);
+    expect(s.guildTime).toBe(2);
+    expect(s.plans).toBe(1);
+  });
+
+  it('寮时间 / 寄养记录的归一化：畸形项被丢弃（宁可少几条，也不能让坏数据进递推）', () => {
+    const raw = bundle({
+      data: [
+        {
+          ...row('p_main', { x: 1 }),
+          guildTime: { daily_daoguan: '20:00', daily_bad: '25:00', daily_num: 42 },
+          plans: [
+            { id: 'n_ok', base: '08:00', n: 2, started: true, createdAt: 1, dones: { 1: 100, 0: 5 } },
+            { id: 'n_bad_base', base: '99:99', n: 1, started: true, createdAt: 1 },
+            { id: 'n_bad_n', base: '08:00', n: 99, started: true, createdAt: 1 },
+            { nope: true },
+          ],
+        },
+      ],
+    });
+    const r = validateBundle(raw, '1.4.0');
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+
+    expect(r.bundle.data[0].guildTime).toEqual({ daily_daoguan: '20:00' });
+    expect(r.bundle.data[0].plans).toHaveLength(1);
+    expect(r.bundle.data[0].plans[0].id).toBe('n_ok');
+    /* 点序号 0（上卡点）不是合法的完成记录键：上卡点天然已完成，不接受单独记录 */
+    expect(r.bundle.data[0].plans[0].dones).toEqual({ 1: 100 });
+  });
+
+  it('旧备份缺 guildTime / plans 字段 → 归一成空值，不判为文件损坏', () => {
+    const r = validateBundle(bundle(), '1.4.0');
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    expect(r.bundle.data[0].guildTime).toEqual({});
+    expect(r.bundle.data[0].plans).toEqual([]);
   });
 });
 
@@ -245,7 +299,11 @@ describe('serializeBundle / parseBundleText：复制粘贴的载体', () => {
     if (!parsed.ok) return;
     const r = validateBundle(parsed.value, '1.4.0');
     expect(r.ok).toBe(true);
-    if (r.ok) expect(r.summary).toEqual({ profiles: 1, checked: 2, custom: 0, hidden: 0, order: 0, logDays: 0 });
+    if (r.ok) {
+      expect(r.summary).toEqual({
+        profiles: 1, checked: 2, custom: 0, hidden: 0, order: 0, logDays: 0, guildTime: 0, plans: 0,
+      });
+    }
   });
 
   it('空内容 / 只有空白 → 提示先粘贴', () => {

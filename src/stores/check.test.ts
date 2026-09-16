@@ -65,6 +65,87 @@ afterEach(() => {
   vi.useRealTimers();
 });
 
+/**
+ * 跨档案勾选（清单长按，2026-09-16）。
+ *
+ * 与当前档案的路径刻意不同：当前档案走乐观更新 + 写队列，其他档案**只写盘**
+ * （它们不在内存里）。这里要锁住的是"目标档案的**日志**也一并维护"——
+ * 少了它，另一个号的统计页日历会缺一格、近 N 天收益会少算。
+ */
+describe('跨档案勾选（清单长按）', () => {
+  const scope2Of = (profileId: string) => ({ userId: 'u_local', profileId });
+
+  it('把这一条写进目标档案，并给目标档案补一条当天的日志', async () => {
+    const p2 = await api.createProfile('u_local', { name: '小号' });
+
+    const failed = await useCheckStore.getState().toggleInProfiles(['daily_sign'], [p2.id]);
+    expect(failed).toEqual([]);
+
+    /* 当前档案：内存态 + 落盘都要有 */
+    expect(useCheckStore.getState().checked.daily_sign).toBeTypeOf('number');
+    expect((await api.getState(scope2Of(p2.id))).checked.daily_sign).toBeTypeOf('number');
+
+    /* 目标档案的日历也要有这一天 —— 这正是契约补 `getCheckLog` 的唯一动因 */
+    const log = await api.getCheckLog(scope2Of(p2.id));
+    expect(log.days[dayKey(new Date())]).toContain('daily_sign');
+  });
+
+  it('已勾选时是对称的"一起取消"，目标档案的日志同样回退', async () => {
+    const p2 = await api.createProfile('u_local', { name: '小号' });
+
+    await useCheckStore.getState().toggleInProfiles(['daily_sign'], [p2.id]);
+    await useCheckStore.getState().toggleInProfiles(['daily_sign'], [p2.id]);
+
+    expect(useCheckStore.getState().checked.daily_sign).toBeUndefined();
+    expect((await api.getState(scope2Of(p2.id))).checked.daily_sign).toBeUndefined();
+    expect((await api.getCheckLog(scope2Of(p2.id))).days[dayKey(new Date())] ?? []).not.toContain(
+      'daily_sign',
+    );
+  });
+
+  it('目标档案写入失败 → 计入失败列表；当前档案已成功的那次不回滚', async () => {
+    const p2 = await api.createProfile('u_local', { name: '小号' });
+    vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    /* 让目标档案那一步（读日志）失败，模拟部分失败 */
+    vi.spyOn(api, 'getCheckLog').mockRejectedValue(new Error('offline'));
+
+    const failed = await useCheckStore.getState().toggleInProfiles(['daily_sign'], [p2.id]);
+
+    expect(failed).toEqual([p2.id]);
+    /* 当前档案的成功不该被别的档案的失败牵连：回滚它比失败本身更糟 */
+    expect(useCheckStore.getState().checked.daily_sign).toBeTypeOf('number');
+    expect(
+      (await api.getState(scope2Of('p_main'))).checked.daily_sign,
+    ).toBeTypeOf('number');
+  });
+
+  it('一键日常入口：长按跨档案时**级联**写入被覆盖项（范围与当前档案一致）', async () => {
+    const p2 = await api.createProfile('u_local', { name: '小号' });
+    const ids = [HUB_ID, ...cascadeIds()];
+    expect(ids.length).toBeGreaterThan(1);
+
+    const failed = await useCheckStore.getState().toggleInProfiles(ids, [p2.id]);
+    expect(failed).toEqual([]);
+
+    const other = await api.getState({ userId: 'u_local', profileId: p2.id });
+    /* 入口与它的覆盖项**都要**在目标档案里勾上 —— 少任何一个，
+       都会让目标档案出现"入口显示已完成、实际覆盖项没勾"的不一致 */
+    for (const id of ids) expect(other.checked[id]).toBeTypeOf('number');
+    /* 整组共用一个时间戳（同一批操作，周期重置边界一致） */
+    expect(other.checked[HUB_ID]).toBe(other.checked[cascadeIds()[0]]);
+
+    /* 目标档案的日历也要把整组记上 */
+    const log = await api.getCheckLog({ userId: 'u_local', profileId: p2.id });
+    expect(log.days[dayKey(new Date())]).toEqual(expect.arrayContaining(ids));
+  });
+
+  it('目标列表里包含当前档案时不会重复写（去重由实现保证）', async () => {
+    await useCheckStore.getState().toggleInProfiles(['daily_sign'], ['p_main']);
+    expect(useCheckStore.getState().checked.daily_sign).toBeTypeOf('number');
+    expect((await api.getState(scope2Of('p_main'))).checked.daily_sign).toBeTypeOf('number');
+  });
+});
+
 describe('一键日常：双向级联', () => {
   it('勾选入口 → 入口 + 全部被覆盖项一起勾上，时间戳一致', async () => {
     expect(autoSetOf()).toEqual(['daily_sign', 'daily_free_draw']);

@@ -12,10 +12,12 @@ import type {
   BootstrapPayload,
   CheckLog,
   CheckState,
+  GuildTimePrefs,
   Item,
   ItemDraft,
   ItemOverrides,
   Meta,
+  NurturePlans,
   Profile,
   ProfileDraft,
   Session,
@@ -82,10 +84,27 @@ export interface ApiClient {
    * 读路径走 `getBootstrap` 的 `log` 字段 —— 与 `state` 同一个首屏入口。
    */
   saveCheckLog(scope: DataScope, log: CheckLog): Promise<void>;
+  /**
+   * 勾选日志读取（2026-09-16）。日志的常规读路径是 `getBootstrap`（首屏一次带全，
+   * 避免同一份数据的两个侧面来自不同时刻），但那只覆盖**当前档案**。
+   * 新增它的唯一动因是「长按跨档案勾选」：要给目标档案补一条日志记录，
+   * 就必须先把它读回来合并 —— 否则目标档案的日历会少一条，与实际"确实做过"不符。
+   * 对称性上它本来也该有（`getState` / `getView` / `getOverrides` 都有对应 get）。
+   */
+  getCheckLog(scope: DataScope): Promise<CheckLog>;
   getView(scope: DataScope): Promise<ViewPrefs>;
   saveView(scope: DataScope, view: ViewPrefs): Promise<void>;
   getOverrides(scope: DataScope): Promise<ItemOverrides>;
   saveOverrides(scope: DataScope, ov: ItemOverrides): Promise<void>;
+
+  /* ── 档案级偏好（2026-09-16 由设备级升级）──
+     整表读写：两份额数据都极小（寮时间 5 条上下、寄养记录几条），
+     不需要 `setChecked` 那种增量协议，与 `saveView` 同一形态。
+     读路径在首屏走 `getBootstrap`，这两个 get 供跨档案同步（设置页 / 长按）使用。 */
+  getGuildTime(scope: DataScope): Promise<GuildTimePrefs>;
+  saveGuildTime(scope: DataScope, prefs: GuildTimePrefs): Promise<void>;
+  getPlans(scope: DataScope): Promise<NurturePlans>;
+  savePlans(scope: DataScope, plans: NurturePlans): Promise<void>;
 
   /* 条目增删（语义封装，内部改写 overrides） */
   addCustomItem(scope: DataScope, draft: ItemDraft): Promise<Item>;

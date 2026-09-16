@@ -68,8 +68,15 @@ VITE_API_MODE === 'http' ? new HttpApi(baseURL) : new MockApi()
 | `checklog(profileId)` | `yys:checklog:{profileId}` | 该档案的勾选日志（`YYYY-MM-DD → itemId[]`，历史事实，保留 90 天） |
 | `view(profileId)` | `yys:view:{profileId}` | 该档案的视图偏好 |
 | `ovr(profileId)` | `yys:ovr:{profileId}` | 该档案的条目覆盖层（隐藏 / 自建 / 自定义顺序 / 一键日常配置） |
+| `guild(profileId)` | `yys:guild:{profileId}` | 该档案的寮时间（`itemId -> HH:mm`）—— **2026-09-16 由设备级升格** |
+| `plans(profileId)` | `yys:plans:{profileId}` | 该档案的结界寄养任务 / 计划 —— **2026-09-16 由设备级升格** |
 
-设备级键（不挂档案，定义在 `services/localStore.ts` 的 `DEVICE_KEY`）：`yys:guildTime`、`yys:onboarded`、`yys:plans`。
+设备级键（不挂档案，定义在 `services/localStore.ts` 的 `DEVICE_KEY`）：**只剩 `yys:onboarded`**。
+`yys:guildTime` 与 `yys:plans` 于 2026-09-16 升为上面的两个档案级分片（理由：寮时间取决于所在寮、
+寄养节奏取决于具体号的结界卡，都不是"这台手机的属性"；且只有变成档案级分片，它们才能随备份走）。
+**旧的两个设备级键不做迁移**（用户决策）：新版本不再有读取点，用户重新配置一次，
+或用设置页「同步到其他档案」批量铺开。`onboarded` 之所以留下，是因为它不是配置，
+而是"这台设备看过引导没有"—— 换设备后重看一次引导是正确的。
 
 **分片是硬约束**：勾选一条只重写**本档案**的分片（`yys:state:{profileId}` 逐条增量 + 一次 `yys:checklog:{profileId}` 整表），其他档案不受影响；由 `api/mock/contract.test.ts` 的「分片写入验证」与 `stores/check.test.ts` 的「整批只写」用例守护。
 
@@ -157,8 +164,10 @@ src/domain/enums.ts 的字面量联合类型  ←── 双向校验 ──→  
 | `checkLog.ts` | `LogDays`、`LOG_KEEP_DAYS`(90)、`dayKeyOf` / `dayKey` / `keyToTs` / `shiftDayKey`、`dayCount`、`addEntry`、`removeEntrySince` / `removeEntriesSince`、`pruneDays`、`eachDay` | 勾选日志（按日期分桶的历史）：幂等写入、按周期起点回退、90 天修剪、区间枚举 |
 | `calendar.ts` | `CalendarCell` / `MonthGrid`、`WEEKDAY_HEAD`、`monthTitle`、`buildMonthGrid` | 月历网格排版（周一起始、固定 6 行、含前后补位格） |
 | `autoDaily.ts` | `hubItem`、`isAutoDailyCandidate`、`dataDefaultAutoSet`、`effectiveAutoSet`、`isCovered`、`hiddenByCover`、`cascadeTargets`、`cascadeBatch` | 一键日常覆盖集合与级联 |
-| `backup.ts` | `MAX_BUNDLE_CHARS`(4_000_000)、`STALE_DAYS`(45)、`BundleSummary`（含 `logDays`）、`ValidateResult`、`summarize`、`validateBundle`、`Freshness`、`dataFreshness`、`serializeBundle`、`parseBundleText` | 备份文本的校验、归一化（含勾选日志；旧备份缺 `log` 字段时补空日志而非判为损坏）与新鲜度 |
-| `guildTime.ts` | `GuildTimePrefs`、`isValidHm`、`guildTimeTargets`、`configuredCount`、`applyGuildTime`、`applyGuildTimeAll`、`withGuildTime` | 寮时间在展示层叠加（**不写回主数据**） |
+| `backup.ts` | `MAX_BUNDLE_CHARS`(4_000_000)、`STALE_DAYS`(45)、`BundleSummary`（含 `logDays` / `guildTime` / `plans`）、`ValidateResult`、`summarize`、`validateBundle`、`Freshness`、`dataFreshness`、`serializeBundle`、`parseBundleText` | 备份文本的校验、归一化与新鲜度。缺字段一律补空值而非判为损坏（旧备份没有 `log` / `guildTime` / `plans`）；寄养记录**逐条校验必需字段**（畸形记录会进 `recordPoints` 递推，宁可少几条） |
+| `cardDisplay.ts` | `DEFAULT_CARD_DISPLAY`、`CardPresetKey` / `CardPreset` / `CARD_PRESETS`（极简 / 简要 / 完整）、`CARD_FIELDS`、`effectiveCardDisplay`、`matchPreset`、`hiddenFieldCount` | 清单卡片**显示哪些字段**（2026-09-16 新增，存在 `view.card`）。预设只是"一次设六项"的快捷键，改任一项后 `matchPreset` 返回 null；默认 = 全部显示，故不改变既有观感 |
+| `guildTime.ts` | `GuildTimePrefs`（类型在 `api/types`，此处 re-export）、`isValidHm`、`guildTimeTargets`、`configuredCount`、`applyGuildTime`、`applyGuildTimeAll`、`withGuildTime` | 寮时间在展示层叠加（**不写回主数据**）。2026-09-16 起配置本身是**档案级**分片 |
+| `sync.ts` | `SyncPartKey` / `SyncPart` / `SYNC_PARTS`、`SyncSource` / `SyncPatch`、`defaultSyncKeys`、`applyParts`、`describeKeys` | 档案间配置同步：可同步内容清单 + **字段级接管**规则（只勾「一键日常覆盖」时不动目标的筛选与置顶）。勾选状态与日志刻意不在清单内 |
 | `nurture.ts` | `NURTURE_HOURS`(6)、`MAX_NURTURE_N`(5)、`NurtureRecord`（含 `dones`）/ `NurturePoint`（含 `index` / `doneAt`）、`isHM` / `normalizeHM` / `nowHM` / `hmToDate`、`baseTsOf` / `nurturePointsFrom` / `recordPoints` / `nurturePoints`、`markPointDone` / `clearPointDone` / `nextPendingPoint`、`pointStats`、`NurtureDue` / `nextDue` / `dueText`、`nurtureId`、`makeNurture`、`sortNurture` | 结界寄养 6 小时收 / 续点派生：点列表 = 上卡点 + 逐点递推（`dones` 逐点记实际完成时间）；`nextDue` / `dueText` 供壳层常驻徽章用 |
 | `yuhun.ts` | `MODE_LABEL`、`WEEK_ORDER`、`DungeonDay`、`hasDayGrid`、`dungeonDay`、`resolveFollow`、`OldFollowInfo`、`oldFollowInfo`、`groupBySection` | 御魂副本轮换与掉落派生 |
 | `bounty.ts` | `BountySpotRef` / `BountyEntry` / `BountyUnionRow`、`buildBountyEntries`、`matchBounty`、`bountyUnion`、`fullCoverage`、`RankedEntry`、`pinMatches` | 悬赏出处派生、线索反查与并集 |
@@ -199,7 +208,9 @@ src/domain/enums.ts 的字面量联合类型  ←── 双向校验 ──→  
 
 ### 7.4 寮时间：展示层叠加
 
-各寮活动时间自定，写死即错。数据里的时间只是参考值，用户配置（`stores/device.guildTime`，设备级）在展示层经 `domain/guildTime.applyGuildTimeAll` 叠加。它属于「设备 / 人」的属性 —— 换号不用重配，换手机才需要。
+各寮活动时间自定，写死即错。数据里的时间只是参考值，用户配置（`stores/guildTime`，**档案级**分片 `yys:guild:{profileId}`）在展示层经 `domain/guildTime.applyGuildTimeAll` 叠加。
+
+它的归属在 2026-09-16 变过一次：原设计放设备级、理由是"同一个寮，换号不用重配"，但那只对"所有号都在自己寮"成立 —— 代管他人的号、或两个号分处两寮时，一份配置会互相污染。改档案级后它也随备份走（见 7.5），代价是"多号同寮"要配多次，由设置页的**同步到其他档案**（`domain/sync` + `services/profileSync`）补上。
 
 ### 7.5 备份：文本载体 + 覆盖式写入
 
@@ -207,10 +218,13 @@ src/domain/enums.ts 的字面量联合类型  ←── 双向校验 ──→  
 - 导入：`prepareImportText`（校验 + 归一化，不写库）→ 用户确认五项计数（档案 / 勾选记录 / 自建条目 / 已隐藏 / 自定义排序）→ 手动输入「导入」二字 → `applyImportText` 写库并整库重载。
 - 校验：`domain/backup.validateBundle`（结构 + 归一化）、`summarize`（摘要）、`dataFreshness` / `STALE_DAYS`（快照新鲜度）、`MAX_BUNDLE_CHARS`（长度上限）。
 - schema 版本不同**只警告不拒绝**（保留「试试看」的机会），结构不合格直接拒绝。
+- 备份范围 = **全部档案的全部配置**：勾选、勾选日志、视图偏好、自建条目与排序、**寮时间、寄养任务**（后两项 2026-09-16 加入）。唯一的例外是设备级引导标记 `yys:onboarded` —— 它是"这台设备看过引导没有"，不是配置。
 
 ### 7.6 结界寄养
 
 `domain/nurture`：填卡时间（`HH:mm`）后按 6 小时间隔派生最多 5 个收 / 续点，跨天标「明天 / 后天 / 日期」。任务态与计划态刻意分离（完成情况由 `pointStats` / `nextPendingPoint` 计算，计划态不背状态）。
+
+**2026-09-16 起记录本身是档案级**（`yys:plans:{profileId}`）：原注释写"与玩哪个号无关"站不住 —— 结界卡的种类与时长因号而异（太鼓 / 斗鱼 / 美食卡，6h / 12h…），上卡时间自然不同。落盘由"直写 localStorage"改为走契约 `api.savePlans`（**异步 + 失败回滚**，形态与 `stores/view` 一致）；读路径并入首屏 `getBootstrap().plans`，壳层的「下一次该收」徽章不再自己读本机数据，因此也不会再闪现上一个号的寄养列表。
 点模型（2026-09-15 重构）：`recordPoints` 输出 `[上卡点(index 0), 收/续点 1..n]`，第 k 点的预计时刻 = 前一点的「实际完成时间（`dones[k-1]`，没有就用它的预计时刻）」+ 6h。于是「记某个点完成」只把它**之后**的点往后挪、之前的点不动（早先那版整条重推会让用户以为任务被初始化了）；上卡点天然已完成且不接受改写，它由 `base` 决定。`baseTsOf` 是唯一的基准入口，展示 / 徽章 / `nextDue` 共用。
 
 ### 7.7 御魂与悬赏派生

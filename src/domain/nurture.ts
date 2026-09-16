@@ -158,6 +158,56 @@ export function pointStats(points: NurturePoint[]): { done: number; pending: num
   return { done, pending: points.length - done };
 }
 
+/** 逐点完成记录：键必须是不小于 1 的整数（0 是上卡点，天然已完成、不接受单独记录） */
+function sanitizeDones(value: unknown): Record<number, number> | undefined {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) return undefined;
+  const out: Record<number, number> = {};
+  for (const [key, val] of Object.entries(value as Record<string, unknown>)) {
+    const index = Number(key);
+    if (!Number.isInteger(index) || index < 1) continue;
+    if (typeof val !== 'number' || !Number.isFinite(val)) continue;
+    out[index] = val;
+  }
+  return Object.keys(out).length ? out : undefined;
+}
+
+/**
+ * 寄养记录净化（2026-09-16）：逐条校验必需字段，畸形记录**直接丢弃**。
+ *
+ * 为什么必须有：这些数据来自 localStorage 分片与用户导入的备份 —— 两者都是**外部数据**，
+ * 可能来自旧版本、被手工改过、或干脆选错了文件。一条 `base` 不是合法 `HH:mm` 的记录
+ * 会让 `recordPoints` 的递推算出 `NaN`，界面上表现为"时间显示成 NaN:NaN"且所有点全乱。
+ * 宁可少几条也不能放进去。
+ *
+ * 为什么放在 domain 而不是 Mock：它是**数据规则**，Mock 只做 IO（分层铁律）。
+ * `domain/backup`（导入校验）与 `api/mock/userStore`（分片读取）都调它 ——
+ * 同一个入口，两处不会漂移。
+ */
+export function sanitizePlans(value: unknown): NurtureRecord[] {
+  if (!Array.isArray(value)) return [];
+  const out: NurtureRecord[] = [];
+  for (const raw of value) {
+    if (typeof raw !== 'object' || raw === null || Array.isArray(raw)) continue;
+    const row = raw as Record<string, unknown>;
+    const id = typeof row.id === 'string' ? row.id : '';
+    const base = typeof row.base === 'string' ? row.base.trim() : '';
+    if (!id || !isHM(base)) continue;
+    if (typeof row.n !== 'number' || !Number.isFinite(row.n)) continue;
+    const n = Math.trunc(row.n);
+    if (n < 0 || n > MAX_NURTURE_N) continue;
+    const dones = sanitizeDones(row.dones);
+    out.push({
+      id,
+      base,
+      n,
+      started: row.started === true,
+      createdAt: typeof row.createdAt === 'number' && Number.isFinite(row.createdAt) ? row.createdAt : 0,
+      ...(dones ? { dones } : {}),
+    });
+  }
+  return out;
+}
+
 export interface NurtureDue {
   record: NurtureRecord;
   point: NurturePoint;

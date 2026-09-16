@@ -1,7 +1,9 @@
 import { useEffect } from 'react';
 import { api } from '../api';
 import { resetCheckMemory, useCheckStore } from '../stores/check';
+import { resetGuildTimeMemory, useGuildTimeStore } from '../stores/guildTime';
 import { resetItemsMemory, useItemStore } from '../stores/items';
+import { resetNurtureMemory, useNurtureStore } from '../stores/nurture';
 import { useSessionStore } from '../stores/session';
 import { useUiStore } from '../stores/ui';
 import { resetViewMemory, useViewStore } from '../stores/view';
@@ -9,13 +11,19 @@ import { resetViewMemory, useViewStore } from '../stores/view';
 /**
  * 首屏唯一入口（设计文档 §3.3）。
  *
- * `getBootstrap(scope)` 一次拿全 `meta + items + session + state + view + overrides + log`，
+ * `getBootstrap(scope)` 一次拿全
+ * `meta + items + session + state + view + overrides + log + guildTime + plans`，
  * 因此**首屏没有加载闪烁，也没有破坏"契约是唯一数据通道"**（不用同步直读 localStorage）。
  * 骨架屏只用于懒加载的工具页。
+ *
+ * 2026-09-16：`guildTime` 与 `plans` 由设备级升为档案级后也走这个入口 ——
+ * 壳层的结界卡徽章此前是"自己读一次 localStorage"，现在跟着首屏一起下来，
+ * 切号时与其它数据同进同出，不再有"徽章还是上个号"的中间帧。
  *
  * 切号（`session.profileId` 变化）走同一入口做**全量重载**：
  * 先清空旧档案的内存态 → 亮骨架屏 → 再聚合新档案数据。
  * 三步顺序不能换，否则会出现"新档案标题 + 旧档案勾选"的错位帧（§7.3）。
+ * **下面五个 `resetXxx` 与 `payload` 的字段必须一一对应**：漏一个就会出现该字段的错位帧。
  */
 export function useBootstrap(): void {
   const profileId = useSessionStore((s) => s.session?.profileId);
@@ -29,6 +37,8 @@ export function useBootstrap(): void {
     resetItemsMemory();
     resetCheckMemory();
     resetViewMemory();
+    resetGuildTimeMemory();
+    resetNurtureMemory();
 
     (async () => {
       try {
@@ -46,6 +56,8 @@ export function useBootstrap(): void {
         useItemStore.getState().applyBootstrap(payload);
         useViewStore.getState().applyView(payload.view, payload.meta.viewDefaults);
         useCheckStore.getState().applyChecked(payload.state.checked, payload.log.days);
+        useGuildTimeStore.getState().applyGuildTime(payload.guildTime);
+        useNurtureStore.getState().applyPlans(payload.plans);
         useUiStore.getState().setBootstrapError(null);
       } catch (e) {
         console.error('[bootstrap] 首屏加载失败', e);

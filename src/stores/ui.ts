@@ -24,6 +24,15 @@ export interface ConfirmOptions {
   tone?: 'danger' | 'normal';
 }
 
+/** 跨档案勾选选择器的入参（清单长按） */
+export interface PickOptions {
+  itemId: string;
+  /** 条目名，弹层标题里要显示（"「每日签到」同时勾选到…"） */
+  itemName: string;
+  /** 当前档案这一条是否已完成：决定文案是"一起勾选"还是"一起取消" */
+  checked: boolean;
+}
+
 interface UiState {
   nav: NavKey;
   bootstrapLoading: boolean;
@@ -57,10 +66,22 @@ interface UiState {
    */
   askConfirm: (opts: ConfirmOptions) => Promise<boolean>;
   answerConfirm: (ok: boolean) => void;
+  /**
+   * 跨档案勾选的选择器（清单长按触发）。
+   * 与 `askConfirm` 同一模式但带返回值 —— 用户要选的是**若干个档案 id**，
+   * 不是"是 / 否"，所以不能复用确认弹窗。`null` = 用户取消。
+   * 弹窗本体挂在 `App` 顶层（`ProfilePickDialog`），调用点不持有弹窗状态。
+   */
+  pickState: PickOptions | null;
+  askPick: (opts: PickOptions) => Promise<string[] | null>;
+  answerPick: (profileIds: string[] | null) => void;
 }
 
 /** 当前待答的确认请求（只可能有一个：确认框是模态的） */
 let resolveConfirm: ((ok: boolean) => void) | null = null;
+
+/** 当前待答的跨档案勾选请求（同样只可能有一个） */
+let resolvePick: ((profileIds: string[] | null) => void) | null = null;
 
 export const useUiStore = create<UiState>((set) => ({
   nav: 'today',
@@ -69,6 +90,7 @@ export const useUiStore = create<UiState>((set) => ({
   confirmState: null,
   bootstrapTick: 0,
   navRequest: null,
+  pickState: null,
 
   setNav: (nav) => set({ nav }),
 
@@ -93,5 +115,20 @@ export const useUiStore = create<UiState>((set) => ({
     resolveConfirm = null;
     set({ confirmState: null });
     resolve?.(ok);
+  },
+
+  askPick: (opts) =>
+    new Promise<string[] | null>((resolve) => {
+      /* 同上：被后来的请求顶掉时按"取消"处理，避免 Promise 永久挂起 */
+      resolvePick?.(null);
+      resolvePick = resolve;
+      set({ pickState: opts });
+    }),
+
+  answerPick: (profileIds) => {
+    const resolve = resolvePick;
+    resolvePick = null;
+    set({ pickState: null });
+    resolve?.(profileIds);
   },
 }));

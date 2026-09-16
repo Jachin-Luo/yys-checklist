@@ -8,8 +8,9 @@
 import { nanoid } from 'nanoid';
 import type { ApiClient, DataScope } from '../contract';
 import type {
-  BountyDb, BootstrapPayload, CheckLog, CheckState, Item, ItemDraft, ItemOverrides, Meta,
-  Profile, ProfileDraft, Session, SoulsDb, User, UserDataBundle, ViewPrefs, YuhunDb,
+  BountyDb, BootstrapPayload, CheckLog, CheckState, GuildTimePrefs, Item, ItemDraft,
+  ItemOverrides, Meta, NurturePlans, Profile, ProfileDraft, Session, SoulsDb, User,
+  UserDataBundle, ViewPrefs, YuhunDb,
 } from '../types';
 import { activeItems, mergeChecked, type ResetCtx } from '../../domain/reset';
 import { buildMeta, effectiveView, mergeItems } from '../../domain/merge';
@@ -65,6 +66,10 @@ export class MockApi implements ApiClient {
       /* 日志与 state 同一入口：两者都是「勾选」这件事的两个侧面
          （当前周期状态 / 历史事实），分两次请求只会让它们可能来自不同时刻 */
       log: store.readLogShard(scope.profileId),
+      /* 2026-09-16：寮时间与寄养记录由设备级升为档案级，随首屏一起下发
+         （壳层徽章与清单页时间徽章都要用它们，单独请求只会多一次往返） */
+      guildTime: store.readGuildTimeShard(scope.profileId),
+      plans: store.readPlansShard(scope.profileId),
     };
   }
 
@@ -171,11 +176,15 @@ export class MockApi implements ApiClient {
         updatedAt: at,
       };
       store.saveProfiles([...s.profiles, profile]);
-      /* 立刻初始化该档案的四份空数据（设计文档 §5.5 ProfileDraft 说明 + 2026-09-15 的日志分片） */
+      /* 立刻初始化该档案的六份空数据（§5.5 ProfileDraft；日志片 2026-09-15 加入，
+         寮时间 / 寄养片 2026-09-16 加入）。新档案的寮时间与寄养列表都是空的 ——
+         要复用另一个档案的配置，走设置页的「同步到其他档案」。 */
       store.saveStateShard(store.emptyState(profile.id, userId, at));
       store.saveViewShard(effectiveView(seedMetaDb.viewDefaults, { profileId: profile.id }));
       store.saveOverridesShard(store.emptyOverrides(profile.id, at));
       store.saveLogShard(store.emptyLog(profile.id, userId, at));
+      store.saveGuildTimeShard(profile.id, store.emptyGuildTime());
+      store.savePlansShard(profile.id, store.emptyPlans());
       return profile;
     });
   }
@@ -294,6 +303,17 @@ export class MockApi implements ApiClient {
     });
   }
 
+  /**
+   * 跨档案勾选（清单长按）要读**目标档案**的日志才能把新记录合并进去 —— 见契约注释。
+   * 语义与 `getBootstrap().log` 完全一致：原样读分片，不做周期重置（日志是历史事实）。
+   */
+  async getCheckLog(scope: DataScope): Promise<CheckLog> {
+    injectFailure('getCheckLog');
+    await mainDelay();
+    store.assertScope(scope);
+    return store.readLogShard(scope.profileId);
+  }
+
   async getView(scope: DataScope): Promise<ViewPrefs> {
     injectFailure('getView');
     await mainDelay();
@@ -323,6 +343,43 @@ export class MockApi implements ApiClient {
     await store.enqueue(() => {
       store.assertScope(scope);
       store.saveOverridesShard({ ...ov, profileId: scope.profileId });
+    });
+  }
+
+  /* ── 档案级偏好（2026-09-16 由设备级升格）──
+     整表读写，与 `saveView` 同一形态：两份额数据都极小，不需要增量协议。
+     注意 `assertScope` 会校验 profileId 属于当前用户 —— 跨档案同步也是走这里，
+     所以"给别人的档案写数据"在 Mock 层就被挡住了（服务端同样应校验）。 */
+
+  async getGuildTime(scope: DataScope): Promise<GuildTimePrefs> {
+    injectFailure('getGuildTime');
+    await mainDelay();
+    store.assertScope(scope);
+    return store.readGuildTimeShard(scope.profileId);
+  }
+
+  async saveGuildTime(scope: DataScope, prefs: GuildTimePrefs): Promise<void> {
+    injectFailure('saveGuildTime');
+    await writeDelay();
+    await store.enqueue(() => {
+      store.assertScope(scope);
+      store.saveGuildTimeShard(scope.profileId, prefs);
+    });
+  }
+
+  async getPlans(scope: DataScope): Promise<NurturePlans> {
+    injectFailure('getPlans');
+    await mainDelay();
+    store.assertScope(scope);
+    return store.readPlansShard(scope.profileId);
+  }
+
+  async savePlans(scope: DataScope, plans: NurturePlans): Promise<void> {
+    injectFailure('savePlans');
+    await writeDelay();
+    await store.enqueue(() => {
+      store.assertScope(scope);
+      store.savePlansShard(scope.profileId, plans);
     });
   }
 
@@ -430,6 +487,10 @@ export class MockApi implements ApiClient {
         view: effectiveView(seedMetaDb.viewDefaults, store.readViewShard(p.id)),
         overrides: store.readOverridesShard(p.id),
         log: store.readLogShard(p.id),
+        /* 2026-09-16：寮时间与寄养任务随备份走 —— 不带走的话，
+           "清理浏览器数据后导入"会让这两项**永久丢失**（设备级键一起被清了，备份里又没有） */
+        guildTime: store.readGuildTimeShard(p.id),
+        plans: store.readPlansShard(p.id),
       })),
     };
   }
@@ -450,6 +511,9 @@ export class MockApi implements ApiClient {
         store.saveOverridesShard({ ...row.overrides, profileId: row.profileId });
         /* `log` 由 `domain/backup.validateBundle` 归一化保证存在（旧备份缺字段时补空日志） */
         store.saveLogShard({ ...row.log, profileId: row.profileId });
+        /* 同理：`guildTime` / `plans` 缺字段时归一成空值 / 空数组（2026-09-16 之前的备份没有它们） */
+        store.saveGuildTimeShard(row.profileId, row.guildTime);
+        store.savePlansShard(row.profileId, row.plans);
       }
     });
   }

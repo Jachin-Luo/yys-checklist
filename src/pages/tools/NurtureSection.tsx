@@ -32,7 +32,12 @@ import { useUiStore } from '../../stores/ui';
  * 添加时先问「立即开始 / 仅存计划」：任务才记完成状态，计划纯查看（虚线、不可点），
  * 决定开刷时点「开始」转正。用户常常只是"打算这个点寄"，不想一存就被判成未到。
  *
- * 数据落在设备级键（`yys:plans`）：与玩哪个号无关，见 stores/nurture.ts 的说明。
+ * 数据落在**档案级**分片（`yys:plans:{profileId}`，2026-09-16 由设备级升格）：
+ * 换号会切到该号自己的那份，且随备份一起走 —— 见 `stores/nurture.ts` 的说明。
+ *
+ * 布局注记（2026-09-16）：任务行是「上卡信息 / 点 chips / 操作条 / 删除」四块横向排列，
+ * 移动端靠 `flex-wrap` 折行。**点 chips 的容器必须给最小宽度**，否则它会被压到 0 宽、
+ * 里面的 chip 溢出到操作条上（详见该行的注释）。
  */
 
 /** 点 chip 的语气：已完成 / 过期未完成（该收了）/ 未到；计划态一律虚线只读 */
@@ -100,7 +105,6 @@ function PointChips({
 
 export default function NurtureSection() {
   const records = useNurtureStore((s) => s.records);
-  const hydrate = useNurtureStore((s) => s.hydrate);
   const add = useNurtureStore((s) => s.add);
   const promote = useNurtureStore((s) => s.promote);
   const markPoint = useNurtureStore((s) => s.markPoint);
@@ -118,10 +122,6 @@ export default function NurtureSection() {
   /** 每行「实际完成时间」的草稿（`HH:mm`；留空 = 现在） */
   const [doneDraft, setDoneDraft] = useState<Record<string, string>>({});
   const [now, setNow] = useState(() => new Date());
-
-  useEffect(() => {
-    hydrate();
-  }, [hydrate]);
 
   /* 每分钟刷新一次 now：让"已过 / 该收了"自己走，不用用户手动刷新页面。
      6h 粒度下 60s 足够，也不会有明显的重渲染成本。 */
@@ -195,7 +195,11 @@ export default function NurtureSection() {
           ) : null}
         </span>
 
-        <span className="min-w-0 flex-1">
+        {/* `min-w-36`（9rem）是**修移动端重叠的关键**：原先只有 `flex-1 min-w-0`，
+            `flex-basis: 0` + 可压缩到 0 ⇒ 外层 `flex-wrap` 永远等不到"空间不足"，
+            它选择把这一块压扁而不是换行；被压到 0 后里面固定宽的 chip 就溢出自身盒子、
+            画到右侧操作条上（桌面够宽所以看不出来）。给了最小宽度，空间不足时才会真正换行。 */}
+        <span className="min-w-36 flex-1">
           <PointChips
             record={r}
             now={now}
@@ -215,8 +219,10 @@ export default function NurtureSection() {
             开始
           </button>
         ) : target ? (
-          /* 操作条只作用于 `target`（选中点，或下一个待办点）—— 记完成只影响它之后的点 */
-          <span className="flex flex-none flex-wrap items-center gap-1">
+          /* 操作条只作用于 `target`（选中点，或下一个待办点）—— 记完成只影响它之后的点。
+             不用 `flex-none`：那个值让它按 max-content 定宽、窄屏下直接溢出容器；
+             去掉后配合 `min-w-0` 与内部的 `flex-wrap`，装不下时改在**自己内部**换行。 */
+          <span className="flex min-w-0 flex-wrap items-center gap-1">
             <span className="text-sm text-ink-3">
               {target.doneAt !== undefined
                 ? `${target.hm} 已完成`
@@ -397,7 +403,8 @@ export default function NurtureSection() {
       )}
 
       <p className="px-3.5 pt-4 text-sm leading-relaxed text-ink-3">
-        寄养记录只存在本机（设备级，不随游戏档案走、不上传）—— 换设备或清理浏览器数据会丢。
+        寄养记录按<b className="text-ink-2">档案</b>保存：换号会切到该号自己的那份，且随备份一起走
+        （「我的 → 数据备份」），换设备时导一次即可带走。
       </p>
     </div>
   );

@@ -12,7 +12,9 @@
  * 版本差异**只警告不拒绝**：`schemaVersion` 不同不必然不兼容，
  * 拒绝会让用户连"试试看"的机会都没有；但必须显式告知，免得他以为"导入成功了所以没问题"。
  */
-import type { CheckLog, UserDataBundle } from '../api/types';
+import type { CheckLog, GuildTimePrefs, UserDataBundle } from '../api/types';
+import { isValidHm } from './guildTime';
+import { sanitizePlans } from './nurture';
 
 /** 粘贴内容长度上限：正常备份 < 100 KB，超过这个量级八成是粘错了东西 */
 export const MAX_BUNDLE_CHARS = 4_000_000;
@@ -32,6 +34,10 @@ export interface BundleSummary {
   order: number;
   /** 勾选日志覆盖的天数（跨全部档案求和，2026-09-15 加入） */
   logDays: number;
+  /** 已配置的寮时间条数（跨全部档案求和，2026-09-16 加入） */
+  guildTime: number;
+  /** 结界寄养任务 / 计划条数（跨全部档案求和，2026-09-16 加入） */
+  plans: number;
 }
 
 export type ValidateResult =
@@ -72,20 +78,43 @@ const str = (v: unknown): string => (typeof v === 'string' ? v : '');
 const strArray = (v: unknown): string[] =>
   Array.isArray(v) ? v.filter((x): x is string => typeof x === 'string') : [];
 
+/**
+ * 寮时间归一化（2026-09-16）：只留"键是非空字符串、值是通过 `isValidHm` 的时刻"的项。
+ *
+ * 用 `domain/guildTime.isValidHm` 而不是在这里另写一条正则：那是设置页输入校验用的同一条规则
+ * （允许 `9:00` 这种不补零写法），两处各写一份必然漂移。
+ */
+function normalizeGuildTime(v: unknown): GuildTimePrefs {
+  if (!isObj(v)) return {};
+  const out: GuildTimePrefs = {};
+  for (const [itemId, val] of Object.entries(v)) {
+    if (!itemId || typeof val !== 'string' || !isValidHm(val)) continue;
+    out[itemId] = val.trim();
+  }
+  return out;
+}
+
 export function summarize(bundle: UserDataBundle): BundleSummary {
   let checked = 0;
   let custom = 0;
   let hidden = 0;
   let order = 0;
   let logDays = 0;
+  let guildTime = 0;
+  let plans = 0;
   for (const row of bundle.data) {
     checked += Object.keys(row.state?.checked ?? {}).length;
     custom += row.overrides?.custom?.length ?? 0;
     hidden += row.overrides?.hidden?.length ?? 0;
     order += row.overrides?.order?.length ?? 0;
     logDays += Object.keys(row.log?.days ?? {}).length;
+    guildTime += Object.keys(row.guildTime ?? {}).length;
+    plans += row.plans?.length ?? 0;
   }
-  return { profiles: bundle.profiles.length, checked, custom, hidden, order, logDays };
+  return {
+    profiles: bundle.profiles.length,
+    checked, custom, hidden, order, logDays, guildTime, plans,
+  };
 }
 
 /**
@@ -157,6 +186,11 @@ export function validateBundle(raw: unknown, currentSchemaVersion: string): Vali
         days: normalizeLogDays(logRaw.days),
         updatedAt: str(logRaw.updatedAt),
       },
+      /* 2026-09-16 起携带。**旧备份没有这两个字段**（那时它们还是设备级、根本不进备份），
+         归一成空值 / 空数组即可 —— 那是真实情况，不是文件损坏，与 `log` 同一处理方式。 */
+      guildTime: normalizeGuildTime(row.guildTime),
+      /* 净化规则在 `domain/nurture`，与「从本机分片读取」共用同一个入口 —— 两处不会漂移 */
+      plans: sanitizePlans(row.plans),
     });
   }
 

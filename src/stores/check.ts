@@ -35,6 +35,17 @@ interface CheckState {
   setMany: (ids: string[], at: number | null) => Promise<void>;
   /** 一键日常入口的双向级联：已勾 → 全部取消；未勾 → 全部勾选（同一时间戳） */
   toggleWithCascade: (hubId: string, coveredIds: string[]) => Promise<void>;
+  /**
+   * 跨档案勾选（清单长按，2026-09-16）：把**一组**条目同时写进若干**其他档案**。
+   *
+   * 收数组而不是单条，是因为一键日常入口卡要**级联**（勾入口即勾它覆盖的全部条目）。
+   * 跨档案路径必须与当前档案的范围一致，否则目标档案会出现"入口已完成、被覆盖项没勾"
+   * 的不一致状态 —— 那是统计口径上最难被发现的坏数据。普通条目的数组长度为 1。
+   *
+   * 返回**写失败的档案 id**（空数组 = 全部成功）—— 部分失败不抛出：
+   * 已成功的那些不该被回滚，UI 要如实告诉用户"其中 N 个没写成功"。
+   */
+  toggleInProfiles: (itemIds: string[], profileIds: string[]) => Promise<string[]>;
   clearAll: () => Promise<void>;
 }
 
@@ -190,6 +201,63 @@ export const useCheckStore = create<CheckState>((set, get) => {
     toggleWithCascade: async (hubId, coveredIds) => {
       const isOn = get().checked[hubId] !== undefined;
       await get().setMany([hubId, ...coveredIds], isOn ? null : Date.now());
+    },
+
+    /**
+     * 跨档案勾选。两条路径刻意不同：
+     *
+     *   - **当前档案**走 `setMany`（乐观更新 + 写队列 + 日志 + 失败回滚）；
+     *   - **其他档案**只写盘：它们不在内存里，写进去也不会显示（切过去时 bootstrap 会读到），
+     *     所以没有"乐观"可言，逐个 await 并收集失败。
+     *
+     * 目标档案的**日志必须一并维护**：勾选是"当天做过这件事"的历史事实，
+     * 少了它目标档案的统计页日历会缺一格、近 N 天收益会少算。
+     * 这正是契约新增 `getCheckLog` 的唯一动因（日志的常规读路径 `getBootstrap`
+     * 只覆盖当前档案）。取消勾选时按**条目周期起点**回退，规则与当前档案完全一致
+     * （`logAfter` 用的是同两个纯函数）。
+     */
+    toggleInProfiles: async (itemIds, profileIds) => {
+      const { session } = useSessionStore.getState();
+      if (!session) return [...profileIds];
+      /* 整组共用**一个**时间戳，方向由**第一个 id** 决定 —— 一键日常级联时第一个是入口，
+         与 `toggleWithCascade` 的判定口径完全一致（入口未勾 → 全勾；已勾 → 全取消） */
+      const at = get().checked[itemIds[0]] === undefined ? Date.now() : null;
+      await get().setMany(itemIds, at);
+
+      const failed: string[] = [];
+      const others = profileIds.filter((id) => id !== session.profileId);
+      for (const profileId of others) {
+        const scope = { userId: session.userId, profileId };
+        try {
+          for (const itemId of itemIds) {
+            await api.setChecked(scope, itemId, at);
+          }
+          /* 日志按**整组**读一次、写一次（而不是每条各读写一遍）：批量勾选时只有 2 次请求 */
+          const log = await api.getCheckLog(scope);
+          const now = new Date();
+          const items = useItemStore.getState().items;
+          let days = log.days;
+          for (const itemId of itemIds) {
+            const item = items.find((it) => it.id === itemId);
+            days = at === null
+              /* 目标档案里找不到该条目（自建条目各档案不同）时回退到 0：
+                 与 `logAfter` 的兜底一致 —— 宁可多留一条历史，也不误删别的周期记录 */
+              ? removeEntrySince(days, itemId, item ? periodStartOf(item, now, resetCtx()) : 0)
+              : addEntry(days, itemId, at);
+          }
+          await api.saveCheckLog(scope, {
+            ...log,
+            profileId,
+            userId: session.userId,
+            days: pruneDays(days, now),
+            updatedAt: new Date().toISOString(),
+          });
+        } catch (e) {
+          console.error(`[check] 跨档案写入失败 profileId=${profileId}`, e);
+          failed.push(profileId);
+        }
+      }
+      return failed;
     },
 
     clearAll: () => persist({ ids: null, at: null }),

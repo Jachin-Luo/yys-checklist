@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { api } from '../api';
-import type { ViewDefaults, ViewPrefs } from '../api/types';
+import type { CardDisplay, ViewDefaults, ViewPrefs } from '../api/types';
+import { DEFAULT_CARD_DISPLAY, effectiveCardDisplay } from '../domain/cardDisplay';
 import type { GainKind, SortBy } from '../domain/enums';
 import { effectiveView } from '../domain/merge';
 import { useSessionStore } from './session';
@@ -34,6 +35,11 @@ interface ViewState {
   togglePin: (itemId: string) => Promise<void>;
   /** 被覆盖项的显示方式：dim 弱化 / hide 隐藏（只影响列表，不影响统计口径） */
   setCoverMode: (coverMode: CoverMode) => Promise<void>;
+  /**
+   * 卡片字段显示（2026-09-16）：只传要改的项，其余保持 —— 设置页的逐项开关
+   * 与三档预设都走这一个 action（预设 = 一次传六项）。
+   */
+  setCardDisplay: (patch: Partial<CardDisplay>) => Promise<void>;
   /** 覆盖集合显式快照（用户逐项配置后写全量数组） */
   setAutoSet: (autoSet: string[]) => Promise<void>;
   /** 恢复数据默认：把覆盖集合退回 `undefined`（跟随 `items.autoDaily`） */
@@ -48,13 +54,22 @@ const FALLBACK: ViewPrefs = {
   hideDone: false,
   pinned: [],
   coverMode: 'dim',
+  card: DEFAULT_CARD_DISPLAY,
   updatedAt: '',
 };
+
+/**
+ * 写入序号：**只有最新一次写入的失败才允许回滚**。
+ * 理由见 `stores/nurture` 里同名变量的注释 —— 连点两次筛选时，
+ * 第一次的失败若赶在第二次之后返回，会把第二次的结果一起抹掉。
+ */
+let writeSeq = 0;
 
 export const useViewStore = create<ViewState>((set, get) => {
   /** 乐观更新 + 落盘；失败回滚并提示 */
   const persist = async (next: ViewPrefs) => {
     const prev = get().view;
+    const mine = ++writeSeq;
     set({ view: next, error: null });
     const { session } = useSessionStore.getState();
     if (!session) return;
@@ -62,6 +77,7 @@ export const useViewStore = create<ViewState>((set, get) => {
       await api.saveView({ userId: session.userId, profileId: session.profileId }, next);
     } catch (e) {
       console.error('[view] 保存失败，回滚', e);
+      if (mine !== writeSeq) return;
       set({ view: prev, error: e as Error });
     }
   };
@@ -91,6 +107,12 @@ export const useViewStore = create<ViewState>((set, get) => {
 
     setCoverMode: (coverMode) => persist({ ...get().view, coverMode }),
 
+    setCardDisplay: (patch) =>
+      persist({
+        ...get().view,
+        card: effectiveCardDisplay({ ...get().view.card, ...patch }),
+      }),
+
     setAutoSet: (autoSet) => persist({ ...get().view, autoSet: [...new Set(autoSet)] }),
 
     resetAutoSet: () => persist({ ...get().view, autoSet: undefined }),
@@ -98,8 +120,11 @@ export const useViewStore = create<ViewState>((set, get) => {
 });
 
 /** 切号时清空内存态（由 `useBootstrap` 调用），避免旧档案的筛选/置顶闪现在新档案名下 */
-export const resetViewMemory = (): void =>
+export const resetViewMemory = (): void => {
+  /* ++ 让在途写入的失败不再回滚到新档案上（见 `writeSeq` 的注释） */
+  writeSeq += 1;
   useViewStore.setState({ view: FALLBACK, defaults: null, error: null });
+};
 
 /** 档案偏好缺失 / 非法字段回落默认（与 domain/merge.effectiveView 同一规则） */
 export const normalizeView = (defaults: ViewDefaults, pref?: Partial<ViewPrefs> | null): ViewPrefs =>

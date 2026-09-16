@@ -1,87 +1,104 @@
 import { create } from 'zustand';
+import { api } from '../api';
+import type { NurturePlans } from '../api/types';
 import { clearPointDone, makeNurture, markPointDone, type NurtureRecord } from '../domain/nurture';
-import { DEVICE_KEY, read, write } from '../services/localStore';
+import { useSessionStore } from './session';
 
 /**
- * 结界寄养任务 / 计划（S6）。
+ * 结界寄养任务 / 计划。
  *
- * **设备级存储**（`yys:plans`，见 `services/localStore.ts` 的键说明）—— 不走契约、不随档案、不上后端。
- * 依据：设计文档 §3 的 7 库清单与 §5.2 契约方法都**没有**寄养表；
- * 寄养是"我手机上这台设备的操作节奏提醒"，与玩哪个号无关，因此与寮时间、通知开关同属设备级。
+ * ## 2026-09-16：由设备级升为档案级（用户决策）
  *
- * 若将来后端要收这份数据，改动面是：契约加 `getPlans/savePlans` + 本文件换成 api 调用，
- * 组件不受影响（组件只见 store）。
+ * 原来的理由是"寄养是这台设备的操作节奏提醒、与玩哪个号无关"—— 这条站不住：
+ * 结界卡的种类与时长因号而异（太鼓 / 斗鱼 / 美食卡，6h / 12h…），上卡时间自然也不同，
+ * 切号后看到同一个寄养列表更像 bug。改档案级同时满足了"所有配置项均可备份"。
+ *
+ * 落盘键：`yys:plans:{profileId}`；读路径：首屏 `getBootstrap().plans`
+ * （壳层的「下一次该收」徽章曾自己读 localStorage，现在跟着首屏一起下来）。
+ *
+ * ## 写入是异步的（这是本次最需要留意的变化）
+ *
+ * 此前直接 `write(DEVICE_KEY.plans)` 同步落盘、失败只置 `error`；现在走 `api.savePlans`，
+ * 形态与 `stores/view` 一致：**乐观更新 → 失败回滚 + 置 `error`**。
+ * 因此所有 action 返回 `Promise`，调用点（`NurtureSection`）不需要 await 也能用，
+ * 但**不要**再把它们的返回值当作同步结果。
  */
 interface NurtureState {
   records: NurtureRecord[];
-  hydrated: boolean;
   error: Error | null;
-  /**
-   * 读一次本机数据（幂等，已 hydration 则直接返回）。
-   * 2026-09-15 起壳层的结界卡徽章会在首屏就调用它 —— 徽章要常驻显示"下一次该收"，
-   * 就不能等用户进工具页；这份数据极小（几条记录），进首屏没有负担。
-   */
-  hydrate: () => void;
-  add: (base: string, n: number, started: boolean) => void;
+  /** 首屏 / 切号时灌入（`useBootstrap` 是唯一生产调用点） */
+  applyPlans: (records: NurturePlans) => void;
+  add: (base: string, n: number, started: boolean) => Promise<void>;
   /** 计划 → 任务（「开始」转正） */
-  promote: (id: string) => void;
+  promote: (id: string) => Promise<void>;
   /** 记某个收/续点完成（`at` 省略 = 现在）；该点之后的点按它的实际时间递推 */
-  markPoint: (id: string, index: number, at?: Date) => void;
+  markPoint: (id: string, index: number, at?: Date) => Promise<void>;
   /** 取消某个点的完成记录（点错了 / 想重记时间） */
-  clearPoint: (id: string, index: number) => void;
-  remove: (id: string) => void;
-  clearAll: () => void;
+  clearPoint: (id: string, index: number) => Promise<void>;
+  remove: (id: string) => Promise<void>;
+  clearAll: () => Promise<void>;
 }
 
+/**
+ * 写入序号：**只有最新一次写入的失败才允许回滚**。
+ *
+ * 不加它会出现"旧写的失败赶在新写之后返回，把新状态一起抹掉"：
+ *   `add B`（落盘失败，150ms 后 catch）→ 立刻 `add C`（成功落盘 [C,B,A]）→
+ *   B 的 catch 把内存回滚成 [A]，而磁盘已经是 [C,B,A]。
+ * 结果是内存与磁盘不一致，且用户看到"刚加的那条凭空消失"。
+ *
+ * 整表写语义下"最后一次成功 = 落盘内容"，所以只要保证回滚不落后于最新写入即可。
+ * `resetNurtureMemory`（切号）也会 ++：让上一个档案在途的失败不再回滚到新档案上。
+ */
+let writeSeq = 0;
+
 export const useNurtureStore = create<NurtureState>((set, get) => {
-  const persist = (records: NurtureRecord[]) => {
+  const persist = async (records: NurtureRecord[]) => {
+    const prev = get().records;
+    const mine = ++writeSeq;
+    set({ records, error: null });
+    const { session } = useSessionStore.getState();
+    if (!session) return;
     try {
-      write(DEVICE_KEY.plans, records);
-      set({ records, error: null });
+      await api.savePlans({ userId: session.userId, profileId: session.profileId }, records);
     } catch (e) {
-      set({ error: e as Error });
+      console.error('[nurture] 保存失败，回滚', e);
+      if (mine !== writeSeq) return;
+      set({ records: prev, error: e as Error });
     }
   };
 
   return {
-  records: [],
-  hydrated: false,
-  error: null,
+    records: [],
+    error: null,
 
-  hydrate: () => {
-    if (get().hydrated) return;
-    set({ records: read<NurtureRecord[]>(DEVICE_KEY.plans) ?? [], hydrated: true });
-  },
+    applyPlans: (records) => set({ records, error: null }),
 
-  add: (base, n, started) => {
-    const next = [makeNurture(base, n, started, new Date()), ...get().records];
-    persist(next);
-  },
+    add: (base, n, started) =>
+      persist([makeNurture(base, n, started, new Date()), ...get().records]),
 
-  promote: (id) => {
-    const next = get().records.map((r) => (r.id === id ? { ...r, started: true } : r));
-    persist(next);
-  },
+    promote: (id) =>
+      persist(get().records.map((r) => (r.id === id ? { ...r, started: true } : r))),
 
-  markPoint: (id, index, at = new Date()) => {
-    persist(get().records.map((r) => (r.id === id ? markPointDone(r, index, at) : r)));
-  },
+    markPoint: (id, index, at = new Date()) =>
+      persist(get().records.map((r) => (r.id === id ? markPointDone(r, index, at) : r))),
 
-  clearPoint: (id, index) => {
-    persist(get().records.map((r) => (r.id === id ? clearPointDone(r, index) : r)));
-  },
+    clearPoint: (id, index) =>
+      persist(get().records.map((r) => (r.id === id ? clearPointDone(r, index) : r))),
 
-  remove: (id) => {
-    const next = get().records.filter((r) => r.id !== id);
-    persist(next);
-  },
+    remove: (id) => persist(get().records.filter((r) => r.id !== id)),
 
-  clearAll: () => {
-    persist([]);
-  },
+    clearAll: () => persist([]),
   };
 });
 
-/** 测试与「重置」用：清掉内存态（不动本机数据） */
-export const resetNurtureMemory = (): void =>
-  useNurtureStore.setState({ records: [], hydrated: false, error: null });
+/**
+ * 切号时清空内存态（由 `useBootstrap` 调用）。
+ * 不清的话，新档案的首屏聚合返回前会显示**旧档案**的寄养记录，
+ * 而徽章上的"下一次该收"正是最容易让人立刻行动的信息，错一帧就可能白跑一趟。
+ */
+export const resetNurtureMemory = (): void => {
+  /* ++ 让在途写入的失败不再回滚到新档案上（见 `writeSeq` 的注释） */
+  writeSeq += 1;
+  useNurtureStore.setState({ records: [], error: null });
+};

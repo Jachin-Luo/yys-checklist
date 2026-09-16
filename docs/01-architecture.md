@@ -99,8 +99,8 @@ sequenceDiagram
     App->>Boot: useBootstrap()
     Boot->>API: getSession() → listProfiles() + getBootstrap()
     API-->>Boot: session + profiles + bootstrap 载荷
-    Boot->>Boot: 清空 items→check→view 内存态后按序写回四个 store
-    App->>App: usePeriodRefresh() 周期重估；hydrate() 读设备级偏好
+    Boot->>Boot: 清空 items→check→view→guildTime→nurture 内存态后按序写回六个 store
+    App->>App: usePeriodRefresh() 周期重估；hydrate() 读设备级标记（只剩引导）
     App->>Shell: breakpoint === 'mobile' ? MobileShell : DesktopShell
     Shell->>Nav: <NavContent variant="desktop|mobile">
     Nav->>Nav: switch(nav) 分派 7 个一级页面
@@ -114,9 +114,9 @@ sequenceDiagram
 | 根渲染 | `src/main.tsx` | `React.StrictMode`，**不注册 Service Worker** |
 | 首屏聚合 | `src/App.tsx` → `hooks/useBootstrap.ts` | 首屏唯一入口；切号 / `bootstrapTick` 变化时全量重载 |
 | 周期刷新 | `hooks/usePeriodRefresh.ts` | 每分钟边界 + 窗口聚焦 + 可见性变化时重估周期状态，**不写盘** |
-| 设备偏好 | `src/App.tsx` 挂载时 `hydrate()` → `stores/device.ts` | 寮时间、引导标记（设备级，不挂档案） |
+| 设备级状态 | `src/App.tsx` 挂载时 `hydrate()` → `stores/device.ts` | **只剩引导标记**（2026-09-16 起）。寮时间迁至 `stores/guildTime`、寄养迁至 `stores/nurture`，两者都改为**档案级**并随 `getBootstrap` 下发 |
 | 首屏错误 | `App.tsx` | 渲染 `ErrorScreen` |
-| 顶层提示 | `App.tsx` | `SaveErrorNotice`（聚合五处 `error`）、`OnboardingDialog`、`ConfirmDialog` |
+| 顶层提示 | `App.tsx` | `SaveErrorNotice`（聚合六处 `error`）、`OnboardingDialog`、`ConfirmDialog`、`ProfilePickDialog`（长按跨档案勾选的选择器，与确认框同一位置） |
 
 ## 5. 导航与页面分派
 
@@ -193,7 +193,7 @@ api.getBootstrap
 | `LimitedPage.tsx` | `useChecklist`（限时分区，固定按剩余天数升序，无排序控件） |
 | `StatsPage.tsx` | `domain/calendar.buildMonthGrid`（月历）+ `stores/check` 的 `log` + `domain/stats.summarizeRangeGain`（区间收益）—— **不经过 `useChecklist`**，因此不受「隐藏已完成 / 覆盖隐藏」影响 |
 | `ToolsPage.tsx` | `stores/tools.ensure`（御魂 / 悬赏 / 寄养三段懒加载） |
-| `MePage.tsx` | `pages/settings/*` 四个分区 + `components/settings/*` 两个分区 |
+| `MePage.tsx` | `pages/settings/*` **六个**分区（档案 / 同步到其他档案 / 一键日常 / 条目管理 / 视图偏好 / 寮时间）+ `components/settings/*` 两个分区 |
 
 `hooks/useChecklist.ts` 是清单类页面的公共编排：过滤（`domain/sort.isVisible`）+ 排序（`domain/sort.buildComparator`）+ 分组，导出 `Checklist`、`ChecklistTarget`、`HIGH_WEIGHT`（= 30）。
 

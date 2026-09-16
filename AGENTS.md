@@ -129,8 +129,8 @@ node tools/verify.js      # 一键验收：tsc + eslint + vitest + build + db:ch
 | 文档 | 内容 |
 | --- | --- |
 | `docs/README.md` | 文档总索引、按角色的推荐阅读路径、文档时效与更新约定 |
-| `docs/01-architecture.md` | 目录逐层职责、启动到首屏的渲染链路、导航机制、8 个 store 的职责与依赖方向、双布局差异 |
-| `docs/02-data-and-domain.md` | 数据契约、Mock 适配器与分片持久化、8 个 db.json 结构与规模、14 个 domain 模块导出表、特殊机制（一键日常 / 寮时间 / 备份 / 寄养 / 御魂 / 悬赏） |
+| `docs/01-architecture.md` | 目录逐层职责、启动到首屏的渲染链路、导航机制、9 个 store 的职责与依赖方向、双布局差异 |
+| `docs/02-data-and-domain.md` | 数据契约、Mock 适配器与分片持久化、8 个 db.json 结构与规模、15 个 domain 模块导出表、特殊机制（一键日常 / 卡片显示 / 寮时间 / 备份 / 寄养 / 档案同步 / 御魂 / 悬赏） |
 | `docs/03-conventions-and-tests.md` | 分层约束的强制手段、口径纪律逐条落点、测试体系与写法、数据录入流程、工具脚本、常见坑 |
 | `docs/04-handover-guide.md` | 环境准备、6 类改动任务手册、未完成项与路线图、问题排查、「不要这样做」清单 |
 

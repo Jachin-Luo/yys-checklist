@@ -42,9 +42,13 @@ function SummaryChips({ summary }: { summary: BundleSummary }) {
   const cells: Array<[string, number]> = [
     ['档案', summary.profiles],
     ['勾选记录', summary.checked],
+    ['日志天数', summary.logDays],
     ['自建条目', summary.custom],
     ['已隐藏', summary.hidden],
     ['自定义排序', summary.order],
+    /* 2026-09-16：这两项此前是设备级、根本不进备份；列出来是为了让"备份是全量的"可见 */
+    ['寮时间', summary.guildTime],
+    ['寄养任务', summary.plans],
   ];
   return (
     <div className="mt-1.5 flex flex-wrap gap-1">
@@ -147,7 +151,8 @@ export default function BackupSection() {
   const exportPanel = (
     <>
       <p className="text-sm leading-relaxed text-ink-3">
-        备份文本包含<b className="text-ink-2">全部档案</b>的勾选记录、视图偏好、自建条目与排序。
+        备份文本包含<b className="text-ink-2">全部档案的全部配置</b>：勾选记录、勾选日志、
+        视图偏好、自建条目与排序、<b className="text-ink-2">寮时间、结界寄养任务</b>。
         复制后自行保存（发给自己 / 存备忘录都行），换设备或清理浏览器数据时粘回来即可恢复。
       </p>
       <textarea
@@ -259,8 +264,8 @@ export default function BackupSection() {
         {pending ? (
           <div className="mt-2 rounded-md border border-danger-line bg-danger-soft px-3 py-2">
             <p className="text-sm leading-relaxed text-danger">
-              导入会<b>覆盖</b>当前全部档案的勾选记录、视图偏好与自建条目，且不可撤销 ——
-              建议先切到「导出」留一份当前的。
+              导入会<b>覆盖</b>当前全部档案的勾选记录、视图偏好、自建条目、寮时间与寄养任务，
+              且不可撤销 —— 建议先切到「导出」留一份当前的。
             </p>
             <SummaryChips summary={pending.summary} />
 
@@ -307,6 +312,8 @@ export default function BackupSection() {
 
         <p className={`text-sm leading-relaxed text-ink-3 ${msg || exportSummary || pending ? 'mt-2' : ''}`}>
           备份文本里也包含档案信息（名称 / 区服 / UID）。请像对待账号信息一样保管，不要随意分享。
+          唯一的例外是<b className="text-ink-2">冷启动引导标记</b> —— 它属于"这台设备看过引导没有"的状态，
+          不是配置，因此不随备份迁移：换设备后重看一次引导是正常的。
         </p>
       </div>
     </CollapsibleSection>

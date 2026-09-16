@@ -88,7 +88,15 @@ export default function TodayPage({ variant }: { variant: 'mobile' | 'desktop' }
             <>
               <SectionTitle>已完成 · {residentDoneCount} 项</SectionTitle>
               <div className={CHECKLIST_GRID}>
-                {hub && hubDone ? <ChecklistItem item={hub} onToggle={toggleHub} /> : null}
+                {hub && hubDone ? (
+                  <ChecklistItem
+                    item={hub}
+                    onToggle={toggleHub}
+                    /* 长按跨档案时一并写入被覆盖项 —— 与 `toggleHub` 的级联范围一致，
+                       否则目标档案会出现"入口已完成、覆盖项没勾"的不一致 */
+                    cascadeIds={[...coveredSet]}
+                  />
+                ) : null}
                 {doneResident.map((item) => (
                   <ChecklistItem key={item.id} item={item} dimmed={isDimmed(item.id)} />
                 ))}

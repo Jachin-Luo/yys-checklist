@@ -27,14 +27,12 @@ export default function NurtureBadge({
   compact?: boolean;
 }) {
   const records = useNurtureStore((s) => s.records);
-  const hydrate = useNurtureStore((s) => s.hydrate);
   const requestNav = useUiStore((s) => s.requestNav);
   const [now, setNow] = useState(() => new Date());
 
-  /* 徽章在壳层常驻，所以要在这里读一次本机数据（寄养页的懒加载 hydrate 仍保留，幂等） */
-  useEffect(() => {
-    hydrate();
-  }, [hydrate]);
+  /* 2026-09-16：不再自己读数据。寄养记录升为档案级后走首屏 `getBootstrap().plans`，
+     徽章直接消费 store 即可 —— 因此也不会再出现"徽章显示的是上一个号"的中间帧。
+     （bootstrap 完成前壳层本来就是骨架屏，不存在"数据没到却要显示徽章"的空档。） */
 
   useEffect(() => {
     const timer = window.setInterval(() => setNow(new Date()), 60000);
