@@ -1,6 +1,6 @@
 # 02 · 数据层与领域逻辑
 
-> 对应数据版本：`2026.09.13-十周年勾玉查漏` ｜ 事实核对日期：2026-09-14
+> 对应数据版本：`2026.09.17-十周年二阶段` ｜ 事实核对日期：2026-09-17
 > 本文回答：**数据长什么样、从哪来、到哪去、规则写在哪个函数里**。
 > 本文只描述结构与规模，不逐条罗列条目明细 —— 明细以 `src/db/*.db.json` 为唯一真值。
 
@@ -108,7 +108,7 @@ VITE_API_MODE === 'http' ? new HttpApi(baseURL) : new MockApi()
 | 文件 | 顶层 key | 规模 |
 | --- | --- | --- |
 | `items.db.json` | `items: Item[]` | **69 条**真正的常驻（每日 36 / 每周 29 / 每月 4） |
-| `limited.db.json` | `items: Item[]` | **22 条**非常驻（活动期每日 4 / 限时活动 12 / 版本 5 / 赛季 1；带 `until` 的到期自动下线，版本与赛季条目随版本维护） |
+| `limited.db.json` | `items: Item[]` | **34 条**非常驻（活动期每日 4 / 限时活动 24 / 版本 5 / 赛季 1；带 `until` 的到期自动下线，版本与赛季条目随版本维护） |
 | `yuhun.db.json` | `dungeons[]`、`dayTips[]`、`excluded[]` | 副本 **11**、日提示 **10**、排除项 **8** |
 | `souls.db.json` | `rows: SoulRow[]` | **70** 种御魂（`effect2` 70 条；`effect4` 57 条，13 种首领御魂无四件套） |
 | `bounty.db.json` | `shikigami[]`、`spots[]`、`shikigamiSpots[]`、`shikigamiClues[]` | 式神 **39**、地点 **64**、出处关系 **148**、线索词 **116** |
@@ -116,9 +116,9 @@ VITE_API_MODE === 'http' ? new HttpApi(baseURL) : new MockApi()
 | `users.db.json` | `users`、`profiles`、`states`、`viewPrefs`、`itemOverrides`、`sessions` | 各 1 条（`u_local` / `p_main`） |
 | `dataVersion.db.json` | `versions: VersionRow[]` | **7** 条（对应 meta / items / limited / yuhun / bounty / souls / users） |
 
-常驻 + 活动总计 **91 条**条目。
+常驻 + 活动总计 **103 条**条目。
 
-`meta` 关键字段：`version`（应用版本，如 `1.4.0`）、`dataVersion`（如 `2026.09.13-十周年勾玉查漏`）、`resetHour`（= 0）、`periods`（版本 / 赛季锚点）。
+`meta` 关键字段：`version`（应用版本，如 `1.4.0`）、`dataVersion`（如 `2026.09.17-十周年二阶段`）、`resetHour`（= 0）、`periods`（版本 / 赛季锚点）。
 
 ### 4.2 条目字段规格
 
