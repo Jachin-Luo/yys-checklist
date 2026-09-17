@@ -96,7 +96,7 @@
       "start": "2026-09-09",
       "deadline": "2026-09-29 23:59",
       "until": "2026-09-30",
-      "note": "重点：SP 少羽大天狗皮肤「樱时之忆」、SSR/SP 召唤券、契约书·御行达摩、动态头像框；磐语商店兑换延至 10/13，金石礼帖领奖延至 10/6；本体 9/29 结束，爬塔积分清零",
+      "note": "重点：SP 少羽大天狗皮肤「樱时之忆」、SSR/SP 召唤券、契约书·御行达摩、动态头像框；二阶段首领战「炼石成金」9/16–9/19；磐语商店兑换延至 10/13，金石礼帖领奖延至 10/6；本体 9/29 结束，爬塔积分清零",
       "origin": "preset"
     },
     {
@@ -140,7 +140,7 @@
       "start": "2026-09-16",
       "deadline": "2026-10-16 23:59",
       "until": "2026-10-17",
-      "note": "9/16 开启；重点：跳跳哥哥皮肤「奇陵寻金」、御行达摩、符咒",
+      "note": "9/16 开启；重点：跳跳哥哥皮肤「奇陵寻金」、御行达摩、神秘的符咒；「棺中奇梦·番外」限时挑战至 10/16 23:59，通关得「梦醒见吉」聊天挂件；8/17 后新建角色有助力增益",
       "origin": "preset"
     },
     {
@@ -167,6 +167,7 @@
         "ssr",
         "token"
       ],
+      "start": "2026-09-09",
       "deadline": "2026-10-06 23:59",
       "until": "2026-10-07",
       "note": "指定 SSR/SP、未收录兑换券；全集赏玩家可换",
@@ -226,6 +227,183 @@
       "deadline": "2026-10-18 23:59",
       "until": "2026-10-19",
       "note": "护肝减负向",
+      "origin": "preset"
+    },
+    {
+      "id": "ltd_lianshi_chengjin",
+      "name": "炼石成金·二阶段首领战",
+      "cycle": "limited",
+      "path": "活动页 → 拾光永恒 → 炼石成金",
+      "gainKind": [
+        "token",
+        "other"
+      ],
+      "start": "2026-09-16",
+      "deadline": "2026-09-19 23:59",
+      "until": "2026-09-20",
+      "note": "拾光永恒二阶段·石长姬首领战；消耗体力，每日前 20 次奖励更高，累计伤害解锁档位；仅 4 天窗口；奖励档位待核，以游戏内为准",
+      "origin": "preset"
+    },
+    {
+      "id": "ltd_dadi_fengyin",
+      "name": "大地奉引·凤凰涅槃召唤",
+      "cycle": "limited",
+      "path": "召唤 → 旭华/瑶归召唤",
+      "gainKind": [
+        "ssr"
+      ],
+      "start": "2026-09-09",
+      "deadline": "2026-09-20 23:59",
+      "until": "2026-09-21",
+      "note": "新 SSR 石长姬 / 新 SP 百羽凤凰火；首抽 SSR/SP 必未收录；神眷符咒·永恒（全集赏 10%、最多 450 次必出）；累计 100 次得随机 SP",
+      "origin": "preset"
+    },
+    {
+      "id": "ltd_qiyuan_fuli",
+      "name": "祈愿福礼",
+      "cycle": "limited",
+      "path": "活动页 → 祈愿福礼",
+      "gainKind": [
+        "other"
+      ],
+      "start": "2026-09-09",
+      "deadline": "2026-09-20 23:59",
+      "until": "2026-09-21",
+      "note": "15 级可先领「铜铃」礼包，「银月」「金社」逐日解锁；头像框「浮世狸遇」重复得 50 勾玉",
+      "origin": "preset"
+    },
+    {
+      "id": "ltd_douji_up",
+      "name": "祈胜秘诀·斗技UP",
+      "cycle": "limited",
+      "path": "町中 → 斗技",
+      "gainKind": [
+        "blackFrag",
+        "blueTicket"
+      ],
+      "start": "2026-09-16",
+      "deadline": "2026-09-22 23:59",
+      "until": "2026-09-23",
+      "note": "二段以上：前 3 次战败不扣积分与名士星级；可免费兑「难行符咒」限 10 次，胜场额外 +200% 斗技积分/荣誉/名士荣誉",
+      "origin": "preset"
+    },
+    {
+      "id": "ltd_yunshi_fengnian",
+      "name": "运势加成+丰年探索",
+      "cycle": "limited",
+      "path": "探索 → 副本",
+      "gainKind": [
+        "gold",
+        "exp",
+        "other"
+      ],
+      "start": "2026-09-16",
+      "deadline": "2026-09-22 23:59",
+      "until": "2026-09-23",
+      "note": "御魂/觉醒/探索副本概率掉金币、经验、觉醒材料、御魂掉落加成道具；探索小怪额外携带 1 个加成效果（可自选）",
+      "origin": "preset"
+    },
+    {
+      "id": "ltd_bainiao_zhuyan",
+      "name": "百鸟逐焰",
+      "cycle": "limited",
+      "path": "活动页 → 百鸟逐焰",
+      "gainKind": [
+        "daruma",
+        "other"
+      ],
+      "start": "2026-09-09",
+      "deadline": "2026-09-22 23:59",
+      "until": "2026-09-23",
+      "note": "「流羽话栖」找小鸟、「片羽吉光」推剧情；得御行达摩·契约书、限定插画「沸腾人间」、百羽凤凰火小纸人装扮",
+      "origin": "preset"
+    },
+    {
+      "id": "ltd_shiguang_time",
+      "name": "十周年时光机",
+      "cycle": "limited",
+      "path": "庭院挂墙小纸人 → 时光机",
+      "gainKind": [
+        "ssr",
+        "other"
+      ],
+      "start": "2026-09-09",
+      "deadline": "2026-09-22 23:59",
+      "until": "2026-09-23",
+      "note": "生成年度身份并分享，得随机 SSR/SP、周年纪念头像框、插画「拾岁之约」；数据范围 2025-09-01 至 2026-08-26",
+      "origin": "preset"
+    },
+    {
+      "id": "ltd_jinyi_zhaohuan",
+      "name": "今忆召唤·概率UP",
+      "cycle": "limited",
+      "path": "召唤 → 今忆召唤",
+      "gainKind": [
+        "ssr"
+      ],
+      "start": "2026-09-16",
+      "deadline": "2026-09-29 23:59",
+      "until": "2026-09-30",
+      "note": "UP：赤影妖刀姬、云间不见岳、小鹿男、鬼童丸、缘结神、不见岳；礼包屋同步上架推荐礼包",
+      "origin": "preset"
+    },
+    {
+      "id": "ltd_chongshen_kan",
+      "name": "SSR/SP重临神龛",
+      "cycle": "limited",
+      "path": "商店 → 神龛",
+      "gainKind": [
+        "ssr"
+      ],
+      "start": "2026-09-09",
+      "deadline": "2026-10-02 23:59",
+      "until": "2026-10-03",
+      "note": "御札 ×6000 兑换 2023-10-01 前 SSR/SP（不含联动与两面佛），每人限 1 位",
+      "origin": "preset"
+    },
+    {
+      "id": "ltd_shenmi_shangren",
+      "name": "神秘商人的秘密",
+      "cycle": "limited",
+      "path": "庭院小纸人 / 商店 → 奉为达摩",
+      "gainKind": [
+        "skin",
+        "skinTicket"
+      ],
+      "start": "2026-09-16",
+      "deadline": "2026-10-06 23:59",
+      "until": "2026-10-07",
+      "note": "消耗皮肤券占卜，猫爪钱币兑换限定返场：童女·萩间童羽、虫师·暮色蝶舞、迦楼罗·金翎琼羽",
+      "origin": "preset"
+    },
+    {
+      "id": "ltd_linghu_xinmeng",
+      "name": "灵狐新梦·晴明皮肤免费领",
+      "cycle": "limited",
+      "path": "活动页 → 灵狐新梦",
+      "gainKind": [
+        "skin"
+      ],
+      "start": "2026-09-09",
+      "deadline": "2026-10-06 23:59",
+      "until": "2026-10-07",
+      "note": "分享即得「晴明·灵狐新梦」皮肤、限定头像框、姿度；可解锁曜之秘藏金赏池；2027-03 前不返场",
+      "origin": "preset"
+    },
+    {
+      "id": "ltd_tianyu_huixiang",
+      "name": "天域回响·皮肤祈愿",
+      "cycle": "limited",
+      "path": "活动页 → 天域回响",
+      "gainKind": [
+        "skin",
+        "token",
+        "daruma"
+      ],
+      "start": "2026-09-16",
+      "deadline": "2026-10-20 23:59",
+      "until": "2026-10-21",
+      "note": "异想·誓言第一弹：帝释天「圣莲咏叹」、阿修罗「深渊劫火」+动态头像；9/23 加鬼切/炼狱茨木/鬼王酒吞；2027-03 前无其他获取途径；集齐 5 款送背景板「誓响千应」",
       "origin": "preset"
     },
     {
