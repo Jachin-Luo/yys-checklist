@@ -1,8 +1,10 @@
 import type { Item } from '../../api/types';
+import { DEFAULT_CARD_DISPLAY } from '../../domain/cardDisplay';
 import { LONG_PRESS_MS, useLongPress } from '../../hooks/useLongPress';
 import { useAutoDaily } from '../../hooks/useAutoDaily';
 import { useCheckStore } from '../../stores/check';
 import { useUiStore } from '../../stores/ui';
+import { useViewStore } from '../../stores/view';
 import CheckBox from './CheckBox';
 import { FieldIcon } from './ItemField';
 
@@ -27,10 +29,19 @@ import { FieldIcon } from './ItemField';
  * `ChecklistItem` 的变体，所以手势要在这里单独接一次 —— 但语义与那边保持一致：
  * 按住下压 + 底部进度条，500ms 走满弹档案选择器；**并且带级联**，
  * 把入口与它的覆盖项一起写进目标档案。
+ *
+ * 2026-09-20：**跟随「视图偏好」**（用户要求）。它与清单卡是两个组件，但"卡片显示哪些内容"
+ * 是同一份用户偏好 —— 否则用户关掉入口路径 / 备注后，今日页第一张卡仍是最高的一张，
+ * 精简在最有价值的位置上失效。本卡只有 `path` 与 `note` 两个块可关
+ * （`tags` / `gain` / `kinds` 在这里没有对应渲染块），且 **`path` 关掉后仍保留
+ * 「已配置覆盖 N 项」** —— 那是入口卡的核心信息，不属于"入口路径"这个字段。
  */
 export default function HubCard({ item }: { item: Item }) {
   const checked = useCheckStore((s) => s.checked[item.id] !== undefined);
   const toggleInProfiles = useCheckStore((s) => s.toggleInProfiles);
+  /* 卡片显示哪些字段（2026-09-20）。`?? DEFAULT` 只为类型兜底：store 里的 view
+     已过 `effectiveView`，实际总带 `card`。 */
+  const card = useViewStore((s) => s.view.card) ?? DEFAULT_CARD_DISPLAY;
   const { toggleHub, coveredCount, coveredIds } = useAutoDaily();
   const requestNav = useUiStore((s) => s.requestNav);
   const askPick = useUiStore((s) => s.askPick);
@@ -82,16 +93,18 @@ export default function HubCard({ item }: { item: Item }) {
           {item.name}
         </h3>
 
+        {/* 这一行是"入口路径 + 覆盖计数"的混合内容：`path` 关闭时只隐藏路径部分，
+            **覆盖计数始终显示** —— 它才是入口卡要传达的核心（点它会连带勾上多少项） */}
         <p className="mt-1 flex items-start gap-2 text-sm leading-relaxed">
-          {item.path ? <FieldIcon kind="path" /> : null}
+          {card.path && item.path ? <FieldIcon kind="path" /> : null}
           <span className="min-w-0 flex-1 break-words text-ink-2">
-            {item.path ? <span className="text-ticket">{item.path}</span> : null}
-            {item.path ? ' · ' : ''}
+            {card.path && item.path ? <span className="text-ticket">{item.path}</span> : null}
+            {card.path && item.path ? ' · ' : ''}
             已配置覆盖 {coveredCount} 项
           </span>
         </p>
 
-        {item.note ? (
+        {card.note && item.note ? (
           <p className="mt-1 flex items-start gap-2 text-sm leading-relaxed">
             <FieldIcon kind="note" />
             <span className="min-w-0 flex-1 break-words text-ink-2">{item.note}</span>
