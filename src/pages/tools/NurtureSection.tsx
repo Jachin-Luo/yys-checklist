@@ -38,9 +38,12 @@ import { useUiStore } from '../../stores/ui';
  * 数据落在**档案级**分片（`yys:plans:{profileId}`，2026-09-16 由设备级升格）：
  * 换号会切到该号自己的那份，且随备份一起走 —— 见 `stores/nurture.ts` 的说明。
  *
- * 布局注记（2026-09-16）：任务行是「上卡信息 / 点 chips / 操作条 / 删除」四块横向排列，
- * 移动端靠 `flex-wrap` 折行。**点 chips 的容器必须给最小宽度**，否则它会被压到 0 宽、
- * 里面的 chip 溢出到操作条上（详见该行的注释）。
+ * 布局注记（2026-09-20 改为两排）：任务行现在是
+ *   **第一排**「上卡信息 · 统计 ·（右推）操作条 · 删除」
+ *   **第二排**「时间线（点 chips + 结束 chip）」
+ * 拆开的理由是时间线**需要整行宽度**：它本来就是一条横向序列，与操作条同排时会被挤成
+ * 两三行反而更难读，还得靠 `min-w-36` 兜住"被压到 0 宽后溢出"的问题。分排之后
+ * 那个约束连同它要防的问题一起消失 —— 布局层面解决比打补丁稳。
  *
  * 2026-09-20：表单**不再让用户选推点数**，改为填「结界卡持续时间」（小时），
  * 点数由 `pointCountOf(hours)` 派生（22h → 3 个收/续点）。同时显示**只读的结束时间**
@@ -238,28 +241,99 @@ export default function NurtureSection() {
     const pickedIndex = active?.id === r.id ? active.index : null;
 
     return (
-      <div key={r.id} className="flex flex-wrap items-start gap-2 border-b border-line-faint px-3 py-2.5 last:border-0">
-        <span className="w-24 flex-none">
-          <b className="block text-lg font-medium text-ink">{r.base} 上卡</b>
-          <span className="block text-sm text-ink-3">
-            持续 {r.hours}h · {pointCountOf(r.hours, r.delay)} 个点
-            {/* 延迟为 0 时不显示 —— 它是最常见的情况，写出来只会占地方 */}
-            {r.delay ? ` · 延 ${r.delay} 分` : ''}
+      <div key={r.id} className="border-b border-line-faint px-3 py-2.5 last:border-0">
+        {/* ── 第一排：概述 + 操作条 + 删除 ── */}
+        <div className="flex flex-wrap items-center gap-x-2 gap-y-1.5">
+          <span className="flex flex-none items-baseline gap-1.5">
+            <b className="text-lg font-medium text-ink">{r.base} 上卡</b>
+            <span className="text-sm text-ink-3">
+              持续 {r.hours}h · {pointCountOf(r.hours, r.delay)} 个点
+              {/* 延迟为 0 时不显示 —— 它是最常见的情况，写出来只会占地方 */}
+              {r.delay ? ` · 延 ${r.delay} 分` : ''}
+            </span>
           </span>
-          {/* 结束时间已移到右侧时间线的末尾（2026-09-20 用户反馈）—— 与点放在一条线上，
-              看"最后排到几点、离卡到期还差多久"不用在两处之间来回扫 */}
+
           {stats ? (
-            <span className="block text-sm text-ink-3">
+            <span className="flex-none text-sm text-ink-3">
               已完成 {stats.done} · 待收 {stats.pending}
             </span>
           ) : null}
-        </span>
 
-        {/* `min-w-36`（9rem）是**修移动端重叠的关键**：原先只有 `flex-1 min-w-0`，
-            `flex-basis: 0` + 可压缩到 0 ⇒ 外层 `flex-wrap` 永远等不到"空间不足"，
-            它选择把这一块压扁而不是换行；被压到 0 后里面固定宽的 chip 就溢出自身盒子、
-            画到右侧操作条上（桌面够宽所以看不出来）。给了最小宽度，空间不足时才会真正换行。 */}
-        <span className="min-w-36 flex-1">
+          {/* `ml-auto` 把操作区推到右侧；`min-w-0` + 内部 `flex-wrap` 让它在窄屏下
+              改在**自己内部**换行，而不是撑破容器（`flex-none` 会按 max-content 定宽、直接溢出） */}
+          <span className="ml-auto flex min-w-0 flex-wrap items-center gap-1.5">
+            {!r.started ? (
+              <button
+                type="button"
+                onClick={() => promote(r.id)}
+                className="flex-none cursor-pointer rounded-sm bg-brand px-2 py-1 text-sm text-white transition-colors duration-120 hover:bg-brand-deep"
+              >
+                开始
+              </button>
+            ) : target ? (
+              /* 操作条只作用于 `target`（选中点，或下一个待办点）—— 记完成只影响它之后的点 */
+              <>
+                <span className="text-sm text-ink-3">
+                  {target.doneAt !== undefined
+                    ? `${target.hm} 已完成`
+                    : target.past
+                      ? `${target.hm} 该收了`
+                      : `${target.hm} 待收`}
+                </span>
+                <input
+                  type="time"
+                  value={doneDraft[r.id] ?? nowHM(now)}
+                  onChange={(e) => setDoneDraft((s) => ({ ...s, [r.id]: e.target.value }))}
+                  aria-label={`${target.hm} 的实际完成时间`}
+                  title="实际完成时间；默认已填当前时间，可改"
+                  className="w-[5.6rem] rounded-sm border border-line bg-surface px-1.5 py-1 text-sm text-ink transition-colors duration-120 focus:border-brand"
+                />
+                <button
+                  type="button"
+                  onClick={() => submitDone(r, target)}
+                  title={
+                    target.doneAt !== undefined
+                      ? '改这个点的实际完成时间（这个点与它之后的点都会重算）'
+                      : '记这个点完成；这个点显示为实际时间，之后的点按实际时间 + 6h 顺延'
+                  }
+                  className="flex-none cursor-pointer rounded-sm bg-brand px-2 py-1 text-sm text-white transition-colors duration-120 hover:bg-brand-deep"
+                >
+                  {target.doneAt !== undefined ? '改时间' : '记完成'}
+                </button>
+                {target.doneAt !== undefined ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      clearPoint(r.id, target.index);
+                      setActive(null);
+                    }}
+                    title="取消这个点的完成记录，回到按预计时间推"
+                    className="flex-none cursor-pointer rounded-sm border border-line px-2 py-1 text-sm text-ink-2 transition-colors duration-120 hover:border-ink-4"
+                  >
+                    取消完成
+                  </button>
+                ) : null}
+              </>
+            ) : (
+              <span className="flex-none text-sm text-success-deep">全部完成</span>
+            )}
+          </span>
+
+          <button
+            type="button"
+            aria-label="删除记录"
+            onClick={() => void onRemove(r)}
+            className="flex-none cursor-pointer rounded-sm border border-line px-1.5 py-1 text-ink-3 transition-colors duration-120 hover:border-danger-line hover:text-danger"
+          >
+            <Trash2 size={12} strokeWidth={2} />
+          </button>
+        </div>
+
+        {/* ── 第二排：时间线独占一行（2026-09-20 用户要求）──
+            chips 拿到整行宽度后，不再与操作条抢空间。原先两者同排时需要一个
+            `min-w-36` 的最小宽度来防止 chips 被压到 0 宽、溢出到操作条上；
+            拆成两排后那个约束连同它要防的问题一起消失了 —— 布局层面解决，比补丁更稳。 */}
+        <div className="mt-1.5">
           <PointChips
             record={r}
             now={now}
@@ -268,74 +342,7 @@ export default function NurtureSection() {
               setActive((cur) => (cur?.id === r.id && cur.index === index ? null : { id: r.id, index }))
             }
           />
-        </span>
-
-        {!r.started ? (
-          <button
-            type="button"
-            onClick={() => promote(r.id)}
-            className="flex-none cursor-pointer rounded-sm bg-brand px-2 py-1 text-sm text-white transition-colors duration-120 hover:bg-brand-deep"
-          >
-            开始
-          </button>
-        ) : target ? (
-          /* 操作条只作用于 `target`（选中点，或下一个待办点）—— 记完成只影响它之后的点。
-             不用 `flex-none`：那个值让它按 max-content 定宽、窄屏下直接溢出容器；
-             去掉后配合 `min-w-0` 与内部的 `flex-wrap`，装不下时改在**自己内部**换行。 */
-          <span className="flex min-w-0 flex-wrap items-center gap-1">
-            <span className="text-sm text-ink-3">
-              {target.doneAt !== undefined
-                ? `${target.hm} 已完成`
-                : target.past
-                  ? `${target.hm} 该收了`
-                  : `${target.hm} 待收`}
-            </span>
-            <input
-              type="time"
-              value={doneDraft[r.id] ?? nowHM(now)}
-              onChange={(e) => setDoneDraft((s) => ({ ...s, [r.id]: e.target.value }))}
-              aria-label={`${target.hm} 的实际完成时间`}
-              title="实际完成时间；默认已填当前时间，可改"
-              className="w-[5.6rem] rounded-sm border border-line bg-surface px-1.5 py-1 text-sm text-ink transition-colors duration-120 focus:border-brand"
-            />
-            <button
-              type="button"
-              onClick={() => submitDone(r, target)}
-              title={
-                target.doneAt !== undefined
-                  ? '改这个点的实际完成时间（这个点与它之后的点都会重算）'
-                  : '记这个点完成；这个点显示为实际时间，之后的点按实际时间 + 6h 顺延'
-              }
-              className="flex-none cursor-pointer rounded-sm bg-brand px-2 py-1 text-sm text-white transition-colors duration-120 hover:bg-brand-deep"
-            >
-              {target.doneAt !== undefined ? '改时间' : '记完成'}
-            </button>
-            {target.doneAt !== undefined ? (
-              <button
-                type="button"
-                onClick={() => {
-                  clearPoint(r.id, target.index);
-                  setActive(null);
-                }}
-                title="取消这个点的完成记录，回到按预计时间推"
-                className="flex-none cursor-pointer rounded-sm border border-line px-2 py-1 text-sm text-ink-2 transition-colors duration-120 hover:border-ink-4"
-              >
-                取消完成
-              </button>
-            ) : null}
-          </span>
-        ) : (
-          <span className="flex-none text-sm text-success-deep">全部完成</span>
-        )}
-
-        <button
-          type="button"
-          aria-label="删除记录"
-          onClick={() => void onRemove(r)}
-          className="flex-none cursor-pointer rounded-sm border border-line px-1.5 py-1 text-ink-3 transition-colors duration-120 hover:border-danger-line hover:text-danger"
-        >
-          <Trash2 size={12} strokeWidth={2} />
-        </button>
+        </div>
       </div>
     );
   };
