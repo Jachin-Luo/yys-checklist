@@ -3,11 +3,11 @@
  * 覆盖边界 —— 跨天 / 跨周 / 跨月 / 跨版本 / 跨赛季、无截止日、`isAutoHub` 恒第一。
  */
 import { describe, expect, it } from 'vitest';
-import { isArchived, mergeChecked, periodStartOf, type ResetCtx } from './reset';
+import { isArchived, mergeChecked, periodEndOf, periodStartOf, type ResetCtx } from './reset';
 import { buildComparator, isVisible } from './sort';
 import { weightOf } from './weight';
 import { effectiveView, mergeItems } from './merge';
-import { appliesToday, deadlineBadge, parseTs, timeWindow } from './countdown';
+import { appliesToday, deadlineBadge, formatRemain, parseTs, timeWindow } from './countdown';
 import type { Item, ViewDefaults } from '../api/types';
 
 const item = (over: Partial<Item>): Item => ({
@@ -242,6 +242,19 @@ describe('countdown：倒计时与时间窗', () => {
     expect(over.hours).toBeNull();
   });
 
+  it('formatRemain：天 + 小时；不足 1 小时不显示 0', () => {
+    const H = 3600000;
+    /* floor 口径：还剩 5 小时 23 分说「剩 5 小时」，不夸大 —— 与 deadlineBadge 的 ceil 刻意不同 */
+    expect(formatRemain(5 * H + 23 * 60000)).toBe('剩 5 小时');
+    expect(formatRemain(2 * 24 * H + 5 * H)).toBe('剩 2 天 5 小时');
+    /* 小时为 0 时省掉那一段 */
+    expect(formatRemain(2 * 24 * H)).toBe('剩 2 天');
+    /* 不足 1 小时不能说「剩 0 小时」（读起来像已经结束） */
+    expect(formatRemain(30 * 60000)).toBe('不足 1 小时');
+    expect(formatRemain(0)).toBe('即将刷新');
+    expect(formatRemain(-1000)).toBe('即将刷新');
+  });
+
   it('timeWindow：未开始 / 进行中 / 已结束', () => {
     const it = item({ time: '17:00', timeEnd: '23:00' });
     expect(timeWindow(it, new Date(2026, 8, 10, 16, 0)).state).toBe('wait');
@@ -254,5 +267,46 @@ describe('countdown：倒计时与时间窗', () => {
     expect(appliesToday(item({}), new Date(2026, 8, 10))).toBe(true);
     expect(appliesToday(item({ days: [3, 6] }), new Date(2026, 8, 9))).toBe(true);
     expect(appliesToday(item({ days: [3, 6] }), new Date(2026, 8, 10))).toBe(false);
+  });
+});
+
+describe('periodEndOf：周期结束点（今日 / 本周 / 本月倒计时）', () => {
+  const ctx: ResetCtx = { resetHour: 0, periods: {} };
+
+  it('日 / 周 / 月各取下一次重置时刻', () => {
+    /* 2026-09-20 是周日 */
+    const sundayNoon = new Date(2026, 8, 20, 12, 0);
+    /* 今日 → 明天 0 点 */
+    expect(periodEndOf('daily', sundayNoon, ctx)).toBe(new Date(2026, 8, 21).getTime());
+    /* 本周 → 下周一 0 点（周日是一周最后一天，所以同样是明天） */
+    expect(periodEndOf('weekly', sundayNoon, ctx)).toBe(new Date(2026, 8, 21).getTime());
+    /* 本月 → 下月 1 日 0 点（跨月由 Date 自己处理） */
+    expect(periodEndOf('monthly', sundayNoon, ctx)).toBe(new Date(2026, 9, 1).getTime());
+  });
+
+  it('resetHour 非 0：周期起点落在"昨天"时，终点落在今天', () => {
+    /* 4 点刷新、现在 2:00 → 当前周期起点是昨天 4:00，结束在**今天** 4:00（即 2 小时后） */
+    const ctx4: ResetCtx = { resetHour: 4, periods: {} };
+    expect(periodEndOf('daily', new Date(2026, 8, 20, 2, 0), ctx4)).toBe(
+      new Date(2026, 8, 20, 4, 0).getTime(),
+    );
+  });
+
+  it('不自动重置的周期返回 null（调用点据此不渲染倒计时）', () => {
+    expect(periodEndOf('once', new Date(2026, 8, 20), ctx)).toBeNull();
+    expect(periodEndOf('limited', new Date(2026, 8, 20), ctx)).toBeNull();
+    expect(periodEndOf('version', new Date(2026, 8, 20), ctx)).toBeNull();
+    expect(periodEndOf('season', new Date(2026, 8, 20), ctx)).toBeNull();
+  });
+
+  it('倒计时归零的那一刻就是重置的那一刻（两个函数必须闭合）', () => {
+    const now = new Date(2026, 8, 20, 12, 0);
+    for (const cycle of ['daily', 'weekly', 'monthly'] as const) {
+      const end = periodEndOf(cycle, now, ctx);
+      expect(end).not.toBeNull();
+      /* 终点前一毫秒仍属于当前周期，终点那一刻已属于下一周期 —— 这是"倒计时与重置同源"的形式化表达 */
+      expect(periodStartOf(item({ cycle }), new Date(end! - 1), ctx)).toBeLessThan(end!);
+      expect(periodStartOf(item({ cycle }), new Date(end!), ctx)).toBe(end);
+    }
   });
 });

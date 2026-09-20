@@ -3,6 +3,7 @@ import { EmptyState, SectionTitle } from '../components/common/EmptyState';
 import ViewBar from '../components/common/ViewBar';
 import { weekRangeLabel } from '../domain/dateLabel';
 import { useChecklist } from '../hooks/useChecklist';
+import { usePeriodCountdown } from '../hooks/usePeriodCountdown';
 import { CHECKLIST_GRID } from '../styles/layout';
 
 /**
@@ -15,14 +16,23 @@ import { CHECKLIST_GRID } from '../styles/layout';
 export default function WeekPage({ variant }: { variant: 'mobile' | 'desktop' }) {
   const { pending, done, coveredSet, coverMode } = useChecklist('week');
   const isDimmed = (id: string) => coverMode === 'dim' && coveredSet.has(id);
+  /* 距下周一 0 点还有多久（与勾选重置同源） */
+  const countdown = usePeriodCountdown('weekly');
 
   return (
     <div className="pb-6">
       <ViewBar mode={variant} />
 
-      {/* 顶部日期：自然周周一–周日，纯展示 —— 与「周一 0 点刷新」的勾选语义无关（domain/dateLabel） */}
+      {/* 顶部日期：自然周周一–周日，纯展示 —— 与「周一 0 点刷新」的勾选语义无关（domain/dateLabel）。
+          右侧倒计时才是刷新口径，它走 domain/reset 的周期终点 */}
       <p className="px-3.5 pt-2.5 text-sm text-ink-3">
         本周 <b className="font-medium text-ink">{weekRangeLabel(new Date())}</b>
+        {countdown ? (
+          <>
+            {' · '}
+            <b className="font-medium text-ink-2">{countdown}</b>
+          </>
+        ) : null}
       </p>
 
       {/* 重置提示已移到限时页的「版本 / 赛季」分区（2026-09-14）：周常 0 点刷新是常识，

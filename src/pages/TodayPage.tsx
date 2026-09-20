@@ -7,6 +7,7 @@ import ViewBar from '../components/common/ViewBar';
 import { todayDateLabel } from '../domain/dateLabel';
 import { useAutoDaily } from '../hooks/useAutoDaily';
 import { useChecklist } from '../hooks/useChecklist';
+import { usePeriodCountdown } from '../hooks/usePeriodCountdown';
 import { CHECKLIST_GRID } from '../styles/layout';
 
 /**
@@ -27,6 +28,8 @@ import { CHECKLIST_GRID } from '../styles/layout';
 export default function TodayPage({ variant }: { variant: 'mobile' | 'desktop' }) {
   const { hub, hubDone, pending, done, coveredSet, coverMode } = useChecklist('today');
   const { toggleHub } = useAutoDaily();
+  /* 距明天 0 点（下一次重置）还有多久 —— 结束点与勾选重置同源，见 domain/reset.periodEndOf */
+  const countdown = usePeriodCountdown('daily');
   const [tab, setTab] = useState<'resident' | 'event'>('resident');
 
   const isEvent = (it: Item) => Boolean(it.until || it.deadline);
@@ -52,9 +55,16 @@ export default function TodayPage({ variant }: { variant: 'mobile' | 'desktop' }
     <div className="pb-6">
       <ViewBar mode={variant} />
 
-      {/* 顶部日期：纯展示（自然日历），与勾选重置（0 点）语义无关 —— 见 domain/dateLabel */}
+      {/* 顶部日期：纯展示（自然日历），与勾选重置（0 点）语义无关 —— 见 domain/dateLabel。
+          后面的倒计时**刻意不同源**：它走 domain/reset 的周期终点，即"还有多久被重置" */}
       <p className="px-3.5 pt-2.5 text-sm text-ink-3">
         今天 <b className="font-medium text-ink">{todayDateLabel(new Date())}</b>
+        {countdown ? (
+          <>
+            {' · '}
+            <b className="font-medium text-ink-2">{countdown}</b>
+          </>
+        ) : null}
       </p>
 
       <div className="flex items-center gap-1.5 px-3.5 pt-2.5">

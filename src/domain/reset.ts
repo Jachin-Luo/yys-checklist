@@ -11,6 +11,7 @@
  *   - once / limited：不自动重置，只靠 `until` 归档
  */
 import type { Item, Meta } from '../api/types';
+import type { Cycle } from './enums';
 
 export interface ResetCtx {
   resetHour: number;
@@ -64,6 +65,41 @@ export function periodStartOf(it: Item, now: Date, ctx: ResetCtx): number {
       return 0; // 一次性 / 限时：不自动重置，只靠 until 归档
     default:
       return 0;
+  }
+}
+
+/**
+ * 该周期**下一次重置的时刻**（即当前周期的结束点）。不自动重置的周期（once / limited）→ null。
+ *
+ * 2026-09-20 新增（用户要求：今日 / 本周 / 本月都显示倒计时）。
+ * 它刻意与 `periodStartOf` **共用同一组锚点函数**（`lastHour` / `lastMondayHour` / `firstDayHour`）：
+ * 倒计时归零的那一刻，必须正好就是勾选被重置的那一刻。若另写一套"月末 24 点"之类的算法，
+ * 两者迟早会在某个边界（跨月、resetHour 非 0 点）差出一档，而用户会先看到倒计时归零、
+ * 再发现勾选没被重置 —— 那比没有倒计时更糟。
+ *
+ * 用 `setDate/setMonth` 做日期加法而不是 `+ 86400000`：夏令时切换时后者会偏一小时。
+ * 国内无夏令时，但这条纪律与 `lastHour` 的既有写法一致，不必为特例破例。
+ */
+export function periodEndOf(cycle: Cycle, now: Date, ctx: ResetCtx): number | null {
+  switch (cycle) {
+    case 'daily': {
+      const d = new Date(lastHour(now, ctx.resetHour));
+      d.setDate(d.getDate() + 1);
+      return d.getTime();
+    }
+    case 'weekly': {
+      const d = new Date(lastMondayHour(now, ctx.resetHour));
+      d.setDate(d.getDate() + 7);
+      return d.getTime();
+    }
+    case 'monthly': {
+      const d = new Date(firstDayHour(now, ctx.resetHour));
+      /* 月份 +1 由 Date 自己处理 12 → 次年 1 月与不同天数（闰年自动正确） */
+      d.setMonth(d.getMonth() + 1);
+      return d.getTime();
+    }
+    default:
+      return null;
   }
 }
 

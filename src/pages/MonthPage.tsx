@@ -3,6 +3,7 @@ import { EmptyState, SectionTitle } from '../components/common/EmptyState';
 import ViewBar from '../components/common/ViewBar';
 import { monthRangeLabel } from '../domain/dateLabel';
 import { useChecklist } from '../hooks/useChecklist';
+import { usePeriodCountdown } from '../hooks/usePeriodCountdown';
 import { CHECKLIST_GRID } from '../styles/layout';
 
 /**
@@ -16,15 +17,24 @@ import { CHECKLIST_GRID } from '../styles/layout';
 export default function MonthPage({ variant }: { variant: 'mobile' | 'desktop' }) {
   const { pending, done, coveredSet, coverMode } = useChecklist('month');
   const isDimmed = (id: string) => coverMode === 'dim' && coveredSet.has(id);
+  /* 距下月 1 日 0 点还有多久（与勾选重置同源） */
+  const countdown = usePeriodCountdown('monthly');
 
   return (
     <div className="pb-6">
       <ViewBar mode={variant} />
 
       {/* 顶部日期：自然月区间，纯展示 —— 与「每月 1 日 0 点刷新」的勾选语义无关（domain/dateLabel）。
-          月常刷新不是常识（周常周一刷新才是），所以这一页把刷新点写在日期旁边 */}
+          月常刷新不是常识（周常周一刷新才是），所以这一页把刷新点写在日期旁边；
+          末尾再接具体还剩多久 —— 规则与倒计时并列，既说清"什么时候刷"也说清"还有多久" */}
       <p className="px-3.5 pt-2.5 text-sm text-ink-3">
         本月 <b className="font-medium text-ink">{monthRangeLabel(new Date())}</b> · 每月 1 日 0 点刷新
+        {countdown ? (
+          <>
+            {' · '}
+            <b className="font-medium text-ink-2">{countdown}</b>
+          </>
+        ) : null}
       </p>
 
       <SectionTitle>本月 · {pending.length} 项未完成</SectionTitle>

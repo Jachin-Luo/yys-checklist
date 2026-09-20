@@ -93,6 +93,28 @@ export function deadlineBadge(it: Item, now: Date = new Date()): DeadlineBadge {
   };
 }
 
+/**
+ * 把"还剩多久"的毫秒差格式化成**天 + 小时**（2026-09-20 用户要求：今日 / 本周 / 本月都加倒计时，
+ * 精确到天和小时）。
+ *
+ * 用 `floor` 而不是 `ceil`：这里的用途是"还剩多少可支配时间"，说多了会让用户以为还来得及。
+ * 这和 `deadlineBadge` 的 `ceil` 是**刻意不同**的口径 —— 那边要避免"剩 0 天"这种表达，
+ * 且它回答的是"哪天截止"。两处别互相对齐。
+ *
+ * 边界：不足 1 小时说"不足 1 小时"而不是"剩 0 小时"（后者读起来像已经结束）；
+ * 小时为 0 时省掉那一段（"剩 2 天"而不是"剩 2 天 0 小时"）。
+ */
+export function formatRemain(ms: number): string {
+  if (ms <= 0) return '即将刷新';
+  const hours = Math.floor(ms / HOUR_MS);
+  if (hours < 1) return '不足 1 小时';
+  const days = Math.floor(hours / 24);
+  const rest = hours % 24;
+  if (days === 0) return `剩 ${rest} 小时`;
+  if (rest === 0) return `剩 ${days} 天`;
+  return `剩 ${days} 天 ${rest} 小时`;
+}
+
 export type TimeWindowState = 'none' | 'wait' | 'open' | 'over';
 
 export interface TimeWindow {

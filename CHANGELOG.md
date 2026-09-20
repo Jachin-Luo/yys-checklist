@@ -18,6 +18,8 @@
 - 勾选日志 `CheckLog`：新增 `yys:checklog:{profileId}` 分片，按 `YYYY-MM-DD` 分桶记录当日勾选的条目（幂等、保留 90 天），**周期重置不清它**，只有取消勾选才按该条目的周期起点回退（`domain/checkLog` + `stores/check.logAfter`，均带单测）。它是"哪天做过什么"的唯一来源 —— `checked` 只留每条最近一次。随备份导出 / 导入（`UserDataBundle.data[].log`；旧备份缺该字段时归一成空日志），契约新增 `saveCheckLog`（31 个方法），`getBootstrap` 的 payload 增加 `log`
 - 统计页整版改版（`pages/StatsPage.tsx`）：上方「月度日历」按**当月单日最大值**相对分档着色、点某天即选中；下方「时间区间收益」为 近 7 天（默认）/ 近 30 天 / 本月，点日历切成单日、再点一次（或按「返回近 7 天」）回到快捷区间。区间收益走新增的 `domain/stats.summarizeRangeGain`（输入是勾选日志 —— 同一条目多天完成即累计多次，因此无「总量 / 还差」），日历排版走新增的 `domain/calendar`（周一起始、固定 6 行、含前后补位格）。原「本日 / 本周 / 本月进度条」与 `GainBar` / `ProgressBar` 保留待恢复但已无消费方
 
+- 今日 / 本周 / 本月三页顶部加**周期倒计时**（精确到天和小时）：`domain/reset` 新增 `periodEndOf` —— 它与 `periodStartOf` **共用同一组锚点函数**，所以倒计时归零的那一刻正好就是勾选被重置的那一刻；若另写一套"月末 24 点"之类的算法，两者迟早会在某个边界（跨月、`resetHour` 非 0 点）差出一档，而用户会先看到倒计时归零、再发现勾选没被重置，比没有倒计时更糟。`domain/countdown` 新增 `formatRemain`（天 + 小时，`floor` 口径，不足 1 小时说"不足 1 小时"而非"剩 0 小时"），`hooks/usePeriodCountdown` 每分钟重算。本月页原有的「每月 1 日 0 点刷新」保留 —— 规则与倒计时并列，既说清"什么时候刷"也说清"还有多久"。单测里有一条"两个函数必须闭合"的用例把这个不变量钉住
+
 ### 修改
 
 - 截止倒计时**不足一天时改按小时显示**：`daysLeft` 的 `Math.ceil` 会把「还有 2 小时」算成「剩 1 天」，限时活动的最后一段这个粒度太粗 —— 「剩 1 天」让人以为还有一整天，实际马上要结束。现在 `deadlineBadge` 在剩余不足 24 小时时输出「剩 N 小时 · 10/6 23:59 止」，并新增 `hoursLeft` 纯函数（与 `daysLeft` 成对，同一次时间差的两种刻度）。`daysLeft` 本身**不改**：排序与 `LimitedPage` 的 urgent 计数依赖它按天粗粒度的语义。`DeadlineBadge` 新增 `hours` 字段与 `days` 并存，颜色分级（≤3 天红）继续走 `days`
