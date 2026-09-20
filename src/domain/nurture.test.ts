@@ -11,6 +11,7 @@ import {
   hmToDate,
   makeNurture,
   markPointDone,
+  MAX_NURTURE_DELAY,
   MAX_NURTURE_HOURS,
   MAX_NURTURE_N,
   nextDue,
@@ -169,6 +170,31 @@ describe('pointCountOf / endTsOf / endLabelOf：由持续时间派生（2026-09-
     expect(pts.map((p) => p.index)).toEqual([0, 1, 2, 3]);
     const end = endTsOf(r, NOW);
     for (const p of pts) expect(p.ts).toBeLessThan(end);
+  });
+
+  it('`delay` 按分钟累积：6:00 上卡、延迟 5 → 12:05 → 18:10', () => {
+    const r = makeNurture('06:00', 22, true, NOW, 5);
+    expect(recordPoints(r, NOW).map((p) => p.hm)).toEqual(['06:00', '12:05', '18:10', '00:15']);
+  });
+
+  it('延迟会挤掉点数：24h 的卡配 5 分钟延迟只剩 3 个点', () => {
+    /* 第 4 点会落在 24h20min，已超出卡的寿命 —— 这正是"算次数时要带上延迟" */
+    expect(pointCountOf(24, 0)).toBe(4);
+    expect(pointCountOf(24, 5)).toBe(3);
+    expect(pointCountOf(22, 5)).toBe(3);
+    /* 延迟大到一定程度，一个续点都排不出来 */
+    expect(pointCountOf(6, 60)).toBe(0);
+  });
+
+  it('延迟不影响结束时间：结束仍由持续时间决定', () => {
+    const r = makeNurture('06:00', 22, true, NOW, 5);
+    expect(endTsOf(r, NOW)).toBe(new Date(2026, 8, 11, 4, 0).getTime());
+  });
+
+  it('延迟夹到 [0, MAX_NURTURE_DELAY]；负数与非数按 0', () => {
+    expect(makeNurture('06:00', 12, true, NOW, -5).delay).toBe(0);
+    expect(makeNurture('06:00', 12, true, NOW, 999).delay).toBe(MAX_NURTURE_DELAY);
+    expect(makeNurture('06:00', 12, true, NOW).delay).toBe(0);
   });
 });
 

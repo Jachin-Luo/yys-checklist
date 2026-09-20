@@ -24,6 +24,12 @@ export const NURTURE_HOURS = 6;
 export const MAX_NURTURE_N = 5;
 /** 结界卡持续时间上限（小时）—— 与点数上限一致，避免"排得出点、但记不下"的不一致 */
 export const MAX_NURTURE_HOURS = MAX_NURTURE_N * NURTURE_HOURS;
+/**
+ * 每次收/续的延迟上限（分钟，2026-09-20 新增）。
+ * 实测里"总是晚几分钟"很常见，但超过一小时就该去改上卡时间而不是记延迟了 ——
+ * 而且延迟越大、挤掉的点数越多，给个上限免得填出 0 个点的记录。
+ */
+export const MAX_NURTURE_DELAY = 60;
 
 export interface NurtureRecord {
   id: string;
@@ -40,6 +46,15 @@ export interface NurtureRecord {
    * （22h 的卡，最后一点在 18h，结束在 22h），结束时刻必须由它本身决定。
    */
   hours: number;
+  /**
+   * 每次收/续的**延迟**（分钟，0 – `MAX_NURTURE_DELAY`），2026-09-20 新增。
+   *
+   * 递推因此变成：第 k 点 = 上卡 + `k × (6h + delay)`。
+   * 延迟**逐点累积**（6:00 上卡、延迟 5 → 12:05 → 18:10），所以算「能排几个点」时
+   * 必须把它算进去：22h 的卡配 5 分钟延迟仍是 3 点，但 24h 的卡就只有 3 点而非 4 点
+   * —— 第 4 点会落在 24h20min，已经超出卡的寿命。见 `pointCountOf`。
+   */
+  delay: number;
   /** true = 任务（记状态） / false = 计划（纯查看） */
   started: boolean;
   createdAt: number;
@@ -50,14 +65,28 @@ export interface NurtureRecord {
   dones?: Record<number, number>;
 }
 
+/** 延迟夹到 `[0, MAX_NURTURE_DELAY]`；非有限数当 0 */
+const clampDelay = (min: number): number =>
+  Number.isFinite(min) ? Math.min(Math.max(Math.round(min), 0), MAX_NURTURE_DELAY) : 0;
+
+/** 相邻两点的间隔（毫秒）= 6h + 延迟。递推只经这里，别处不要再写 `6 * 3600000` */
+export const nurtureStepMs = (delay: number): number =>
+  NURTURE_HOURS * 3600000 + clampDelay(delay) * 60000;
+
 /**
- * 持续时间 → 收/续点数：每 6 小时一个、**向下取整**。
+ * 持续时间 → 收/续点数：**向下取整**。
  *
- * 例：22h → `floor(22 / 6)` = 3 个收/续点（上卡点另计，它在 index 0）。
- * 不足一个间隔（< 6h）返回 0 —— 卡还没到第一个续点就到期了。
+ * 第 k 点落在 `k × (6h + delay)`，所以点数 = `floor(总分钟 / (360 + delay))`。
+ * 延迟逐点累积，于是它会把点数往下压 —— 这正是"算次数时要带上延迟"的地方：
+ *   22h + 5 分 → `floor(1320 / 365)` = 3 个点
+ *   24h + 5 分 → `floor(1440 / 365)` = 3 个点（不加延迟会是 4 个）
+ *
+ * 不足一个间隔返回 0 —— 卡还没到第一个续点就到期了。
  */
-export const pointCountOf = (hours: number): number =>
-  Math.min(Math.max(0, Math.floor(hours / NURTURE_HOURS)), MAX_NURTURE_N);
+export function pointCountOf(hours: number, delay = 0): number {
+  const stepMin = NURTURE_HOURS * 60 + clampDelay(delay);
+  return Math.min(Math.max(0, Math.floor((hours * 60) / stepMin)), MAX_NURTURE_N);
+}
 
 export interface NurturePoint {
   /** 0 = 上卡点；1..n = 收/续点。UI 用它定位"给哪个点记完成" */
@@ -133,15 +162,16 @@ function shapePoint(ts: number, index: number, now: Date): NurturePoint {
  * 从基准时刻按固定 6h 推 `n` 个点（**不含上卡点自身**，点序号从 1 开始）。
  * 用于表单预览（"首点几点"）与纯时间计算；带完成状态的完整列表见 `recordPoints`。
  */
-export function nurturePointsFrom(baseTs: number, n: number, now: Date): NurturePoint[] {
+export function nurturePointsFrom(baseTs: number, n: number, now: Date, delay = 0): NurturePoint[] {
   const out: NurturePoint[] = [];
-  for (let i = 1; i <= n; i++) out.push(shapePoint(baseTs + i * NURTURE_HOURS * 3600000, i, now));
+  const step = nurtureStepMs(delay);
+  for (let i = 1; i <= n; i++) out.push(shapePoint(baseTs + i * step, i, now));
   return out;
 }
 
 /** 按 `HH:mm` 基准推点（等价于用今天的该时刻作基准） */
-export const nurturePoints = (base: string, n: number, now: Date): NurturePoint[] =>
-  nurturePointsFrom(baseTsOf({ base }, now), n, now);
+export const nurturePoints = (base: string, n: number, now: Date, delay = 0): NurturePoint[] =>
+  nurturePointsFrom(baseTsOf({ base }, now), n, now, delay);
 
 /**
  * 一条记录的**完整点列表** `[上卡点, ...收/续点]`：展示、徽章与 `nextDue` 都走这里。
@@ -166,9 +196,9 @@ export function recordPoints(record: NurtureRecord, now: Date): NurturePoint[] {
   const out: NurturePoint[] = [{ ...shapePoint(start, 0, now), doneAt: start }];
 
   let prev = start;
-  /* 点数从 `hours` 派生，不读落盘字段 —— 见 `NurtureRecord.hours` 的说明 */
-  for (let k = 1; k <= pointCountOf(record.hours); k++) {
-    const ts = prev + NURTURE_HOURS * 3600000;
+  /* 点数从 `hours` / `delay` 派生，不读落盘字段 —— 见 `NurtureRecord.hours` 的说明 */
+  for (let k = 1; k <= pointCountOf(record.hours, record.delay); k++) {
+    const ts = prev + nurtureStepMs(record.delay);
     const doneAt = dones[k];
     /* 用 `doneAt ?? ts` 定位展示时刻（`hm` / `dayLabel` / `past` 都跟着它），
        再把 `ts` 覆盖回**预计值** —— 否则上面那三个字段会把预计值顶掉，递推口径就乱了 */
@@ -237,11 +267,17 @@ export function sanitizePlans(value: unknown): NurtureRecord[] {
     if (typeof row.hours !== 'number' || !Number.isFinite(row.hours)) continue;
     const hours = Math.round(row.hours);
     if (hours < 1 || hours > MAX_NURTURE_HOURS) continue;
+    /* `delay` 缺失按 0 处理（不用丢整条：它是可选细节，0 就是"每次都准时"，
+       与旧记录、与用户没填的默认情形都一致）；给了值但离谱则夹紧 */
+    const delay = typeof row.delay === 'number' && Number.isFinite(row.delay)
+      ? clampDelay(row.delay)
+      : 0;
     const dones = sanitizeDones(row.dones);
     out.push({
       id,
       base,
       hours,
+      delay,
       started: row.started === true,
       createdAt: typeof row.createdAt === 'number' && Number.isFinite(row.createdAt) ? row.createdAt : 0,
       ...(dones ? { dones } : {}),
@@ -293,13 +329,24 @@ const clampHours = (h: number): number =>
 
 /**
  * 建一条寄养记录（`hours` = 结界卡持续时间）。
- * 注意**不再接收点数** —— 点数由 `pointCountOf(hours)` 派生，用户填的是卡能持续多久。
+ * 注意**不接收点数** —— 点数由 `pointCountOf(hours, delay)` 派生，用户填的是
+ * 「卡能撑多久」与「每次大概晚几分钟」。
+ *
+ * `delay` 放在末位并默认 0：它本来就是可选的（0 = 每次都准时），且 TS 要求可选参数
+ * 必须排在必填参数之后。调用点因此不必为一个"大多数记录都用不上"的字段改写。
  */
-export function makeNurture(base: string, hours: number, started: boolean, now: Date): NurtureRecord {
+export function makeNurture(
+  base: string,
+  hours: number,
+  started: boolean,
+  now: Date,
+  delay = 0,
+): NurtureRecord {
   return {
     id: nurtureId(now),
     base: normalizeHM(base) ?? nowHM(now),
     hours: clampHours(hours),
+    delay: clampDelay(delay),
     started,
     createdAt: now.getTime(),
   };

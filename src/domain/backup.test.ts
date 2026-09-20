@@ -220,7 +220,7 @@ describe('summarize', () => {
         {
           ...row('p_main', { x: 1 }),
           guildTime: { daily_daoguan: '20:00', weekly_banquet: '20:30' },
-          plans: [{ id: 'n_1', base: '08:00', hours: 12, started: true, createdAt: 1 }],
+          plans: [{ id: 'n_1', base: '08:00', hours: 12, delay: 5, started: true, createdAt: 1 }],
         },
       ],
     });
@@ -236,9 +236,11 @@ describe('summarize', () => {
           ...row('p_main', { x: 1 }),
           guildTime: { daily_daoguan: '20:00', daily_bad: '25:00', daily_num: 42 },
           plans: [
-            { id: 'n_ok', base: '08:00', hours: 12, started: true, createdAt: 1, dones: { 1: 100, 0: 5 } },
-            { id: 'n_bad_base', base: '99:99', hours: 6, started: true, createdAt: 1 },
-            { id: 'n_bad_hours', base: '08:00', hours: 99, started: true, createdAt: 1 },
+            { id: 'n_ok', base: '08:00', hours: 12, delay: 5, started: true, createdAt: 1, dones: { 1: 100, 0: 5 } },
+            { id: 'n_bad_base', base: '99:99', hours: 6, delay: 0, started: true, createdAt: 1 },
+            { id: 'n_bad_hours', base: '08:00', hours: 99, delay: 0, started: true, createdAt: 1 },
+            /* 延迟缺失 → 按 0 处理（不丢整条）；离谱 → 夹紧 */
+            { id: 'n_no_delay', base: '08:00', hours: 12, started: true, createdAt: 1 },
             { nope: true },
           ],
         },
@@ -249,8 +251,10 @@ describe('summarize', () => {
     if (!r.ok) return;
 
     expect(r.bundle.data[0].guildTime).toEqual({ daily_daoguan: '20:00' });
-    expect(r.bundle.data[0].plans).toHaveLength(1);
-    expect(r.bundle.data[0].plans[0].id).toBe('n_ok');
+    expect(r.bundle.data[0].plans.map((p) => p.id)).toEqual(['n_ok', 'n_no_delay']);
+    expect(r.bundle.data[0].plans[0].delay).toBe(5);
+    /* 缺失的 `delay` 归一成 0，而不是把整条记录丢掉 */
+    expect(r.bundle.data[0].plans[1].delay).toBe(0);
     /* 点序号 0（上卡点）不是合法的完成记录键：上卡点天然已完成，不接受单独记录 */
     expect(r.bundle.data[0].plans[0].dones).toEqual({ 1: 100 });
   });

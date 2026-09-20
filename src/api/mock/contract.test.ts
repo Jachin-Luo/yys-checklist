@@ -282,7 +282,7 @@ describe('档案级偏好分片（寮时间 / 寄养任务 / 日志读取）', (
 
   it('寄养任务按档案隔离（换号不会看到另一个号的寄养列表）', async () => {
     const p2 = await api.createProfile(scope.userId, { name: '小号' });
-    const plan = { id: 'n_1', base: '08:00', hours: 12, started: true, createdAt: 1, dones: { 1: 100 } };
+    const plan = { id: 'n_1', base: '08:00', hours: 12, delay: 0, started: true, createdAt: 1, dones: { 1: 100 } };
 
     await api.savePlans(scope, [plan]);
     expect(await api.getPlans(scope)).toEqual([plan]);
@@ -291,7 +291,7 @@ describe('档案级偏好分片（寮时间 / 寄养任务 / 日志读取）', (
 
   it('getBootstrap 一并带上两个新分片', async () => {
     await api.saveGuildTime(scope, { daily_daoguan: '20:00' });
-    await api.savePlans(scope, [{ id: 'n_1', base: '08:00', hours: 6, started: false, createdAt: 1 }]);
+    await api.savePlans(scope, [{ id: 'n_1', base: '08:00', hours: 6, delay: 0, started: false, createdAt: 1 }]);
 
     const payload = await api.getBootstrap(scope);
     expect(payload.guildTime).toEqual({ daily_daoguan: '20:00' });
@@ -301,7 +301,7 @@ describe('档案级偏好分片（寮时间 / 寄养任务 / 日志读取）', (
 
   it('导出带上两项；清库后导入原样还原', async () => {
     await api.saveGuildTime(scope, { daily_daoguan: '20:00' });
-    await api.savePlans(scope, [{ id: 'n_1', base: '08:00', hours: 12, started: true, createdAt: 1 }]);
+    await api.savePlans(scope, [{ id: 'n_1', base: '08:00', hours: 12, delay: 0, started: true, createdAt: 1 }]);
 
     const bundle = await api.exportUserData(scope);
     expect(bundle.data[0].guildTime).toEqual({ daily_daoguan: '20:00' });
@@ -318,16 +318,21 @@ describe('档案级偏好分片（寮时间 / 寄养任务 / 日志读取）', (
   it('分片里的畸形寄养记录在**读取时**就被净化掉（base 非法会让递推算出 NaN）', async () => {
     /* 直接往分片里塞坏数据：模拟旧版本残留 / 被手工改坏 */
     storage.setItem('yys:plans:p_main', JSON.stringify([
-      { id: 'n_ok', base: '08:00', hours: 12, started: true, createdAt: 1 },
-      { id: 'n_bad_base', base: '99:99', hours: 6, started: true, createdAt: 1 },
-      { id: 'n_bad_hours', base: '08:00', hours: 999, started: true, createdAt: 1 },
+      { id: 'n_ok', base: '08:00', hours: 12, delay: 5, started: true, createdAt: 1 },
+      { id: 'n_bad_base', base: '99:99', hours: 6, delay: 0, started: true, createdAt: 1 },
+      { id: 'n_bad_hours', base: '08:00', hours: 999, delay: 0, started: true, createdAt: 1 },
+      /* 延迟离谱记录：夹紧而不是丢弃（它是可选细节，0 也合法） */
+      { id: 'n_delay_clamped', base: '08:00', hours: 12, delay: 999, started: true, createdAt: 1 },
       { nope: true },
     ]));
     resetStoreForTest();
 
     const plans = await api.getPlans(scope);
-    expect(plans).toHaveLength(1);
-    expect(plans[0].id).toBe('n_ok');
+    /* `n_ok` 与 `n_delay_clamped` 留下；base / hours 非法的两条被丢弃 */
+    expect(plans.map((p) => p.id)).toEqual(['n_ok', 'n_delay_clamped']);
+    expect(plans[0].delay).toBe(5);
+    /* 离谱延迟是**夹紧**而不是丢弃：它是可选细节，0 也合法，没必要为此废掉整条记录 */
+    expect(plans[1].delay).toBe(60);
   });
 
   it('getCheckLog 读的是**传入 scope** 的日志，而不是当前档案的', async () => {
@@ -346,7 +351,7 @@ describe('档案级偏好分片（寮时间 / 寄养任务 / 日志读取）', (
   it('删除档案时两个新分片一并清除（不留孤儿键）', async () => {
     const p2 = await api.createProfile(scope.userId, { name: '小号' });
     await api.saveGuildTime(p2scope(p2.id), { daily_daoguan: '20:00' });
-    await api.savePlans(p2scope(p2.id), [{ id: 'n_1', base: '08:00', hours: 6, started: false, createdAt: 1 }]);
+    await api.savePlans(p2scope(p2.id), [{ id: 'n_1', base: '08:00', hours: 6, delay: 0, started: false, createdAt: 1 }]);
 
     await api.deleteProfile(scope, p2.id);
     expect(storage.getItem(`yys:guild:${p2.id}`)).toBeNull();

@@ -3,6 +3,7 @@ import { Check, Plus, Trash2 } from 'lucide-react';
 import {
   endLabelOf,
   hmToDate,
+  MAX_NURTURE_DELAY,
   MAX_NURTURE_HOURS,
   nextPendingPoint,
   normalizeHM,
@@ -129,9 +130,14 @@ export default function NurtureSection() {
    * 默认 24 —— 最常见的整日卡，改一个数字比从零输入快。
    */
   const [hours, setHours] = useState(24);
+  /**
+   * 每次收/续的延迟（分钟，2026-09-20 新增）。默认 0 = 每次都准时；
+   * 递推是"每点 +6h +delay"，所以它会累积、也会挤掉点数（见 `pointCountOf`）。
+   */
+  const [delay, setDelay] = useState(0);
   const [draftError, setDraftError] = useState('');
-  /** 待确认的草稿：`{ base, hours }`，等用户选「立即开始 / 仅存计划」 */
-  const [ask, setAsk] = useState<{ base: string; hours: number } | null>(null);
+  /** 待确认的草稿，等用户选「立即开始 / 仅存计划」 */
+  const [ask, setAsk] = useState<{ base: string; hours: number; delay: number } | null>(null);
   /** 当前选中的点（每条记录各自的操作对象）；没选时操作条作用于"下一个待办点" */
   const [active, setActive] = useState<{ id: string; index: number } | null>(null);
   /** 每行「实际完成时间」的草稿（`HH:mm`）。**缺键 = 用"现在"**，与上卡时间同一套跟随逻辑 */
@@ -160,12 +166,12 @@ export default function NurtureSection() {
       return;
     }
     setDraftError('');
-    setAsk({ base: normalizeHM(raw) ?? nowHM(now), hours });
+    setAsk({ base: normalizeHM(raw) ?? nowHM(now), hours, delay });
   };
 
   const confirmAdd = (started: boolean) => {
     if (!ask) return;
-    add(ask.base, ask.hours, started);
+    add(ask.base, ask.hours, ask.delay, started);
     setAsk(null);
     /* 复位成 `null` 而不是 `''`：下一条又要记的话，框里该是那时的"现在" */
     setTime(null);
@@ -174,7 +180,9 @@ export default function NurtureSection() {
   const onRemove = async (r: NurtureRecord) => {
     const ok = await askConfirm({
       title: '删除这条寄养记录？',
-      body: `${r.base} 上卡 · 持续 ${r.hours}h（${pointCountOf(r.hours)} 个收/续点）。删除后不再提醒。`,
+      body: `${r.base} 上卡 · 持续 ${r.hours}h（${pointCountOf(r.hours, r.delay)} 个收/续点）${
+        r.delay ? ` · 每次延迟 ${r.delay} 分` : ''
+      }。删除后不再提醒。`,
       confirmLabel: '删除',
       tone: 'danger',
     });
@@ -217,7 +225,9 @@ export default function NurtureSection() {
         <span className="w-28 flex-none">
           <b className="block text-lg font-medium text-ink">{r.base} 上卡</b>
           <span className="block text-sm text-ink-3">
-            持续 {r.hours}h · {pointCountOf(r.hours)} 个点
+            持续 {r.hours}h · {pointCountOf(r.hours, r.delay)} 个点
+            {/* 延迟为 0 时不显示 —— 它是最常见的情况，写出来只会占地方 */}
+            {r.delay ? ` · 延 ${r.delay} 分` : ''}
           </span>
           {/* 结束时间只读：由 `base` + `hours` 决定，不给编辑入口 —— 它是推算结果不是输入项。
               加 `title` 说明来源，免得用户找不到"改哪里能让它变" */}
@@ -319,10 +329,11 @@ export default function NurtureSection() {
   return (
     <div className="pb-6">
       <div className="mx-3.5 mt-3 rounded-md bg-surface-3 px-3 py-2.5 text-sm leading-relaxed text-ink-2">
-        <b className="text-ink">结界寄养每次 6 小时</b>。填上卡时间与<b className="text-ink">卡的持续时间</b>
-        （如 22 小时）→ 自动排出之后每 6h 的收/续点（22h 排 3 个），跨天标明天/后天；
-        <b className="text-ink">上卡时刻也作为一个点显示在任务里</b>，
-        <b className="text-ink">结束时间</b>由前两者推算、只读不可改。
+        <b className="text-ink">结界寄养每次 6 小时</b>。填上卡时间、<b className="text-ink">卡的持续时间</b>
+        （如 22 小时）与<b className="text-ink">每次的延迟</b>（分钟，默认 0）→
+        自动排出收/续点（每点 = 前一点 + 6 小时 + 延迟，如 6:00 上卡、延迟 5 → 12:05 → 18:10），
+        跨天标明天/后天；<b className="text-ink">上卡时刻也作为一个点显示在任务里</b>，
+        <b className="text-ink">结束时间</b>由持续时间推算、只读不可改。
         <b className="text-ink">每个点各自记完成</b>：点一下那个时间点，再用「现在」或填实际时间 ——
         这个点会显示为你填的实际时间，之后的点按实际时间 + 6h 顺延，之前的点不动。
         <b className="text-ink">添加时先问你要不要「立即开始」</b> —— 开始才算任务、才记录完成；
@@ -366,8 +377,20 @@ export default function NurtureSection() {
             aria-label="结界卡持续时间（小时）"
             className="w-20 rounded-sm border border-line bg-surface px-2 py-1.5 text-lg text-ink transition-colors duration-120 focus:border-brand"
           />
+          {/* 延迟（2026-09-20 新增）：每次收/续往后推几分钟。它逐点累积，
+              所以点数提示必须带上它 —— 24h 的卡配 5 分钟延迟会从 4 个点变成 3 个 */}
+          <span className="w-12 flex-none text-sm text-ink-3">延迟</span>
+          <input
+            type="number"
+            min={0}
+            max={MAX_NURTURE_DELAY}
+            value={delay}
+            onChange={(e) => setDelay(Number(e.target.value))}
+            aria-label="每次收续延迟（分钟）"
+            className="w-20 rounded-sm border border-line bg-surface px-2 py-1.5 text-lg text-ink transition-colors duration-120 focus:border-brand"
+          />
           <span className="text-sm text-ink-3">
-            小时 · 将排 <b className="font-medium text-ink-2">{pointCountOf(hours)}</b> 个收/续点
+            分钟 · 将排 <b className="font-medium text-ink-2">{pointCountOf(hours, delay)}</b> 个收/续点
           </span>
         </div>
 
@@ -401,8 +424,9 @@ export default function NurtureSection() {
       {ask ? (
         <div className="mx-3.5 mt-2 flex flex-wrap items-center gap-2 rounded-md border border-brand bg-brand-soft px-3 py-2">
           <p className="min-w-0 flex-1 text-sm leading-relaxed text-brand">
-            <b>{ask.base}</b> 上卡 · 持续 <b>{ask.hours}h</b> ·{' '}
-            <b>{pointCountOf(ask.hours)}</b> 个收/续点 · 结束 <b>{endLabelOf(ask, now)}</b>
+            <b>{ask.base}</b> 上卡 · 持续 <b>{ask.hours}h</b>
+            {ask.delay ? <> · 延迟 <b>{ask.delay}</b> 分</> : null} ·{' '}
+            <b>{pointCountOf(ask.hours, ask.delay)}</b> 个收/续点 · 结束 <b>{endLabelOf(ask, now)}</b>
             {' —— '}现在就开始记状态，还是先存为计划？
           </p>
           <button

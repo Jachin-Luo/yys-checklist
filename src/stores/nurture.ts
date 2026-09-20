@@ -28,8 +28,11 @@ interface NurtureState {
   error: Error | null;
   /** 首屏 / 切号时灌入（`useBootstrap` 是唯一生产调用点） */
   applyPlans: (records: NurturePlans) => void;
-  /** `hours` = 结界卡持续时间（小时）；收/续点数由 `domain/nurture.pointCountOf` 派生 */
-  add: (base: string, hours: number, started: boolean) => Promise<void>;
+  /**
+   * `hours` = 结界卡持续时间（小时），`delay` = 每次收/续延迟的分钟数。
+   * 收/续点数由 `domain/nurture.pointCountOf(hours, delay)` 派生（延迟会被算进去）。
+   */
+  add: (base: string, hours: number, delay: number, started: boolean) => Promise<void>;
   /** 计划 → 任务（「开始」转正） */
   promote: (id: string) => Promise<void>;
   /** 记某个收/续点完成（`at` 省略 = 现在）；该点之后的点按它的实际时间递推 */
@@ -75,8 +78,8 @@ export const useNurtureStore = create<NurtureState>((set, get) => {
 
     applyPlans: (records) => set({ records, error: null }),
 
-    add: (base, hours, started) =>
-      persist([makeNurture(base, hours, started, new Date()), ...get().records]),
+    add: (base, hours, delay, started) =>
+      persist([makeNurture(base, hours, started, new Date(), delay), ...get().records]),
 
     promote: (id) =>
       persist(get().records.map((r) => (r.id === id ? { ...r, started: true } : r))),
