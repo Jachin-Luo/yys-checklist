@@ -218,6 +218,30 @@ describe('countdown：倒计时与时间窗', () => {
     expect(deadlineBadge(item({}), now).text).toBe('待定');
   });
 
+  it('deadlineBadge：不足一天改按小时显示', () => {
+    const now = new Date(2026, 9, 3, 12, 0);
+    /* 还剩 11 小时 59 分 → 向上取整为 12 小时；不再是 daysLeft 的「剩 1 天」 */
+    const hours = deadlineBadge(item({ deadline: '2026-10-03 23:59' }), now);
+    expect(hours.text).toContain('剩 12 小时');
+    expect(hours.hours).toBe(12);
+    /* `days` 仍是粗粒度口径：两个字段并存，颜色分级（≤3 天红）继续走它 */
+    expect(hours.days).toBe(1);
+    expect(hours.level).toBe('hot');
+
+    /* 正好 24 小时：仍走「天」，与 ceil 一致 */
+    expect(deadlineBadge(item({ deadline: '2026-10-04 12:00' }), now).text).toContain('剩 1 天');
+
+    /* 不足 1 小时也至少是 1，不能出现「剩 0 小时」 */
+    const lastHour = deadlineBadge(item({ deadline: '2026-10-03 12:30' }), now);
+    expect(lastHour.text).toContain('剩 1 小时');
+    expect(lastHour.hours).toBe(1);
+
+    /* 已过：时间差 ≤ 0 → 「已结束」，此时 hours 不参与 */
+    const over = deadlineBadge(item({ deadline: '2026-10-03 11:00' }), now);
+    expect(over.text).toContain('已结束');
+    expect(over.hours).toBeNull();
+  });
+
   it('timeWindow：未开始 / 进行中 / 已结束', () => {
     const it = item({ time: '17:00', timeEnd: '23:00' });
     expect(timeWindow(it, new Date(2026, 8, 10, 16, 0)).state).toBe('wait');

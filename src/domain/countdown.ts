@@ -5,6 +5,7 @@
 import type { Item } from '../api/types';
 
 const DAY_MS = 86400000;
+const HOUR_MS = 3600000;
 
 /**
  * 时间串 → 时间戳（本地时区）。
@@ -29,13 +30,35 @@ export function daysLeft(deadline?: string, now: Date = new Date()): number | nu
   return Math.ceil((t - now.getTime()) / DAY_MS);
 }
 
+/**
+ * 距截止还有几小时（向上取整）。null = 无截止日。
+ *
+ * 2026-09-20 新增（用户要求：不足一天显示小时）。它与 `daysLeft` 是**同一次时间差的两种刻度**，
+ * 不是替代关系：`daysLeft` 的 ceil 会把"还有 2 小时"说成"剩 1 天" —— 对限时活动的最后一段
+ * 来说太粗，"剩 1 天"让人以为还有一整天，而实际马上要结束。徽章在剩余不足 24 小时时改用它。
+ *
+ * `daysLeft` 保持原样：排序（`deadlineRank` 走的是原始时间戳）、`LimitedPage` 的 urgent 计数
+ * （`d <= 3`）依赖的是它"按天粗粒度"的语义，把它们改成小时口径属于另一件事。
+ */
+export function hoursLeft(deadline?: string, now: Date = new Date()): number | null {
+  const t = parseTs(deadline);
+  if (t === null) return null;
+  return Math.ceil((t - now.getTime()) / HOUR_MS);
+}
+
 export type DeadlineLevel = 'hot' | 'warn' | 'normal' | 'none';
 
 export interface DeadlineBadge {
   level: DeadlineLevel;
-  /** 「剩 3 天 · 10/6 23:59 止」 */
+  /** 「剩 3 天 · 10/6 23:59 止」；不足一天时是「剩 5 小时 · 10/6 23:59 止」 */
   text: string;
+  /** 剩余天数（向上取整，**粗粒度**口径）。无截止日 = null */
   days: number | null;
+  /**
+   * 剩余小时数（向上取整）—— 仅当"不足一天且尚未结束"时有值，其余为 null。
+   * 与 `days` 并存而不是取代它：颜色分级（≤3 天红）仍走 `days`，两者各司其职。
+   */
+  hours: number | null;
 }
 
 /** 截止徽章：≤3 天转红、≤7 天转橙（设计文档 §6 / 原型 ddlHTML） */
@@ -44,19 +67,29 @@ export function deadlineBadge(it: Item, now: Date = new Date()): DeadlineBadge {
     const startTs = parseTs(it.start);
     if (it.start && startTs !== null && startTs > now.getTime()) {
       const [, mo, d] = it.start.split(' ')[0].split('-');
-      return { level: 'none', text: `${+mo}/${+d} 开启`, days: null };
+      return { level: 'none', text: `${+mo}/${+d} 开启`, days: null, hours: null };
     }
-    return { level: 'none', text: it.start ? '截止未定' : '待定', days: null };
+    return { level: 'none', text: it.start ? '截止未定' : '待定', days: null, hours: null };
   }
+  const ts = parseTs(it.deadline);
+  const remain = ts === null ? 0 : ts - now.getTime();
   const days = daysLeft(it.deadline, now) ?? 0;
+  /* 不足一天 → 改按小时显示（2026-09-20 用户要求）。
+     上界取 `< DAY_MS`：正好剩 24 小时仍归"天"，与 ceil 的结果一致，不必特判。
+     下界取 `> 0`：恰好 0 或已过都归"已结束"，不会出现「剩 0 小时」。
+     `ceil` 已保证最小为 1，所以"还剩 30 分钟"显示「剩 1 小时」而不是 0。 */
+  const hours = remain > 0 && remain < DAY_MS ? Math.ceil(remain / HOUR_MS) : null;
   const [datePart, timePart] = it.deadline.split(' ');
   const [, mo, d] = datePart.split('-');
   const md = `${+mo}/${+d}${timePart ? ` ${timePart}` : ''}`;
-  if (days <= 0) return { level: 'hot', text: `已结束 ${md}`, days };
+  /* 判据用 `remain` 而不是 `days <= 0`：两者等价（负数的 ceil 仍 ≤ 0），但这里要表达的
+     本来就是"时间到了没有"，直接比时间差少一层换算 */
+  if (remain <= 0) return { level: 'hot', text: `已结束 ${md}`, days, hours: null };
   return {
     level: days <= 3 ? 'hot' : days <= 7 ? 'warn' : 'normal',
-    text: `剩 ${days} 天 · ${md} 止`,
+    text: hours !== null ? `剩 ${hours} 小时 · ${md} 止` : `剩 ${days} 天 · ${md} 止`,
     days,
+    hours,
   };
 }
 
