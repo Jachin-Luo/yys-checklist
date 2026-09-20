@@ -112,14 +112,19 @@ export default function NurtureSection() {
   const remove = useNurtureStore((s) => s.remove);
   const askConfirm = useUiStore((s) => s.askConfirm);
 
-  const [time, setTime] = useState('');
+  /**
+   * 上卡时间。`null` = 用户还没动过这个框 —— 此时**显示"现在"并跟着时钟走**（2026-09-20 用户要求：
+   * 进页面就有值可填，不必自己敲）。跟随而不是"进页面那一刻取一次快照"，是因为后者会让人
+   * 停留十分钟后按提交、结果记的是进门时的时间；而一旦手动输入（含清空）就以输入为准。
+   */
+  const [time, setTime] = useState<string | null>(null);
   const [n, setN] = useState(4);
   const [draftError, setDraftError] = useState('');
   /** 待确认的草稿：`{ base, n }`，等用户选「立即开始 / 仅存计划」 */
   const [ask, setAsk] = useState<{ base: string; n: number } | null>(null);
   /** 当前选中的点（每条记录各自的操作对象）；没选时操作条作用于"下一个待办点" */
   const [active, setActive] = useState<{ id: string; index: number } | null>(null);
-  /** 每行「实际完成时间」的草稿（`HH:mm`；留空 = 现在） */
+  /** 每行「实际完成时间」的草稿（`HH:mm`）。**缺键 = 用"现在"**，与上卡时间同一套跟随逻辑 */
   const [doneDraft, setDoneDraft] = useState<Record<string, string>>({});
   const [now, setNow] = useState(() => new Date());
 
@@ -135,10 +140,13 @@ export default function NurtureSection() {
     return { tasks: sorted.filter((r) => r.started), plans: sorted.filter((r) => !r.started) };
   }, [records]);
 
+  /** 输入框里此刻该显示的值：用户动过就用他的，没动过就是"现在" */
+  const timeValue = time ?? nowHM(now);
+
   const submit = () => {
-    const raw = time.trim();
+    const raw = timeValue.trim();
     if (raw && !normalizeHM(raw)) {
-      setDraftError('时间格式应为 HH:mm，例如 21:00；留空表示"现在"');
+      setDraftError('时间格式应为 HH:mm，例如 21:00');
       return;
     }
     setDraftError('');
@@ -149,7 +157,8 @@ export default function NurtureSection() {
     if (!ask) return;
     add(ask.base, ask.n, started);
     setAsk(null);
-    setTime('');
+    /* 复位成 `null` 而不是 `''`：下一条又要记的话，框里该是那时的"现在" */
+    setTime(null);
   };
 
   const onRemove = async (r: NurtureRecord) => {
@@ -169,11 +178,21 @@ export default function NurtureSection() {
     return picked ?? nextPendingPoint(r, now);
   };
 
-  /** 记完成：留空按「现在」，填了按输入的实际时间（`type=time` 已保证格式合法） */
+  /**
+   * 记完成：缺键（用户没动过输入框）按「现在」，填了按输入值。
+   * 重置时**删键**而不是置空串 —— 空串会让输入框显示空白，而缺键才回到"显示现在"的默认态
+   * （`??` 对空串不生效，这是这个 fallback 用「键是否存在」而非「值是否为空」的原因）。
+   */
   const submitDone = (r: NurtureRecord, point: NurturePoint) => {
-    const raw = (doneDraft[r.id] ?? '').trim();
-    markPoint(r.id, point.index, raw ? (hmToDate(raw, now) ?? new Date()) : new Date());
-    setDoneDraft((s) => ({ ...s, [r.id]: '' }));
+    /* 直接用 `doneDraft` 判空而不是先 fallback 到 `nowHM(now)`：走 `now` 的时分再解析回来，
+       会带上"最近一次 tick"最多 60 秒的滞后，而缺键时本可以直接取点击这一刻 */
+    const draft = doneDraft[r.id];
+    markPoint(r.id, point.index, draft ? (hmToDate(draft, now) ?? new Date()) : new Date());
+    setDoneDraft((s) => {
+      const next = { ...s };
+      delete next[r.id];
+      return next;
+    });
     setActive(null);
   };
 
@@ -232,10 +251,10 @@ export default function NurtureSection() {
             </span>
             <input
               type="time"
-              value={doneDraft[r.id] ?? ''}
+              value={doneDraft[r.id] ?? nowHM(now)}
               onChange={(e) => setDoneDraft((s) => ({ ...s, [r.id]: e.target.value }))}
-              aria-label={`${target.hm} 的实际完成时间（留空 = 现在）`}
-              title="实际完成时间；留空表示现在就完成了"
+              aria-label={`${target.hm} 的实际完成时间`}
+              title="实际完成时间；默认已填当前时间，可改"
               className="w-[5.6rem] rounded-sm border border-line bg-surface px-1.5 py-1 text-sm text-ink transition-colors duration-120 focus:border-brand"
             />
             <button
@@ -294,21 +313,22 @@ export default function NurtureSection() {
       <div className="mx-3.5 mt-3 rounded-md border border-line-soft bg-surface px-3 py-2.5">
         <p className="text-lg text-ink">记一次结界寄养</p>
         <p className="mt-0.5 text-sm text-ink-3">
-          填上卡时间 + 选往后推几个 6h 点（4 ≈ 覆盖满 24h · 6 星卡剩余不足 24h 选 3）
+          上卡时间已默认填当前时间，可直接改 + 选往后推几个 6h 点
+          （4 ≈ 覆盖满 24h · 6 星卡剩余不足 24h 选 3）
         </p>
 
         <div className="mt-2 flex items-center gap-2">
           <span className="w-12 flex-none text-sm text-ink-3">上卡</span>
           <input
-            value={time}
+            value={timeValue}
             onChange={(e) => setTime(e.target.value)}
-            placeholder="如 21:00 · 留空 = 现在"
+            placeholder="如 21:00"
             aria-label="上卡时间"
             className="min-w-0 flex-1 rounded-sm border border-line bg-surface px-2 py-1.5 text-lg text-ink transition-colors duration-120 focus:border-brand"
           />
           <button
             type="button"
-            onClick={() => setTime(nowHM(now))}
+            onClick={() => setTime(null)}
             className="flex-none cursor-pointer rounded-sm border border-line px-2 py-1.5 text-sm text-ink-2 transition-colors duration-120 hover:border-ink-4"
           >
             用现在
