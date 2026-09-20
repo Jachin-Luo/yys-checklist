@@ -5,6 +5,7 @@ import type { Cycle, GainKind } from '../../domain/enums';
 import { CYCLE, GAIN_KIND } from '../../domain/enums';
 import { buildComparator, effectiveSortBy, moveBefore, moveWithinGroup, seedOrder } from '../../domain/sort';
 import CollapsibleSection from '../../components/common/CollapsibleSection';
+import { useAutoDaily } from '../../hooks/useAutoDaily';
 import { dictIndexOf, useItemStore } from '../../stores/items';
 import { useUiStore } from '../../stores/ui';
 import { useViewStore } from '../../stores/view';
@@ -53,6 +54,11 @@ export default function ItemManagerSection() {
   const resetLibrary = useItemStore((s) => s.resetLibrary);
   const pinned = useViewStore((s) => s.view.pinned);
   const askConfirm = useUiStore((s) => s.askConfirm);
+  /* 一键日常的覆盖集合（2026-09-20 用户要求在这里标记）：
+     用 `useAutoDaily` 而不是直读 `view.autoSet` —— 它给的是 `effectiveAutoSet` 归一后的结果
+     （只含常驻每日候选、已剔除失效 id），与实际级联勾选的口径**完全一致**。
+     直读 `autoSet` 会把失效 id 也算进来，"标记了却不会被入口勾上"反而误导。 */
+  const { coveredSet } = useAutoDaily();
 
   const [query, setQuery] = useState('');
   /** 当前展开的周期分组（`null` = 全部收起）；同一时刻最多展开一个组 */
@@ -288,6 +294,10 @@ export default function ItemManagerSection() {
           按<b className="font-medium text-ink-2">周期分组</b>展示：点周期名展开该组，
           拖动或点 ▲▼ 只在组内调整 —— 顺序一旦调整，会直接接管默认的痛感排序
         </span>
+        <span className="text-sm text-ink-3">
+          带<b className="font-medium text-ink-2">日常覆盖</b>标记的条目属于一键日常的覆盖集合，
+          勾选今日页入口时会一并勾选（在「一键日常覆盖」里调整）
+        </span>
       </div>
 
       {/* ── 分组列表（组 = 条目自身的周期分类） ── */}
@@ -351,6 +361,18 @@ export default function ItemManagerSection() {
                     <span className="min-w-0 flex-1 truncate text-lg text-ink">{it.name}</span>
                     {it.origin === 'custom' ? (
                       <span className="flex-none rounded-sm bg-brand-soft px-1.5 py-0.5 text-xs text-brand">自建</span>
+                    ) : null}
+                    {/* 属于一键日常覆盖集合（2026-09-20 用户要求）：
+                        用中性灰而非品牌紫 —— 紫色在本页已经是「自建」（来源）的语义，
+                        两个含义不同的徽章用同一种颜色，等于两个都没说清。
+                        只标记、不加点击跳转：这里是"看清楚有哪些"，改覆盖集合仍走它的专属分区。 */}
+                    {coveredSet.has(it.id) ? (
+                      <span
+                        title="属于一键日常的覆盖集合：勾选今日页的入口时会一并勾选它"
+                        className="flex-none rounded-sm border border-line bg-surface-3 px-1.5 py-0.5 text-xs text-ink-2"
+                      >
+                        日常覆盖
+                      </span>
                     ) : null}
                     {it.origin === 'custom' ? (
                       <button
