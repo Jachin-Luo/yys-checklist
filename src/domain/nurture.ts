@@ -352,9 +352,22 @@ export function makeNurture(
   };
 }
 
+/**
+ * 卡到期时刻的展示点（`index = -1`，只读）—— 供时间线把「结束」也画成一个 chip。
+ *
+ * 复用 `shapePoint` 而不是自己拼日期：同一行里的收/续点都走它，
+ * 另写一套格式化迟早会在"明天 / 后天 / 9/21"的切换边界上与它们不一致。
+ * `index = -1` 是个不占号段的哨兵值（收/续点从 1 开始，上卡点是 0），
+ * 因此它天然不会被 `active.index` 选中、也不会被当成可点 chip。
+ */
+export const endPointOf = (
+  record: Pick<NurtureRecord, 'base' | 'hours'>,
+  now: Date,
+): NurturePoint => shapePoint(endTsOf(record, now), -1, now);
+
 /** 卡到期时刻的可读文案（`明天 12:00` / `9/21 12:00`）—— 与点 chip 共用同一套日标签口径 */
 export function endLabelOf(record: Pick<NurtureRecord, 'base' | 'hours'>, now: Date): string {
-  const p = shapePoint(endTsOf(record, now), -1, now);
+  const p = endPointOf(record, now);
   return `${p.dayLabel} ${p.hm}`;
 }
 

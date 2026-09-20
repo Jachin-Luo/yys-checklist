@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Check, Plus, Trash2 } from 'lucide-react';
 import {
   endLabelOf,
+  endPointOf,
   hmToDate,
   MAX_NURTURE_DELAY,
   MAX_NURTURE_HOURS,
@@ -68,6 +69,7 @@ function PointChips({
   onSelect: (index: number) => void;
 }) {
   const points = recordPoints(record, now);
+  const endPoint = endPointOf(record, now);
   const planned = !record.started;
 
   return (
@@ -106,6 +108,21 @@ function PointChips({
           </button>
         );
       })}
+
+      {/* 结束时间画在时间线**末尾**（2026-09-20 用户反馈）：原先放在左侧信息区竖排，
+          与点分离两处，看"最后排到几点"要来回扫。放在线尾后一眼能看出它比最后一个点晚多少
+          （22h 的卡：最后一点 02:00、结束 06:00）。
+          只读、不参与选中 —— `index = -1` 是哨兵值，不会与收/续点（1..n）或上卡点（0）撞号。
+          虚线边框 + 更浅的字色，与"计划态"的虚线区分靠标签本身（写的是「结束」）。 */}
+      <span
+        title={`卡到期：${endLabelOf(record, now)}（持续时间 ${record.hours} 小时）`}
+        className="flex flex-col items-center rounded-sm border border-dashed border-line bg-surface px-1.5 py-0.5 text-sm text-ink-3"
+      >
+        <span>{endPoint.hm}</span>
+        <i className="text-xs not-italic opacity-80">
+          {endPoint.dayLabel === '今天' ? '结束' : `结束·${endPoint.dayLabel}`}
+        </i>
+      </span>
     </div>
   );
 }
@@ -222,18 +239,15 @@ export default function NurtureSection() {
 
     return (
       <div key={r.id} className="flex flex-wrap items-start gap-2 border-b border-line-faint px-3 py-2.5 last:border-0">
-        <span className="w-28 flex-none">
+        <span className="w-24 flex-none">
           <b className="block text-lg font-medium text-ink">{r.base} 上卡</b>
           <span className="block text-sm text-ink-3">
             持续 {r.hours}h · {pointCountOf(r.hours, r.delay)} 个点
             {/* 延迟为 0 时不显示 —— 它是最常见的情况，写出来只会占地方 */}
             {r.delay ? ` · 延 ${r.delay} 分` : ''}
           </span>
-          {/* 结束时间只读：由 `base` + `hours` 决定，不给编辑入口 —— 它是推算结果不是输入项。
-              加 `title` 说明来源，免得用户找不到"改哪里能让它变" */}
-          <span className="block text-sm text-ink-3" title="结束时间 = 上卡时间 + 持续时间，不可单独修改">
-            结束 {endLabelOf(r, now)}
-          </span>
+          {/* 结束时间已移到右侧时间线的末尾（2026-09-20 用户反馈）—— 与点放在一条线上，
+              看"最后排到几点、离卡到期还差多久"不用在两处之间来回扫 */}
           {stats ? (
             <span className="block text-sm text-ink-3">
               已完成 {stats.done} · 待收 {stats.pending}
