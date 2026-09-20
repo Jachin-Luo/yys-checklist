@@ -20,24 +20,44 @@
  */
 /** 寄养间隔（小时）。写成常量而不是散落的 6 —— 官方若调整，只改这一处 */
 export const NURTURE_HOURS = 6;
-/** 往后推的点数上限（5 个 ≈ 30h，够覆盖一张 6 星卡） */
+/** 收/续点数上限（5 个 ≈ 30h，够覆盖一张 6 星卡） */
 export const MAX_NURTURE_N = 5;
+/** 结界卡持续时间上限（小时）—— 与点数上限一致，避免"排得出点、但记不下"的不一致 */
+export const MAX_NURTURE_HOURS = MAX_NURTURE_N * NURTURE_HOURS;
 
 export interface NurtureRecord {
   id: string;
   /** 上卡时间 `HH:mm` */
   base: string;
-  /** 往后推几个 6h 点 */
-  n: number;
+  /**
+   * 结界卡的**持续时间**（小时，1 – `MAX_NURTURE_HOURS`）。
+   *
+   * 2026-09-20 起改由它推算点数（用户要求：不让用户直接选次数，而是填卡能持续多久）。
+   * 点数**不落盘**，由 `pointCountOf(hours)` 派生 —— 存两个字段迟早会漂移
+   * （改了时长忘了改次数，界面上就会出现"说 3 个点、显示 5 个"）。
+   *
+   * 它也不能用 `点数 × 6` 反推：最后一个收/续点之后卡还会继续生效一段时间
+   * （22h 的卡，最后一点在 18h，结束在 22h），结束时刻必须由它本身决定。
+   */
+  hours: number;
   /** true = 任务（记状态） / false = 计划（纯查看） */
   started: boolean;
   createdAt: number;
   /**
-   * 逐点完成记录：点序号（1..n，**不含上卡点**）→ 实际完成时间戳。
+   * 逐点完成记录：点序号（1..`pointCountOf(hours)`，**不含上卡点**）→ 实际完成时间戳。
    * 缺席表示该点还没收/续。上卡点天然视为已完成（它的完成时刻就是 `base` 那一刻）。
    */
   dones?: Record<number, number>;
 }
+
+/**
+ * 持续时间 → 收/续点数：每 6 小时一个、**向下取整**。
+ *
+ * 例：22h → `floor(22 / 6)` = 3 个收/续点（上卡点另计，它在 index 0）。
+ * 不足一个间隔（< 6h）返回 0 —— 卡还没到第一个续点就到期了。
+ */
+export const pointCountOf = (hours: number): number =>
+  Math.min(Math.max(0, Math.floor(hours / NURTURE_HOURS)), MAX_NURTURE_N);
 
 export interface NurturePoint {
   /** 0 = 上卡点；1..n = 收/续点。UI 用它定位"给哪个点记完成" */
@@ -89,6 +109,10 @@ export function baseTsOf(record: Pick<NurtureRecord, 'base'>, now: Date): number
   const [h, m] = norm.split(':').map(Number);
   return new Date(now.getFullYear(), now.getMonth(), now.getDate(), h, m, 0, 0).getTime();
 }
+
+/** 卡到期时刻 = 上卡 + 持续时间。**只读**：由 `base` 与 `hours` 决定，不接受单独改写 */
+export const endTsOf = (record: Pick<NurtureRecord, 'base' | 'hours'>, now: Date): number =>
+  baseTsOf(record, now) + record.hours * 3600000;
 
 /** 点的展示字段（不含完成状态，由调用方补 `doneAt`） */
 function shapePoint(ts: number, index: number, now: Date): NurturePoint {
@@ -142,7 +166,8 @@ export function recordPoints(record: NurtureRecord, now: Date): NurturePoint[] {
   const out: NurturePoint[] = [{ ...shapePoint(start, 0, now), doneAt: start }];
 
   let prev = start;
-  for (let k = 1; k <= record.n; k++) {
+  /* 点数从 `hours` 派生，不读落盘字段 —— 见 `NurtureRecord.hours` 的说明 */
+  for (let k = 1; k <= pointCountOf(record.hours); k++) {
     const ts = prev + NURTURE_HOURS * 3600000;
     const doneAt = dones[k];
     /* 用 `doneAt ?? ts` 定位展示时刻（`hm` / `dayLabel` / `past` 都跟着它），
@@ -208,14 +233,15 @@ export function sanitizePlans(value: unknown): NurtureRecord[] {
     const id = typeof row.id === 'string' ? row.id : '';
     const base = typeof row.base === 'string' ? row.base.trim() : '';
     if (!id || !isHM(base)) continue;
-    if (typeof row.n !== 'number' || !Number.isFinite(row.n)) continue;
-    const n = Math.trunc(row.n);
-    if (n < 0 || n > MAX_NURTURE_N) continue;
+    /* `hours` 越界或非数则丢弃整条：它是派生点数的依据，给个荒唐值会让结束时间与点列表都没意义 */
+    if (typeof row.hours !== 'number' || !Number.isFinite(row.hours)) continue;
+    const hours = Math.round(row.hours);
+    if (hours < 1 || hours > MAX_NURTURE_HOURS) continue;
     const dones = sanitizeDones(row.dones);
     out.push({
       id,
       base,
-      n,
+      hours,
       started: row.started === true,
       createdAt: typeof row.createdAt === 'number' && Number.isFinite(row.createdAt) ? row.createdAt : 0,
       ...(dones ? { dones } : {}),
@@ -261,14 +287,28 @@ export function dueText(ts: number, now: Date): string {
 let seq = 0;
 export const nurtureId = (now: Date): string => `nr_${now.getTime().toString(36)}_${(seq++).toString(36)}`;
 
-export function makeNurture(base: string, n: number, started: boolean, now: Date): NurtureRecord {
+/** 持续时间夹到 `[1, MAX_NURTURE_HOURS]`；非有限数回落到 1（宁可记一条短的，也不要 NaN） */
+const clampHours = (h: number): number =>
+  Number.isFinite(h) ? Math.min(Math.max(Math.round(h), 1), MAX_NURTURE_HOURS) : 1;
+
+/**
+ * 建一条寄养记录（`hours` = 结界卡持续时间）。
+ * 注意**不再接收点数** —— 点数由 `pointCountOf(hours)` 派生，用户填的是卡能持续多久。
+ */
+export function makeNurture(base: string, hours: number, started: boolean, now: Date): NurtureRecord {
   return {
     id: nurtureId(now),
     base: normalizeHM(base) ?? nowHM(now),
-    n: Math.min(Math.max(1, n), MAX_NURTURE_N),
+    hours: clampHours(hours),
     started,
     createdAt: now.getTime(),
   };
+}
+
+/** 卡到期时刻的可读文案（`明天 12:00` / `9/21 12:00`）—— 与点 chip 共用同一套日标签口径 */
+export function endLabelOf(record: Pick<NurtureRecord, 'base' | 'hours'>, now: Date): string {
+  const p = shapePoint(endTsOf(record, now), -1, now);
+  return `${p.dayLabel} ${p.hm}`;
 }
 
 /** 任务在前、计划在后；各自按创建时间倒序（最近加的排最上） */

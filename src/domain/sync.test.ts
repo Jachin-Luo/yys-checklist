@@ -33,7 +33,7 @@ const overrides = (patch: Partial<ItemOverrides> = {}): ItemOverrides => ({
 
 const source: SyncSource = {
   guildTime: { daily_daoguan: '20:00' },
-  plans: [{ id: 'n_src', base: '08:00', n: 2, started: true, createdAt: 1 }],
+  plans: [{ id: 'n_src', base: '08:00', hours: 12, started: true, createdAt: 1 }],
   view: view({ showKinds: ['jade'], hideDone: true, pinned: ['daily_sign'], autoSet: ['daily_pet'], coverMode: 'hide' }),
   overrides: overrides({
     custom: [{ id: 'c1', name: '自建', cycle: 'daily', gainKind: [], origin: 'custom' }],

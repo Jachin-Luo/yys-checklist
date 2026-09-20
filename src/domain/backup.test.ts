@@ -220,7 +220,7 @@ describe('summarize', () => {
         {
           ...row('p_main', { x: 1 }),
           guildTime: { daily_daoguan: '20:00', weekly_banquet: '20:30' },
-          plans: [{ id: 'n_1', base: '08:00', n: 2, started: true, createdAt: 1 }],
+          plans: [{ id: 'n_1', base: '08:00', hours: 12, started: true, createdAt: 1 }],
         },
       ],
     });
@@ -236,9 +236,9 @@ describe('summarize', () => {
           ...row('p_main', { x: 1 }),
           guildTime: { daily_daoguan: '20:00', daily_bad: '25:00', daily_num: 42 },
           plans: [
-            { id: 'n_ok', base: '08:00', n: 2, started: true, createdAt: 1, dones: { 1: 100, 0: 5 } },
-            { id: 'n_bad_base', base: '99:99', n: 1, started: true, createdAt: 1 },
-            { id: 'n_bad_n', base: '08:00', n: 99, started: true, createdAt: 1 },
+            { id: 'n_ok', base: '08:00', hours: 12, started: true, createdAt: 1, dones: { 1: 100, 0: 5 } },
+            { id: 'n_bad_base', base: '99:99', hours: 6, started: true, createdAt: 1 },
+            { id: 'n_bad_hours', base: '08:00', hours: 99, started: true, createdAt: 1 },
             { nope: true },
           ],
         },

@@ -28,7 +28,7 @@ afterEach(() => vi.restoreAllMocks());
 
 describe('nurture store（档案级）', () => {
   it('add 后进入内存态，并按当前档案的 scope 落盘', async () => {
-    await useNurtureStore.getState().add('20:00', 3, false);
+    await useNurtureStore.getState().add('20:00', 24, false);
 
     const records = useNurtureStore.getState().records;
     expect(records).toHaveLength(1);
@@ -42,7 +42,7 @@ describe('nurture store（档案级）', () => {
 
   it('applyPlans 直接灌入首屏数据（不触发落盘）', () => {
     useNurtureStore.getState().applyPlans([
-      { id: 'n_1', base: '08:00', n: 2, started: true, createdAt: 1 },
+      { id: 'n_1', base: '08:00', hours: 12, started: true, createdAt: 1 },
     ]);
     expect(useNurtureStore.getState().records).toHaveLength(1);
     expect(savePlans).not.toHaveBeenCalled();
@@ -51,14 +51,14 @@ describe('nurture store（档案级）', () => {
   it.each(['add', 'promote', 'remove', 'clearAll'] as const)(
     '%s 落盘失败时回滚内存态并置 error',
     async (operation) => {
-      await useNurtureStore.getState().add('20:00', 3, false);
+      await useNurtureStore.getState().add('20:00', 24, false);
       const records = useNurtureStore.getState().records;
 
       vi.spyOn(console, 'error').mockImplementation(() => undefined);
       savePlans.mockRejectedValue(new Error('offline'));
 
       const actions = {
-        add: () => useNurtureStore.getState().add('21:00', 2, true),
+        add: () => useNurtureStore.getState().add('21:00', 12, true),
         promote: () => useNurtureStore.getState().promote(records[0].id),
         remove: () => useNurtureStore.getState().remove(records[0].id),
         clearAll: () => useNurtureStore.getState().clearAll(),
@@ -85,8 +85,8 @@ describe('nurture store（档案级）', () => {
       }),
     );
 
-    const first = useNurtureStore.getState().add('20:00', 2, true);
-    const second = useNurtureStore.getState().add('21:00', 3, true);
+    const first = useNurtureStore.getState().add('20:00', 12, true);
+    const second = useNurtureStore.getState().add('21:00', 24, true);
     await second;
     expect(useNurtureStore.getState().records).toHaveLength(2);
 
@@ -99,7 +99,7 @@ describe('nurture store（档案级）', () => {
 
   it('无会话时只改内存、不调用契约（首屏尚未就绪的降级路径）', async () => {
     useSessionStore.setState({ session: null });
-    await useNurtureStore.getState().add('20:00', 3, false);
+    await useNurtureStore.getState().add('20:00', 24, false);
     expect(useNurtureStore.getState().records).toHaveLength(1);
     expect(savePlans).not.toHaveBeenCalled();
   });

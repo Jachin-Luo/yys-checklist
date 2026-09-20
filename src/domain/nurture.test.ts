@@ -6,14 +6,18 @@ import {
   baseTsOf,
   clearPointDone,
   dueText,
+  endLabelOf,
+  endTsOf,
   hmToDate,
   makeNurture,
   markPointDone,
+  MAX_NURTURE_HOURS,
   MAX_NURTURE_N,
   nextDue,
   nextPendingPoint,
   normalizeHM,
   nurturePoints,
+  pointCountOf,
   pointStats,
   recordPoints,
   sortNurture,
@@ -82,7 +86,7 @@ describe('nurturePoints：每 6h 推点（不含上卡点）', () => {
 
 describe('recordPoints：上卡点 + 逐点递推（2026-09-15 重构）', () => {
   it('点列表以上卡点（index 0）打头，且它天然是已完成', () => {
-    const r = makeNurture('08:00', 3, true, NOW);
+    const r = makeNurture('08:00', 18, true, NOW);
     const pts = recordPoints(r, NOW);
     expect(pts.map((p) => p.index)).toEqual([0, 1, 2, 3]);
     expect(pts.map((p) => p.hm)).toEqual(['08:00', '14:00', '20:00', '02:00']);
@@ -91,7 +95,7 @@ describe('recordPoints：上卡点 + 逐点递推（2026-09-15 重构）', () =>
   });
 
   it('给某个点记完成 → 该点显示实际时刻，之后的点顺延，之前的原样不动', () => {
-    const r = makeNurture('08:00', 3, true, NOW);
+    const r = makeNurture('08:00', 18, true, NOW);
     /* 14:00 那个点实际 14:05 才收 */
     const done = markPointDone(r, 1, new Date(2026, 8, 10, 14, 5));
     const pts = recordPoints(done, NOW);
@@ -104,7 +108,7 @@ describe('recordPoints：上卡点 + 逐点递推（2026-09-15 重构）', () =>
   });
 
   it('已完成的点：`hm` 取实际、`ts` 仍是预计（两套时刻各司其职）', () => {
-    const r = makeNurture('08:00', 2, true, NOW);
+    const r = makeNurture('08:00', 12, true, NOW);
     const pts = recordPoints(markPointDone(r, 1, new Date(2026, 8, 10, 14, 5)), NOW);
     expect(pts[1].hm).toBe('14:05');
     /* `ts` 不受影响 —— 递推基准与 nextDue 排队都按预计值 */
@@ -113,14 +117,14 @@ describe('recordPoints：上卡点 + 逐点递推（2026-09-15 重构）', () =>
   });
 
   it('连续两个点各按自己的实际时间 → 后一个基于前一个的实际时间递推', () => {
-    let r = makeNurture('08:00', 3, true, NOW);
+    let r = makeNurture('08:00', 18, true, NOW);
     r = markPointDone(r, 1, new Date(2026, 8, 10, 14, 5));
     r = markPointDone(r, 2, new Date(2026, 8, 10, 20, 12));
     expect(recordPoints(r, NOW).map((p) => p.hm)).toEqual(['08:00', '14:05', '20:12', '02:12']);
   });
 
   it('取消某点的完成 → 该点与后续一起回到"按预计时间推"', () => {
-    const r = makeNurture('08:00', 3, true, NOW);
+    const r = makeNurture('08:00', 18, true, NOW);
     const done = markPointDone(r, 1, new Date(2026, 8, 10, 14, 5));
     expect(recordPoints(done, NOW).map((p) => p.hm)).toEqual(['08:00', '14:05', '20:05', '02:05']);
     expect(recordPoints(clearPointDone(done, 1), NOW).map((p) => p.hm)).toEqual([
@@ -132,14 +136,45 @@ describe('recordPoints：上卡点 + 逐点递推（2026-09-15 重构）', () =>
   });
 
   it('上卡点不接受改写（index 0 由 base 决定）', () => {
-    const r = makeNurture('08:00', 2, true, NOW);
+    const r = makeNurture('08:00', 12, true, NOW);
     expect(markPointDone(r, 0, new Date(2026, 8, 10, 9, 30))).toEqual(r);
+  });
+});
+
+describe('pointCountOf / endTsOf / endLabelOf：由持续时间派生（2026-09-20）', () => {
+  it('点数 = 持续时间 / 6 向下取整（用户给的例子：22h → 3 次）', () => {
+    expect(pointCountOf(22)).toBe(3);
+    expect(pointCountOf(24)).toBe(4);
+    expect(pointCountOf(18)).toBe(3);
+    expect(pointCountOf(23)).toBe(3);
+    /* 不足一个间隔：卡还没到第一个续点就到期 */
+    expect(pointCountOf(5)).toBe(0);
+    expect(pointCountOf(0)).toBe(0);
+  });
+
+  it('点数受上限夹紧', () => {
+    expect(pointCountOf(MAX_NURTURE_HOURS)).toBe(MAX_NURTURE_N);
+    expect(pointCountOf(999)).toBe(MAX_NURTURE_N);
+  });
+
+  it('结束时刻 = 上卡 + 持续时间（不是"最后一个点 + 6h"）', () => {
+    /* 08:00 上卡、22h 的卡：最后一点在 02:00（+18h），但卡要到 06:00 才结束 */
+    expect(endTsOf({ base: '08:00', hours: 22 }, NOW)).toBe(new Date(2026, 8, 11, 6, 0).getTime());
+    expect(endLabelOf({ base: '08:00', hours: 22 }, NOW)).toBe('明天 06:00');
+  });
+
+  it('记录的点数与结束时间一致：22h 排出 3 个点、都落在结束之前', () => {
+    const r = makeNurture('08:00', 22, true, NOW);
+    const pts = recordPoints(r, NOW);
+    expect(pts.map((p) => p.index)).toEqual([0, 1, 2, 3]);
+    const end = endTsOf(r, NOW);
+    for (const p of pts) expect(p.ts).toBeLessThan(end);
   });
 });
 
 describe('pointStats / nextPendingPoint', () => {
   it('统计已完成与待收（上卡点算已完成）', () => {
-    const r = makeNurture('08:00', 3, true, NOW);
+    const r = makeNurture('08:00', 18, true, NOW);
     expect(pointStats(recordPoints(r, NOW))).toEqual({ done: 1, pending: 3 });
     expect(pointStats(recordPoints(markPointDone(r, 1, new Date(2026, 8, 10, 14, 5)), NOW))).toEqual({
       done: 2,
@@ -148,7 +183,7 @@ describe('pointStats / nextPendingPoint', () => {
   });
 
   it('nextPendingPoint 取第一个未完成的收/续点（已过时间也算待办，不会跳过）', () => {
-    const r = makeNurture('06:00', 3, true, NOW); // 12:00 / 18:00 / 00:00，其中 12:00 已过
+    const r = makeNurture('06:00', 18, true, NOW); // 12:00 / 18:00 / 00:00，其中 12:00 已过
     expect(nextPendingPoint(r, NOW)?.hm).toBe('12:00');
 
     const done = markPointDone(r, 1, new Date(2026, 8, 10, 12, 10));
@@ -156,7 +191,7 @@ describe('pointStats / nextPendingPoint', () => {
   });
 
   it('全部完成 → nextPendingPoint 为 null', () => {
-    let r = makeNurture('08:00', 2, true, NOW);
+    let r = makeNurture('08:00', 12, true, NOW);
     r = markPointDone(r, 1, new Date(2026, 8, 10, 14, 5));
     r = markPointDone(r, 2, new Date(2026, 8, 10, 20, 10));
     expect(nextPendingPoint(r, NOW)).toBeNull();
@@ -172,9 +207,9 @@ describe('baseTsOf', () => {
 
 describe('nextDue / dueText：跨任务取最紧要的待办点（壳层徽章用）', () => {
   it('只算任务，取时间最早的那个未完成点（计划不参与）', () => {
-    const early = makeNurture('08:00', 3, true, NOW); // 14:00 / 20:00 / 02:00
-    const late = makeNurture('12:00', 3, true, NOW); // 18:00 / 00:00 / 06:00
-    const plan = makeNurture('06:00', 3, false, NOW);
+    const early = makeNurture('08:00', 18, true, NOW); // 14:00 / 20:00 / 02:00
+    const late = makeNurture('12:00', 18, true, NOW); // 18:00 / 00:00 / 06:00
+    const plan = makeNurture('06:00', 18, false, NOW);
 
     const due = nextDue([late, plan, early], NOW);
     expect(due?.record.id).toBe(early.id);
@@ -182,10 +217,10 @@ describe('nextDue / dueText：跨任务取最紧要的待办点（壳层徽章�
   });
 
   it('任务全部完成、或只有计划 → null', () => {
-    let r = makeNurture('08:00', 1, true, NOW);
+    let r = makeNurture('08:00', 6, true, NOW);
     r = markPointDone(r, 1, new Date(2026, 8, 10, 14, 5));
     expect(nextDue([r], NOW)).toBeNull();
-    expect(nextDue([makeNurture('08:00', 3, false, NOW)], NOW)).toBeNull();
+    expect(nextDue([makeNurture('08:00', 18, false, NOW)], NOW)).toBeNull();
   });
 
   it('dueText：分 / 时:分 / 整点 / 到点即提醒', () => {
@@ -199,30 +234,30 @@ describe('nextDue / dueText：跨任务取最紧要的待办点（壳层徽章�
 });
 
 describe('makeNurture / sortNurture', () => {
-  it('归一化 base、夹紧 n、id 唯一', () => {
-    const a = makeNurture('9:05', 9, true, NOW);
+  it('归一化 base、夹紧持续时间、id 唯一', () => {
+    const a = makeNurture('9:05', 99, true, NOW);
     const b = makeNurture('9:05', -3, false, NOW);
     expect(a.base).toBe('09:05');
-    expect(a.n).toBe(MAX_NURTURE_N);
-    expect(b.n).toBe(1);
+    expect(a.hours).toBe(MAX_NURTURE_HOURS);
+    expect(b.hours).toBe(1);
     expect(a.id).not.toBe(b.id);
   });
 
   it('非法 base 回落到当前时刻', () => {
-    expect(makeNurture('乱填', 4, true, NOW).base).toBe('14:00');
+    expect(makeNurture('乱填', 24, true, NOW).base).toBe('14:00');
   });
 
   it('新记录没有完成记录；dones 只在记完成时出现', () => {
-    const r = makeNurture('10:00', 4, true, NOW);
+    const r = makeNurture('10:00', 24, true, NOW);
     expect(r.dones).toBeUndefined();
     expect(markPointDone(r, 1, NOW).dones).toEqual({ 1: NOW.getTime() });
   });
 
   it('任务在前、计划在后，各自按创建时间倒序', () => {
     const recs = [
-      makeNurture('10:00', 4, false, new Date(2026, 8, 10, 10, 0)),
-      makeNurture('11:00', 4, true, new Date(2026, 8, 10, 11, 0)),
-      makeNurture('12:00', 4, true, new Date(2026, 8, 10, 12, 0)),
+      makeNurture('10:00', 24, false, new Date(2026, 8, 10, 10, 0)),
+      makeNurture('11:00', 24, true, new Date(2026, 8, 10, 11, 0)),
+      makeNurture('12:00', 24, true, new Date(2026, 8, 10, 12, 0)),
     ];
     const sorted = sortNurture(recs);
     expect(sorted.map((r) => r.base)).toEqual(['12:00', '11:00', '10:00']);
