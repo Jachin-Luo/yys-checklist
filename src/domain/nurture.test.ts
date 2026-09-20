@@ -90,29 +90,39 @@ describe('recordPoints：上卡点 + 逐点递推（2026-09-15 重构）', () =>
     expect(pts[1].doneAt).toBeUndefined();
   });
 
-  it('给某个点记完成 → 只有它**之后**的点顺延，之前的原样不动', () => {
+  it('给某个点记完成 → 该点显示实际时刻，之后的点顺延，之前的原样不动', () => {
     const r = makeNurture('08:00', 3, true, NOW);
     /* 14:00 那个点实际 14:05 才收 */
     const done = markPointDone(r, 1, new Date(2026, 8, 10, 14, 5));
     const pts = recordPoints(done, NOW);
 
-    expect(pts.map((p) => p.hm)).toEqual(['08:00', '14:00', '20:05', '02:05']);
+    /* 点 1 自己显示 14:05（实际），不再是 14:00（预计）—— 2026-09-20 修复 */
+    expect(pts.map((p) => p.hm)).toEqual(['08:00', '14:05', '20:05', '02:05']);
     expect(pts[1].doneAt).toBe(new Date(2026, 8, 10, 14, 5).getTime());
     expect(pts[0].doneAt).toBe(at(8)); // 上卡点不受影响
     expect(pts[2].doneAt).toBeUndefined();
+  });
+
+  it('已完成的点：`hm` 取实际、`ts` 仍是预计（两套时刻各司其职）', () => {
+    const r = makeNurture('08:00', 2, true, NOW);
+    const pts = recordPoints(markPointDone(r, 1, new Date(2026, 8, 10, 14, 5)), NOW);
+    expect(pts[1].hm).toBe('14:05');
+    /* `ts` 不受影响 —— 递推基准与 nextDue 排队都按预计值 */
+    expect(pts[1].ts).toBe(at(14));
+    expect(pts[2].hm).toBe('20:05');
   });
 
   it('连续两个点各按自己的实际时间 → 后一个基于前一个的实际时间递推', () => {
     let r = makeNurture('08:00', 3, true, NOW);
     r = markPointDone(r, 1, new Date(2026, 8, 10, 14, 5));
     r = markPointDone(r, 2, new Date(2026, 8, 10, 20, 12));
-    expect(recordPoints(r, NOW).map((p) => p.hm)).toEqual(['08:00', '14:00', '20:05', '02:12']);
+    expect(recordPoints(r, NOW).map((p) => p.hm)).toEqual(['08:00', '14:05', '20:12', '02:12']);
   });
 
-  it('取消某点的完成 → 后续回到"按预计时间推"', () => {
+  it('取消某点的完成 → 该点与后续一起回到"按预计时间推"', () => {
     const r = makeNurture('08:00', 3, true, NOW);
     const done = markPointDone(r, 1, new Date(2026, 8, 10, 14, 5));
-    expect(recordPoints(done, NOW).map((p) => p.hm)).toEqual(['08:00', '14:00', '20:05', '02:05']);
+    expect(recordPoints(done, NOW).map((p) => p.hm)).toEqual(['08:00', '14:05', '20:05', '02:05']);
     expect(recordPoints(clearPointDone(done, 1), NOW).map((p) => p.hm)).toEqual([
       '08:00',
       '14:00',

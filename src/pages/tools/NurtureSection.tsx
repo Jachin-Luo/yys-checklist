@@ -243,8 +243,8 @@ export default function NurtureSection() {
               onClick={() => submitDone(r, target)}
               title={
                 target.doneAt !== undefined
-                  ? '改这个点的实际完成时间（之后的点会跟着重算）'
-                  : '记这个点完成；之后的点按实际时间 + 6h 顺延'
+                  ? '改这个点的实际完成时间（这个点与它之后的点都会重算）'
+                  : '记这个点完成；这个点显示为实际时间，之后的点按实际时间 + 6h 顺延'
               }
               className="flex-none cursor-pointer rounded-sm bg-brand px-2 py-1 text-sm text-white transition-colors duration-120 hover:bg-brand-deep"
             >
@@ -286,7 +286,7 @@ export default function NurtureSection() {
         <b className="text-ink">结界寄养每次 6 小时</b>，一天理论可寄 4 次。填上卡时间 → 自动排出之后每 6h
         的收/续点（跨天标明天/后天），<b className="text-ink">上卡时刻也作为一个点显示在任务里</b>。
         <b className="text-ink">每个点各自记完成</b>：点一下那个时间点，再用「现在」或填实际时间 ——
-        只有它之后的点会按实际时间 + 6h 顺延，之前已完成的点不动。
+        这个点会显示为你填的实际时间，之后的点按实际时间 + 6h 顺延，之前的点不动。
         <b className="text-ink">添加时先问你要不要「立即开始」</b> —— 开始才算任务、才记录完成；
         仅存计划的纯查看（虚线），不背状态。
       </div>

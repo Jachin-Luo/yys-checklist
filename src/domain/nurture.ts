@@ -42,10 +42,14 @@ export interface NurtureRecord {
 export interface NurturePoint {
   /** 0 = 上卡点；1..n = 收/续点。UI 用它定位"给哪个点记完成" */
   index: number;
-  /** 预计时刻（点 0 = 上卡时刻；点 k = 前一点的完成/预计 + 6h） */
+  /**
+   * **预计**时刻（点 0 = 上卡时刻；点 k = 前一点的完成/预计 + 6h）。
+   * 递推与 `nextDue` 用它；展示用 `hm` —— 两者的差别见 `recordPoints`。
+   */
   ts: number;
+  /** 展示用的 `HH:mm`：**已完成 = 实际完成时间**，未完成 = 预计时间 */
   hm: string;
-  /** 今天 / 明天 / 后天 / `M/D` */
+  /** 今天 / 明天 / 后天 / `M/D`（跟随 `hm` 所依据的那个时刻） */
   dayLabel: string;
   past: boolean;
   /** 实际完成时刻：点 0 = `ts`（上卡即完成）；其余取 `dones[index]`；没完成则 undefined */
@@ -119,7 +123,17 @@ export const nurturePoints = (base: string, n: number, now: Date): NurturePoint[
  * 一条记录的**完整点列表** `[上卡点, ...收/续点]`：展示、徽章与 `nextDue` 都走这里。
  *
  * 递推：第 k 点的预计时刻 = 前一点的「实际完成时间 ?? 预计时刻」+ 6h。
- * 所以某个点记了完成之后，只有它**之后**的点会挪动。
+ * 所以某个点记了完成之后，只有它**自己与它之后**的点会挪动。
+ *
+ * ## 展示时刻 = `doneAt ?? ts`（2026-09-20 修复）
+ *
+ * 先前一律用 `ts`（预计）展示，于是用户把"14:00 收"改成"14:05 收"之后：
+ * 那个点**自己仍写着 14:00**，只有它之后的点挪到了 20:05 —— 看起来像改动没生效
+ * （用户反馈："修改的当前时间不会变，只有后续的时间会变"）。
+ * 现在已完成的点显示实际完成时刻，与"记了完成"这个动作在视觉上闭环。
+ *
+ * `ts` 仍保留为预计值：递推的基准是 `doneAt ?? ts`，`nextDue` / `dueText` 也按预计排队，
+ * 两套时刻各司其职，不要互相取代。
  */
 export function recordPoints(record: NurtureRecord, now: Date): NurturePoint[] {
   const dones = record.dones ?? {};
@@ -131,7 +145,9 @@ export function recordPoints(record: NurtureRecord, now: Date): NurturePoint[] {
   for (let k = 1; k <= record.n; k++) {
     const ts = prev + NURTURE_HOURS * 3600000;
     const doneAt = dones[k];
-    out.push({ ...shapePoint(ts, k, now), doneAt });
+    /* 用 `doneAt ?? ts` 定位展示时刻（`hm` / `dayLabel` / `past` 都跟着它），
+       再把 `ts` 覆盖回**预计值** —— 否则上面那三个字段会把预计值顶掉，递推口径就乱了 */
+    out.push({ ...shapePoint(doneAt ?? ts, k, now), ts, doneAt });
     prev = doneAt ?? ts;
   }
   return out;
