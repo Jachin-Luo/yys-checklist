@@ -38,12 +38,26 @@ import { useUiStore } from '../../stores/ui';
  * 数据落在**档案级**分片（`yys:plans:{profileId}`，2026-09-16 由设备级升格）：
  * 换号会切到该号自己的那份，且随备份一起走 —— 见 `stores/nurture.ts` 的说明。
  *
- * 布局注记（2026-09-20 改为两排）：任务行现在是
- *   **第一排**「上卡信息 · 统计 ·（右推）操作条 · 删除」
- *   **第二排**「时间线（点 chips + 结束 chip）」
- * 拆开的理由是时间线**需要整行宽度**：它本来就是一条横向序列，与操作条同排时会被挤成
- * 两三行反而更难读，还得靠 `min-w-36` 兜住"被压到 0 宽后溢出"的问题。分排之后
- * 那个约束连同它要防的问题一起消失 —— 布局层面解决比打补丁稳。
+ * 布局注记（2026-09-20）：时间线**始终独占一行**，操作区的位置**分端**：
+ *
+ *   **桌面端**（`md:` 起）两层：
+ *     第一排「上卡信息 · 统计 ·（`ml-auto` 右推）操作条 · 删除」
+ *     第二排「时间线」
+ *
+ *   **移动端**三层：
+ *     第一层「上卡信息 · 统计」
+ *     第二层「时间线」
+ *     第三层「操作条 · 删除」（`md:hidden`）
+ *
+ * 时间线独占的理由：它本来就是一条横向序列，与操作条同排时会被挤成两三行反而更难读，
+ * 还得靠 `min-w-36` 兜住"被压到 0 宽后溢出"的问题。分排之后那个约束连同它要防的问题
+ * 一起消失 —— 布局层面解决比打补丁稳。
+ *
+ * 移动端再单独把操作区下沉一层：窄屏下它挤在第一层会把时间线顶得更窄，而"记完成"
+ * 恰恰是**看完时间线之后**才做的动作 —— 放在线下方，视线顺序与操作顺序一致。
+ *
+ * 操作区只写一份 JSX（`actions` / `delBtn`），两处渲染靠 `hidden md:flex` 与 `md:hidden`
+ * 二选一显示；抄成两份就是给"以后只改了一处"埋雷。
  *
  * 2026-09-20：表单**不再让用户选推点数**，改为填「结界卡持续时间」（小时），
  * 点数由 `pointCountOf(hours)` 派生（22h → 3 个收/续点）。同时显示**只读的结束时间**
@@ -240,6 +254,78 @@ export default function NurtureSection() {
     const target = r.started ? targetOf(r) : null;
     const pickedIndex = active?.id === r.id ? active.index : null;
 
+    /*
+     * 操作区抽成一份 JSX，供两处渲染（桌面 / 移动）—— 见下方布局注记。
+     * 不复制第二份：三个分支（开始 / 记完成 / 全部完成）里带着各自的 onClick 与
+     * 禁用条件，抄一遍就是给"以后只改了一处"埋雷。
+     */
+    const actions = !r.started ? (
+      <button
+        type="button"
+        onClick={() => promote(r.id)}
+        className="flex-none cursor-pointer rounded-sm bg-brand px-2 py-1 text-sm text-white transition-colors duration-120 hover:bg-brand-deep"
+      >
+        开始
+      </button>
+    ) : target ? (
+      /* 操作条只作用于 `target`（选中点，或下一个待办点）—— 记完成只影响它之后的点 */
+      <>
+        <span className="text-sm text-ink-3">
+          {target.doneAt !== undefined
+            ? `${target.hm} 已完成`
+            : target.past
+              ? `${target.hm} 该收了`
+              : `${target.hm} 待收`}
+        </span>
+        <input
+          type="time"
+          value={doneDraft[r.id] ?? nowHM(now)}
+          onChange={(e) => setDoneDraft((s) => ({ ...s, [r.id]: e.target.value }))}
+          aria-label={`${target.hm} 的实际完成时间`}
+          title="实际完成时间；默认已填当前时间，可改"
+          className="w-[5.6rem] rounded-sm border border-line bg-surface px-1.5 py-1 text-sm text-ink transition-colors duration-120 focus:border-brand"
+        />
+        <button
+          type="button"
+          onClick={() => submitDone(r, target)}
+          title={
+            target.doneAt !== undefined
+              ? '改这个点的实际完成时间（这个点与它之后的点都会重算）'
+              : '记这个点完成；这个点显示为实际时间，之后的点按实际时间 + 6h 顺延'
+          }
+          className="flex-none cursor-pointer rounded-sm bg-brand px-2 py-1 text-sm text-white transition-colors duration-120 hover:bg-brand-deep"
+        >
+          {target.doneAt !== undefined ? '改时间' : '记完成'}
+        </button>
+        {target.doneAt !== undefined ? (
+          <button
+            type="button"
+            onClick={() => {
+              clearPoint(r.id, target.index);
+              setActive(null);
+            }}
+            title="取消这个点的完成记录，回到按预计时间推"
+            className="flex-none cursor-pointer rounded-sm border border-line px-2 py-1 text-sm text-ink-2 transition-colors duration-120 hover:border-ink-4"
+          >
+            取消完成
+          </button>
+        ) : null}
+      </>
+    ) : (
+      <span className="flex-none text-sm text-success-deep">全部完成</span>
+    );
+
+    const delBtn = (
+      <button
+        type="button"
+        aria-label="删除记录"
+        onClick={() => void onRemove(r)}
+        className="flex-none cursor-pointer rounded-sm border border-line px-1.5 py-1 text-ink-3 transition-colors duration-120 hover:border-danger-line hover:text-danger"
+      >
+        <Trash2 size={12} strokeWidth={2} />
+      </button>
+    );
+
     return (
       <div key={r.id} className="border-b border-line-faint px-3 py-2.5 last:border-0">
         {/* ── 第一排：概述 + 操作条 + 删除 ── */}
@@ -259,77 +345,15 @@ export default function NurtureSection() {
             </span>
           ) : null}
 
-          {/* `ml-auto` 把操作区推到右侧；`min-w-0` + 内部 `flex-wrap` 让它在窄屏下
-              改在**自己内部**换行，而不是撑破容器（`flex-none` 会按 max-content 定宽、直接溢出） */}
-          <span className="ml-auto flex min-w-0 flex-wrap items-center gap-1.5">
-            {!r.started ? (
-              <button
-                type="button"
-                onClick={() => promote(r.id)}
-                className="flex-none cursor-pointer rounded-sm bg-brand px-2 py-1 text-sm text-white transition-colors duration-120 hover:bg-brand-deep"
-              >
-                开始
-              </button>
-            ) : target ? (
-              /* 操作条只作用于 `target`（选中点，或下一个待办点）—— 记完成只影响它之后的点 */
-              <>
-                <span className="text-sm text-ink-3">
-                  {target.doneAt !== undefined
-                    ? `${target.hm} 已完成`
-                    : target.past
-                      ? `${target.hm} 该收了`
-                      : `${target.hm} 待收`}
-                </span>
-                <input
-                  type="time"
-                  value={doneDraft[r.id] ?? nowHM(now)}
-                  onChange={(e) => setDoneDraft((s) => ({ ...s, [r.id]: e.target.value }))}
-                  aria-label={`${target.hm} 的实际完成时间`}
-                  title="实际完成时间；默认已填当前时间，可改"
-                  className="w-[5.6rem] rounded-sm border border-line bg-surface px-1.5 py-1 text-sm text-ink transition-colors duration-120 focus:border-brand"
-                />
-                <button
-                  type="button"
-                  onClick={() => submitDone(r, target)}
-                  title={
-                    target.doneAt !== undefined
-                      ? '改这个点的实际完成时间（这个点与它之后的点都会重算）'
-                      : '记这个点完成；这个点显示为实际时间，之后的点按实际时间 + 6h 顺延'
-                  }
-                  className="flex-none cursor-pointer rounded-sm bg-brand px-2 py-1 text-sm text-white transition-colors duration-120 hover:bg-brand-deep"
-                >
-                  {target.doneAt !== undefined ? '改时间' : '记完成'}
-                </button>
-                {target.doneAt !== undefined ? (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      clearPoint(r.id, target.index);
-                      setActive(null);
-                    }}
-                    title="取消这个点的完成记录，回到按预计时间推"
-                    className="flex-none cursor-pointer rounded-sm border border-line px-2 py-1 text-sm text-ink-2 transition-colors duration-120 hover:border-ink-4"
-                  >
-                    取消完成
-                  </button>
-                ) : null}
-              </>
-            ) : (
-              <span className="flex-none text-sm text-success-deep">全部完成</span>
-            )}
+          {/* 桌面端（`md:` 起）：操作条与删除留在第一排、靠 `ml-auto` 右推。
+              移动端把它们收进下面独立的第三层 —— 见该处注释 */}
+          <span className="ml-auto hidden min-w-0 flex-wrap items-center gap-1.5 md:flex">
+            {actions}
+            {delBtn}
           </span>
-
-          <button
-            type="button"
-            aria-label="删除记录"
-            onClick={() => void onRemove(r)}
-            className="flex-none cursor-pointer rounded-sm border border-line px-1.5 py-1 text-ink-3 transition-colors duration-120 hover:border-danger-line hover:text-danger"
-          >
-            <Trash2 size={12} strokeWidth={2} />
-          </button>
         </div>
 
-        {/* ── 第二排：时间线独占一行（2026-09-20 用户要求）──
+        {/* ── 第二层：时间线独占一行（2026-09-20 用户要求）──
             chips 拿到整行宽度后，不再与操作条抢空间。原先两者同排时需要一个
             `min-w-36` 的最小宽度来防止 chips 被压到 0 宽、溢出到操作条上；
             拆成两排后那个约束连同它要防的问题一起消失了 —— 布局层面解决，比补丁更稳。 */}
@@ -342,6 +366,15 @@ export default function NurtureSection() {
               setActive((cur) => (cur?.id === r.id && cur.index === index ? null : { id: r.id, index }))
             }
           />
+        </div>
+
+        {/* ── 第三层（仅移动端）：记完成 + 删除 ──
+            用户反馈「移动端记完成和删除放在最下面，相当于分三层」：窄屏下操作条挤在第一排
+            会把时间线顶得更窄，而"记完成"恰恰是看完时间线之后才做的动作 —— 放在线下方，
+            视线顺序与操作顺序一致。桌面端不这样排（宽度够，三层会显得松散），所以用 `md:hidden`。 */}
+        <div className="mt-1.5 flex flex-wrap items-center justify-end gap-1.5 md:hidden">
+          {actions}
+          {delBtn}
         </div>
       </div>
     );
