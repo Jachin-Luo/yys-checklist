@@ -131,8 +131,8 @@
       "origin": "preset"
     },
     {
-      "id": "daily_demon_lord",
-      "name": "地域鬼王 ×3",
+      "id": "daily_demon_lord_1",
+      "name": "地域鬼王 1/3",
       "cycle": "daily",
       "path": "探索 → 地域鬼王",
       "gainKind": [
@@ -141,8 +141,38 @@
       "gain": {
         "jade": 20
       },
-      "gainNote": "每只20勾，按可打1只保守计",
-      "note": "声望2000可打2只(40勾)、10000可打3只(60勾)；难度拉1级就能拿",
+      "gainNote": "每只 20 勾",
+      "note": "难度拉 1 级就能拿",
+      "origin": "preset"
+    },
+    {
+      "id": "daily_demon_lord_2",
+      "name": "地域鬼王 2/3",
+      "cycle": "daily",
+      "path": "探索 → 地域鬼王",
+      "gainKind": [
+        "jade"
+      ],
+      "gain": {
+        "jade": 20
+      },
+      "gainNote": "每只 20 勾",
+      "note": "需声望 2000",
+      "origin": "preset"
+    },
+    {
+      "id": "daily_demon_lord_3",
+      "name": "地域鬼王 3/3",
+      "cycle": "daily",
+      "path": "探索 → 地域鬼王",
+      "gainKind": [
+        "jade"
+      ],
+      "gain": {
+        "jade": 20
+      },
+      "gainNote": "每只 20 勾",
+      "note": "需声望 10000",
       "origin": "preset"
     },
     {
@@ -645,15 +675,27 @@
       "origin": "preset"
     },
     {
-      "id": "weekly_zhenshe",
-      "name": "真·八岐大蛇 ×2",
+      "id": "weekly_zhenshe_1",
+      "name": "真·八岐大蛇 1/2",
       "cycle": "weekly",
       "path": "探索 → 真·八岐大蛇",
       "gainKind": [
         "soul",
         "other"
       ],
-      "note": "重复出框给 100 勾；可用摸鱼行动存次数下双倍；NGA 列为体力最高优先",
+      "note": "重复出框给 100 勾；NGA 列为体力最高优先",
+      "origin": "preset"
+    },
+    {
+      "id": "weekly_zhenshe_2",
+      "name": "真·八岐大蛇 2/2",
+      "cycle": "weekly",
+      "path": "探索 → 真·八岐大蛇",
+      "gainKind": [
+        "soul",
+        "other"
+      ],
+      "note": "可用摸鱼行动存次数下双倍",
       "origin": "preset"
     },
     {
@@ -870,8 +912,8 @@
       "origin": "preset"
     },
     {
-      "id": "weekly_banquet",
-      "name": "阴阳寮宴会 ×2",
+      "id": "weekly_banquet_1",
+      "name": "阴阳寮宴会 1/2",
       "cycle": "weekly",
       "path": "阴阳寮 → 宴会",
       "gainKind": [
@@ -879,9 +921,26 @@
         "blackFrag",
         "exp"
       ],
-      "condition": "每周两次，寮自定时间",
+      "condition": "每周第一次，寮自定时间",
       "time": "20:00",
-      "timeNote": "寮自定 ·「多在周三/周六」属社区经验，非官方",
+      "timeNote": "寮自定 ·「多在周三」属社区经验，非官方",
+      "isGuildTime": true,
+      "note": "高等级宴会务必参加",
+      "origin": "preset"
+    },
+    {
+      "id": "weekly_banquet_2",
+      "name": "阴阳寮宴会 2/2",
+      "cycle": "weekly",
+      "path": "阴阳寮 → 宴会",
+      "gainKind": [
+        "blueTicket",
+        "blackFrag",
+        "exp"
+      ],
+      "condition": "每周第二次，寮自定时间",
+      "time": "20:00",
+      "timeNote": "寮自定 ·「多在周六」属社区经验，非官方",
       "isGuildTime": true,
       "note": "高等级宴会务必参加",
       "origin": "preset"
