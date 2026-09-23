@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { Clock, RotateCcw } from 'lucide-react';
+import Icon from '../../components/icons/Icon';
 import CollapsibleSection from '../../components/common/CollapsibleSection';
 import { isValidHm, guildTimeTargets, configuredCount } from '../../domain/guildTime';
 import { useDevicePrefs } from '../../hooks/useDevicePrefs';
@@ -8,17 +8,17 @@ import { useItemStore } from '../../stores/items';
 
 /* 去掉 `outline-none`，焦点环交给 `styles/base.css` 的全局 `:focus-visible` */
 const inputCls =
-  'w-28 flex-none rounded-sm border border-line bg-surface px-2 py-1 text-lg text-ink transition-colors duration-120 focus:border-brand';
+  'w-28 flex-none rounded-sm border border-line bg-surface px-2 py-1 text-lg text-ink transition-colors duration-120 focus:border-gold-hi';
 
 /**
- * 「我的 · 寮时间」分区（需求 §5-D3 / D3 难点）。
+ * 「设置 · 寮时间」分区（需求 §5-D3 / D3 难点）。
  *
  * 道馆 / 宴会 / 首领退治 / 狭间暗域等集体活动的时间**各寮自定，写死即错**，
  * 所以数据里的 `time` 只是参考值，用户配置的值在展示层叠加（`domain/guildTime.applyGuildTime`）。
  *
- * **2026-09-16 改为档案级**（`yys:guild:{profileId}`）：原设计存在设备级键里、
+ * **2026-09-16 改为账号级**（`yys:guild:{profileId}`）：原设计存在设备级键里、
  * "换号不用重配"，但那只对"所有号都在自己寮"成立。现在每个号各有一份，
- * 需要多号共用时走下面的「同步到其他档案」。
+ * 需要多号共用时走下面的「同步到其他账号」。
  *
  * 卡内分割：说明文字在上（配置前提），逐条录入在下（明细）。
  */
@@ -27,7 +27,7 @@ export default function GuildTimeSection() {
   const guildTime = useGuildTimeStore((s) => s.guildTime);
   const setGuildTime = useGuildTimeStore((s) => s.setGuildTime);
   const clearGuildTime = useGuildTimeStore((s) => s.clearGuildTime);
-  /* 引导标记仍是设备级：它是"这台设备看过引导没有"，与哪个档案无关 */
+  /* 引导标记仍是设备级：它是"这台设备看过引导没有"，与哪个账号无关 */
   const { resetOnboarding } = useDevicePrefs();
 
   const targets = useMemo(() => guildTimeTargets(items), [items]);
@@ -42,19 +42,13 @@ export default function GuildTimeSection() {
           type="button"
           disabled={done === 0}
           onClick={() => void clearGuildTime()}
-          className="flex cursor-pointer items-center gap-1 rounded-sm border border-line px-2 py-1 text-sm text-ink-2 transition-colors duration-120 hover:border-ink-4 disabled:cursor-not-allowed disabled:opacity-50"
+          className="flex cursor-pointer items-center gap-1 rounded-sm border border-line px-2 py-1 text-sm text-ink-2 transition-colors duration-120 hover:border-line disabled:cursor-not-allowed disabled:opacity-50"
         >
-          <RotateCcw size={12} strokeWidth={2} />
+          <Icon name="restore" size={12} />
           清空配置
         </button>
       }
     >
-      <div className="bg-surface-3 px-3 py-3">
-        <p className="text-sm leading-relaxed text-ink-3">
-          集体活动的时间由所在寮决定，官方无法统一代班。填入你的寮实际时间后，
-          清单里的时间徽章会按你配置的时刻提示「未开始 / 进行中 / 已结束」。
-        </p>
-      </div>
 
       <div className="px-3 py-3">
         {targets.map((it) => {
@@ -66,7 +60,7 @@ export default function GuildTimeSection() {
               className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-2 border-b border-line-faint px-1 py-2 last:border-0"
             >
               <div className="flex min-w-0 items-start gap-2 py-1">
-                <Clock size={13} className="mt-1 flex-none text-ink-4" />
+                <Icon name="tokei" size={13} className="mt-1 flex-none text-ink-4" />
                 <span className="min-w-0 break-words text-lg text-ink">{it.name}</span>
               </div>
               <div className="flex flex-col items-end gap-1">
@@ -81,7 +75,7 @@ export default function GuildTimeSection() {
                   <button
                     type="button"
                     onClick={() => void setGuildTime(it.id, '')}
-                    className="cursor-pointer rounded-sm border border-line px-2 py-1 text-sm text-ink-2 transition-colors duration-120 hover:border-ink-4"
+                    className="cursor-pointer rounded-sm border border-line px-2 py-1 text-sm text-ink-2 transition-colors duration-120 hover:border-line"
                   >
                     清除
                   </button>
@@ -96,14 +90,10 @@ export default function GuildTimeSection() {
           );
         })}
 
-        <p className="mt-2.5 text-sm text-ink-3">
-          配置按<b className="text-ink-2">档案</b>保存：每个号各有一份，切号即切换。
-          多个号在同一个寮时，用下面的「同步到其他档案」一次铺开，不必逐个填。
-        </p>
         <button
           type="button"
           onClick={() => resetOnboarding()}
-          className="mt-2 cursor-pointer rounded-sm border border-line px-2 py-1 text-sm text-ink-2 transition-colors duration-120 hover:border-ink-4"
+          className="mt-2 cursor-pointer rounded-sm border border-line px-2 py-1 text-sm text-ink-2 transition-colors duration-120 hover:border-line"
         >
           重看冷启动引导
         </button>

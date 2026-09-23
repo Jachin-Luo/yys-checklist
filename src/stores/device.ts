@@ -2,11 +2,11 @@ import { create } from 'zustand';
 import { DEVICE_KEY, read, write } from '../services/localStore';
 
 /**
- * 设备级状态（**不属于用户数据模型**：不随档案走、不上后端、mock 与 http 行为一致）。
+ * 设备级状态（**不属于用户数据模型**：不随账号走、不上后端、mock 与 http 行为一致）。
  *
  * ## 2026-09-16 瘦身：只剩引导标记
  *
- * 寮时间与结界寄养任务**升为档案级**（见 `api/mock/persist.ts` 的分片表与
+ * 寮时间与结界寄养任务**升为账号级**（见 `api/mock/persist.ts` 的分片表与
  * `UserDataBundle`）—— 它们都不是"这台手机的属性"，且用户要求"所有配置项均可备份"。
  * 相应入口迁到 `stores/guildTime`（新）与 `stores/nurture`（改为走契约）。
  *

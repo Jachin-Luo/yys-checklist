@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { ChevronDown, ChevronRight, ChevronUp, GripVertical, Plus, RotateCcw, Trash2, Undo2 } from 'lucide-react';
+import Icon from '../../components/icons/Icon';
 import type { Item } from '../../api/types';
 import type { Cycle, GainKind } from '../../domain/enums';
 import { CYCLE, GAIN_KIND } from '../../domain/enums';
@@ -17,13 +17,13 @@ const DEADLINE_RE = /^\d{4}-\d{2}-\d{2}( \d{2}:\d{2})?$/;
 /* 去掉 `outline-none`，焦点环交给 `styles/base.css` 的全局 `:focus-visible`
    （这个 app 里有 `<select>` 复用同一份类，可见焦点提示此前最弱） */
 const inputCls =
-  'w-full rounded-sm border border-line bg-surface px-2 py-1.5 text-lg text-ink transition-colors duration-120 focus:border-brand disabled:opacity-50';
+  'w-full rounded-sm border border-line bg-surface px-2 py-1.5 text-lg text-ink transition-colors duration-120 focus:border-gold-hi disabled:opacity-50';
 
 const btnCls =
-  'cursor-pointer rounded-sm border border-line px-2 py-1 text-sm text-ink-2 transition-colors duration-120 hover:border-ink-4 disabled:cursor-not-allowed disabled:opacity-50';
+  'cursor-pointer rounded-sm border border-line px-2 py-1 text-sm text-ink-2 transition-colors duration-120 hover:border-line disabled:cursor-not-allowed disabled:opacity-50';
 
 /**
- * 「我的 · 条目管理」（F20 条目自定义）。
+ * 「设置 · 条目管理」（F20 条目自定义）。
  *
  * 这里同时也是**自定义排序的唯一入口**：排序控件已按产品决策取消，
  * 一旦用户在此调整顺序，`order` 非空 → `effectiveSortBy` 判定为 custom → 直接接管默认痛感排序。
@@ -37,7 +37,7 @@ const btnCls =
  * 跨组调序被禁用而非静默无效：列表已按周期切开，跨组移动在界面上看不出任何变化，
  * 让按钮"点了没反应"比禁用更让人困惑（`domain/sort.moveWithinGroup` 的注释有详细说明）。
  *
- * 卡内分割约定（与「我的」页其它分区一致）：
+ * 卡内分割约定（与「设置」页其它分区一致）：
  *   **配置 / 新增 / 操作** 类子块用 `bg-surface-3` 底，**展示 / 列表** 保持白底，两者之间加 `border-t`。
  */
 export default function ItemManagerSection() {
@@ -214,7 +214,7 @@ export default function ItemManagerSection() {
           }}
           className={`flex items-center gap-1 ${btnCls}`}
         >
-          <RotateCcw size={12} strokeWidth={2} />
+          <Icon name="restore" size={12} />
           恢复默认
         </button>
       }
@@ -253,14 +253,14 @@ export default function ItemManagerSection() {
             type="button"
             disabled={busy}
             onClick={() => void submit()}
-            className="flex cursor-pointer items-center justify-center gap-1 rounded-sm bg-brand px-3 py-1.5 text-sm text-white transition-colors duration-120 hover:bg-brand-deep disabled:cursor-not-allowed disabled:opacity-50"
+            className="flex cursor-pointer items-center justify-center gap-1 rounded-sm border border-line bg-gold-soft px-3 py-1.5 text-sm text-gold-hi transition-colors duration-120 hover:border-gold-hi disabled:cursor-not-allowed disabled:opacity-50"
           >
-            <Plus size={12} strokeWidth={2.4} />
+            <Icon name="plus" size={12} />
             添加
           </button>
         </div>
 
-        <p className="mt-2 text-sm text-ink-3">奖励类型（可多选，只标类型不填数值）</p>
+        <p className="mt-2 text-sm text-ink-3">奖励类型 · 可多选，不填数值</p>
         <div className="mt-1.5 flex flex-wrap gap-1.5">
           {GAIN_KIND.map((k) => {
             const on = kinds.includes(k);
@@ -270,7 +270,7 @@ export default function ItemManagerSection() {
                 type="button"
                 onClick={() => setKinds(on ? kinds.filter((x) => x !== k) : [...kinds, k])}
                 className={`cursor-pointer rounded-sm border px-2 py-1 text-sm transition-colors duration-120 ${
-                  on ? 'border-brand bg-brand-soft text-brand' : 'border-line bg-surface text-ink-2 hover:border-ink-4'
+                  on ? 'border-line bg-gold-soft text-gold-hi' : 'border-line bg-surface text-ink-2 hover:border-line'
                 }`}
               >
                 {kindLabels.get(k)?.label ?? k}
@@ -315,9 +315,9 @@ export default function ItemManagerSection() {
                   onClick={() => setOpenGroup(expanded ? null : g.cycle)}
                   className="flex w-full cursor-pointer items-baseline gap-2 rounded-sm px-1 pb-1 pt-2 text-left text-sm text-ink-3 transition-colors duration-120 hover:text-ink-2"
                 >
-                  <ChevronRight
+                  <Icon
+                    name="chevron-right"
                     size={13}
-                    strokeWidth={2.4}
                     className={`flex-none self-center transition-transform duration-120 ${
                       expanded ? 'rotate-90' : ''
                     }`}
@@ -335,7 +335,7 @@ export default function ItemManagerSection() {
                     onDrop={() => dropOn(it)}
                     className="flex items-center gap-2 rounded-sm px-1 py-1.5 transition-colors duration-120 hover:bg-surface-3"
                   >
-                    <GripVertical size={14} className="flex-none cursor-grab text-line" />
+                    <Icon name="grip" size={14} className="flex-none cursor-grab text-line" />
                     <div className="flex flex-none flex-col">
                       <button
                         type="button"
@@ -345,7 +345,7 @@ export default function ItemManagerSection() {
                         onClick={() => moveInGroup(g.list, it.id, -1)}
                         className="cursor-pointer text-ink-4 transition-colors duration-120 hover:text-ink-2 disabled:cursor-not-allowed disabled:opacity-30"
                       >
-                        <ChevronUp size={13} strokeWidth={2.2} />
+                        <Icon name="chevron-up" size={13} />
                       </button>
                       <button
                         type="button"
@@ -355,12 +355,12 @@ export default function ItemManagerSection() {
                         onClick={() => moveInGroup(g.list, it.id, 1)}
                         className="cursor-pointer text-ink-4 transition-colors duration-120 hover:text-ink-2 disabled:cursor-not-allowed disabled:opacity-30"
                       >
-                        <ChevronDown size={13} strokeWidth={2.2} />
+                        <Icon name="chevron-down" size={13} />
                       </button>
                     </div>
                     <span className="min-w-0 flex-1 truncate text-lg text-ink">{it.name}</span>
                     {it.origin === 'custom' ? (
-                      <span className="flex-none rounded-sm bg-brand-soft px-1.5 py-0.5 text-xs text-brand">自建</span>
+                      <span className="flex-none rounded-sm bg-gold-soft px-1.5 py-0.5 text-xs text-gold-hi">自建</span>
                     ) : null}
                     {/* 属于一键日常覆盖集合（2026-09-20 用户要求）：
                         用中性灰而非品牌紫 —— 紫色在本页已经是「自建」（来源）的语义，
@@ -390,7 +390,7 @@ export default function ItemManagerSection() {
                         }}
                         className="flex-none cursor-pointer rounded-sm p-1 text-ink-4 transition-colors duration-120 hover:text-danger"
                       >
-                        <Trash2 size={13} strokeWidth={2} />
+                        <Icon name="trash" size={13} />
                       </button>
                     ) : (
                       <button
@@ -398,7 +398,7 @@ export default function ItemManagerSection() {
                         title={`隐藏预设条目：${it.name}（可恢复）`}
                         aria-label={`隐藏预设条目：${it.name}`}
                         onClick={() => void hideItem(it.id)}
-                        className="flex-none cursor-pointer rounded-sm border border-line px-2 py-0.5 text-sm text-ink-2 transition-colors duration-120 hover:border-ink-4"
+                        className="flex-none cursor-pointer rounded-sm border border-line px-2 py-0.5 text-sm text-ink-2 transition-colors duration-120 hover:border-line"
                       >
                         隐藏
                       </button>
@@ -416,9 +416,7 @@ export default function ItemManagerSection() {
       {/* ── 已隐藏的预设条目（操作区，浅底）：同样按周期分组、按需展开 ── */}
       {hiddenItems.length ? (
         <div className="border-t border-line-faint bg-surface-3 px-3 py-3">
-          <p className="text-sm text-ink-3">
-            已隐藏的预设条目 · {hiddenItems.length} 条（只隐藏不销毁，随时可恢复；点周期名展开该组）
-          </p>
+          <p className="text-sm text-ink-3">已隐藏的预设条目 · {hiddenItems.length} 条 · 可恢复</p>
           <div className="mt-1.5">
             {hiddenGroups.map((g) => {
               const expanded = openHiddenGroup === g.cycle;
@@ -430,9 +428,9 @@ export default function ItemManagerSection() {
                     onClick={() => setOpenHiddenGroup(expanded ? null : g.cycle)}
                     className="flex w-full cursor-pointer items-baseline gap-2 rounded-sm px-1 pb-1 pt-1.5 text-left text-sm text-ink-3 transition-colors duration-120 hover:text-ink-2"
                   >
-                    <ChevronRight
+                    <Icon
+                      name="chevron-right"
                       size={13}
-                      strokeWidth={2.4}
                       className={`flex-none self-center transition-transform duration-120 ${
                         expanded ? 'rotate-90' : ''
                       }`}
@@ -451,7 +449,7 @@ export default function ItemManagerSection() {
                         onClick={() => void restoreItem(it.id)}
                         className={`flex items-center gap-1 bg-surface ${btnCls}`}
                       >
-                        <Undo2 size={12} strokeWidth={2} />
+                        <Icon name="undo" size={12} />
                         恢复
                       </button>
                     </div>
@@ -463,9 +461,6 @@ export default function ItemManagerSection() {
         </div>
       ) : null}
 
-      <p className="border-t border-line-faint bg-surface-3 px-3 py-2 text-sm leading-relaxed text-ink-3">
-        删除预设只会隐藏（可恢复）；只有自建条目才允许真删。新添加的条目会排到末尾，不打乱已有顺序。
-      </p>
     </CollapsibleSection>
   );
 }

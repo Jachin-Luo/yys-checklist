@@ -112,7 +112,7 @@ describe('validateBundle：结构与归一化', () => {
     expect(r.warnings[0]).toContain('1.4.0');
   });
 
-  it('缺 id/userId 的档案行被跳过并警告', () => {
+  it('缺 id/userId 的账号行被跳过并警告', () => {
     const r = validateBundle(bundle({ profiles: [profile('p_main', '大号', 1), { name: '没有 id 的坏行' }] }), '1.4.0');
     expect(r.ok).toBe(true);
     if (!r.ok) return;
@@ -130,7 +130,7 @@ describe('validateBundle：结构与归一化', () => {
     expect(r.bundle.data[0].state.checked).toEqual({ ok: 1 });
   });
 
-  it('对不上档案的数据行被跳过并警告', () => {
+  it('对不上账号的数据行被跳过并警告', () => {
     const r = validateBundle(bundle({ data: [row('p_main'), row('p_ghost')] }), '1.4.0');
     expect(r.ok).toBe(true);
     if (!r.ok) return;
@@ -144,11 +144,11 @@ describe('validateBundle：结构与归一化', () => {
     if (!r.ok) expect(r.error).toContain('损坏');
   });
 
-  it('空档案列表通过但给出提醒（导入后什么都不会变）', () => {
+  it('空账号列表通过但给出提醒（导入后什么都不会变）', () => {
     const r = validateBundle(bundle({ profiles: [], data: [] }), '1.4.0');
     expect(r.ok).toBe(true);
     if (!r.ok) return;
-    expect(r.warnings.some((w) => w.includes('没有任何档案'))).toBe(true);
+    expect(r.warnings.some((w) => w.includes('没有任何账号'))).toBe(true);
   });
 
   it('归一化只保留已知字段（不留 schemaVersion 之外的野字段）', () => {
@@ -171,7 +171,7 @@ describe('validateBundle：结构与归一化', () => {
 });
 
 describe('summarize', () => {
-  it('跨档案求和', () => {
+  it('跨账号求和', () => {
     const b = bundle({
       profiles: [profile('a', 'A', 1), profile('b', 'B', 2)],
       data: [

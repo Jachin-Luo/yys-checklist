@@ -133,7 +133,7 @@ export const useItemStore = create<ItemState>((set, get) => {
 
 /**
  * 切号时清空内存态（由 `useBootstrap` 在 scope 变化时调用）。
- * 不清的话，新档案的首屏聚合返回前会短暂显示**旧档案**的条目与自建项。
+ * 不清的话，新账号的首屏聚合返回前会短暂显示**旧账号**的条目与自建项。
  */
 export const resetItemsMemory = (): void =>
   useItemStore.setState({ items: [], presetItems: [], overrides: null, error: null });

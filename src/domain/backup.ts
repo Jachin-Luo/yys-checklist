@@ -3,7 +3,7 @@
  *
  * **为什么导入必须先校验**：备份文件是**用户手上的一份外部数据**，可能来自旧版本、
  * 被手工改过、或干脆选错了文件。直接塞进 `importUserData` 的后果是
- * 档案列表被半截数据覆盖 —— 用户丢的是无法恢复的勾选记录。
+ * 账号列表被半截数据覆盖 —— 用户丢的是无法恢复的勾选记录。
  * 因此这一层做两件事：**结构校验**（不合格就拒绝）+ **归一化**（只保留已知字段）。
  *
  * 校验刻意**不引入 JSON Schema 库**：Bundle 只有 4 个字段、2 层嵌套，
@@ -22,9 +22,9 @@ export const MAX_BUNDLE_CHARS = 4_000_000;
 export const STALE_DAYS = 45;
 
 export interface BundleSummary {
-  /** 备份里的档案数 */
+  /** 备份里的账号数 */
   profiles: number;
-  /** 有勾选记录的条目数（跨全部档案求和） */
+  /** 有勾选记录的条目数（跨全部账号求和） */
   checked: number;
   /** 自建条目数 */
   custom: number;
@@ -32,11 +32,11 @@ export interface BundleSummary {
   hidden: number;
   /** 自定义排序条目数 */
   order: number;
-  /** 勾选日志覆盖的天数（跨全部档案求和，2026-09-15 加入） */
+  /** 勾选日志覆盖的天数（跨全部账号求和，2026-09-15 加入） */
   logDays: number;
-  /** 已配置的寮时间条数（跨全部档案求和，2026-09-16 加入） */
+  /** 已配置的寮时间条数（跨全部账号求和，2026-09-16 加入） */
   guildTime: number;
-  /** 结界寄养任务 / 计划条数（跨全部档案求和，2026-09-16 加入） */
+  /** 结界寄养任务 / 计划条数（跨全部账号求和，2026-09-16 加入） */
   plans: number;
 }
 
@@ -143,9 +143,9 @@ export function validateBundle(raw: unknown, currentSchemaVersion: string): Vali
       isObj(p) && typeof p.id === 'string' && p.id.length > 0 && typeof p.userId === 'string',
   );
   if (profiles.length !== raw.profiles.length) {
-    warnings.push(`有 ${raw.profiles.length - profiles.length} 条档案记录缺少 id/userId，已跳过。`);
+    warnings.push(`有 ${raw.profiles.length - profiles.length} 条账号记录缺少 id/userId，已跳过。`);
   }
-  if (!profiles.length) warnings.push('这个备份里没有任何档案，导入后不会改变现有数据。');
+  if (!profiles.length) warnings.push('这个备份里没有任何账号，导入后不会改变现有数据。');
 
   const ids = new Set(profiles.map((p) => p.id));
   const rawData = Array.isArray(raw.data) ? raw.data : [];
@@ -195,10 +195,10 @@ export function validateBundle(raw: unknown, currentSchemaVersion: string): Vali
   }
 
   if (rawData.length && !data.length) {
-    return { ok: false, error: '备份里的数据行都无法对应到档案，文件可能已损坏。' };
+    return { ok: false, error: '备份里的数据行都无法对应到账号，文件可能已损坏。' };
   }
   if (data.length < rawData.length) {
-    warnings.push(`有 ${rawData.length - data.length} 条数据行与档案对不上，已跳过。`);
+    warnings.push(`有 ${rawData.length - data.length} 条数据行与账号对不上，已跳过。`);
   }
 
   const bundle: UserDataBundle = {
@@ -244,7 +244,7 @@ export function dataFreshness(updated: string | undefined, now: Date = new Date(
  * 而不是先下载一个文件、再想办法把文件传过去。手机上尤其明显 —— 文件下载后往往躺在
  * 「下载」目录里，导入时还要在文件选择器里翻。
  *
- * 缩进 2 空格：用户看得懂、能手工改（比如只恢复某一个档案），也便于发现粘贴被截断。
+ * 缩进 2 空格：用户看得懂、能手工改（比如只恢复某一个账号），也便于发现粘贴被截断。
  */
 export function serializeBundle(bundle: UserDataBundle): string {
   return JSON.stringify(bundle, null, 2);

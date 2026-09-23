@@ -190,7 +190,7 @@ describe('mergeItems / effectiveView：种子 + 覆盖层 → 有效数据（§2
     expect(out.find((i) => i.id === 'c1')?.origin).toBe('custom');
   });
 
-  it('effectiveView：档案偏好缺字段时回落默认值', () => {
+  it('effectiveView：账号偏好缺字段时回落默认值', () => {
     const defaults: ViewDefaults = { sortBy: 'weight', showKinds: [], minWeight: 0, hideDone: false, pinned: [] };
     const v = effectiveView(defaults, { profileId: 'p', sortBy: 'name', showKinds: ['jade'] });
     expect(v.sortBy).toBe('name');

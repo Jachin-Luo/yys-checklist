@@ -2,6 +2,10 @@
  * 极少量全局基础样式（重置、字体栈、滚动条、可访问性基线）—— 设计文档 §8.1。
  * 颜色 / 字号一律 @apply 令牌类，不写 #RRGGBB，保持"改一处令牌即全局生效"。
  *
+ * 2026-09-23 换肤：令牌取值已改为 CSS 变量（见 `styles/theme.css`），
+ * 本文件的方法不变 —— 依然只引令牌类，于是自动跟随明暗主题。
+ * 底纹贴在 `body`（`theme.css`），壳层根节点改为透明以便纹样透出。
+ *
  * 注意：本文件独立于 index.css 被 PostCSS 处理，因此外层不套 `@layer base`
  * （Tailwind 要求 `@layer` 与 `@tailwind base` 同文件），改用普通选择器表达同等优先级。
  * 这个"副作用"是**有意依赖**的：普通选择器的优先级高于 Tailwind 的 `@layer utilities`，
@@ -35,7 +39,11 @@ body,
  * 背景：引入 100dvh 后，Windows 分数缩放（125%/150%）下浏览器视口计算的亚像素舍入差
  * 可把 body 撑出 ≤1px 的溢出，PC 端于是出现「body 一条 + main 一条」的双滚动条。
  * overflow:hidden 直接掐掉文档级滚动，保证全站最多一条（main 的）滚动条。
- * 注意：不要给 aside 加 overflow —— ProfileSwitcher 的下拉是 absolute，会被裁掉。
+ *
+ * ⚠️ **不要给"装着 `ProfileSwitcher` 的容器"加 `overflow: hidden` / Tailwind 的 `overflow-hidden`**
+ * —— 它的下拉是 `absolute`：PC 挂在左栏 `aside` 底部、向上弹；移动端挂在顶栏 `header`、向下弹。
+ * 一旦父级裁剪，表现就是"点开账号切换器什么也没出现"（2026-09-23 换肤时给这两个容器加
+ * `overflow-hidden` 贴合底纹，踩过一次）。底纹 `Texture` 用 `absolute inset-0`，本就不需要父级裁剪。
  */
 html,
 body {
@@ -58,14 +66,15 @@ button {
 }
 
 /*
- * 焦点可见性：**全站唯一来源**（2026-09-11 新增）。
+ * 焦点可见性：**全站唯一来源**（2026-09-11 新增，2026-09-23 改为金环）。
  * 此前全站 0 处作者级焦点样式：约 70 个按钮只剩各家浏览器默认环（与设计语言无关），
  * 8 个输入框更糟 —— 用 `outline-none` 去掉默认环后只靠 1px 边框变色提示，
  * 其中式神搜索框连 `focus:` 类都没有，键盘聚焦后完全没有视觉变化。
  * 用 `:focus-visible` 而非 `:focus`：鼠标点击不亮环，键盘 Tab 才亮，不干扰日常使用。
+ * 参考稿 §5 的键盘规格即为「2px 金环」。
  */
 :focus-visible {
-  @apply outline outline-2 outline-offset-2 outline-brand;
+  @apply outline outline-2 outline-offset-2 outline-gold;
 }
 
 /*
@@ -81,6 +90,25 @@ button:active:not(:disabled),
 
 * {
   -webkit-tap-highlight-color: transparent;
+}
+
+/*
+ * 长按勾选卡片：禁掉文字选择与 iOS 的原生长按菜单（2026-09-23 修）。
+ *
+ * 清单卡是"整张可点 + 长按 500ms 触发跨账号勾选"的双手势元素。
+ * 不关掉选择，按住的那一刻浏览器就把卡片文字选上了，手指继续移动还会
+ * **连带选中相邻卡片的文字**（用户反馈的原话："长按时会触发选中底部清单的文字"）——
+ * 手指还没抬起，交互已经跑偏，松手后满屏蓝色高亮。
+ *
+ * 为什么不在 `useLongPress` 里 `e.preventDefault()`：那个 pointerdown 会冒泡到整卡，
+ * 连带把卡片内**真正需要聚焦**的菱形勾选框一起挡掉（点它就不再获得焦点），
+ * 为了一个视觉/选择问题牺牲键盘可达性不划算。CSS 只管选择，不碰焦点。
+ */
+.no-press-select {
+  -webkit-user-select: none;
+  user-select: none;
+  /* iOS 专有：不加它，长按仍会弹出「拷贝 / 查询」原生长按菜单 */
+  -webkit-touch-callout: none;
 }
 
 /*
@@ -105,7 +133,7 @@ button:active:not(:disabled),
 }
 
 /*
- * 滚动条槽位常驻（2026-09-14）：修「我的」页展开折叠分区时的横向抖动。
+ * 滚动条槽位常驻（2026-09-14）：修「设置」页展开折叠分区时的横向抖动。
  *
  * `main` 是全站唯一的内层滚动容器（`html/body` 的滚动见上）。展开 / 收起折叠分区会改变
  * 内容高度，一旦跨越"是否需要滚动"的阈值，滚动条的出现 / 消失会让 main 的可用宽度少 8px
@@ -123,7 +151,7 @@ main {
 }
 
 ::-webkit-scrollbar-thumb {
-  @apply rounded-full bg-line;
+  @apply rounded-full bg-line-soft;
 }
 
 ::-webkit-scrollbar-track {

@@ -5,7 +5,7 @@
  * 字段命名一律 camelCase（下划线命名由 S1 迁移一次性转换）。
  */
 import type { Cycle, GainKind, Origin, SortBy } from '../domain/enums';
-/* 结界寄养记录（2026-09-16 起为**档案级**用户数据，进 `BootstrapPayload` 与备份）。
+/* 结界寄养记录（2026-09-16 起为**账号级**用户数据，进 `BootstrapPayload` 与备份）。
    从 domain 借形状而不是在此重定义：递推规则与它绑定，两处定义必然漂移。
    `domain/nurture` 不 import 本文件，因此这条 import 不会成环。 */
 import type { NurtureRecord } from '../domain/nurture';
@@ -232,7 +232,7 @@ export interface Meta {
   viewDefaults: ViewDefaults;
 }
 
-/* ───────────────────────── 用户 / 档案 / 会话 ───────────────────────── */
+/* ───────────────────────── 用户 / 账号 / 会话 ───────────────────────── */
 
 export interface User {
   id: string;
@@ -264,7 +264,7 @@ export interface Profile {
 
 export interface Session {
   userId: string;
-  /** 当前激活档案 */
+  /** 当前激活账号 */
   profileId: string;
   authType: 'local' | 'password' | 'oauth';
   /** 本期 undefined；接入登录后由后端下发，只存在于内存与请求头 */
@@ -330,7 +330,7 @@ export interface ViewPrefs {
    * 见 `domain/autoDaily.effectiveAutoSet`。显式 `[]` = 用户关掉了全部覆盖项。
    *
    * 与 `coverMode` 同处 `yys:view:{profileId}` 分片：大号与小号「玩不玩一键日常」的习惯不同，
-   * 按档案隔离才正确（D3 口径）。设计文档 §4.6 的 viewPrefs 字段清单缺这一项（原型用刷新即丢的
+   * 按账号隔离才正确（D3 口径）。设计文档 §4.6 的 viewPrefs 字段清单缺这一项（原型用刷新即丢的
    * 内存变量顶替），此处按 §4.2「用户可逐项覆盖」的语义补上。
    */
   autoSet?: string[];
@@ -375,9 +375,9 @@ export interface ItemOverrides {
 /**
  * 寮时间偏好：`itemId -> 'HH:mm'`。
  *
- * **2026-09-16 由设备级改为档案级**（用户决策）。原设计把它归为"这台手机的属性"，
+ * **2026-09-16 由设备级改为账号级**（用户决策）。原设计把它归为"这台手机的属性"，
  * 理由是"同一个寮"；但代管朋友号、或两个号在两个寮时，切号不切寮时间会互相污染。
- * 现在它与 `view.autoSet` 同属"用户配置"，因此**随档案、进备份**。
+ * 现在它与 `view.autoSet` 同属"用户配置"，因此**随账号、进备份**。
  *
  * 类型放在 types.ts 而不在 `domain/guildTime`：它与 `ViewPrefs` / `ItemOverrides` 是同一类
  * "用户数据分片的形状"，集中一处；`domain/guildTime` 只留纯函数，并从这里 re-export
@@ -386,11 +386,11 @@ export interface ItemOverrides {
 export type GuildTimePrefs = Record<string, string>;
 
 /**
- * 结界寄养任务 / 计划。**2026-09-16 由设备级改为档案级**（用户决策）。
+ * 结界寄养任务 / 计划。**2026-09-16 由设备级改为账号级**（用户决策）。
  *
  * 原设计写"与玩哪个号无关"，但结界卡的种类与时长恰恰因号而异（太鼓 / 斗鱼 / 美食卡，
  * 6h / 12h…），上卡时间自然也不同；切号后看到同一个寄养列表更像 bug 而非特性。
- * 改档案级后，它同时自动进入备份（用户要求"所有配置项均可备份"）。
+ * 改账号级后，它同时自动进入备份（用户要求"所有配置项均可备份"）。
  */
 export type NurturePlans = NurtureRecord[];
 
@@ -408,13 +408,13 @@ export interface BootstrapPayload {
   /** 勾选日志：与 `state` 同一入口取，周期重置不参与（它是历史事实） */
   log: CheckLog;
   /**
-   * 寮时间（2026-09-16 起为档案级）。
+   * 寮时间（2026-09-16 起为账号级）。
    * 进首屏的理由与 `plans` 相同：壳层与清单页都要用它做时间徽章叠加，
    * 单独再发一次请求既多一个往返，也让它与 `items` 可能来自不同时刻。
    */
   guildTime: GuildTimePrefs;
   /**
-   * 结界寄养任务 / 计划（2026-09-16 起为档案级）。
+   * 结界寄养任务 / 计划（2026-09-16 起为账号级）。
    * 壳层的"下一次该收"徽章在首屏就会读它（此前是独立读 localStorage），
    * 走 bootstrap 后切号能跟着一起换，时序反而比原来更干净。
    */
@@ -459,7 +459,7 @@ export interface UserDataBundle {
      * 寮时间 + 寄养任务（2026-09-16 起纳入备份）。
      * 两者此前是设备级、不进备份，导致"清理浏览器数据后导入"会**永久丢失**它们
      * （清 localStorage 时设备级键一起没了，而备份里没有副本）。
-     * 从 `data[]` 逐档案携带后，「所有用户配置项均可备份」这条主张才真正成立。
+     * 从 `data[]` 逐账号携带后，「所有用户配置项均可备份」这条主张才真正成立。
      *
      * 旧备份没有这两个字段 → 归一成空值，不报错（`domain/backup.normalizeBundle`）。
      */

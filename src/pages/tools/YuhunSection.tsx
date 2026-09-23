@@ -16,8 +16,8 @@ import { dungeonDay, groupBySection, hasDayGrid, MODE_LABEL, oldFollowInfo, reso
  */
 
 const MODE_TONE: Record<DungeonMode, string> = {
-  weekly: 'bg-brand-soft text-brand',
-  follow: 'bg-brand-soft text-brand',
+  weekly: 'bg-gold-soft text-gold-hi',
+  follow: 'bg-gold-soft text-gold-hi',
   fixed: 'bg-surface-3 text-ink-2',
   special: 'bg-warn-soft text-warn',
 };
@@ -98,7 +98,7 @@ function DungeonCard({
     );
   } else if (day.random) {
     today = (
-      <div className="mt-1.5 rounded-sm bg-brand-soft px-2 py-1.5 text-sm text-brand">
+      <div className="mt-1.5 rounded-sm bg-gold-soft px-2 py-1.5 text-sm text-gold-hi">
         {d.randNote ?? '周末随机掉落 · 排除专属与首领御魂'}
       </div>
     );
@@ -150,11 +150,11 @@ function DungeonCard({
             return (
               <span
                 key={x}
-                className={`flex flex-col items-center rounded-sm px-0.5 py-1 ${on ? 'bg-brand' : 'bg-surface-3'}`}
+                className={`flex flex-col items-center rounded-sm px-0.5 py-1 ${on ? 'bg-gold' : 'bg-surface-3'}`}
               >
                 <b className={`text-xs font-medium ${on ? 'text-white' : 'text-ink-2'}`}>{week[x]}</b>
                 <i
-                  className={`mt-0.5 block w-full truncate text-center text-xs not-italic ${on ? 'text-brand-soft' : 'text-ink-3'}`}
+                  className={`mt-0.5 block w-full truncate text-center text-xs not-italic ${on ? 'text-gold-soft' : 'text-ink-3'}`}
                 >
                   {text}
                 </i>
@@ -204,11 +204,11 @@ export default function YuhunSection({ yuhun, souls, variant }: { yuhun: YuhunDb
 
   return (
     <div>
-      <div className="mx-3 mt-3 rounded-md bg-surface-3 px-3 py-2.5 text-sm leading-relaxed text-ink-2">
-        <b className="text-ink">{yuhun.dungeons.length} 个御魂副本</b>按来源归成 {groups.length} 组，
-        其中 <b className="text-ink">{rotating} 个按星期轮换</b>。轮换本的 7 日条已把每天掉什么铺开，
-        <b className="text-ink">今天周{week[dow]}已高亮</b>。
-      </div>
+      {/* 概览只留三个数：副本总数 / 轮换本数 / 今天星期几。
+          上一版是一段话（"7 日条已把每天掉什么铺开"之类），那部分图本身看得见，不必再讲 */}
+      <p className="mx-3 mt-3 text-sm text-ink-3">
+        {yuhun.dungeons.length} 个副本 · {rotating} 个按星期轮换 · 今天周{week[dow]}
+      </p>
 
       {groups.map(({ section, list }) => {
         const def = dictIndexOf(meta, 'yuhunSection').get(section);

@@ -1,4 +1,4 @@
-import { AlertTriangle } from 'lucide-react';
+import Icon from '../icons/Icon';
 import { useModalFocus } from '../../hooks/useModalFocus';
 import { useUiStore } from '../../stores/ui';
 
@@ -13,6 +13,9 @@ import { useUiStore } from '../../stores/ui';
  * 2026-09-11 补上弹层焦点管理（此前只有 `aria-modal`，那只管朗读范围、不拦键盘）：
  * 打开时焦点移入（落在「取消」= 更安全的一侧，避免一个回车就把东西删了）、
  * Tab 锁在弹层内、Escape 关闭、关闭后还焦。点遮罩仍然关闭。
+ *
+ * 2026-09-23 换肤：遮罩改 `scrim`（暗版更沉）、弹窗改 `surface-3` + 朱印面板投影；
+ * 危险动作从"实心朱红块"改成"细描边 + 极淡朱红底"——参考稿禁止用实心色块提密度。
  */
 export default function ConfirmDialog() {
   const confirmState = useUiStore((s) => s.confirmState);
@@ -26,7 +29,7 @@ export default function ConfirmDialog() {
 
   return (
     <div
-      className="fixed inset-0 z-[60] flex items-center justify-center bg-ink/40 px-4"
+      className="fixed inset-0 z-[60] flex items-center justify-center bg-scrim/60 px-4"
       onClick={() => answer(false)}
     >
       <div
@@ -36,14 +39,16 @@ export default function ConfirmDialog() {
         aria-modal="true"
         aria-label={confirmState.title}
         onClick={(e) => e.stopPropagation()}
-        className="w-full max-w-sm overflow-hidden rounded-lg border border-line bg-surface shadow-lg"
+        className="w-full max-w-sm overflow-hidden rounded-lg border border-line bg-surface-3 shadow-panel"
       >
         <div className="flex items-start gap-2 px-4 py-3.5">
           {danger ? (
-            <AlertTriangle size={16} strokeWidth={2} className="mt-0.5 flex-none text-danger" />
+            <Icon name="alert" size={16} className="mt-0.5 flex-none text-crimson" />
           ) : null}
           <div className="min-w-0 flex-1">
-            <h2 className={`text-lg font-medium ${danger ? 'text-danger' : 'text-ink'}`}>
+            <h2
+              className={`font-serif text-lg tracking-card ${danger ? 'text-crimson' : 'text-ink'}`}
+            >
               {confirmState.title}
             </h2>
             {confirmState.body ? (
@@ -56,15 +61,17 @@ export default function ConfirmDialog() {
           <button
             type="button"
             onClick={() => answer(false)}
-            className="cursor-pointer rounded-sm border border-line px-3 py-1.5 text-sm text-ink-2 transition-colors duration-120 hover:border-ink-4"
+            className="cursor-pointer rounded-sm border border-line px-3 py-1.5 text-sm text-ink-2 transition-colors duration-120 hover:border-line hover:bg-surface"
           >
             取消
           </button>
           <button
             type="button"
             onClick={() => answer(true)}
-            className={`cursor-pointer rounded-sm px-3 py-1.5 text-sm text-white transition-colors duration-120 ${
-              danger ? 'bg-danger hover:opacity-90' : 'bg-brand hover:bg-brand-deep'
+            className={`cursor-pointer rounded-sm border px-3 py-1.5 text-sm transition-colors duration-120 ${
+              danger
+                ? 'border-crimson-soft text-crimson hover:bg-crimson/10'
+                : 'border-line bg-gold-soft text-gold-hi hover:border-gold-hi'
             }`}
           >
             {confirmState.confirmLabel ?? '确认'}

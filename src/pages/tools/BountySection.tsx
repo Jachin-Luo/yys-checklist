@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Search, X } from 'lucide-react';
+import Icon from '../../components/icons/Icon';
 import type { BountyDb } from '../../api/types';
 import { bountyUnion, buildBountyEntries, fullCoverage, pinMatches } from '../../domain/bounty';
 
@@ -50,7 +50,7 @@ export default function BountySection({ bounty }: { bounty: BountyDb }) {
     <div className="pb-6">
       {/* ── 搜索（辅助手段，不是必经路径） ── */}
       <div className="mx-3.5 mt-3 flex items-center gap-2 rounded-md border border-line bg-surface px-2.5 py-2">
-        <Search size={13} strokeWidth={2.2} className="flex-none text-ink-4" />
+        <Icon name="search" size={13} className="flex-none text-ink-4" />
         {/* 去掉 `outline-none`：此前它把默认焦点环也去掉了，而这里又没有 `focus:` 类 ——
             键盘聚焦后完全没有视觉变化。现在焦点环由 `styles/base.css` 的全局 `:focus-visible` 提供 */}
         <input
@@ -67,7 +67,7 @@ export default function BountySection({ bounty }: { bounty: BountyDb }) {
             onClick={() => setQuery('')}
             className="flex-none cursor-pointer text-ink-4 transition-colors duration-120 hover:text-ink-2"
           >
-            <X size={13} strokeWidth={2.2} />
+            <Icon name="close" size={13} />
           </button>
         ) : null}
         <span className="flex-none text-sm text-ink-3">
@@ -75,9 +75,6 @@ export default function BountySection({ bounty }: { bounty: BountyDb }) {
         </span>
       </div>
 
-      <p className="mx-3 mt-1.5 text-sm text-ink-3">
-        可直接勾选，不必先搜索；搜索只把匹配项<b className="text-ink-2">置顶并标出</b>。
-      </p>
 
       <section className="mt-2">
         {searching && hitCount === 0 ? (
@@ -99,12 +96,12 @@ export default function BountySection({ bounty }: { bounty: BountyDb }) {
               .join('\n');
             /* 三态：已勾选（实心）> 搜索命中（品牌描边）> 其余（描边；搜索时弱化） */
             const tone = on
-              ? 'border-brand bg-brand text-white'
+              ? 'border-line bg-gold-soft text-gold-hi'
               : e.hit
-                ? 'border-brand bg-brand-soft font-medium text-brand'
+                ? 'border-line bg-gold-soft font-medium text-gold-hi'
                 : searching
                   ? 'border-line bg-surface text-ink-3 opacity-55 hover:opacity-100'
-                  : 'border-line bg-surface text-ink-2 hover:border-ink-4';
+                  : 'border-line bg-surface text-ink-2 hover:border-line';
             return (
               <button
                 key={e.id}
@@ -144,7 +141,7 @@ export default function BountySection({ bounty }: { bounty: BountyDb }) {
                 key={id}
                 type="button"
                 onClick={() => toggle(id)}
-                className="cursor-pointer rounded-xl bg-brand-soft px-2 py-0.5 text-sm text-brand transition-colors duration-120 hover:bg-brand hover:text-white"
+                className="cursor-pointer rounded-xl bg-gold-soft px-2 py-0.5 text-sm text-gold-hi transition-colors duration-120 hover:bg-gold hover:text-white"
               >
                 {nameOf(id)} ×
               </button>

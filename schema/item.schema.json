@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "YYS Checklist Item",
-  "description": "阴阳师奖励查漏清单 - 单条奖励条目定义（v1.4.1 数据模型）。已删除：value（主观价值档）/ time2（一天两次改为拆条）/ source（与 origin 语义重复）/ reward（与 gainKind 信息重复）/ entry + action（零消费且 92% 可由 path 推出）。运行时校验以 tools/build.js + src/domain/enums.ts 双轨校验为准，本文件用于编辑器提示与字段规格说明。",
+  "description": "囤囤鼠 · 阴阳师任务清单 - 单条奖励条目定义（v1.4.1 数据模型）。已删除：value（主观价值档）/ time2（一天两次改为拆条）/ source（与 origin 语义重复）/ reward（与 gainKind 信息重复）/ entry + action（零消费且 92% 可由 path 推出）。运行时校验以 tools/build.js + src/domain/enums.ts 双轨校验为准，本文件用于编辑器提示与字段规格说明。",
   "type": "object",
   "required": ["id", "name", "cycle", "origin"],
   "additionalProperties": false,

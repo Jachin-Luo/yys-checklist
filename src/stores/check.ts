@@ -36,13 +36,13 @@ interface CheckState {
   /** 一键日常入口的双向级联：已勾 → 全部取消；未勾 → 全部勾选（同一时间戳） */
   toggleWithCascade: (hubId: string, coveredIds: string[]) => Promise<void>;
   /**
-   * 跨档案勾选（清单长按，2026-09-16）：把**一组**条目同时写进若干**其他档案**。
+   * 跨账号勾选（清单长按，2026-09-16）：把**一组**条目同时写进若干**其他账号**。
    *
    * 收数组而不是单条，是因为一键日常入口卡要**级联**（勾入口即勾它覆盖的全部条目）。
-   * 跨档案路径必须与当前档案的范围一致，否则目标档案会出现"入口已完成、被覆盖项没勾"
+   * 跨账号路径必须与当前账号的范围一致，否则目标账号会出现"入口已完成、被覆盖项没勾"
    * 的不一致状态 —— 那是统计口径上最难被发现的坏数据。普通条目的数组长度为 1。
    *
-   * 返回**写失败的档案 id**（空数组 = 全部成功）—— 部分失败不抛出：
+   * 返回**写失败的账号 id**（空数组 = 全部成功）—— 部分失败不抛出：
    * 已成功的那些不该被回滚，UI 要如实告诉用户"其中 N 个没写成功"。
    */
   toggleInProfiles: (itemIds: string[], profileIds: string[]) => Promise<string[]>;
@@ -204,16 +204,16 @@ export const useCheckStore = create<CheckState>((set, get) => {
     },
 
     /**
-     * 跨档案勾选。两条路径刻意不同：
+     * 跨账号勾选。两条路径刻意不同：
      *
-     *   - **当前档案**走 `setMany`（乐观更新 + 写队列 + 日志 + 失败回滚）；
-     *   - **其他档案**只写盘：它们不在内存里，写进去也不会显示（切过去时 bootstrap 会读到），
+     *   - **当前账号**走 `setMany`（乐观更新 + 写队列 + 日志 + 失败回滚）；
+     *   - **其他账号**只写盘：它们不在内存里，写进去也不会显示（切过去时 bootstrap 会读到），
      *     所以没有"乐观"可言，逐个 await 并收集失败。
      *
-     * 目标档案的**日志必须一并维护**：勾选是"当天做过这件事"的历史事实，
-     * 少了它目标档案的统计页日历会缺一格、近 N 天收益会少算。
+     * 目标账号的**日志必须一并维护**：勾选是"当天做过这件事"的历史事实，
+     * 少了它目标账号的统计页日历会缺一格、近 N 天收益会少算。
      * 这正是契约新增 `getCheckLog` 的唯一动因（日志的常规读路径 `getBootstrap`
-     * 只覆盖当前档案）。取消勾选时按**条目周期起点**回退，规则与当前档案完全一致
+     * 只覆盖当前账号）。取消勾选时按**条目周期起点**回退，规则与当前账号完全一致
      * （`logAfter` 用的是同两个纯函数）。
      */
     toggleInProfiles: async (itemIds, profileIds) => {
@@ -240,7 +240,7 @@ export const useCheckStore = create<CheckState>((set, get) => {
           for (const itemId of itemIds) {
             const item = items.find((it) => it.id === itemId);
             days = at === null
-              /* 目标档案里找不到该条目（自建条目各档案不同）时回退到 0：
+              /* 目标账号里找不到该条目（自建条目各账号不同）时回退到 0：
                  与 `logAfter` 的兜底一致 —— 宁可多留一条历史，也不误删别的周期记录 */
               ? removeEntrySince(days, itemId, item ? periodStartOf(item, now, resetCtx()) : 0)
               : addEntry(days, itemId, at);
@@ -253,7 +253,7 @@ export const useCheckStore = create<CheckState>((set, get) => {
             updatedAt: new Date().toISOString(),
           });
         } catch (e) {
-          console.error(`[check] 跨档案写入失败 profileId=${profileId}`, e);
+          console.error(`[check] 跨账号写入失败 profileId=${profileId}`, e);
           failed.push(profileId);
         }
       }
@@ -265,7 +265,7 @@ export const useCheckStore = create<CheckState>((set, get) => {
 });
 
 /** 切号时清空内存态（由 `useBootstrap` 调用）。**这是最要命的一项**：
- *  勾选是用户最直接的操作结果，若旧档案的勾选在新档案下显示一帧，用户会以为漏记/误记。
+ *  勾选是用户最直接的操作结果，若旧账号的勾选在新账号下显示一帧，用户会以为漏记/误记。
  *  日志同理 —— 它是同一份用户数据的历史面。 */
 export const resetCheckMemory = (): void => {
   resetTracking({});

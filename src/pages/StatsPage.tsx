@@ -13,8 +13,12 @@ type RangeSel =
 
 const WEEKDAY_CN = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'] as const;
 
-/** 深浅着色档位（类 GitHub 贡献图）：0 无记录；1–4 按**当月最大值**相对分档 */
-const LEVEL_CLASS = ['', 'bg-brand/15', 'bg-brand/30', 'bg-brand/50', 'bg-brand/70'] as const;
+/**
+ * 深浅着色档位（类 GitHub 贡献图）：0 无记录；1–4 按**当月最大值**相对分档。
+ * 2026-09-23 换肤：色相由品牌紫改为**朱红**——它是本页唯一的"热度"通道，
+ * 用朱红而不是金，是为了与页面上其它金色描边区分开（金是结构色，朱红才是强调色）。
+ */
+const LEVEL_CLASS = ['', 'bg-crimson/15', 'bg-crimson/30', 'bg-crimson/50', 'bg-crimson/75'] as const;
 
 /** `2026-09-15` → `9月15日` */
 function mdLabel(key: string): string {
@@ -46,10 +50,10 @@ function DayCell({
   selected: boolean;
   onPick: (key: string) => void;
 }) {
-  /* 深档用白字（`bg-brand/50` 以上与白字对比度约 5:1），浅档或无底色用 ink 系 */
+  /* 深档用「纸色」字：明版是米白、暗版是墨黑 —— 同一个类在两版上都能压住朱红底 */
   const strong = level >= 3;
   const tone = strong
-    ? 'text-white'
+    ? 'text-surface-2'
     : cell.inMonth
       ? count > 0
         ? 'text-ink'
@@ -62,8 +66,8 @@ function DayCell({
       onClick={() => onPick(cell.key)}
       aria-pressed={selected}
       title={`${mdLabel(cell.key)} ${wdLabel(cell.key)} · 完成 ${count} 条`}
-      className={`flex h-8 cursor-pointer flex-col items-center justify-center rounded-sm text-sm transition-colors duration-120 ${LEVEL_CLASS[level]} ${tone} ${
-        selected ? 'ring-2 ring-brand' : today ? 'ring-1 ring-line' : ''
+      className={`flex h-8 cursor-pointer flex-col items-center justify-center rounded-sm font-mono text-sm transition-colors duration-120 ${LEVEL_CLASS[level]} ${tone} ${
+        selected ? 'ring-2 ring-gold-hi' : today ? 'ring-1 ring-line' : ''
       } ${cell.inMonth ? '' : 'opacity-50'}`}
     >
       {cell.day}
@@ -135,7 +139,7 @@ export default function StatsPage() {
       type="button"
       onClick={onClick}
       className={`cursor-pointer px-3 py-1.5 text-sm transition-colors duration-120 ${
-        active ? 'bg-brand text-white' : 'bg-surface text-ink-2 hover:bg-surface-3'
+        active ? 'bg-gold-soft font-medium text-gold-hi' : 'bg-surface text-ink-2 hover:bg-surface-3'
       }`}
     >
       {label}
@@ -146,13 +150,13 @@ export default function StatsPage() {
     /* `mx-auto` 居中：本页宽度上限 768，而桌面内容容器上限 1024 —— 不居中时右侧会空出约 256px，
        看起来像"内容没写完"（2026-09-14 用户反馈） */
     <div className="mx-auto max-w-3xl px-3.5 py-3 pb-10">
-      <div className="rounded-md border border-line-soft bg-surface px-3 py-3">
+      <div className="rounded-md border border-line-soft bg-surface px-3 py-3 shadow-card">
         <div className="flex flex-wrap items-baseline justify-between gap-2">
-          <p className="text-lg text-ink">{monthTitle(now)}</p>
+          <p className="font-serif text-xl tracking-card text-ink">{monthTitle(now)}</p>
           <span className="text-sm text-ink-3">颜色越深 = 当天勾选越多 · 点某天可只看那天</span>
         </div>
 
-        <div className="mt-2 grid grid-cols-7 gap-1 text-center text-sm text-ink-3">
+        <div className="mt-2 grid grid-cols-7 gap-1 text-center text-2xs tracking-label text-ink-3">
           {WEEKDAY_HEAD.map((w) => (
             <span key={w}>{w}</span>
           ))}
@@ -180,13 +184,13 @@ export default function StatsPage() {
           {rangeBtn('本月', sel.kind === 'month', () => setSel({ kind: 'month' }))}
         </div>
         <span className="text-sm text-ink-2">
-          {rangeText} · 完成 <b className="font-medium">{range.entries}</b> 条
+          {rangeText} · 完成 <b className="font-mono font-medium text-ink">{range.entries}</b> 条
         </span>
         {sel.kind === 'day' ? (
           <button
             type="button"
             onClick={() => setSel({ kind: 'recent', days: 7 })}
-            className="cursor-pointer rounded-sm border border-line px-2 py-1 text-sm text-ink-2 transition-colors duration-120 hover:border-ink-4"
+            className="cursor-pointer rounded-sm border border-line px-2 py-1 text-sm text-ink-2 transition-colors duration-120 hover:border-line hover:bg-surface"
           >
             返回近 7 天
           </button>
@@ -196,19 +200,22 @@ export default function StatsPage() {
       {/* `md` 而不是 `sm`：统计页在移动壳里也用同一份代码，而 `sm`(640px) 在手机上也会命中 ——
           640–767px（横屏手机）会莫名变成三列，与"窄屏一律单列"的全局口径打架 */}
       <div className="mt-3 grid grid-cols-1 gap-2 md:grid-cols-3">
-        <div className="rounded-md border border-line-soft bg-surface px-3 py-3">
+        <div className="relative rounded-sm border border-line-soft bg-surface px-3 py-3 shadow-card">
+          <i className="absolute -left-px -top-px h-1.5 w-1.5 border-l border-t border-line" />
           <p className="text-sm text-ink-3">勾玉</p>
-          <p className="mt-1 text-xl font-medium text-jade">{range.jade}</p>
+          <p className="mt-1 font-mono text-2xl text-jade">{range.jade}</p>
           <p className="mt-0.5 text-sm text-ink-3">固定奖励</p>
         </div>
-        <div className="rounded-md border border-line-soft bg-surface px-3 py-3">
+        <div className="relative rounded-sm border border-line-soft bg-surface px-3 py-3 shadow-card">
+          <i className="absolute -left-px -top-px h-1.5 w-1.5 border-l border-t border-line" />
           <p className="text-sm text-ink-3">黑碎</p>
-          <p className="mt-1 text-xl font-medium text-frag">{range.blackFrag}</p>
+          <p className="mt-1 font-mono text-2xl text-frag">{range.blackFrag}</p>
           <p className="mt-0.5 text-sm text-ink-3">1 黑蛋 = 25 片</p>
         </div>
-        <div className="rounded-md border border-line-soft bg-surface px-3 py-3">
+        <div className="relative rounded-sm border border-line-soft bg-surface px-3 py-3 shadow-card">
+          <i className="absolute -left-px -top-px h-1.5 w-1.5 border-l border-t border-line" />
           <p className="text-sm text-ink-3">蓝票</p>
-          <p className="mt-1 text-xl font-medium text-ticket">{range.blueTicket}</p>
+          <p className="mt-1 font-mono text-2xl text-ticket">{range.blueTicket}</p>
           <p className="mt-0.5 text-sm text-ink-3">神秘的符咒</p>
         </div>
       </div>

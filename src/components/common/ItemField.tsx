@@ -1,7 +1,7 @@
-import { Lock, MapPin, StickyNote } from 'lucide-react';
+import Icon, { type IconName } from '../icons/Icon';
 
 /**
- * 清单卡片的「字段行」—— 2026-09-11 按用户要求重新设计：**图标即标签，颜色即分类**。
+ * 清单卡片的「字段行」—— 2026-09-11 起：**图标即标签，颜色即分类**。
  *
  * ## 上一版的问题
  *
@@ -11,19 +11,18 @@ import { Lock, MapPin, StickyNote } from 'lucide-react';
  *
  * ## 现在
  *
- * | 字段 | 图标 | 颜色 | 为什么是这个色 |
+ * | 字段 | 图标 | 颜色 | 为什么 |
  * |---|---|---|---|
- * | 入口 | `MapPin` | `ticket` | 蓝=位置 / 路径 |
- * | 条件 | `Lock` | `warn` | 琥珀=门槛，不满足就做不了 |
- * | 备注 | `StickyNote` | `ink-3` | 灰=中性补充 |
+ * | 入口 | 鸟居 | `ticket` | 蓝 = 位置 / 路径（鸟居本就是"入口"的和风语汇） |
+ * | 条件 | 锁 | `warn` | 金 = 门槛，不满足就做不了 |
+ * | 备注 | 纸 | `ink-3` | 灰 = 中性补充 |
  *
- * 三个颜色都按 **WCAG AA 正文门槛（4.5:1）** 挑过（最差 5.01:1），不是凭好看选的。
- * 图标统一 13px 方形、宽度天然一致，所以右侧值文本**左边界仍然严格对齐**
- * （原来那个"两字标签"的对齐作用被图标接管了）。
+ * 三个颜色都按 **WCAG AA 正文门槛（4.5:1）** 挑过，不是凭好看选的。
+ * 图标统一 13px 方形、宽度天然一致，所以右侧值文本**左边界仍然严格对齐**。
  *
- * > **原先这里还有第四类「奖励」（🎁 `Gift` / `jade` 绿）**，2026-09-11 随 `Item.reward`
- * > 字段一起删除 —— 那行渲染的是自由文本奖励描述，与 `gainKind` 徽章信息重叠（详见 `api/types.ts`
- * > 里 `reward` 的删除说明）。奖励信息现在完全由 `GainBadges` / `KindBadges` 两组徽章承担。
+ * > **原先这里还有第四类「奖励」**，2026-09-11 随 `Item.reward` 字段一起删除 ——
+ * > 那行渲染的是自由文本奖励描述，与 `gainKind` 徽章信息重叠。奖励信息现在完全由
+ * > `GainBadges` / `KindBadges` 两组徽章承担。
  *
  * ## 无障碍：中文标签没有消失，只是藏起来了
  *
@@ -34,10 +33,10 @@ import { Lock, MapPin, StickyNote } from 'lucide-react';
  */
 export type FieldKind = 'path' | 'condition' | 'note';
 
-const FIELD: Record<FieldKind, { Icon: typeof MapPin; label: string; cls: string }> = {
-  path: { Icon: MapPin, label: '入口', cls: 'text-ticket' },
-  condition: { Icon: Lock, label: '条件', cls: 'text-warn' },
-  note: { Icon: StickyNote, label: '备注', cls: 'text-ink-3' },
+const FIELD: Record<FieldKind, { icon: IconName; label: string; cls: string }> = {
+  path: { icon: 'torii', label: '入口', cls: 'text-ticket' },
+  condition: { icon: 'joumae', label: '条件', cls: 'text-warn' },
+  note: { icon: 'fumi', label: '备注', cls: 'text-ink-3' },
 };
 
 /**
@@ -45,10 +44,10 @@ const FIELD: Record<FieldKind, { Icon: typeof MapPin; label: string; cls: string
  * `mt-0.5` 让 13px 的图标与 12px 文字的首行视觉居中。
  */
 export function FieldIcon({ kind }: { kind: FieldKind }) {
-  const { Icon, label, cls } = FIELD[kind];
+  const { icon, label, cls } = FIELD[kind];
   return (
     <span className="mt-0.5 flex-none" title={label}>
-      <Icon size={13} strokeWidth={2.2} aria-hidden="true" className={cls} />
+      <Icon name={icon} size={13} className={cls} />
       <span className="sr-only">{label}</span>
     </span>
   );

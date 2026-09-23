@@ -27,8 +27,8 @@ export interface ExportResult {
 }
 
 /**
- * 导出**全部档案**（不只是当前档案）。
- * 备份的意义是"换设备后原样回来"，只导出当前档案会让另一个号悄悄丢掉。
+ * 导出**全部账号**（不只是当前账号）。
+ * 备份的意义是"换设备后原样回来"，只导出当前账号会让另一个号悄悄丢掉。
  */
 export async function exportBackupText(): Promise<ExportResult> {
   const scope = scopeOf();
@@ -81,7 +81,7 @@ export async function applyImportText(text: string): Promise<PrepareResult> {
 
   try {
     await api.importUserData(scope, checked.bundle);
-    /* 导入会改档案列表与三份用户数据分片 —— 让首屏入口整体重跑一遍，
+    /* 导入会改账号列表与三份用户数据分片 —— 让首屏入口整体重跑一遍，
        复用 useBootstrap 的内存态清空顺序、取消守卫与错误呈现，
        而不是另写一份迟早会漂移的"局部刷新"。 */
     useUiStore.getState().refreshBootstrap();

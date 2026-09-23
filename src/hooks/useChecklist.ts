@@ -6,7 +6,7 @@ import { buildComparator, effectiveSortBy, isVisible } from '../domain/sort';
 import { useCheckStore } from '../stores/check';
 import { useGuildTimeStore } from '../stores/guildTime';
 import { useItemStore } from '../stores/items';
-import { useViewStore } from '../stores/view';
+import { SHOW_KIND_FILTER, useViewStore } from '../stores/view';
 import { useAutoDaily } from './useAutoDaily';
 
 /**
@@ -44,7 +44,7 @@ export function useChecklist(target: ChecklistTarget): Checklist {
   const checked = useCheckStore((s) => s.checked);
   const view = useViewStore((s) => s.view);
   const { coveredSet, coverMode } = useAutoDaily();
-  /* 寮时间 2026-09-16 由设备级升为档案级：换号会跟着换，所以清单页的寮自定时间也随之变 */
+  /* 寮时间 2026-09-16 由设备级升为账号级：换号会跟着换，所以清单页的寮自定时间也随之变 */
   const guildTime = useGuildTimeStore((s) => s.guildTime);
 
   const order = overrides?.order;
@@ -62,7 +62,9 @@ export function useChecklist(target: ChecklistTarget): Checklist {
       order: orderList,
     });
     const visibility = {
-      showKinds: view.showKinds as string[],
+      /* 筛选入口暂时下线：开关关着时一律传空数组，避免"看不见的筛选"把条目悄悄滤掉
+         （见 `stores/view.SHOW_KIND_FILTER` 的说明） */
+      showKinds: SHOW_KIND_FILTER ? (view.showKinds as string[]) : [],
       hideDone: view.hideDone,
       today: now.getDay(),
     };

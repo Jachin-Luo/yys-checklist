@@ -1,4 +1,4 @@
-import { X } from 'lucide-react';
+import Icon from '../icons/Icon';
 import { useCheckStore } from '../../stores/check';
 import { useDeviceStore } from '../../stores/device';
 import { useGuildTimeStore } from '../../stores/guildTime';
@@ -29,7 +29,7 @@ export default function SaveErrorNotice() {
   return (
     <div
       role="alert"
-      className="fixed inset-x-3 bottom-24 z-50 flex items-start gap-2 rounded-md border border-danger-line bg-danger-soft px-3 py-2 text-sm text-danger shadow-md md:inset-x-auto md:bottom-4 md:right-4 md:max-w-md"
+      className="fixed inset-x-3 bottom-24 z-50 flex items-start gap-2 rounded-md border border-crimson-soft bg-crimson-faint px-3 py-2 text-sm text-crimson shadow-panel md:inset-x-auto md:bottom-4 md:right-4 md:max-w-md"
     >
       <span className="min-w-0 flex-1 break-words">
         {'\u4fdd\u5b58\u5931\u8d25\uff1a'}{error.message}
@@ -41,7 +41,7 @@ export default function SaveErrorNotice() {
         title={'\u5173\u95ed\u63d0\u793a'}
         className="flex h-6 w-6 flex-none items-center justify-center rounded-sm hover:bg-surface"
       >
-        <X size={16} />
+        <Icon name="close" size={16} />
       </button>
     </div>
   );

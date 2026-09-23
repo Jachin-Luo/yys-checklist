@@ -1,0 +1,256 @@
+/**
+ * 朱印主题 —— **主题令牌的唯一出处**（与 `tailwind.config.ts` 一一对应）。
+ *
+ * ## 为什么用 CSS 变量而不是两套色阶常量
+ *
+ * 全站颜色此前 100% 走 Tailwind 语义类（`bg-surface` / `text-ink-3` …），
+ * 组件里零硬编码色值。所以换肤不需要改 40 个组件 —— 只要把令牌的**取值**变成
+ * 「随 `html[data-theme]` 变化」即可，类名一个不动。
+ *
+ * ## 三条硬约定（改这个文件前必须理解）
+ *
+ * 1. **变量存的是「空格分隔的 RGB 通道」**（`227 215 193`），不是 `#E3D7C1`。
+ *    因为 Tailwind 侧写成 `rgb(var(--c-x) / <alpha-value>)`，
+ *    只有这样 `bg-brand/15`、`bg-jade/10` 这类透明度修饰符才继续有效。
+ * 2. **半透明金线已「烘焙」成不透明色**。参考稿的 `--line-outer` 是 `rgba(金, .42)`，
+ *    而 Tailwind 颜色槽存不下"自带 alpha 的色值 + 再叠 alpha"。这里统一按
+ *    **卡片底 `--c-card`** 为背景把透明度算掉，得到等效不透明色 —— 视觉等价，
+ *    且 `border-line/60` 之类仍然可用。
+ * 3. **明版不是暗版的反色**（参考稿铁律三）：明版靠"压深 + 高透明"做描线，
+ *    暗版靠"提亮 + 低透明"做发光；卡片浮起方向永远背离底色
+ *    （明版卡片比面板**暗**，暗版卡片比面板**亮**）。
+ */
+
+:root {
+  --sans: 'PingFang SC', 'Microsoft YaHei', 'Hiragino Sans GB', system-ui, sans-serif;
+  --serif: 'Source Han Serif SC', 'Noto Serif SC', 'Songti SC', SimSun, serif;
+  --mono: ui-monospace, Consolas, 'Roboto Mono', monospace;
+}
+
+/* ───────────────────────── 明版 · 和纸手札（默认） ───────────────────────── */
+:root,
+html[data-theme='light'] {
+  color-scheme: light;
+
+  /* 面：面板最亮、卡片压深一档、最深一档留给最外与底部条 */
+  --c-panel: 245 239 227; /* #F5EFE3 */
+  --c-panel-2: 239 231 214; /* #EFE7D6 */
+  --c-card: 227 215 193; /* #E3D7C1 */
+  --c-card-done: 235 227 211; /* #EBE3D3 */
+  --c-deep: 220 210 190; /* #DCD2BE */
+
+  /* 墨：四档文字 */
+  --c-ink: 58 53 64; /* #3A3540 */
+  --c-ink-2: 90 82 69; /* #5A5245 */
+  --c-ink-3: 101 93 80; /* #655D50 · 卡片底 4.56:1，可承载说明文字 */
+  --c-ink-4: 142 133 116; /* #8E8574 · 仅占位符 / 装饰 / 禁用 */
+
+  /* 线：金三档 */
+  --c-line: 195 170 122; /* 外框 */
+  --c-line-soft: 212 194 159; /* 卡片描边 */
+  --c-line-faint: 222 208 178; /* 块内分隔 */
+  --c-band: 198 175 128; /* 桔梗纹带横线 */
+
+  /* 金箔 */
+  --c-gold: 168 134 63; /* #A8863F */
+  --c-gold-hi: 138 106 36; /* #8A6A24 */
+  --c-gold-soft: 240 230 209; /* 「唯一高亮位」淡金叠色 */
+
+  /* 朱红 */
+  --c-crimson: 183 35 42; /* #B7232A */
+  --c-crimson-soft: 192 138 138; /* #C08A8A */
+  --c-crimson-deep: 158 30 37; /* #9E1E25 */
+  --c-crimson-faint: 223 197 178; /* 危险块底 */
+
+  /* 四态 */
+  --c-s-locked: 138 147 163;
+  --c-s-active: 47 111 181;
+  --c-s-ready: 184 137 31;
+  --c-s-done: 184 174 158;
+
+  /* 币种三色（勾玉 / 黑碎 / 蓝票）——低饱和宝色，与朱红金箔并置不打架 */
+  --c-jade: 37 96 78; /* #25604E */
+  --c-jade-deep: 31 83 68;
+  --c-frag: 78 66 120; /* #4E4278 */
+  --c-ticket: 38 96 159; /* #26609F */
+
+  /* 底轨 */
+  --c-track: 214 197 164;
+
+  /* 遮罩 */
+  --c-scrim: 58 53 64;
+
+  /* 御币 */
+  --c-paper: 255 255 255;
+  --c-crease: 168 134 63;
+
+  --sh-panel: 0 20px 46px rgba(120, 100, 70, 0.28), 0 1px 0 rgba(255, 255, 255, 0.6);
+  --sh-card: inset 0 1px 0 rgba(255, 255, 255, 0.55), 0 1px 2px rgba(140, 115, 80, 0.16);
+
+  /* 「唯一高亮位」的叠色：**必须是半透明**，因为它要叠在卡片底之上（见 .genso-ready）。
+     与 --c-gold-soft 分开存：后者是不透明色，给 bg-gold-soft 这类实体底用。 */
+  --ready-bg: rgba(184, 137, 31, 0.09);
+  --ready-glow: rgba(184, 137, 31, 0.2);
+
+  /* 麻叶纹 40×34.641 + 8px 细点阵。明版底纹必须比暗版**更浓**才看得见（铁律三） */
+  --mat-pat: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='40'%20height='34.641'%3E%3Cpath%20d='M0%200H40M0%2034.641H40M0%200L20%2034.641L40%200M0%2034.641L20%200L40%2034.641M0%200V34.641M20%200V34.641M40%200V34.641'%20fill='none'%20stroke='%23A8863F'%20stroke-width='0.7'%20stroke-opacity='0.13'/%3E%3C/svg%3E");
+  --dot-pat: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='8'%20height='8'%3E%3Ccircle%20cx='4'%20cy='4'%20r='0.7'%20fill='%233A3540'%20fill-opacity='0.15'/%3E%3C/svg%3E");
+}
+
+/* ───────────────────────── 暗版 · 神社符札 ───────────────────────── */
+html[data-theme='dark'] {
+  color-scheme: dark;
+
+  --c-panel: 23 22 26; /* #17161A */
+  --c-panel-2: 27 26 32; /* #1B1A20 */
+  --c-card: 33 31 38; /* #211F26 · 比面板亮 */
+  --c-card-done: 30 28 34; /* #1E1C22 · 比普通卡暗 */
+  --c-deep: 11 10 13; /* #0B0A0D */
+
+  --c-ink: 237 228 211; /* #EDE4D3 */
+  --c-ink-2: 167 158 142; /* #A79E8E */
+  --c-ink-3: 139 131 117;
+  --c-ink-4: 110 104 117; /* #6E6875 */
+
+  --c-line: 104 89 63;
+  --c-line-soft: 60 53 47;
+  --c-line-faint: 66 57 43;
+  --c-band: 93 81 59;
+
+  --c-gold: 201 169 97; /* #C9A961 */
+  --c-gold-hi: 227 199 126; /* #E3C77E */
+  --c-gold-soft: 36 33 28;
+
+  --c-crimson: 193 39 45; /* #C1272D */
+  --c-crimson-soft: 122 74 79; /* #7A4A4F */
+  --c-crimson-deep: 139 26 31; /* #8B1A1F */
+  --c-crimson-faint: 55 32 39;
+
+  --c-s-locked: 71 85 105;
+  --c-s-active: 59 130 246;
+  --c-s-ready: 245 197 66;
+  --c-s-done: 90 85 96;
+
+  --c-jade: 95 180 154;
+  --c-jade-deep: 127 199 174;
+  --c-frag: 155 138 208;
+  --c-ticket: 111 168 224;
+
+  --c-track: 55 49 46;
+
+  --c-scrim: 11 10 13;
+
+  --c-paper: 237 228 211;
+  --c-crease: 23 22 26;
+
+  --sh-panel: 0 24px 60px rgba(0, 0, 0, 0.55), 0 2px 0 rgba(0, 0, 0, 0.4);
+  --sh-card: inset 0 1px 0 rgba(255, 255, 255, 0.035), 0 1px 2px rgba(0, 0, 0, 0.35);
+
+  /* 「唯一高亮位」的叠色与光晕（与明版成对；缺了就会静默沿用明版的值） */
+  --ready-bg: rgba(245, 197, 66, 0.06);
+  --ready-glow: rgba(245, 197, 66, 0.16);
+
+  --mat-pat: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='40'%20height='34.641'%3E%3Cpath%20d='M0%200H40M0%2034.641H40M0%200L20%2034.641L40%200M0%2034.641L20%200L40%2034.641M0%200V34.641M20%200V34.641M40%200V34.641'%20fill='none'%20stroke='%23C9A961'%20stroke-width='0.7'%20stroke-opacity='0.10'/%3E%3C/svg%3E");
+  --dot-pat: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='8'%20height='8'%3E%3Ccircle%20cx='4'%20cy='4'%20r='0.7'%20fill='%23EDE4D3'%20fill-opacity='0.13'/%3E%3C/svg%3E");
+}
+
+/**
+ * 全局面板底纹。
+ *
+ * 贴在 `body` 而不是每个卡片上：壳层根节点已改为透明（见 `DesktopShell` / `MobileShell`），
+ * 于是底纹自然出现在**卡片之间的留白**里，卡片本身保持不透明压在纹上 ——
+ * 这正是参考稿「面板铺纹、卡片浮起」的效果，且零额外 DOM。
+ * 主题切换时底色与底纹一起过渡。
+ */
+body {
+  background-image: var(--dot-pat), var(--mat-pat);
+  background-position: 4px 4px, 0 0;
+  background-repeat: repeat, repeat;
+  transition: background-color 0.35s ease, color 0.35s ease;
+}
+
+/* 需要自带纹样的容器（如 PC 侧栏、移动端顶栏）用这两个类 */
+.genso-texture {
+  background-image: var(--mat-pat);
+  background-repeat: repeat;
+}
+
+.genso-texture-dots {
+  background-image: var(--dot-pat), var(--mat-pat);
+  background-position: 4px 4px, 0 0;
+  background-repeat: repeat, repeat;
+}
+
+/* ───────── 御币：金杆 / 纸垂 / 折痕（三色，故走类而非 currentColor） ───────── */
+.genso-gohei-bar {
+  stroke: rgb(var(--c-gold));
+}
+
+.genso-gohei-paper {
+  fill: rgb(var(--c-paper));
+  stroke: rgb(var(--c-line));
+  stroke-width: 0.8;
+}
+
+.genso-gohei-crease {
+  stroke: rgb(var(--c-crease));
+  opacity: 0.8;
+}
+
+/* 桔梗纹带的横线（pattern 内部引用） */
+.genso-band-line {
+  stroke: rgb(var(--c-band));
+}
+
+/**
+ * 达摩点睛（参考稿 §5.1）：许愿涂左眼、还愿涂右眼。
+ * 左眼常亮 = 有愿在许；右眼在**当前页全部完成**时点亮，整只由金转朱红。
+ * 判定类 `.all-done` 由页面挂在同一个容器上。
+ */
+.genso-daruma .genso-daruma-eye-r {
+  opacity: 0;
+  transition: opacity 0.45s ease;
+}
+
+.genso-daruma {
+  color: rgb(var(--c-gold));
+  opacity: 0.7;
+  transition: color 0.45s ease, opacity 0.45s ease;
+}
+
+.all-done .genso-daruma .genso-daruma-eye-r {
+  opacity: 1;
+}
+
+.all-done .genso-daruma {
+  color: rgb(var(--c-crimson));
+  opacity: 1;
+}
+
+/**
+ * 全清静默：一屏之内只留一个视觉重心。
+ * 全清后若"待做"还顶着醒目的靛蓝、"可提交"还留着金描边，会与"任务做完了"的语义打架，
+ * 所以这两卡主动退成弱化色，只留「已完成」一卡有颜色。
+ */
+.all-done .genso-stat.is-active .genso-stat-value,
+.all-done .genso-stat.is-ready .genso-stat-value {
+  color: rgb(var(--c-ink-4));
+}
+
+.all-done .genso-stat.is-ready {
+  border-color: rgb(var(--c-line-soft));
+}
+
+/**
+ * 动效兜底（参考稿陷阱七）：可见性永远由静态规则决定，入场动效只做位移，
+ * 绝不让 opacity / visibility / display 进 @keyframes。
+ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

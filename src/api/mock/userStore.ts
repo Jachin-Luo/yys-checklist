@@ -34,9 +34,9 @@ export interface UserStore {
   overrides: Record<string, ItemOverrides | undefined>;
   /** 勾选日志（按日期分桶的历史，2026-09-15 新增） */
   logs: Record<string, CheckLog | undefined>;
-  /** 寮时间（档案级，2026-09-16 由设备级升格） */
+  /** 寮时间（账号级，2026-09-16 由设备级升格） */
   guildTimes: Record<string, GuildTimePrefs | undefined>;
-  /** 结界寄养任务 / 计划（档案级，2026-09-16 由设备级升格） */
+  /** 结界寄养任务 / 计划（账号级，2026-09-16 由设备级升格） */
   plans: Record<string, NurturePlans | undefined>;
 }
 
@@ -51,7 +51,7 @@ export function emptyOverrides(profileId: string, at = nowIso()): ItemOverrides 
 }
 
 /**
- * 空日志。新档案、或从没勾过东西的档案都是这个形状。
+ * 空日志。新账号、或从没勾过东西的账号都是这个形状。
  * 种子库里**没有**日志（`users.db.json` 不含该字段）—— 它是纯运行期数据，从无到有累积。
  */
 export function emptyLog(profileId: string, userId: string, at = nowIso()): CheckLog {
@@ -110,7 +110,7 @@ export function ensureStore(): UserStore {
       ?? seedUsersDb.itemOverrides.find((o) => o.profileId === p.id)
       ?? emptyOverrides(p.id);
     logs[p.id] = read<CheckLog>(KEY.checklog(p.id)) ?? emptyLog(p.id, p.userId);
-    /* 这两片没有种子来源：种子库里不存在设备级 → 档案级的迁移，
+    /* 这两片没有种子来源：种子库里不存在设备级 → 账号级的迁移，
        旧版本残留的 `yys:guildTime` / `yys:plans` 按用户决策**不做迁移**（直接作废） */
     guildTimes[p.id] = read<GuildTimePrefs>(KEY.guild(p.id)) ?? emptyGuildTime();
     plans[p.id] = read<NurturePlans>(KEY.plans(p.id)) ?? emptyPlans();
@@ -145,7 +145,7 @@ export function assertScope(scope: DataScope): void {
   }
 }
 
-/* ── 会话 / 档案 ── */
+/* ── 会话 / 账号 ── */
 
 export function saveSession(session: Session): void {
   const s = ensureStore();

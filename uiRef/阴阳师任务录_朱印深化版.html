@@ -1,0 +1,1261 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>式神委托 · 任务录 — 阴阳师朱印深化版</title>
+<style>
+/* ============================================================
+   0 · TOKENS
+   ============================================================ */
+*,*::before,*::after{box-sizing:border-box}
+html,body{margin:0;padding:0}
+:root{
+  --sans:"PingFang SC","Microsoft YaHei","Hiragino Sans GB",sans-serif;
+  --serif:"Source Han Serif SC","Noto Serif SC","Songti SC",SimSun,serif;
+  --mono:ui-monospace,Consolas,"Roboto Mono",monospace;
+  --r-sm:2px;--r-md:4px;--r-lg:6px;
+}
+
+/* — 暗版 · 墨底朱红金箔 — */
+html[data-theme="dark"]{
+  --bg:#0B0A0D;
+  --panel:#17161A;
+  --panel-2:#1B1A20;
+  --card:#211F26;
+  --card-done:#1E1C22;
+  --ink:#EDE4D3;
+  --ink-2:#A79E8E;
+  --ink-mute:#6E6875;
+  --crimson:#C1272D;
+  --crimson-soft:#7A4A4F;
+  --crimson-deep:#8B1A1F;
+  --gold:#C9A961;
+  --gold-hi:#E3C77E;
+  --line-outer:rgba(201,169,97,.42);
+  --line-inner:rgba(201,169,97,.16);
+  --band-line:rgba(201,169,97,.36);
+  --track:rgba(201,169,97,.13);
+  --track-fill:#3B82F6;
+  --dots:rgba(237,228,211,.30);
+  --s-locked:#475569;
+  --s-active:#3B82F6;
+  --s-ready:#F5C542;
+  --s-done:#5A5560;
+  --ready-bg:rgba(245,197,66,.06);
+  --ready-glow:rgba(245,197,66,.16);
+  --gohei-paper:rgba(237,228,211,.50);
+  --gohei-crease:rgba(23,22,26,.9);
+  --shadow:0 24px 60px rgba(0,0,0,.55),0 2px 0 rgba(0,0,0,.4);
+  --card-bevel:inset 0 1px 0 rgba(255,255,255,.035),0 1px 2px rgba(0,0,0,.35);
+  --mat-pat:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='40'%20height='34.641'%3E%3Cpath%20d='M0%200H40M0%2034.641H40M0%200L20%2034.641L40%200M0%2034.641L20%200L40%2034.641M0%200V34.641M20%200V34.641M40%200V34.641'%20fill='none'%20stroke='%23C9A961'%20stroke-width='0.7'%20stroke-opacity='0.10'/%3E%3C/svg%3E");
+  --dot-pat:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='8'%20height='8'%3E%3Ccircle%20cx='4'%20cy='4'%20r='0.7'%20fill='%23EDE4D3'%20fill-opacity='0.13'/%3E%3C/svg%3E");
+}
+/* — 明版 · 和纸米白（全色阶重算，非反色） — */
+html[data-theme="light"]{
+  --bg:#DCD2BE;
+  --panel:#F5EFE3;
+  --panel-2:#EFE7D6;
+  --card:#E3D7C1;
+  --card-done:#EBE3D3;
+  --ink:#3A3540;
+  --ink-2:#5A5245;
+  --ink-mute:#8E8574;
+  --crimson:#B7232A;
+  --crimson-soft:#C08A8A;
+  --crimson-deep:#9E1E25;
+  --gold:#A8863F;
+  --gold-hi:#8A6A24;
+  --line-outer:rgba(168,134,63,.55);
+  --line-inner:rgba(168,134,63,.26);
+  --band-line:rgba(168,134,63,.50);
+  --track:rgba(168,134,63,.22);
+  --track-fill:#4E7FB8;
+  --dots:rgba(58,53,64,.26);
+  --s-locked:#8A93A3;
+  --s-active:#2F6FB5;
+  --s-ready:#B8891F;
+  --s-done:#B8AE9E;
+  --ready-bg:rgba(184,137,31,.09);
+  --ready-glow:rgba(184,137,31,.20);
+  --gohei-paper:#FFFFFF;
+  --gohei-crease:rgba(168,134,63,.55);
+  --shadow:0 20px 46px rgba(120,100,70,.28),0 1px 0 rgba(255,255,255,.6);
+  --card-bevel:inset 0 1px 0 rgba(255,255,255,.55),0 1px 2px rgba(140,115,80,.16);
+  --mat-pat:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='40'%20height='34.641'%3E%3Cpath%20d='M0%200H40M0%2034.641H40M0%200L20%2034.641L40%200M0%2034.641L20%200L40%2034.641M0%200V34.641M20%200V34.641M40%200V34.641'%20fill='none'%20stroke='%23A8863F'%20stroke-width='0.7'%20stroke-opacity='0.13'/%3E%3C/svg%3E");
+  --dot-pat:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='8'%20height='8'%3E%3Ccircle%20cx='4'%20cy='4'%20r='0.7'%20fill='%233A3540'%20fill-opacity='0.15'/%3E%3C/svg%3E");
+}
+
+/* ============================================================
+   1 · LAYOUT
+   ============================================================ */
+body{
+  min-height:100vh;background:var(--bg);color:var(--ink);
+  font-family:var(--sans);-webkit-font-smoothing:antialiased;
+  display:flex;flex-direction:column;align-items:center;
+  padding:40px 24px 72px;gap:16px;
+  transition:background .35s ease,color .35s ease;
+}
+.defs{position:absolute;width:0;height:0;overflow:hidden}
+
+.bar-top{
+  width:100%;max-width:720px;display:flex;justify-content:space-between;
+  align-items:center;gap:12px;
+}
+.hint{
+  font-size:11.5px;letter-spacing:.04em;color:var(--ink-mute);
+}
+.hint b{color:var(--gold);font-weight:500}
+.tbtn{
+  display:inline-flex;align-items:center;gap:7px;
+  padding:7px 13px;border:1px solid var(--line-outer);background:transparent;
+  color:var(--gold);font-family:var(--sans);font-size:11.5px;letter-spacing:.08em;
+  border-radius:var(--r-sm);cursor:pointer;transition:.25s ease;
+}
+.tbtn svg{width:9px;height:9px;fill:currentColor;transition:transform .4s ease}
+.tbtn:hover{border-color:var(--gold-hi);color:var(--gold-hi);background:var(--ready-bg)}
+.tbtn:hover svg{transform:rotate(90deg)}
+
+/* ============================================================
+   2 · PANEL + 工艺层
+   ============================================================ */
+.panel{
+  position:relative;width:100%;max-width:720px;
+  background:var(--panel);border-radius:var(--r-lg);
+  padding:0 0 26px;box-shadow:var(--shadow);
+  transition:background .35s ease,box-shadow .35s ease;
+}
+.panel::before{ /* 外框 1px 金 42% */
+  content:'';position:absolute;inset:0;border-radius:var(--r-lg);
+  border:1px solid var(--line-outer);pointer-events:none;z-index:5;
+}
+.frame-inner{ /* 内框 0.8px 金 16%，内缩 6px */
+  position:absolute;inset:6px;border:0.8px solid var(--line-inner);
+  border-radius:var(--r-sm);pointer-events:none;z-index:4;
+}
+.frame-inner i{ /* 四角 L 形折角 */
+  position:absolute;width:14px;height:14px;pointer-events:none;
+  border:0 solid var(--line-outer);
+}
+.frame-inner .tl{top:-1px;left:-1px;border-top-width:1.4px;border-left-width:1.4px}
+.frame-inner .tr{top:-1px;right:-1px;border-top-width:1.4px;border-right-width:1.4px}
+.frame-inner .bl{bottom:-1px;left:-1px;border-bottom-width:1.4px;border-left-width:1.4px}
+.frame-inner .br{bottom:-1px;right:-1px;border-bottom-width:1.4px;border-right-width:1.4px}
+
+.texture{ /* 麻叶纹底 + 细点阵错位半格 */
+  position:absolute;inset:0;border-radius:var(--r-lg);
+  background-image:var(--mat-pat);background-repeat:repeat;
+  pointer-events:none;z-index:0;
+}
+.texture::after{
+  content:'';position:absolute;inset:0;
+  background-image:var(--dot-pat);background-repeat:repeat;
+  background-position:4px 4px;opacity:.7;
+}
+
+.spine{ /* 竖排书脊 */
+  position:absolute;left:13px;top:72px;bottom:72px;width:16px;z-index:3;
+  writing-mode:vertical-rl;display:flex;align-items:center;justify-content:center;
+  gap:7px;font-family:var(--serif);font-size:10.5px;letter-spacing:6px;
+  color:var(--gold);opacity:.5;pointer-events:none;
+}
+.spine i{width:4px;height:4px;flex:none;background:var(--gold);transform:rotate(45deg);opacity:.8}
+
+/* 面板右侧 · 竖排符纸装饰（御灵符 + 封印小字） */
+.ofuda-deco{
+  position:absolute;right:16px;top:112px;width:22px;z-index:6;
+  color:var(--gold);opacity:.34;pointer-events:none;
+  display:flex;flex-direction:column;align-items:center;
+}
+.ofuda-deco svg{width:22px;height:22px;display:block}
+.ofuda-deco .tag{
+  margin-top:8px;writing-mode:vertical-rl;font-family:var(--serif);
+  font-size:9px;letter-spacing:4px;color:var(--crimson);opacity:.8;
+}
+/* 注连绳 · 末组下方的收束横幅 */
+.shimenawa-deco{
+  height:26px;margin:10px 0 6px;color:var(--gold);opacity:.4;
+  pointer-events:none;
+}
+.shimenawa-deco svg{width:100%;height:26px;display:block}
+
+.content{position:relative;z-index:2;padding:26px 30px 0 46px}
+
+/* ============================================================
+   3 · 顶栏
+   ============================================================ */
+.topbar{display:flex;align-items:flex-start;justify-content:space-between;gap:20px}
+.brand{display:flex;align-items:center;gap:13px}
+.emblem{
+  width:34px;height:34px;flex:none;color:var(--crimson);
+  fill:currentColor;filter:drop-shadow(0 0 6px var(--ready-glow));
+}
+.brand h1{
+  margin:0;font-family:var(--serif);font-size:19px;font-weight:600;
+  letter-spacing:5px;color:var(--ink);line-height:1.2;
+}
+.brand p{
+  margin:5px 0 0;font-size:10.5px;letter-spacing:.16em;color:var(--ink-2);
+}
+/* 顶栏右侧：铃（提示） + 达摩（进度隐喻） */
+.clock{text-align:right;flex:none;padding-top:2px}
+.cl-icon{
+  display:flex;align-items:center;justify-content:flex-end;gap:9px;
+  margin-bottom:6px;color:var(--gold);opacity:.7;
+}
+.cl-icon svg{width:17px;height:17px;display:block}
+.cl-icon .sep{width:1px;height:13px;background:var(--line-inner)}
+.cl-label{
+  font-size:10px;letter-spacing:.16em;color:var(--ink-2);margin-bottom:5px;
+  display:flex;align-items:center;justify-content:flex-end;gap:7px;
+}
+.cl-label::before{content:'';width:12px;height:1px;background:var(--line-outer)}
+.cl-time{
+  font-family:var(--mono);font-size:17px;letter-spacing:.06em;color:var(--gold-hi);
+  font-variant-numeric:tabular-nums;
+}
+/* 达摩：15px 尺度下简化版（圆身 + 一眼 + 嘴，右眼点亮 = 全部完成） */
+.daruma .eye-r{opacity:0;transition:opacity .45s ease}
+.panel.all-done .daruma .eye-r{opacity:1}
+.panel.all-done .daruma{color:var(--crimson);opacity:1}
+
+/* ============================================================
+   4 · 御币
+   ============================================================ */
+.gohei{display:block;width:100%;height:26px;margin:16px 0 14px;overflow:visible}
+
+/* ============================================================
+   5 · 统计三卡
+   ============================================================ */
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:11px;margin-bottom:16px}
+.stat{
+  position:relative;padding:11px 12px 10px;border-radius:var(--r-sm);
+  border:1px solid var(--line-inner);background:var(--panel-2);
+  transition:.3s ease;
+}
+.stat::before,.stat::after{ /* 左上 / 右下 6px 折角 */
+  content:'';position:absolute;width:6px;height:6px;border:0 solid var(--line-outer);
+}
+.stat::before{top:-1px;left:-1px;border-top-width:1px;border-left-width:1px}
+.stat::after{bottom:-1px;right:-1px;border-bottom-width:1px;border-right-width:1px}
+.stat .sv{
+  display:block;font-family:var(--mono);font-size:19px;line-height:1;
+  font-variant-numeric:tabular-nums;
+}
+.stat .sl{
+  display:block;margin-top:6px;font-size:10px;letter-spacing:.16em;color:var(--ink-2);
+}
+/* 统计卡 icon（17px，置于左上折角内侧） */
+.stat .si{
+  position:absolute;top:9px;right:10px;width:14px;height:14px;
+  color:var(--gold);opacity:.5;pointer-events:none;
+}
+.stat.s-active .sv{color:var(--s-active)}
+.stat.s-ready{border-color:var(--line-outer)}
+.stat.s-ready .sv{color:var(--s-ready)}
+.stat.s-done .sv{color:var(--s-done)}
+/* 全清后：进行中 / 待提交 两卡退为静默态，只留「已完成」有颜色 */
+.panel.all-done .stat.s-active .sv{color:var(--ink-mute)}
+.panel.all-done .stat.s-ready  .sv{color:var(--ink-mute)}
+.panel.all-done .stat.s-ready{border-color:var(--line-inner)}
+
+/* ============================================================
+   6 · 纹带（桔梗） + 分组头
+   ============================================================ */
+.band{display:block;width:100%;height:12px;margin:2px 0 16px;opacity:.9}
+.ghead{
+  display:flex;align-items:center;gap:10px;
+  margin:20px 0 9px;padding-left:2px;
+}
+.ghead .gt{
+  display:flex;align-items:center;gap:8px;
+  font-family:var(--serif);font-size:12.5px;letter-spacing:.2em;color:var(--gold);
+}
+.ghead .gt svg{width:16px;height:16px;flex:none;opacity:.85}
+.ghead .gl{flex:1;height:0;border-top:1px dashed var(--line-inner)}
+.pill{
+  min-width:22px;text-align:center;padding:2px 7px;border-radius:20px;
+  border:1px solid var(--line-outer);font-family:var(--mono);font-size:10px;
+  letter-spacing:.06em;color:var(--gold);
+}
+
+/* ============================================================
+   6.5 · Tab 栏（符纸签式）
+   ============================================================ */
+.tabs{
+  display:flex;align-items:flex-end;gap:6px;margin:0 0 16px;
+  padding-bottom:0;position:relative;
+}
+.tabs::after{ /* 底轨：一条连续金线，把四个签串起来 */
+  content:'';position:absolute;left:0;right:0;bottom:0;height:0;
+  border-top:1px solid var(--line-inner);
+}
+.tab{
+  position:relative;flex:0 0 auto;
+  display:flex;align-items:center;gap:7px;
+  padding:9px 15px 10px;border:1px solid transparent;border-bottom:0;
+  border-radius:3px 3px 0 0;background:transparent;cursor:pointer;
+  font-family:var(--serif);font-size:12.5px;letter-spacing:.16em;color:var(--ink-2);
+  transition:color .25s ease,background .25s ease,border-color .25s ease;
+}
+.tab .ti{width:15px;height:15px;flex:none;opacity:.7;transition:opacity .25s ease,color .25s ease}
+.tab .tn{white-space:nowrap}
+.tab .tc{
+  font-family:var(--mono);font-size:9.5px;letter-spacing:.04em;
+  padding:1px 5px;border-radius:20px;border:1px solid var(--line-inner);
+  color:var(--ink-mute);
+}
+.tab:hover{color:var(--gold);background:var(--ready-bg)}
+.tab:hover .ti{opacity:1}
+.tab.is-on{
+  color:var(--gold);background:var(--panel-2);
+  border-color:var(--line-outer);border-bottom-color:var(--panel-2);
+}
+.tab.is-on .ti{opacity:1}
+.tab.is-on .tc{border-color:var(--line-outer);color:var(--gold)}
+/* 选中签顶部一道朱红短线（额束） */
+.tab.is-on::before{
+  content:'';position:absolute;top:-1px;left:50%;transform:translateX(-50%);
+  width:22px;height:2px;background:var(--crimson);
+}
+/* 选中签两侧的小菱形节点 */
+.tab.is-on::after{
+  content:'';position:absolute;bottom:-3.5px;left:50%;transform:translateX(-50%) rotate(45deg);
+  width:7px;height:7px;background:var(--panel-2);
+  border:1px solid var(--line-outer);border-left:0;border-top:0;
+}
+.tab-set{margin-left:auto}  /* 设置签推到最右 */
+.tab-set.is-on::before{background:var(--gold-hi)}
+
+/* ============================================================
+   6.6 · Tab 面板
+   ============================================================ */
+/* 注意：切换动效不得以 opacity 作为关键帧属性。
+   一旦动画被冻结（headless 截图 / prefers-reduced-motion / 动画被禁用），
+   面板会永久停在 opacity:0 而整页不可见。改用 transform 做入场，
+   可见性始终由 display 决定。 */
+.tpane{display:none}
+.tpane.is-on{display:block;animation:paneIn .3s ease}
+@keyframes paneIn{from{transform:translateY(5px)}to{transform:translateY(0)}}
+@media (prefers-reduced-motion:reduce){
+  .tpane.is-on{animation:none}
+  .tab,.tab .ti,.switch i,.segi,.sw{transition:none}
+}
+
+/* ============================================================
+   6.7 · 设置页（纯视觉稿）
+   ============================================================ */
+.pill.static-tag{border-style:dashed;color:var(--ink-mute)}
+
+.sgroup{margin-bottom:14px}
+.sgroup-h{
+  display:flex;align-items:center;gap:9px;margin:16px 0 8px;padding-left:2px;
+  font-family:var(--serif);font-size:12px;letter-spacing:.2em;color:var(--gold);
+}
+.sgroup-h svg{width:15px;height:15px;flex:none;opacity:.85}
+.sgroup-h .gl{flex:1;height:0;border-top:1px dashed var(--line-inner)}
+
+.srow{
+  position:relative;display:flex;align-items:center;justify-content:space-between;
+  gap:18px;padding:11px 14px;margin-bottom:6px;
+  background-color:var(--card);border-radius:var(--r-md);
+  box-shadow:var(--card-bevel);
+  border:1px solid transparent;
+}
+.srow .scell{min-width:0;flex:1}
+.srow .sk{
+  font-family:var(--serif);font-size:13px;letter-spacing:.5px;color:var(--ink);
+  line-height:1.35;
+}
+.srow .sd{
+  margin-top:4px;font-size:10.5px;letter-spacing:.06em;color:var(--ink-mute);
+  line-height:1.45;
+}
+
+/* 分段控件 */
+.seg{
+  display:inline-flex;flex:none;padding:2px;border-radius:3px;
+  border:1px solid var(--line-inner);background:var(--panel-2);
+}
+.segi{
+  padding:4px 12px;border-radius:2px;font-size:11px;letter-spacing:.1em;
+  color:var(--ink-2);transition:.25s ease;
+}
+.segi.is-on{
+  color:var(--gold-hi);background:var(--card);
+  box-shadow:inset 0 0 0 1px var(--line-outer);
+}
+
+/* 滑块 */
+.slider{
+  position:relative;flex:none;width:132px;height:16px;display:flex;align-items:center;
+}
+.slider::before{
+  content:'';position:absolute;left:0;right:0;height:2px;background:var(--track);
+}
+.slider-fill{
+  position:absolute;left:0;width:58%;height:2px;background:var(--gold);display:block;
+}
+.slider-knob{
+  position:absolute;left:58%;transform:translateX(-50%) rotate(45deg);
+  width:11px;height:11px;background:var(--crimson);
+  box-shadow:0 0 0 1px var(--line-outer);
+}
+
+/* 色板 */
+.swatches{display:flex;gap:8px;flex:none;align-items:center}
+.sw{
+  width:20px;height:20px;border-radius:50%;background:var(--sw);
+  box-shadow:inset 0 0 0 1px rgba(0,0,0,.15);
+}
+.sw.is-on{
+  box-shadow:inset 0 0 0 2px var(--card),0 0 0 1.5px var(--gold);
+}
+
+/* 开关 */
+.switch{
+  position:relative;flex:none;width:34px;height:19px;border-radius:20px;
+  background:var(--panel-2);border:1px solid var(--line-inner);
+  display:inline-flex;align-items:center;padding:2px;
+}
+.switch i{
+  width:13px;height:13px;border-radius:50%;background:var(--ink-mute);
+  transition:.25s ease;
+}
+.switch.is-on{background:var(--ready-bg);border-color:var(--line-outer)}
+.switch.is-on i{margin-left:15px;background:var(--gold-hi)}
+
+/* 选择器 */
+.pick{display:inline-flex;gap:5px;flex:none}
+.pk{
+  padding:4px 10px;border-radius:2px;font-size:11px;letter-spacing:.08em;
+  border:1px solid var(--line-inner);color:var(--ink-2);
+}
+.pk.is-on{border-color:var(--line-outer);color:var(--gold);background:var(--ready-bg)}
+
+/* 时分输入 */
+.numfield{
+  display:inline-flex;align-items:center;gap:3px;flex:none;
+  padding:5px 11px;border-radius:3px;
+  border:1px solid var(--line-inner);background:var(--panel-2);
+  font-family:var(--mono);font-size:14px;color:var(--gold-hi);
+  font-variant-numeric:tabular-nums;
+}
+.numfield .colon{font-style:normal;opacity:.6}
+
+/* 底部动作 */
+.sfoot{
+  display:flex;justify-content:flex-end;gap:9px;margin:18px 0 0;
+}
+.sbtn{
+  padding:9px 22px;border-radius:3px;font-family:var(--serif);
+  font-size:12.5px;letter-spacing:.22em;cursor:default;
+}
+.sbtn.ghost{border:1px solid var(--line-inner);color:var(--ink-2)}
+.sbtn.primary{
+  border:1px solid var(--line-outer);color:var(--gold-hi);
+  background-color:var(--ready-bg);
+  box-shadow:inset 0 0 0 1px var(--line-inner);
+}
+
+/* 静态稿声明 */
+.snote{
+  display:flex;align-items:center;justify-content:center;gap:9px;
+  margin-top:14px;padding-top:12px;
+  border-top:1px dashed var(--line-inner);
+  font-size:10px;letter-spacing:.14em;color:var(--ink-mute);
+}
+.snote svg{width:13px;height:13px;flex:none;opacity:.6}
+
+/* ============================================================
+   7 · 任务卡
+   ============================================================ */
+.task{
+  position:relative;display:grid;grid-template-columns:36px 1fr;
+  align-items:center;margin-bottom:9px;padding:12px 18px 15px 0;
+  background-color:var(--card);border-radius:var(--r-md);overflow:hidden;
+  box-shadow:var(--card-bevel);
+  cursor:pointer;transition:background-color .3s ease,box-shadow .3s ease,transform .3s ease;
+}
+.task:hover{background-color:var(--panel-2)}
+.task:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+
+.idx{
+  grid-column:1;text-align:center;font-family:var(--mono);font-size:11px;
+  letter-spacing:.04em;color:var(--gold);opacity:.55;
+  font-variant-numeric:tabular-nums;transition:.3s ease;
+}
+.tbody{grid-column:2;min-width:0}
+
+/* 左侧符纸条 + 挂角 */
+.bar{
+  position:absolute;left:0;top:11px;bottom:13px;width:3px;
+  border-radius:1px;background:var(--s-active);transition:background .3s ease;
+}
+.bar::before,.bar::after{
+  content:'';position:absolute;left:-1.25px;width:5.5px;height:5.5px;
+  background:inherit;transform:rotate(45deg) scale(.5);
+}
+.bar::before{top:-2.5px}
+.bar::after{bottom:-2.5px}
+
+/* 第一行：稀有度 · 任务名 · 完成标记 */
+.r1{display:flex;align-items:center;gap:9px;min-width:0}
+.rar{width:9px;height:9px;flex:none;fill:currentColor}
+.rar.ssr{color:var(--crimson)}
+.rar.sr{color:var(--gold)}
+.rar.r{color:var(--s-locked)}
+.task h3{
+  position:relative;margin:0;font-family:var(--serif);font-size:15px;
+  font-weight:500;letter-spacing:.6px;color:var(--ink);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  transition:color .3s ease;
+}
+/* 任务类型 icon（18px，描边继承 currentColor） */
+.ticon{
+  width:17px;height:17px;flex:none;color:var(--gold);opacity:.85;
+  transition:color .3s ease,opacity .3s ease;
+}
+.task[data-state="locked"] .ticon{color:var(--s-locked);opacity:.65}
+.task[data-state="done"] .ticon{color:var(--ink-mute);opacity:.5}
+.task h3::after{ /* 朱红划除线，从左往右扫 */
+  content:'';position:absolute;left:0;top:54%;height:1.2px;width:100%;
+  background:var(--crimson);transform:scaleX(0);transform-origin:left center;
+  transition:transform .3s cubic-bezier(.2,.9,.3,1);
+}
+.mark{ /* 蛇目纹 · 已完成，纯符号无框，紧贴任务名 */color:var(--crimson);
+  margin-left:10px;flex:none;opacity:0;transform:scale(.6);width:13px;height:13px;
+  transition:opacity .3s ease,transform .3s cubic-bezier(.2,.9,.3,1);
+}
+.mark svg{width:13px;height:13px;display:block}
+
+/* 第二行：菱形进度格 + 等宽计数 */
+.gems{display:flex;align-items:center;gap:11px;margin-top:9px}
+.gem{
+  width:7px;height:7px;flex:none;transform:rotate(45deg);
+  border:1px solid var(--gold);background:transparent;border-radius:1px;
+  transition:background .22s ease,border-color .22s ease,transform .22s ease;
+}
+.gem.on{background:var(--s-active);border-color:var(--s-active)}
+.gem.click{cursor:pointer}
+.gem.click:hover{transform:rotate(45deg) scale(1.35)}
+.cnt{
+  margin-left:3px;font-family:var(--mono);font-size:11px;letter-spacing:.06em;
+  color:var(--ink-2);font-variant-numeric:tabular-nums;
+}
+.note{
+  font-size:11px;letter-spacing:.1em;color:var(--ink-mute);margin-top:9px;
+}
+
+/* 卡片底轨 2px */
+.track{position:absolute;left:0;right:0;bottom:0;height:2px;background:var(--track)}
+.track i{
+  display:block;height:100%;width:0;background:var(--track-fill);
+  transition:width .35s cubic-bezier(.2,.9,.3,1),background .3s ease;
+}
+
+/* ---- 四态 ---- */
+.task[data-state="locked"] .bar{background:var(--s-locked)}
+.task[data-state="locked"] h3{color:var(--ink-2)}
+.task[data-state="locked"] .gem{border-color:var(--s-locked);opacity:.6}
+.task[data-state="locked"] .idx{opacity:.3}
+
+.task[data-state="active"] .bar{background:var(--s-active)}
+.task[data-state="active"] .gem.on{background:var(--s-active);border-color:var(--s-active)}
+.task[data-state="active"] .track i{background:var(--track-fill)}
+
+.task[data-state="ready"]{
+  background-image:linear-gradient(var(--ready-bg),var(--ready-bg));
+  box-shadow:var(--card-bevel),inset 0 0 0 1px var(--gold-hi);
+}
+.task[data-state="ready"]:hover{
+  background-image:linear-gradient(var(--ready-glow),var(--ready-glow));
+  box-shadow:var(--card-bevel),inset 0 0 0 1px var(--gold-hi),0 0 22px var(--ready-glow);
+}
+.task[data-state="ready"] .bar{background:var(--s-ready)}
+.task[data-state="ready"] .gem.on{background:var(--s-ready);border-color:var(--s-ready)}
+.task[data-state="ready"] .track i{background:var(--s-ready)}
+.task[data-state="ready"] .cnt{color:var(--s-ready)}
+
+.task[data-state="done"],
+.task[data-state="done"]:hover{background-color:var(--card-done);background-image:none}
+.task[data-state="done"] .bar{background:var(--crimson-soft)}
+.task[data-state="done"] h3{color:var(--ink-mute)}
+.task[data-state="done"] h3::after{transform:scaleX(1)}
+.task[data-state="done"] .mark{opacity:.75;transform:scale(1)}
+.task[data-state="done"] .idx{opacity:.28}
+.task[data-state="done"] .gem{border-color:var(--ink-mute);opacity:.4;background:transparent}
+.task[data-state="done"] .cnt{color:var(--ink-mute)}
+.task[data-state="done"] .track i{background:var(--crimson-soft)}
+
+/* ============================================================
+   8 · 页脚
+   ============================================================ */
+.foot{
+  margin-top:20px;display:flex;align-items:center;gap:11px;
+  font-size:10px;letter-spacing:.18em;color:var(--ink-mute);
+}
+.foot .ln{flex:1;height:0;border-top:1px dashed var(--line-inner)}
+.foot .dm{width:4px;height:4px;background:var(--gold);transform:rotate(45deg);opacity:.7}
+
+@media (max-width:620px){
+  body{padding:20px 12px 48px}
+  .content{padding:20px 18px 0 34px}
+  .spine{display:none}
+  .stats{gap:8px}
+  .task{grid-template-columns:28px 1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- ============ SVG DEFS ============ -->
+<svg class="defs" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- 五芒星 · 晴明纹 -->
+    <path id="pentagram" d="M0,-1 L0.5878,0.809 L-0.9511,-0.309 L0.9511,-0.309 L-0.5878,0.809 Z"/>
+    <!-- 四芒星 -->
+    <path id="tetra" d="M0,-1 L0.32,-0.32 L1,0 L0.32,0.32 L0,1 L-0.32,0.32 L-1,0 L-0.32,-0.32 Z"/>
+    <!-- 菱形 -->
+    <path id="rhomb" d="M0,-1 L0.72,0 L0,1 L-0.72,0 Z"/>
+    <!-- 桔梗单瓣 -->
+    <path id="kikyo" d="M0,0 C0.2,-0.32 0.36,-0.66 0,-1 C-0.36,-0.66 -0.2,-0.32 0,0 Z"/>
+    <g id="kikyo5">
+      <use href="#kikyo"/>
+      <use href="#kikyo" transform="rotate(72)"/>
+      <use href="#kikyo" transform="rotate(144)"/>
+      <use href="#kikyo" transform="rotate(216)"/>
+      <use href="#kikyo" transform="rotate(288)"/>
+    </g>
+    <!-- 蛇目纹 · 同心双环 -->
+    <g id="snake-eye">
+      <circle r="5.5" fill="none" stroke="currentColor" stroke-width="1.3"/>
+      <circle r="2.4" fill="var(--crimson)"/>
+    </g>
+    <!-- 桔梗纹带 pattern -->
+    <pattern id="bandPat" x="0" y="0" width="34" height="12" patternUnits="userSpaceOnUse">
+      <line x1="0" y1="6" x2="10" y2="6" stroke="var(--band-line)" stroke-width="1"/>
+      <line x1="24" y1="6" x2="34" y2="6" stroke="var(--band-line)" stroke-width="1"/>
+      <use href="#kikyo5" transform="translate(17,6) scale(4.6)" fill="var(--gold)" opacity="0.75"/>
+    </pattern>
+
+    <!-- ============================================================
+         和风 icon 库 · 全部 24×24 视野，stroke 无填充，1.4px 线宽
+         原则：纯几何、可缩放、不抢信息；有体积的器物一律不做
+         ============================================================ -->
+
+    <!-- 晴明纹（五芒星）· 主徽记 / 封魔 -->
+    <g id="i-seimei" fill="none" stroke="currentColor" stroke-width="1.4"
+       stroke-linejoin="round" stroke-linecap="round">
+      <path d="M12,2.6 L14.8,11 L23.4,11 L16.5,16.4 L19.2,24.7 L12,19.4 L4.8,24.7 L7.5,16.4 L0.6,11 L9.2,11 Z"/>
+    </g>
+
+    <!-- 鸟居（神社入口）· 副本 / 结界 -->
+    <g id="i-torii" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round">
+      <path d="M2,6.2 H22"/>                 <!-- 笠木 -->
+      <path d="M3.6,9.4 H20.4"/>             <!-- 贯 -->
+      <path d="M5.4,9.4 L6.6,22"/>           <!-- 左柱 -->
+      <path d="M18.6,9.4 L17.4,22"/>         <!-- 右柱 -->
+      <path d="M12,9.6 V14.4"/>              <!-- 额束 -->
+      <path d="M12,6.2 V3.4"/>               <!-- 顶饰 -->
+    </g>
+
+    <!-- 御灵符（竖符纸）· 悬赏封印 -->
+    <g id="i-ofuda" fill="none" stroke="currentColor" stroke-width="1.4"
+       stroke-linejoin="round" stroke-linecap="round">
+      <path d="M7.4,2.4 H16.6 L16.6,20.4 L12,24.2 L7.4,20.4 Z"/>
+      <path d="M12,6.4 V17.6"/>
+      <path d="M8.6,9.4 H15.4"/>
+      <path d="M9.6,13.4 H14.4"/>
+    </g>
+
+    <!-- 提灯（紙灯籠）· 活动 -->
+    <g id="i-chochin" fill="none" stroke="currentColor" stroke-width="1.5"
+       stroke-linejoin="round" stroke-linecap="round">
+      <path d="M8.4,3.2 H15.6"/>
+      <path d="M9.2,5.4 H14.8 L17.4,9.4 V15.4 L14.8,19.6 H9.2 L6.6,15.4 V9.4 Z"/>
+      <path d="M12,3.2 V5.4"/>
+      <path d="M7.4,12.4 H16.6"/>
+      <path d="M12,19.6 V22.6"/>
+    </g>
+
+    <!-- 注连绳 + 纸垂 · 分区横幅 -->
+    <g id="i-shimenawa" fill="none" stroke="currentColor" stroke-width="1.4"
+       stroke-linejoin="round" stroke-linecap="round">
+      <path d="M0.8,7.6 C4,10 8,5.4 12,7.6 C16,9.8 20,5.4 23.2,7.6"/>
+      <path d="M5.4,9.6 V15"/><path d="M11,10.4 V16"/><path d="M16.6,9.6 V15"/>
+      <path d="M7.6,10.4 V17"/><path d="M13.2,11.2 V17.8"/><path d="M18.8,10.4 V17"/>
+    </g>
+
+    <!-- 团扇（扇面 + 扇骨）· 觉醒材料 -->
+    <g id="i-sensu" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round">
+      <path d="M12,21.6 V11"/>
+      <path d="M12,21.6 C6.2,20.6 3.4,15.4 3.2,8.2"/>
+      <path d="M12,21.6 C17.8,20.6 20.6,15.4 20.8,8.2"/>
+      <path d="M3.2,8.2 C7.4,4.6 16.6,4.6 20.8,8.2"/>
+      <path d="M8.4,20.6 L5.4,8.2"/><path d="M15.6,20.6 L18.6,8.2"/>
+      <path d="M12,21.6 V20.6"/>
+    </g>
+
+    <!-- 达摩（愿 | 缘）· 完成仪式 -->
+    <g id="i-daruma" fill="none" stroke="currentColor" stroke-width="1.4"
+       stroke-linejoin="round" stroke-linecap="round">
+      <path d="M12,2.4 C17,2.4 20.4,8 20.4,14.4 C20.4,19.6 16.6,22.2 12,22.2
+               C7.4,22.2 3.6,19.6 3.6,14.4 C3.6,8 7,2.4 12,2.4 Z"/>
+      <circle cx="8.9" cy="12.6" r="2.3"/>
+      <circle cx="15.1" cy="12.6" r="2.3"/>
+      <path d="M12,15.6 C11.2,16.6 11.2,18 12,18.6"/>
+    </g>
+
+    <!-- 铃（神樂鈴）· 通知 / 提醒 -->
+    <g id="i-suzu" fill="none" stroke="currentColor" stroke-width="1.5"
+       stroke-linejoin="round" stroke-linecap="round">
+      <circle cx="12" cy="3.4" r="1.6"/>
+      <path d="M12,5 V6.4"/>
+      <path d="M6.4,15.6 C6.4,10.4 8.8,6.6 12,6.6 C15.2,6.6 17.6,10.4 17.6,15.6 Z"/>
+      <path d="M4.4,15.6 H19.6"/>
+      <path d="M12,15.8 V18.6"/>
+    </g>
+
+    <!-- 折扇（扇骨展开）· 周常 -->
+    <g id="i-ougi" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+      <path d="M12,22.2 V14.6"/>
+      <path d="M12,22.2 L5.2,18.6"/><path d="M12,22.2 L18.8,18.6"/>
+      <path d="M5.2,18.6 C3.6,12.8 6.8,6.6 12,4.2"/>
+      <path d="M18.8,18.6 C20.4,12.8 17.2,6.6 12,4.2"/>
+      <path d="M8.6,20.4 L8.2,12.6"/><path d="M15.4,20.4 L15.8,12.6"/>
+      <path d="M12,21.6 V13.4"/>
+    </g>
+
+    <!-- 五芒星（实心）· 稀有度 SSR -->
+    <path id="i-star5" fill="currentColor"
+          d="M0,-1 L0.5878,0.809 L-0.9511,-0.309 L0.9511,-0.309 L-0.5878,0.809 Z"/>
+
+  </defs>
+</svg>
+
+<!-- ============ 顶部工具条 ============ -->
+<div class="bar-top">
+  <div class="hint">点击卡片 <b>标记完成</b> · 点击菱形 <b>推进度</b></div>
+  <button class="tbtn" id="themeBtn" type="button" aria-label="切换明暗主题">
+    <svg viewBox="-1.2 -1.2 2.4 2.4"><use href="#rhomb"/></svg>
+    <span id="themeTxt">明版</span>
+  </button>
+</div>
+
+<!-- ============ 面板 ============ -->
+<div class="panel">
+  <div class="frame-inner">
+    <i class="tl"></i><i class="tr"></i><i class="bl"></i><i class="br"></i>
+  </div>
+  <div class="texture"></div>
+  <div class="spine"><span>式神委托</span><i></i><span>壹期</span></div>
+  <div class="ofuda-deco">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-ofuda"/></svg>
+    <div class="tag">封印</div>
+  </div>
+
+  <div class="content">
+
+    <!-- 顶栏 -->
+    <header class="topbar">
+      <div class="brand">
+        <svg class="emblem" viewBox="-1.3 -1.3 2.6 2.6" aria-hidden="true"><use href="#pentagram"/></svg>
+        <div>
+          <h1>式神委托</h1>
+          <p>今日任务录 · 阴阳寮</p>
+        </div>
+      </div>
+      <div class="clock">
+        <div class="cl-icon">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-suzu"/></svg>
+          <i class="sep"></i>
+          <svg class="daruma" viewBox="0 0 24 24" aria-label="达摩点睛 · 任务全清时右眼点亮">
+            <g fill="none" stroke="currentColor" stroke-width="1.5"
+               stroke-linejoin="round" stroke-linecap="round">
+              <path d="M12,2.6 C17.2,2.6 20.6,8.2 20.6,14.6 C20.6,19.8 16.8,22.4 12,22.4
+                       C7.2,22.4 3.4,19.8 3.4,14.6 C3.4,8.2 6.8,2.6 12,2.6 Z"/>
+              <path d="M12,15.4 C11,16.6 11,18.2 12,19"/>
+            </g>
+            <circle class="eye-l" cx="8.6" cy="12.2" r="1.9" fill="currentColor"/>
+            <circle class="eye-r" cx="15.4" cy="12.2" r="1.9" fill="currentColor"/>
+          </svg>
+        </div>
+        <div class="cl-label">周常重置</div>
+        <div class="cl-time" id="clock">02:14:08</div>
+      </div>
+    </header>
+
+    <!-- 御币 · 横杆 + 五条纸垂（结构与信息层，非装饰） -->
+    <svg class="gohei" viewBox="0 0 620 26" preserveAspectRatio="none" aria-hidden="true">
+      <line x1="0" y1="1.5" x2="620" y2="1.5" stroke="var(--gold)" stroke-width="1.5" opacity="0.85"/>
+      <g fill="var(--gohei-paper)" stroke="var(--line-outer)" stroke-width="0.8">
+        <path d="M57,2 h10 v14 l-5,4 l-5,-4 Z"/>
+        <path d="M181,2 h10 v14 l-5,4 l-5,-4 Z"/>
+        <path d="M305,2 h10 v14 l-5,4 l-5,-4 Z"/>
+        <path d="M429,2 h10 v14 l-5,4 l-5,-4 Z"/>
+        <path d="M553,2 h10 v14 l-5,4 l-5,-4 Z"/>
+      </g>
+      <g stroke="var(--gohei-crease)" stroke-width="0.8" fill="none" opacity="0.8">
+        <path d="M58.4,4.5 h2.4 v9.5"/><path d="M182.4,4.5 h2.4 v9.5"/>
+        <path d="M306.4,4.5 h2.4 v9.5"/><path d="M430.4,4.5 h2.4 v9.5"/>
+        <path d="M554.4,4.5 h2.4 v9.5"/>
+      </g>
+    </svg>
+
+    <!-- 统计三卡 -->
+    <div class="stats">
+      <div class="stat s-active">
+        <svg class="si" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-torii"/></svg>
+        <span class="sv" id="stActive">02</span><span class="sl">进行中</span>
+      </div>
+      <div class="stat s-ready">
+        <svg class="si" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-seimei"/></svg>
+        <span class="sv" id="stReady">01</span><span class="sl">待提交</span>
+      </div>
+      <div class="stat s-done">
+        <svg class="si" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-suzu"/></svg>
+        <span class="sv" id="stDone">01</span><span class="sl">已完成</span>
+      </div>
+    </div>
+
+    <!-- 纹带（tab 栏上方的收束线） -->
+    <svg class="band" viewBox="0 0 620 12" preserveAspectRatio="none" aria-hidden="true">
+      <rect width="620" height="12" fill="url(#bandPat)"/>
+    </svg>
+
+    <!-- ============================================================
+         Tab 栏 · 日常 / 周常 / 活动 / 设置
+         竖排式：每个 tab 是"一片符纸签"，选中态由金线 + 朱点 + 金底表达
+         ============================================================ -->
+    <nav class="tabs" role="tablist" aria-label="委托分类">
+      <button class="tab is-on" role="tab" aria-selected="true" data-tab="daily">
+        <svg class="ti" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-torii"/></svg>
+        <span class="tn">日常</span>
+        <span class="tc">03</span>
+      </button>
+      <button class="tab" role="tab" aria-selected="false" data-tab="weekly">
+        <svg class="ti" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-ougi"/></svg>
+        <span class="tn">周常</span>
+        <span class="tc">01</span>
+      </button>
+      <button class="tab" role="tab" aria-selected="false" data-tab="event">
+        <svg class="ti" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-chochin"/></svg>
+        <span class="tn">活动</span>
+        <span class="tc">01</span>
+      </button>
+      <button class="tab tab-set" role="tab" aria-selected="false" data-tab="settings">
+        <svg class="ti" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-seimei"/></svg>
+        <span class="tn">设置</span>
+      </button>
+    </nav>
+
+    <!-- ======== TAB · 日常 ======== -->
+    <section class="tpane is-on" data-pane="daily">
+
+      <div class="ghead"><span class="gt"><svg viewBox="0 0 24 24"><use href="#i-torii"/></svg>日常委托</span><i class="gl"></i><span class="pill">03</span></div>
+
+      <!-- 01 -->
+      <article class="task" data-state="active" data-cur="3" data-total="5" data-done="0" tabindex="0">
+        <div class="bar"></div>
+        <div class="idx">01</div>
+        <div class="tbody">
+          <div class="r1">
+            <svg class="ticon" viewBox="0 0 24 24"><use href="#i-torii"/></svg>
+            <h3>御魂 · 十层</h3>
+            <span class="mark"><svg viewBox="-7 -7 14 14"><use href="#snake-eye"/></svg></span>
+          </div>
+          <div class="gems">
+            <i class="gem click"></i><i class="gem click"></i><i class="gem click"></i>
+            <i class="gem click"></i><i class="gem click"></i>
+            <span class="cnt">3/5</span>
+          </div>
+        </div>
+        <div class="track"><i></i></div>
+      </article>
+
+      <!-- 02 · 可提交（全屏唯一高亮位） -->
+      <article class="task" data-state="ready" data-cur="5" data-total="5" data-done="0" tabindex="0">
+        <div class="bar"></div>
+        <div class="idx">02</div>
+        <div class="tbody">
+          <div class="r1">
+            <svg class="ticon" viewBox="0 0 24 24"><use href="#i-sensu"/></svg>
+            <h3>觉醒材料 · 风转轮</h3>
+            <span class="mark"><svg viewBox="-7 -7 14 14"><use href="#snake-eye"/></svg></span>
+          </div>
+          <div class="gems">
+            <i class="gem click"></i><i class="gem click"></i><i class="gem click"></i>
+            <i class="gem click"></i><i class="gem click"></i>
+            <span class="cnt">5/5</span>
+          </div>
+        </div>
+        <div class="track"><i></i></div>
+      </article>
+
+      <!-- 03 · 未接取 -->
+      <article class="task" data-state="locked" data-cur="0" data-total="1" data-done="0" tabindex="0"
+               data-note-locked="未接取 · 于结界入口领取" data-note-done="已达成 · 奖励已领取">
+        <div class="bar"></div>
+        <div class="idx">03</div>
+        <div class="tbody">
+          <div class="r1">
+            <svg class="ticon" viewBox="0 0 24 24"><use href="#i-ofuda"/></svg>
+            <h3>悬赏封印 · 妖气</h3>
+            <span class="mark"><svg viewBox="-7 -7 14 14"><use href="#snake-eye"/></svg></span>
+          </div>
+          <div class="note">未接取 · 于结界入口领取</div>
+        </div>
+        <div class="track"><i></i></div>
+      </article>
+
+    </section>
+
+    <!-- ======== TAB · 周常 ======== -->
+    <section class="tpane" data-pane="weekly">
+
+      <div class="ghead"><span class="gt"><svg viewBox="0 0 24 24"><use href="#i-ougi"/></svg>周常委托</span><i class="gl"></i><span class="pill">01</span></div>
+
+      <!-- 04 · 已完成 -->
+      <article class="task" data-state="done" data-cur="1" data-total="1" data-done="1" tabindex="0"
+               data-note-locked="未接取 · 于结界入口领取" data-note-done="已达成 · 奖励已领取">
+        <div class="bar"></div>
+        <div class="idx">01</div>
+        <div class="tbody">
+          <div class="r1">
+            <svg class="ticon" viewBox="0 0 24 24"><use href="#i-seimei"/></svg>
+            <h3>秘闻副本 · 竞速</h3>
+            <span class="mark"><svg viewBox="-7 -7 14 14"><use href="#snake-eye"/></svg></span>
+          </div>
+          <div class="note">已达成 · 奖励已领取</div>
+        </div>
+        <div class="track"><i></i></div>
+      </article>
+
+    </section>
+
+    <!-- ======== TAB · 活动 ======== -->
+    <section class="tpane" data-pane="event">
+
+      <div class="ghead"><span class="gt"><svg viewBox="0 0 24 24"><use href="#i-chochin"/></svg>活动委托</span><i class="gl"></i><span class="pill">01</span></div>
+
+      <!-- 05 -->
+      <article class="task" data-state="active" data-cur="7" data-total="10" data-done="0" tabindex="0">
+        <div class="bar"></div>
+        <div class="idx">01</div>
+        <div class="tbody">
+          <div class="r1">
+            <svg class="ticon" viewBox="0 0 24 24"><use href="#i-chochin"/></svg>
+            <h3>妖气封印 · 集结</h3>
+            <span class="mark"><svg viewBox="-7 -7 14 14"><use href="#snake-eye"/></svg></span>
+          </div>
+          <div class="gems">
+            <i class="gem click"></i><i class="gem click"></i><i class="gem click"></i>
+            <i class="gem click"></i><i class="gem click"></i><i class="gem click"></i>
+            <i class="gem click"></i><i class="gem click"></i><i class="gem click"></i>
+            <i class="gem click"></i>
+            <span class="cnt">7/10</span>
+          </div>
+        </div>
+        <div class="track"><i></i></div>
+      </article>
+
+    </section>
+
+    <!-- ============================================================
+         TAB · 设置（仅视觉稿，标注为静态展示）
+         ============================================================ -->
+    <section class="tpane" data-pane="settings">
+
+      <div class="ghead"><span class="gt"><svg viewBox="0 0 24 24"><use href="#i-seimei"/></svg>阴阳寮设置</span><i class="gl"></i><span class="pill static-tag">静态</span></div>
+
+      <!-- 设置项 1 · 主题 -->
+      <div class="sgroup">
+        <div class="sgroup-h">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-daruma"/></svg>
+          <span>观感</span>
+          <i class="gl"></i>
+        </div>
+
+        <div class="srow">
+          <div class="scell">
+            <div class="sk">界面主题</div>
+            <div class="sd">明暗双版 · 同一套零件，色阶各自重算</div>
+          </div>
+          <div class="seg">
+            <span class="segi is-on">暗版</span>
+            <span class="segi">明版</span>
+          </div>
+        </div>
+
+        <div class="srow">
+          <div class="scell">
+            <div class="sk">底纹浓度</div>
+            <div class="sd">麻叶纹与细点阵的可见程度</div>
+          </div>
+          <div class="slider">
+            <i class="slider-fill"></i>
+            <b class="slider-knob"></b>
+          </div>
+        </div>
+
+        <div class="srow">
+          <div class="scell">
+            <div class="sk">朱印强调色</div>
+            <div class="sd">状态条、划除线、徽记统一取色</div>
+          </div>
+          <div class="swatches">
+            <b class="sw is-on" style="--sw:#C1272D"></b>
+            <b class="sw" style="--sw:#B7232A"></b>
+            <b class="sw" style="--sw:#8B1A1F"></b>
+            <b class="sw" style="--sw:#9E1E25"></b>
+          </div>
+        </div>
+      </div>
+
+      <!-- 设置项 2 · 委托 -->
+      <div class="sgroup">
+        <div class="sgroup-h">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-torii"/></svg>
+          <span>委托</span>
+          <i class="gl"></i>
+        </div>
+
+        <div class="srow">
+          <div class="scell">
+            <div class="sk">任务类型图标</div>
+            <div class="sd">在任务名左侧显示类型徽记</div>
+          </div>
+          <span class="switch is-on"><i></i></span>
+        </div>
+
+        <div class="srow">
+          <div class="scell">
+            <div class="sk">卡片底轨进度</div>
+            <div class="sd">卡底内嵌 2px 轨道，实心段等于完成比例</div>
+          </div>
+          <span class="switch is-on"><i></i></span>
+        </div>
+
+        <div class="srow">
+          <div class="scell">
+            <div class="sk">全清达摩点睛</div>
+            <div class="sd">任务全数完成时点亮达摩右眼</div>
+          </div>
+          <span class="switch is-on"><i></i></span>
+        </div>
+
+        <div class="srow">
+          <div class="scell">
+            <div class="sk">排序方式</div>
+            <div class="sd">默认按重置紧迫度降序，快过期的排最上</div>
+          </div>
+          <div class="pick">
+            <span class="pk is-on">紧迫度</span>
+            <span class="pk">类型</span>
+            <span class="pk">序号</span>
+          </div>
+        </div>
+
+        <div class="srow">
+          <div class="scell">
+            <div class="sk">每日刷新时刻</div>
+            <div class="sd">日常委托的重置时间点</div>
+          </div>
+          <div class="numfield"><span>04</span><i class="colon">:</i><span>00</span></div>
+        </div>
+      </div>
+
+      <!-- 设置项 3 · 提示 -->
+      <div class="sgroup">
+        <div class="sgroup-h">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-suzu"/></svg>
+          <span>提示</span>
+          <i class="gl"></i>
+        </div>
+
+        <div class="srow">
+          <div class="scell">
+            <div class="sk">重置前提醒</div>
+            <div class="sd">倒计时进入 30 分钟内时提示一次</div>
+          </div>
+          <span class="switch"><i></i></span>
+        </div>
+
+        <div class="srow">
+          <div class="scell">
+            <div class="sk">可提交待领奖提醒</div>
+            <div class="sd">打满但未领取时置顶并加重提示</div>
+          </div>
+          <span class="switch is-on"><i></i></span>
+        </div>
+      </div>
+
+      <!-- 底部动作 -->
+      <div class="sfoot">
+        <span class="sbtn ghost">恢复默设</span>
+        <span class="sbtn primary">存 档</span>
+      </div>
+
+      <div class="snote">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-ofuda"/></svg>
+        <span>本页仅为视觉稿 · 所有控件为静态展示，不承载交互</span>
+      </div>
+
+    </section>
+
+    <!-- 注连绳 · 末组下方的收束横幅 -->
+    <div class="shimenawa-deco" aria-hidden="true">
+      <svg viewBox="0 0 620 26" preserveAspectRatio="none">
+        <g fill="none" stroke="var(--gold)" stroke-width="1.5"
+           stroke-linejoin="round" stroke-linecap="round">
+          <!-- 绳体：连续波浪 -->
+          <path d="M0,9 C17,12 34,6 52,9 C70,12 87,6 104,9 C121,12 139,6 156,9
+                   C173,12 190,6 207,9 C224,12 242,6 259,9 C276,12 293,6 310,9
+                   C327,12 345,6 362,9 C379,12 396,6 413,9 C430,12 448,6 465,9
+                   C482,12 499,6 516,9 C533,12 551,6 568,9 C585,12 603,6 620,9"/>
+          <!-- 纸垂：9 条，长短相间 -->
+          <path d="M52,11.5 V18"/><path d="M104,11 V20"/><path d="M156,11.5 V18"/>
+          <path d="M207,11 V20"/><path d="M259,11.5 V18"/><path d="M310,11 V20"/>
+          <path d="M362,11.5 V18"/><path d="M413,11 V20"/><path d="M465,11.5 V18"/>
+          <path d="M516,11 V20"/><path d="M568,11.5 V18"/>
+        </g>
+      </svg>
+    </div>
+
+    <!-- 页脚 -->
+    <div class="foot"><i class="ln"></i><i class="dm"></i><span>阴阳寮 · 任务录</span><i class="dm"></i><i class="ln"></i></div>
+
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   主题切换
+   ============================================================ */
+const root = document.documentElement;
+const themeBtn = document.getElementById('themeBtn');
+const themeTxt = document.getElementById('themeTxt');
+themeBtn.addEventListener('click', () => {
+  const next = root.dataset.theme === 'dark' ? 'light' : 'dark';
+  root.dataset.theme = next;
+  themeTxt.textContent = next === 'dark' ? '明版' : '暗版';
+});
+/* 支持 ?theme=light / ?theme=dark 直达 */
+(function initTheme(){
+  const q = new URLSearchParams(location.search).get('theme');
+  if (q === 'light' || q === 'dark') {
+    root.dataset.theme = q;
+    themeTxt.textContent = q === 'dark' ? '明版' : '暗版';
+  }
+})();
+
+/* ============================================================
+   倒计时 · 等宽防跳
+   ============================================================ */
+const clockEl = document.getElementById('clock');
+let remain = 2 * 3600 + 14 * 60 + 8;
+const pad = n => String(n).padStart(2, '0');
+function tick() {
+  remain = Math.max(0, remain - 1);
+  clockEl.textContent =
+    pad(Math.floor(remain / 3600)) + ':' +
+    pad(Math.floor((remain % 3600) / 60)) + ':' +
+    pad(remain % 60);
+}
+setInterval(tick, 1000);
+
+/* ============================================================
+   任务状态机
+   未接取 locked · 进行中 active · 可提交 ready · 已完成 done
+   ============================================================ */
+function render(task) {
+  const cur   = +task.dataset.cur;
+  const total = +task.dataset.total;
+  const done  = task.dataset.done === '1';
+
+  // 计数
+  const cnt = task.querySelector('.cnt');
+  if (cnt) cnt.textContent = cur + '/' + total;
+
+  // 菱形格
+  task.querySelectorAll('.gem').forEach((g, i) => {
+    g.classList.toggle('on', !done && i < cur);
+  });
+
+  // 底轨
+  const pct = total ? (done ? 100 : Math.round(cur / total * 100)) : 0;
+  task.querySelector('.track i').style.width = pct + '%';
+
+  // 状态判定
+  let st;
+  if (done)        st = 'done';
+  else if (cur >= total) st = 'ready';
+  else if (cur > 0)      st = 'active';
+  else                   st = 'locked';
+
+  // 单次任务（无进度格）：说明文案随状态联动
+  const note = task.querySelector('.note');
+  if (note) {
+    note.hidden = !(st === 'locked' || st === 'done');
+    if (st === 'locked') note.textContent = task.dataset.noteLocked || '未接取';
+    if (st === 'done')   note.textContent = task.dataset.noteDone   || '已达成';
+  }
+
+  task.dataset.state = st;
+  updateStats();
+}
+
+/* 统计三卡 */
+function updateStats() {
+  const all = [...document.querySelectorAll('.task')];
+  const n = s => all.filter(t => t.dataset.state === s).length;
+  document.getElementById('stActive').textContent = pad(n('active'));
+  document.getElementById('stReady').textContent  = pad(n('ready'));
+  document.getElementById('stDone').textContent   = pad(n('done'));
+
+  /* 达摩点睛：全部任务完成时点亮右眼 */
+  const allDone = all.length > 0 && all.every(t => t.dataset.state === 'done');
+  document.querySelector('.panel').classList.toggle('all-done', allDone);
+}
+
+/* 点击菱形 → 推进度 */
+document.querySelectorAll('.task').forEach(task => {
+  const total = +task.dataset.total;
+  task.querySelectorAll('.gem.click').forEach((g, i) => {
+    g.addEventListener('click', e => {
+      e.stopPropagation();
+      if (task.dataset.done === '1') return;
+      // 点已亮的最后一格 → 回退一格；否则推进到该格
+      const cur = +task.dataset.cur;
+      task.dataset.cur = (i + 1 === cur) ? Math.max(0, cur - 1) : (i + 1);
+      render(task);
+    });
+  });
+});
+
+/* 点击卡片 → 完成 / 取消 */
+document.querySelectorAll('.task').forEach(task => {
+  const toggle = () => {
+    const total = +task.dataset.total;
+    if (task.dataset.done === '1') {
+      task.dataset.done = '0';
+      task.dataset.cur = Math.min(task.dataset.cur, total - 1);
+    } else {
+      // 未满进度时点击 = 补满；已满 = 提交完成
+      task.dataset.cur = total;
+      task.dataset.done = '1';
+    }
+    render(task);
+  };
+  task.addEventListener('click', toggle);
+  task.addEventListener('keydown', e => {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); }
+  });
+});
+
+/* 初始化 */
+document.querySelectorAll('.task').forEach(render);
+</script>
+</body>
+</html>

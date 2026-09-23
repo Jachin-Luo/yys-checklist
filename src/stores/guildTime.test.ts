@@ -3,9 +3,9 @@ import { resetGuildTimeMemory, useGuildTimeStore } from './guildTime';
 import { useSessionStore } from './session';
 
 /**
- * 档案级寮时间 store。
+ * 账号级寮时间 store。
  *
- * 2026-09-16 由设备级升格 —— 这里锁住的关键点是"**按当前档案的 scope 落盘**"，
+ * 2026-09-16 由设备级升格 —— 这里锁住的关键点是"**按当前账号的 scope 落盘**"，
  * 以及失败回滚（乐观更新必须能退回去，否则界面会显示一个并未保存的时间）。
  */
 const { saveGuildTime } = vi.hoisted(() => ({ saveGuildTime: vi.fn(async () => undefined) }));
@@ -22,8 +22,8 @@ beforeEach(() => {
 
 afterEach(() => vi.restoreAllMocks());
 
-describe('guildTime store（档案级）', () => {
-  it('setGuildTime 改一条，并把整表落盘到当前档案的 scope', async () => {
+describe('guildTime store（账号级）', () => {
+  it('setGuildTime 改一条，并把整表落盘到当前账号的 scope', async () => {
     await useGuildTimeStore.getState().setGuildTime('daily_daoguan', '20:00');
 
     expect(useGuildTimeStore.getState().guildTime).toEqual({ daily_daoguan: '20:00' });

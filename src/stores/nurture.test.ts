@@ -5,7 +5,7 @@ import { resetNurtureMemory, useNurtureStore } from './nurture';
 /**
  * 结界寄养 store。
  *
- * 2026-09-16：由设备级升为**档案级**，落盘从"直写 localStorage"改为走契约
+ * 2026-09-16：由设备级升为**账号级**，落盘从"直写 localStorage"改为走契约
  * `api.savePlans(scope, plans)`。因此这里的断言对象也随之变化：
  * 不再检查 `storage.written`，而是检查**契约调用**（这是新架构下的正确边界 ——
  * 分片键是 Mock 的实现细节，store 根本不知道它叫什么）。
@@ -26,8 +26,8 @@ beforeEach(() => {
 
 afterEach(() => vi.restoreAllMocks());
 
-describe('nurture store（档案级）', () => {
-  it('add 后进入内存态，并按当前档案的 scope 落盘', async () => {
+describe('nurture store（账号级）', () => {
+  it('add 后进入内存态，并按当前账号的 scope 落盘', async () => {
     await useNurtureStore.getState().add('20:00', 24, 0, false);
 
     const records = useNurtureStore.getState().records;
@@ -36,7 +36,7 @@ describe('nurture store（档案级）', () => {
     expect(records[0].started).toBe(false);
 
     expect(savePlans).toHaveBeenCalledTimes(1);
-    /* 断言"按当前档案的 scope 落盘"——这是升为档案级后最关键的一条契约 */
+    /* 断言"按当前账号的 scope 落盘"——这是升为账号级后最关键的一条契约 */
     expect(savePlans).toHaveBeenCalledWith(SCOPE, records);
   });
 

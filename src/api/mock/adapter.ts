@@ -66,7 +66,7 @@ export class MockApi implements ApiClient {
       /* 日志与 state 同一入口：两者都是「勾选」这件事的两个侧面
          （当前周期状态 / 历史事实），分两次请求只会让它们可能来自不同时刻 */
       log: store.readLogShard(scope.profileId),
-      /* 2026-09-16：寮时间与寄养记录由设备级升为档案级，随首屏一起下发
+      /* 2026-09-16：寮时间与寄养记录由设备级升为账号级，随首屏一起下发
          （壳层徽章与清单页时间徽章都要用它们，单独请求只会多一次往返） */
       guildTime: store.readGuildTimeShard(scope.profileId),
       plans: store.readPlansShard(scope.profileId),
@@ -133,16 +133,16 @@ export class MockApi implements ApiClient {
     });
   }
 
-  /* ── 游戏档案 ── */
+  /* ── 游戏账号 ── */
 
   /**
-   * 返回该用户的**全部**档案（含已归档），按 sort 升序。
+   * 返回该用户的**全部**账号（含已归档），按 sort 升序。
    *
-   * 为什么不过滤归档：设计文档 §6.4 要求「归档的档案不出现在切换器，但设置页可恢复」——
+   * 为什么不过滤归档：设计文档 §6.4 要求「归档的账号不出现在切换器，但设置页可恢复」——
    * 若这里就滤掉，设置页永远看不到它们，恢复能力无从实现。契约只有 `listProfiles(userId)`
    * 一个方法（不加参数），因此把「归档不出现在日常入口」这条规则放在 UI 层（切换器过滤），
    * 语义也更准确：归档 = 收起来，不是删掉。
-   * `switchProfile` 仍会拒绝归档档案 —— 那条约束在服务端/适配器侧强制。
+   * `switchProfile` 仍会拒绝归档账号 —— 那条约束在服务端/适配器侧强制。
    */
   async listProfiles(userId: string): Promise<Profile[]> {
     injectFailure('listProfiles');
@@ -176,9 +176,9 @@ export class MockApi implements ApiClient {
         updatedAt: at,
       };
       store.saveProfiles([...s.profiles, profile]);
-      /* 立刻初始化该档案的六份空数据（§5.5 ProfileDraft；日志片 2026-09-15 加入，
-         寮时间 / 寄养片 2026-09-16 加入）。新档案的寮时间与寄养列表都是空的 ——
-         要复用另一个档案的配置，走设置页的「同步到其他档案」。 */
+      /* 立刻初始化该账号的六份空数据（§5.5 ProfileDraft；日志片 2026-09-15 加入，
+         寮时间 / 寄养片 2026-09-16 加入）。新账号的寮时间与寄养列表都是空的 ——
+         要复用另一个账号的配置，走设置页的「同步到其他账号」。 */
       store.saveStateShard(store.emptyState(profile.id, userId, at));
       store.saveViewShard(effectiveView(seedMetaDb.viewDefaults, { profileId: profile.id }));
       store.saveOverridesShard(store.emptyOverrides(profile.id, at));
@@ -212,11 +212,11 @@ export class MockApi implements ApiClient {
       const s = store.ensureStore();
       const removed = s.profiles.find((p) => p.id === id);
       if (!removed) throw new Error(`[mock] profile 不存在: ${id}`);
-      /* 边界 §6.4：保护的是「至少要有一个**存活**档案」——
-         删已归档的档案不该被这条规则挡住（它本来就不在存活集合里）。 */
+      /* 边界 §6.4：保护的是「至少要有一个**存活**账号」——
+         删已归档的账号不该被这条规则挡住（它本来就不在存活集合里）。 */
       const alive = s.profiles.filter((p) => !p.archived && p.userId === scope.userId);
       if (!removed.archived && alive.length <= 1) {
-        throw new Error('[mock] 至少保留一个档案，禁止删除最后一个');
+        throw new Error('[mock] 至少保留一个账号，禁止删除最后一个');
       }
       let list = s.profiles.filter((p) => p.id !== id);
       if (removed?.isDefault) {
@@ -239,14 +239,14 @@ export class MockApi implements ApiClient {
       const s = store.ensureStore();
       const profile = s.profiles.find((p) => p.id === profileId);
       if (!profile) throw new Error(`[mock] profile 不存在: ${profileId}`);
-      if (profile.archived) throw new Error('[mock] 档案已归档，不能切换');
+      if (profile.archived) throw new Error('[mock] 账号已归档，不能切换');
       const session: Session = { ...s.session, profileId };
       store.saveSession(session);
       return session;
     });
   }
 
-  /* ── 用户数据（增量写入，每档案分片） ── */
+  /* ── 用户数据（增量写入，每账号分片） ── */
 
   async getState(scope: DataScope): Promise<CheckState> {
     injectFailure('getState');
@@ -304,7 +304,7 @@ export class MockApi implements ApiClient {
   }
 
   /**
-   * 跨档案勾选（清单长按）要读**目标档案**的日志才能把新记录合并进去 —— 见契约注释。
+   * 跨账号勾选（清单长按）要读**目标账号**的日志才能把新记录合并进去 —— 见契约注释。
    * 语义与 `getBootstrap().log` 完全一致：原样读分片，不做周期重置（日志是历史事实）。
    */
   async getCheckLog(scope: DataScope): Promise<CheckLog> {
@@ -346,10 +346,10 @@ export class MockApi implements ApiClient {
     });
   }
 
-  /* ── 档案级偏好（2026-09-16 由设备级升格）──
+  /* ── 账号级偏好（2026-09-16 由设备级升格）──
      整表读写，与 `saveView` 同一形态：两份额数据都极小，不需要增量协议。
-     注意 `assertScope` 会校验 profileId 属于当前用户 —— 跨档案同步也是走这里，
-     所以"给别人的档案写数据"在 Mock 层就被挡住了（服务端同样应校验）。 */
+     注意 `assertScope` 会校验 profileId 属于当前用户 —— 跨账号同步也是走这里，
+     所以"给别人的账号写数据"在 Mock 层就被挡住了（服务端同样应校验）。 */
 
   async getGuildTime(scope: DataScope): Promise<GuildTimePrefs> {
     injectFailure('getGuildTime');

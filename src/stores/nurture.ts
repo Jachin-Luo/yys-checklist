@@ -7,11 +7,11 @@ import { useSessionStore } from './session';
 /**
  * 结界寄养任务 / 计划。
  *
- * ## 2026-09-16：由设备级升为档案级（用户决策）
+ * ## 2026-09-16：由设备级升为账号级（用户决策）
  *
  * 原来的理由是"寄养是这台设备的操作节奏提醒、与玩哪个号无关"—— 这条站不住：
  * 结界卡的种类与时长因号而异（太鼓 / 斗鱼 / 美食卡，6h / 12h…），上卡时间自然也不同，
- * 切号后看到同一个寄养列表更像 bug。改档案级同时满足了"所有配置项均可备份"。
+ * 切号后看到同一个寄养列表更像 bug。改账号级同时满足了"所有配置项均可备份"。
  *
  * 落盘键：`yys:plans:{profileId}`；读路径：首屏 `getBootstrap().plans`
  * （壳层的「下一次该收」徽章曾自己读 localStorage，现在跟着首屏一起下来）。
@@ -52,7 +52,7 @@ interface NurtureState {
  * 结果是内存与磁盘不一致，且用户看到"刚加的那条凭空消失"。
  *
  * 整表写语义下"最后一次成功 = 落盘内容"，所以只要保证回滚不落后于最新写入即可。
- * `resetNurtureMemory`（切号）也会 ++：让上一个档案在途的失败不再回滚到新档案上。
+ * `resetNurtureMemory`（切号）也会 ++：让上一个账号在途的失败不再回滚到新账号上。
  */
 let writeSeq = 0;
 
@@ -98,11 +98,11 @@ export const useNurtureStore = create<NurtureState>((set, get) => {
 
 /**
  * 切号时清空内存态（由 `useBootstrap` 调用）。
- * 不清的话，新档案的首屏聚合返回前会显示**旧档案**的寄养记录，
+ * 不清的话，新账号的首屏聚合返回前会显示**旧账号**的寄养记录，
  * 而徽章上的"下一次该收"正是最容易让人立刻行动的信息，错一帧就可能白跑一趟。
  */
 export const resetNurtureMemory = (): void => {
-  /* ++ 让在途写入的失败不再回滚到新档案上（见 `writeSeq` 的注释） */
+  /* ++ 让在途写入的失败不再回滚到新账号上（见 `writeSeq` 的注释） */
   writeSeq += 1;
   useNurtureStore.setState({ records: [], error: null });
 };

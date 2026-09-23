@@ -26,8 +26,8 @@ export function mergeItems(seed: Item[], ov: ItemOverrides): Item[] {
 }
 
 /**
- * 视图偏好：默认值（meta.viewDefaults）与档案偏好合并。
- * 档案里缺失或非法的字段回落默认值 —— 保证升级数据结构后旧偏好不会把 UI 卡死。
+ * 视图偏好：默认值（meta.viewDefaults）与账号偏好合并。
+ * 账号里缺失或非法的字段回落默认值 —— 保证升级数据结构后旧偏好不会把 UI 卡死。
  */
 export function effectiveView(defaults: ViewDefaults, pref?: Partial<ViewPrefs> | null): ViewPrefs {
   const p = pref || {};
@@ -49,7 +49,7 @@ export function effectiveView(defaults: ViewDefaults, pref?: Partial<ViewPrefs> 
   };
 }
 
-/** 用户数据覆盖层的空骨架（新建档案时初始化三份空数据用） */
+/** 用户数据覆盖层的空骨架（新建账号时初始化三份空数据用） */
 export function emptyOverrides(profileId: string, updatedAt: string): ItemOverrides {
   return { profileId, custom: [], hidden: [], order: [], updatedAt };
 }

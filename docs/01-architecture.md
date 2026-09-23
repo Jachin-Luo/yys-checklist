@@ -11,10 +11,11 @@
 | 框架 | React 18 + ReactDOM 18 | `package.json` dependencies |
 | 语言 | TypeScript 严格模式 | `tsconfig.app.json` |
 | 构建 | Vite 5 | `vite.config.ts` |
-| 样式 | Tailwind CSS 3（+ `tailwindcss-animate`） | `tailwind.config.ts`、`postcss.config.js` |
+| 样式 | Tailwind CSS 3（+ `tailwindcss-animate`）；颜色槽写成 `rgb(var(--c-x) / <alpha-value>)`，取值随主题变 | `tailwind.config.ts`、`postcss.config.js`、`src/styles/theme.css` |
+| 主题 | 明暗双主题（设备级键 `yys:theme`；初始值优先本机存档、其次跟随 `prefers-color-scheme`、默认明版） | `src/stores/theme.ts`、`src/styles/theme.css` |
 | 状态 | Zustand 5 | `src/stores/` |
 | 测试 | Vitest 2，`environment: 'node'`，`include: ['src/**/*.test.ts']` | `vite.config.ts` |
-| 图标 | `lucide-react` | 各组件 |
+| 图标 | 自建和风图标库（`<symbol>` sprite，无第三方图标依赖） | `src/components/icons/` |
 | 路径别名 | `@` → `./src` | `vite.config.ts`、`tsconfig.app.json` |
 | 其他运行时依赖 | `nanoid`（id 生成）、`tailwind-merge`（类名合并） | `package.json` |
 
@@ -114,9 +115,9 @@ sequenceDiagram
 | 根渲染 | `src/main.tsx` | `React.StrictMode`，**不注册 Service Worker** |
 | 首屏聚合 | `src/App.tsx` → `hooks/useBootstrap.ts` | 首屏唯一入口；切号 / `bootstrapTick` 变化时全量重载 |
 | 周期刷新 | `hooks/usePeriodRefresh.ts` | 每分钟边界 + 窗口聚焦 + 可见性变化时重估周期状态，**不写盘** |
-| 设备级状态 | `src/App.tsx` 挂载时 `hydrate()` → `stores/device.ts` | **只剩引导标记**（2026-09-16 起）。寮时间迁至 `stores/guildTime`、寄养迁至 `stores/nurture`，两者都改为**档案级**并随 `getBootstrap` 下发 |
+| 设备级状态 | `src/App.tsx` 挂载时 `hydrate()` → `stores/device.ts` | **只剩引导标记**（2026-09-16 起）。寮时间迁至 `stores/guildTime`、寄养迁至 `stores/nurture`，两者都改为**账号级**并随 `getBootstrap` 下发 |
 | 首屏错误 | `App.tsx` | 渲染 `ErrorScreen` |
-| 顶层提示 | `App.tsx` | `SaveErrorNotice`（聚合六处 `error`）、`OnboardingDialog`、`ConfirmDialog`、`ProfilePickDialog`（长按跨档案勾选的选择器，与确认框同一位置） |
+| 顶层提示 | `App.tsx` | `SaveErrorNotice`（聚合六处 `error`）、`OnboardingDialog`、`ConfirmDialog`、`ProfilePickDialog`（长按跨账号勾选的选择器，与确认框同一位置） |
 
 ## 5. 导航与页面分派
 
@@ -124,7 +125,7 @@ sequenceDiagram
 
 - `src/stores/ui.ts`：`NavKey`（type）、`NAV_ITEMS`（导航项数组）、`setNav`、state 字段 `nav` / `bootstrapLoading` / `bootstrapError` / `confirmState` / `bootstrapTick`。
 - `src/components/common/NavContent.tsx`：`switch (nav)` 分派 7 个一级页面；首屏 `bootstrapLoading` 时渲染 `Skeleton`。
-- 两套骨架各自渲染导航：`DesktopShell.tsx`（左侧固定 `w-56` 侧栏 + 底部 `ProfileSwitcher`）、`MobileShell.tsx`（顶部应用栏 + 进度条 + 底部固定 Tab，带 `safe-area` 与 `dvh` 处理）。
+- 两套骨架各自渲染导航：`DesktopShell.tsx`（左侧固定 `w-56` 侧栏 + 底部 `ProfileSwitcher`）、`MobileShell.tsx`（顶部应用栏 + 底部固定 Tab，带 `safe-area` 与 `dvh` 处理）。两端页头是同一套品牌锁定（标题「囤囤鼠」/ 副标题「阴阳师任务清单」）；**进度不进顶栏**（2026-09-23 起）—— 每个页面各自展示自己的进度，顶栏只放身份与时间信息。
 - 断点判据唯一来源：`src/hooks/useBreakpoint.ts`，`matchMedia('(min-width: 768px)')`；模块级首帧缓存避免闪烁。
 
 > 页面内部不应自行读屏宽 —— 全项目只有 `useBreakpoint` 读窗口宽度。新增布局差异请走 `components/mobile` / `components/desktop` 与 `styles/layout.ts`。
@@ -153,7 +154,7 @@ stores/view  ──> stores/session
 components/common/SaveErrorNotice ──> 聚合 session / items / check / view / device 五处 error
 ```
 
-`useBootstrap` 的顺序很关键：**先按序清空 items → check → view 的内存态，再写回新数据**，避免切号瞬间旧档案的勾选残留。
+`useBootstrap` 的顺序很关键：**先按序清空 items → check → view 的内存态，再写回新数据**，避免切号瞬间旧账号的勾选残留。
 
 ## 7. 数据流：一次勾选发生了什么
 
@@ -163,7 +164,7 @@ components/common/SaveErrorNotice ──> 聚合 session / items / check / view 
   → stores/check.toggle / setMany / toggleWithCascade（乐观更新内存）
   → api.setChecked / clearAllChecked（契约）
   → api/mock/adapter 写路径经 userStore.enqueue 串行化
-  → api/mock/persist.KEY.state(profileId) 只重写当前档案的勾选分片
+  → api/mock/persist.KEY.state(profileId) 只重写当前账号的勾选分片
   → services/localStore.write 落 localStorage
 ```
 
@@ -180,7 +181,7 @@ api.getBootstrap
 要点：
 
 - 写操作**串行化**（`userStore.enqueue`），避免竞态覆盖。
-- **分片存储**：勾一条只重写 `yys:state:{profileId}`，不触碰其他档案分片（`api/mock/persist.ts` 的 `KEY`，由 `api/mock/contract.test.ts` 单测守护）。
+- **分片存储**：勾一条只重写 `yys:state:{profileId}`，不触碰其他账号分片（`api/mock/persist.ts` 的 `KEY`，由 `api/mock/contract.test.ts` 单测守护）。
 - 失败提示：写失败会写入对应 store 的 `error`，由 `components/common/SaveErrorNotice.tsx` 统一呈现。
 
 ## 8. 页面对应的编排 hook
@@ -193,7 +194,16 @@ api.getBootstrap
 | `LimitedPage.tsx` | `useChecklist`（限时分区，固定按剩余天数升序，无排序控件） |
 | `StatsPage.tsx` | `domain/calendar.buildMonthGrid`（月历）+ `stores/check` 的 `log` + `domain/stats.summarizeRangeGain`（区间收益）—— **不经过 `useChecklist`**，因此不受「隐藏已完成 / 覆盖隐藏」影响 |
 | `ToolsPage.tsx` | `stores/tools.ensure`（御魂 / 悬赏 / 寄养三段懒加载） |
-| `MePage.tsx` | `pages/settings/*` **六个**分区（档案 / 同步到其他档案 / 一键日常 / 条目管理 / 视图偏好 / 寮时间）+ `components/settings/*` 两个分区 |
+| `MePage.tsx` | 设置页：**4 组**（观感 / 委托 / 账号 / 数据）共 9 个分区。来源是 `pages/settings/*` 六个（账号 / 同步到其他账号 / 一键日常 / 条目管理 / 卡片显示字段 / 寮时间）+ `components/settings/*` 两个（数据版本 / 数据备份） |
+
+> **设置页的两级结构与形态口径**（2026-09-23 重构）：组名走清单页同一套分组头 `SectionTitle`
+> （传 `flush` —— 页面容器已自带 `px-3.5`，不传会缩两次）。组内按「**能一行说完的平铺、
+> 需要展开看的收起**」分：平铺用 `components/common/SettingRow`（与任务卡同一套材质
+> `surface` + `shadow-card` + `rounded-md`），收起用 `CollapsibleSection`；两者间距由组容器的
+> `space-y-1.5` 统一给（`CollapsibleSection` 因此不再自带 `mt-4`）。5 个长列表
+> （覆盖清单 / 条目库 / 账号列表 / 寮时间 / 备份）默认收起，靠 `summary` 在收起状态下
+> 也给出关键结论（"已覆盖 12 项" / "存活 2 个" / "快照更新于 9/9"）。分段选择类控件统一用
+> `components/common/Segmented`（`value` 传 `null` 表示"不属于任何一档"，此时三档都不高亮）。
 
 `hooks/useChecklist.ts` 是清单类页面的公共编排：过滤（`domain/sort.isVisible`）+ 排序（`domain/sort.buildComparator`）+ 分组，导出 `Checklist`、`ChecklistTarget`、`HIGH_WEIGHT`（= 30）。
 

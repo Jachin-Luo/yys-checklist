@@ -139,8 +139,8 @@ describe('视图 / 覆盖层：各自独立分片（D3）', () => {
   });
 });
 
-describe('档案全套：大号 / 小号（§6）', () => {
-  it('createProfile 初始化三份空数据且首个档案默认', async () => {
+describe('账号全套：大号 / 小号（§6）', () => {
+  it('createProfile 初始化三份空数据且首个账号默认', async () => {
     const p = await api.createProfile('u_local', { name: '小号', server: '网易官服' });
     expect(p.isDefault).toBe(false);
     expect(p.sort).toBe(2);
@@ -157,7 +157,7 @@ describe('档案全套：大号 / 小号（§6）', () => {
     expect(session.profileId).toBe(p.id);
   });
 
-  it('勾选按档案隔离：两档案互不串', async () => {
+  it('勾选按账号隔离：两账号互不串', async () => {
     const p = await api.createProfile('u_local', { name: '小号' });
     const atA = Date.now();
     const atB = Date.now() - 1;
@@ -168,14 +168,14 @@ describe('档案全套：大号 / 小号（§6）', () => {
     expect(storage.getItem(KEY.state(p.id))).not.toBeNull();
   });
 
-  it('删档连带清分片；禁止删最后一个；默认档案自动转移', async () => {
+  it('删档连带清分片；禁止删最后一个；默认账号自动转移', async () => {
     const p = await api.createProfile('u_local', { name: '小号' });
     await api.setChecked({ userId: 'u_local', profileId: p.id }, 'daily_sign', Date.now());
     await api.deleteProfile(scope, p.id);
     expect(await api.listProfiles('u_local')).toHaveLength(1);
     expect(storage.getItem(KEY.state(p.id))).toBeNull();
 
-    await expect(api.deleteProfile(scope, 'p_main')).rejects.toThrow('至少保留一个档案');
+    await expect(api.deleteProfile(scope, 'p_main')).rejects.toThrow('至少保留一个账号');
   });
 
   it('updateProfile 设默认时取消其它默认', async () => {
@@ -225,8 +225,8 @@ describe('越权与契约边界（§5.1）', () => {
   });
 });
 
-describe('档案归档语义（§6.4）', () => {
-  it('listProfiles 返回已归档档案（设置页才能"恢复"），但 switchProfile 拒绝切换', async () => {
+describe('账号归档语义（§6.4）', () => {
+  it('listProfiles 返回已归档账号（设置页才能"恢复"），但 switchProfile 拒绝切换', async () => {
     const p = await api.createProfile('u_local', { name: '小号' });
     await api.updateProfile(p.id, { archived: true });
 
@@ -237,14 +237,14 @@ describe('档案归档语义（§6.4）', () => {
     await expect(api.switchProfile(p.id)).rejects.toThrow('已归档');
   });
 
-  it('删除已归档档案不受"禁删最后一个"限制（存活档案数没变）', async () => {
+  it('删除已归档账号不受"禁删最后一个"限制（存活账号数没变）', async () => {
     const p = await api.createProfile('u_local', { name: '小号' });
     await api.updateProfile(p.id, { archived: true });
     await expect(api.deleteProfile(scope, p.id)).resolves.toBeUndefined();
     expect((await api.listProfiles('u_local')).some((x) => x.id === p.id)).toBe(false);
   });
 
-  it('删除当前档案后，存活档案仍在且会话指针不再指向已删档案', async () => {
+  it('删除当前账号后，存活账号仍在且会话指针不再指向已删账号', async () => {
     const p = await api.createProfile('u_local', { name: '小号' });
     await api.switchProfile(p.id);
     expect((await api.getSession()).profileId).toBe(p.id);
@@ -252,23 +252,23 @@ describe('档案归档语义（§6.4）', () => {
     await api.deleteProfile({ userId: 'u_local', profileId: p.id }, p.id);
     const list = await api.listProfiles('u_local');
     expect(list.map((x) => x.id)).toEqual(['p_main']);
-    /* mock 内部已把会话指针落到存活档案，不会再指向已删档案 */
+    /* mock 内部已把会话指针落到存活账号，不会再指向已删账号 */
     const s = await api.getSession();
     expect(list.some((x) => x.id === s.profileId)).toBe(true);
   });
 });
 
-/* ── 档案级偏好分片（2026-09-16）─────────────────────────────────────────────
-   寮时间与结界寄养任务由**设备级**升为**档案级**。这一组锁住四件事：
-     ① 两个分片**按档案隔离**（换号看到的是各自的一份 —— 这是本次改动的全部意义）；
+/* ── 账号级偏好分片（2026-09-16）─────────────────────────────────────────────
+   寮时间与结界寄养任务由**设备级**升为**账号级**。这一组锁住四件事：
+     ① 两个分片**按账号隔离**（换号看到的是各自的一份 —— 这是本次改动的全部意义）；
      ② 它们**随 bootstrap 下发**（壳层徽章与时间徽章不必再单独请求）；
      ③ 它们**随备份往返**（用户要求"所有配置项均可备份"，这是前提）；
      ④ 删档时**不留孤儿键**（`removeProfileShards` 漏掉新分片会攒垃圾）。
-   另外补 `getCheckLog`：清单长按跨档案勾选时，靠它读**目标档案**的日志来合并新记录。 */
-describe('档案级偏好分片（寮时间 / 寄养任务 / 日志读取）', () => {
+   另外补 `getCheckLog`：清单长按跨账号勾选时，靠它读**目标账号**的日志来合并新记录。 */
+describe('账号级偏好分片（寮时间 / 寄养任务 / 日志读取）', () => {
   const p2scope = (profileId: string) => ({ userId: scope.userId, profileId });
 
-  it('寮时间按档案隔离：一档一份，互不覆盖', async () => {
+  it('寮时间按账号隔离：一档一份，互不覆盖', async () => {
     const p2 = await api.createProfile(scope.userId, { name: '小号' });
     await api.saveGuildTime(scope, { daily_daoguan: '20:00' });
     await api.saveGuildTime(p2scope(p2.id), { daily_daoguan: '21:30', weekly_banquet: '20:30' });
@@ -280,7 +280,7 @@ describe('档案级偏好分片（寮时间 / 寄养任务 / 日志读取）', (
     });
   });
 
-  it('寄养任务按档案隔离（换号不会看到另一个号的寄养列表）', async () => {
+  it('寄养任务按账号隔离（换号不会看到另一个号的寄养列表）', async () => {
     const p2 = await api.createProfile(scope.userId, { name: '小号' });
     const plan = { id: 'n_1', base: '08:00', hours: 12, delay: 0, started: true, createdAt: 1, dones: { 1: 100 } };
 
@@ -335,7 +335,7 @@ describe('档案级偏好分片（寮时间 / 寄养任务 / 日志读取）', (
     expect(plans[1].delay).toBe(60);
   });
 
-  it('getCheckLog 读的是**传入 scope** 的日志，而不是当前档案的', async () => {
+  it('getCheckLog 读的是**传入 scope** 的日志，而不是当前账号的', async () => {
     const p2 = await api.createProfile(scope.userId, { name: '小号' });
     await api.saveCheckLog(p2scope(p2.id), {
       profileId: p2.id,
@@ -348,7 +348,7 @@ describe('档案级偏好分片（寮时间 / 寄养任务 / 日志读取）', (
     expect((await api.getCheckLog(scope)).days).toEqual({});
   });
 
-  it('删除档案时两个新分片一并清除（不留孤儿键）', async () => {
+  it('删除账号时两个新分片一并清除（不留孤儿键）', async () => {
     const p2 = await api.createProfile(scope.userId, { name: '小号' });
     await api.saveGuildTime(p2scope(p2.id), { daily_daoguan: '20:00' });
     await api.savePlans(p2scope(p2.id), [{ id: 'n_1', base: '08:00', hours: 6, delay: 0, started: false, createdAt: 1 }]);

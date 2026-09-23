@@ -3,12 +3,12 @@ import type { ItemOverrides, ViewPrefs } from '../api/types';
 import { SYNC_PARTS, applyParts, defaultSyncKeys, describeKeys, type SyncSource } from './sync';
 
 /**
- * 档案间配置同步的合并规则。
+ * 账号间配置同步的合并规则。
  *
  * 这里没有 IO，所以用例全部围绕两件事：
  *   1. **清单**里有什么、默认勾什么（产品口径）；
  *   2. `applyParts` 是**字段级**接管还是**整表**接管（这是最容易改错的地方 ——
- *      用户只勾「一键日常覆盖」时，目标档案的筛选与置顶绝不该被动）。
+ *      用户只勾「一键日常覆盖」时，目标账号的筛选与置顶绝不该被动）。
  */
 
 const view = (patch: Partial<ViewPrefs> = {}): ViewPrefs => ({
@@ -110,7 +110,7 @@ describe('applyParts：整表接管 vs 字段级接管', () => {
     /* 若这里被写成 `?? []`，就会变成"用户显式关掉了全部覆盖项"，与本意相反 */
   });
 
-  it('补丁是深一层拷贝：之后改源不影响已生成的补丁（跨档案串数据最难排查）', () => {
+  it('补丁是深一层拷贝：之后改源不影响已生成的补丁（跨账号串数据最难排查）', () => {
     const patch = applyParts(source, target, ['plans', 'customItems', 'guildTime']);
     source.plans[0].base = '23:00';
     source.overrides.custom[0].name = '改过了';
@@ -125,7 +125,7 @@ describe('applyParts：整表接管 vs 字段级接管', () => {
     expect(applyParts(source, target, [])).toEqual({});
   });
 
-  it('目标档案的相关分片不会被就地修改（同步是"写入"，不是"改内存"）', () => {
+  it('目标账号的相关分片不会被就地修改（同步是"写入"，不是"改内存"）', () => {
     const before = JSON.stringify(target);
     applyParts(source, target, ['autoDaily', 'customItems', 'hidden']);
     expect(JSON.stringify(target)).toBe(before);

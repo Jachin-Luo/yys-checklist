@@ -29,7 +29,7 @@ import type {
 } from './types';
 
 /**
- * 数据作用域：因为「用户」与「游戏档案」是两层，
+ * 数据作用域：因为「用户」与「游戏账号」是两层，
  * 所有用户数据接口都需要**两个**寻址参数。
  *
  * 为什么显式带 `userId` 而不是只传 `profileId`：Http Adapter 虽能从 token 解出 userId，
@@ -60,14 +60,14 @@ export interface ApiClient {
   getSession(): Promise<Session>;
   updateUser(id: string, patch: Partial<User>): Promise<User>;
 
-  /* ── 游戏档案（大号 / 小号）── */
-  /** 返回该用户**全部**档案（含已归档，按 sort 升序）；「归档不出现」是 UI 层的过滤规则 */
+  /* ── 游戏账号（大号 / 小号）── */
+  /** 返回该用户**全部**账号（含已归档，按 sort 升序）；「归档不出现」是 UI 层的过滤规则 */
   listProfiles(userId: string): Promise<Profile[]>;
   createProfile(userId: string, input: ProfileDraft): Promise<Profile>;
   updateProfile(id: string, patch: Partial<Profile>): Promise<Profile>;
-  /** 连带删除该档案全部用户数据；带 scope 供服务端校验越权（E-04） */
+  /** 连带删除该账号全部用户数据；带 scope 供服务端校验越权（E-04） */
   deleteProfile(scope: DataScope, id: string): Promise<void>;
-  /** 只换档案，不涉及登录 */
+  /** 只换账号，不涉及登录 */
   switchProfile(profileId: string): Promise<Session>;
 
   /* ── 用户数据（全部按 scope 定址）── */
@@ -76,7 +76,7 @@ export interface ApiClient {
   setChecked(scope: DataScope, itemId: string, at: number | null): Promise<void>;
   /** 取消指定条目的勾选（K7：必传，不允许省略） */
   clearChecked(scope: DataScope, itemIds: string[]): Promise<void>;
-  /** 清空本档案全部勾选（K7：独立方法，避免"漏传参数 = 清全库"） */
+  /** 清空本账号全部勾选（K7：独立方法，避免"漏传参数 = 清全库"） */
   clearAllChecked(scope: DataScope): Promise<void>;
   /**
    * 勾选日志整表落盘（2026-09-15）：日志在勾选时按内存态整体重算一次，
@@ -86,9 +86,9 @@ export interface ApiClient {
   saveCheckLog(scope: DataScope, log: CheckLog): Promise<void>;
   /**
    * 勾选日志读取（2026-09-16）。日志的常规读路径是 `getBootstrap`（首屏一次带全，
-   * 避免同一份数据的两个侧面来自不同时刻），但那只覆盖**当前档案**。
-   * 新增它的唯一动因是「长按跨档案勾选」：要给目标档案补一条日志记录，
-   * 就必须先把它读回来合并 —— 否则目标档案的日历会少一条，与实际"确实做过"不符。
+   * 避免同一份数据的两个侧面来自不同时刻），但那只覆盖**当前账号**。
+   * 新增它的唯一动因是「长按跨账号勾选」：要给目标账号补一条日志记录，
+   * 就必须先把它读回来合并 —— 否则目标账号的日历会少一条，与实际"确实做过"不符。
    * 对称性上它本来也该有（`getState` / `getView` / `getOverrides` 都有对应 get）。
    */
   getCheckLog(scope: DataScope): Promise<CheckLog>;
@@ -97,10 +97,10 @@ export interface ApiClient {
   getOverrides(scope: DataScope): Promise<ItemOverrides>;
   saveOverrides(scope: DataScope, ov: ItemOverrides): Promise<void>;
 
-  /* ── 档案级偏好（2026-09-16 由设备级升级）──
+  /* ── 账号级偏好（2026-09-16 由设备级升级）──
      整表读写：两份额数据都极小（寮时间 5 条上下、寄养记录几条），
      不需要 `setChecked` 那种增量协议，与 `saveView` 同一形态。
-     读路径在首屏走 `getBootstrap`，这两个 get 供跨档案同步（设置页 / 长按）使用。 */
+     读路径在首屏走 `getBootstrap`，这两个 get 供跨账号同步（设置页 / 长按）使用。 */
   getGuildTime(scope: DataScope): Promise<GuildTimePrefs>;
   saveGuildTime(scope: DataScope, prefs: GuildTimePrefs): Promise<void>;
   getPlans(scope: DataScope): Promise<NurturePlans>;

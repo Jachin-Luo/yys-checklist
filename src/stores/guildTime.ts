@@ -5,7 +5,7 @@ import { withGuildTime } from '../domain/guildTime';
 import { useSessionStore } from './session';
 
 /**
- * 寮时间（**档案级**，2026-09-16 由设备级升格）。
+ * 寮时间（**账号级**，2026-09-16 由设备级升格）。
  *
  * 落盘键：`yys:guild:{profileId}`；读路径：首屏 `getBootstrap().guildTime`；
  * 写路径与 `stores/view` 同一形态 —— **乐观更新 + 失败回滚**（改一个时间点不值得等一个往返）。
@@ -61,11 +61,11 @@ export const useGuildTimeStore = create<GuildTimeState>((set, get) => {
 
 /**
  * 切号时清空内存态（由 `useBootstrap` 调用）。
- * 与 view / check 同理：新档案的首屏聚合返回前若还显示旧档案的寮时间，
+ * 与 view / check 同理：新账号的首屏聚合返回前若还显示旧账号的寮时间，
  * 那些时间徽章会按"别人的寮"算一遍，用户可能据此判断"还没开始"而错过活动。
  */
 export const resetGuildTimeMemory = (): void => {
-  /* ++ 让在途写入的失败不再回滚到新档案上（见 `writeSeq` 的注释） */
+  /* ++ 让在途写入的失败不再回滚到新账号上（见 `writeSeq` 的注释） */
   writeSeq += 1;
   useGuildTimeStore.setState({ guildTime: {}, error: null });
 };

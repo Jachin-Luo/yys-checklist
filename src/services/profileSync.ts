@@ -1,20 +1,20 @@
 /**
- * 档案间配置同步的用例编排 —— 与 `backupService` 同一层、同一风格：
+ * 账号间配置同步的用例编排 —— 与 `backupService` 同一层、同一风格：
  * 契约调用 + 领域纯函数 + 汇总结果，失败路径的呈现统一在这里，不散到组件里。
  *
- * ## 为什么契约侧没有"批量跨档案"方法
+ * ## 为什么契约侧没有"批量跨账号"方法
  *
- * 这里是**循环调用既有的 `saveXxx(scope)`**。一次同步最多几个档案、几项配置，
+ * 这里是**循环调用既有的 `saveXxx(scope)`**。一次同步最多几个账号、几项配置，
  * 请求数很小；而加一个批量契约方法要在 Mock 与 Http 各写一遍，
  * 还要定义"部分失败"的协议 —— 收益远小于成本。
  * 直接循环还有个好处：`assertScope` 会在 Mock 层逐个校验 profileId 归属当前用户，
  * 越权写入在数据层就被挡住（服务端同样应校验）。
  *
- * ## 写入是"逐档案、逐项"的，所以支持部分成功
+ * ## 写入是"逐账号、逐项"的，所以支持部分成功
  *
- * 用户勾了 3 项、选 2 个档案，可能第 2 个档案的第 2 项失败。
+ * 用户勾了 3 项、选 2 个账号，可能第 2 个账号的第 2 项失败。
  * 这时**已经写成功的部分不回滚**（回滚比失败更糟：用户以为没生效，实际改了一半），
- * 而是如实汇总「哪些档案成功、哪些失败、失败原因」，让用户自己决定要不要重试。
+ * 而是如实汇总「哪些账号成功、哪些失败、失败原因」，让用户自己决定要不要重试。
  */
 import { api } from '../api';
 import type { DataScope } from '../api/contract';
@@ -29,9 +29,9 @@ import { useViewStore } from '../stores/view';
 export interface SyncReport {
   ok: boolean;
   error?: string;
-  /** 写入成功的档案名（便于提示里直接念名字） */
+  /** 写入成功的账号名（便于提示里直接念名字） */
   succeeded: string[];
-  /** 写入失败的档案名 + 原因 */
+  /** 写入失败的账号名 + 原因 */
   failed: Array<{ name: string; reason: string }>;
 }
 
@@ -44,7 +44,7 @@ const emptyOverrides = (profileId: string): ItemOverrides => ({
 });
 
 /**
- * 把当前档案的指定配置项同步（覆盖）到 `targets`。
+ * 把当前账号的指定配置项同步（覆盖）到 `targets`。
  *
  * 源数据取**内存态**而不是再请求一次：绑定时用户刚在设置页看过这些值，
  * 内存态就是它所见的；重新拉一次反而可能拿到与界面不一致的东西。
@@ -56,7 +56,7 @@ export async function syncToProfiles(
 ): Promise<SyncReport> {
   const { session, profiles } = useSessionStore.getState();
   if (!session) return { ok: false, error: '尚未加载完成，请稍后重试。', succeeded: [], failed: [] };
-  if (!targets.length) return { ok: false, error: '请先选择要同步到的档案。', succeeded: [], failed: [] };
+  if (!targets.length) return { ok: false, error: '请先选择要同步到的账号。', succeeded: [], failed: [] };
   if (!keys.length) return { ok: false, error: '请先选择要同步的内容。', succeeded: [], failed: [] };
 
   const nameOf = (id: string) => profiles.find((p) => p.id === id)?.name ?? id;

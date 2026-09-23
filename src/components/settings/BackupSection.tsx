@@ -1,19 +1,19 @@
 import { useEffect, useState } from 'react';
-import { AlertTriangle, Check, Copy, RefreshCw } from 'lucide-react';
+import Icon from '../icons/Icon';
 import CollapsibleSection from '../common/CollapsibleSection';
 import type { BundleSummary } from '../../domain/backup';
 import { copyText } from '../../services/clipboard';
 import { applyImportText, exportBackupText, prepareImportText } from '../../services/backupService';
 
 /**
- * 「我的 · 数据备份」（设计文档 §9 S7 导入导出）。
+ * 「设置 · 数据备份」（设计文档 §9 S7 导入导出）。
  *
  * **载体是 JSON 文本，靠复制粘贴传递**（设计决策）：
  * 换设备时最自然的动作是"把这段字发给自己" —— 微信 / 备忘录 / 邮件都行，
  * 不必先下载文件、再想办法把文件挪到另一台设备、再在文件选择器里把它找出来。
  *
  * 两条安全性设计：
- *   1. 导出**全部档案**，不只当前档案 —— 只导当前档案会让另一个号悄悄丢掉；
+ *   1. 导出**全部账号**，不只当前账号 —— 只导当前账号会让另一个号悄悄丢掉；
  *   2. 导入是**覆盖式写操作**：必须先看摘要、再手动输入「导入」二字才可执行。
  *      勾选记录是用户唯一无法重建的数据，误触一次的代价无法接受。
  *
@@ -32,15 +32,15 @@ interface Pending {
 const CONFIRM_WORD = '导入';
 
 const btn =
-  'inline-flex cursor-pointer items-center gap-1 rounded-sm border border-line px-2 py-1 text-sm text-ink-2 transition-colors duration-120 hover:border-ink-4 disabled:cursor-not-allowed disabled:opacity-50';
+  'inline-flex cursor-pointer items-center gap-1 rounded-sm border border-line px-2 py-1 text-sm text-ink-2 transition-colors duration-120 hover:border-line disabled:cursor-not-allowed disabled:opacity-50';
 
 /* 去掉 `outline-none`，焦点环交给 `styles/base.css` 的全局 `:focus-visible` */
 const area =
-  'mt-1.5 w-full resize-y rounded-sm border border-line bg-surface-3 px-2 py-1.5 font-mono text-base leading-relaxed text-ink transition-colors duration-120 focus:border-brand';
+  'mt-1.5 w-full resize-y rounded-sm border border-line bg-surface-3 px-2 py-1.5 font-mono text-base leading-relaxed text-ink transition-colors duration-120 focus:border-gold-hi';
 
 function SummaryChips({ summary }: { summary: BundleSummary }) {
   const cells: Array<[string, number]> = [
-    ['档案', summary.profiles],
+    ['账号', summary.profiles],
     ['勾选记录', summary.checked],
     ['日志天数', summary.logDays],
     ['自建条目', summary.custom],
@@ -66,9 +66,9 @@ function Message({ msg }: { msg: { tone: Tone; text: string } }) {
   return (
     <p className={`flex items-start gap-1.5 text-sm leading-relaxed ${color}`}>
       {msg.tone === 'ok' ? (
-        <Check size={12} strokeWidth={2.6} className="mt-0.5 flex-none" />
+        <Icon name="check" size={12} className="mt-0.5 flex-none" />
       ) : (
-        <AlertTriangle size={12} strokeWidth={2.4} className="mt-0.5 flex-none" />
+        <Icon name="alert" size={12} className="mt-0.5 flex-none" />
       )}
       {msg.text}
     </p>
@@ -142,7 +142,7 @@ export default function BackupSection() {
       r.ok
         ? {
             tone: 'ok',
-            text: `导入完成${r.summary ? ` · ${r.summary.profiles} 个档案 / ${r.summary.checked} 条勾选记录` : ''}，列表已刷新。`,
+            text: `导入完成${r.summary ? ` · ${r.summary.profiles} 个账号 / ${r.summary.checked} 条勾选记录` : ''}，列表已刷新。`,
           }
         : { tone: 'err', text: `导入失败：${r.error ?? '未知错误'}` },
     );
@@ -151,7 +151,7 @@ export default function BackupSection() {
   const exportPanel = (
     <>
       <p className="text-sm leading-relaxed text-ink-3">
-        备份文本包含<b className="text-ink-2">全部档案的全部配置</b>：勾选记录、勾选日志、
+        备份文本包含<b className="text-ink-2">全部账号的全部配置</b>：勾选记录、勾选日志、
         视图偏好、自建条目与排序、<b className="text-ink-2">寮时间、结界寄养任务</b>。
         复制后自行保存（发给自己 / 存备忘录都行），换设备或清理浏览器数据时粘回来即可恢复。
       </p>
@@ -169,13 +169,13 @@ export default function BackupSection() {
           type="button"
           disabled={!exportText}
           onClick={() => void onCopy()}
-          className="inline-flex cursor-pointer items-center gap-1 rounded-sm bg-brand px-2 py-1 text-sm text-white transition-colors duration-120 hover:bg-brand-deep disabled:cursor-not-allowed disabled:opacity-40"
+          className="inline-flex cursor-pointer items-center gap-1 rounded-sm border border-line bg-gold-soft px-2 py-1 text-sm text-gold-hi transition-colors duration-120 hover:border-gold-hi disabled:cursor-not-allowed disabled:opacity-40"
         >
-          <Copy size={11} strokeWidth={2.4} />
+          <Icon name="kasane" size={11} />
           复制全部
         </button>
         <button type="button" disabled={busy} onClick={() => void onExport()} className={btn}>
-          <RefreshCw size={11} strokeWidth={2.4} />
+          <Icon name="refresh" size={11} />
           重新生成
         </button>
       </div>
@@ -206,7 +206,7 @@ export default function BackupSection() {
           type="button"
           disabled={busy || !importText.trim()}
           onClick={() => void onValidate()}
-          className="inline-flex cursor-pointer items-center gap-1 rounded-sm border border-line px-2 py-1 text-sm text-ink-2 transition-colors duration-120 hover:border-ink-4 disabled:cursor-not-allowed disabled:opacity-40"
+          className="inline-flex cursor-pointer items-center gap-1 rounded-sm border border-line px-2 py-1 text-sm text-ink-2 transition-colors duration-120 hover:border-line disabled:cursor-not-allowed disabled:opacity-40"
         >
           校验内容
         </button>
@@ -264,7 +264,7 @@ export default function BackupSection() {
         {pending ? (
           <div className="mt-2 rounded-md border border-danger-line bg-danger-soft px-3 py-2">
             <p className="text-sm leading-relaxed text-danger">
-              导入会<b>覆盖</b>当前全部档案的勾选记录、视图偏好、自建条目、寮时间与寄养任务，
+              导入会<b>覆盖</b>当前全部账号的勾选记录、视图偏好、自建条目、寮时间与寄养任务，
               且不可撤销 —— 建议先切到「导出」留一份当前的。
             </p>
             <SummaryChips summary={pending.summary} />
@@ -292,7 +292,7 @@ export default function BackupSection() {
                 type="button"
                 disabled={typed.trim() !== CONFIRM_WORD || busy}
                 onClick={() => void onConfirm()}
-                className="cursor-pointer rounded-sm bg-danger px-2 py-1 text-sm text-white transition-colors duration-120 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+                className="cursor-pointer rounded-sm border border-crimson-soft px-2 py-1 text-sm text-crimson transition-colors duration-120 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
               >
                 覆盖导入
               </button>
@@ -311,7 +311,7 @@ export default function BackupSection() {
         ) : null}
 
         <p className={`text-sm leading-relaxed text-ink-3 ${msg || exportSummary || pending ? 'mt-2' : ''}`}>
-          备份文本里也包含档案信息（名称 / 区服 / UID）。请像对待账号信息一样保管，不要随意分享。
+          备份文本里也包含账号信息（名称 / 区服 / UID）。请妥善保管，不要随意分享。
           唯一的例外是<b className="text-ink-2">冷启动引导标记</b> —— 它属于"这台设备看过引导没有"的状态，
           不是配置，因此不随备份迁移：换设备后重看一次引导是正常的。
         </p>

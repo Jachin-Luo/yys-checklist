@@ -1,8 +1,8 @@
 import { useState, type ReactNode } from 'react';
-import { ChevronRight } from 'lucide-react';
+import Icon from '../icons/Icon';
 
 /**
- * 「我的」页的可折叠分区卡片（所有设置分区的统一外壳）。
+ * 「设置」页的可折叠分区卡片（所有设置分区的统一外壳）。
  *
  * 三条约定（改这一处就全局一致）：
  *
@@ -17,6 +17,16 @@ import { ChevronRight } from 'lucide-react';
  * 3. **收起时不卸载子内容**（CSS `hidden` 而非条件渲染）。因为分区里有表单草稿
  *    （条目添加框、备份文本框）—— 收起一下就把用户输入清空是不可接受的。
  *    代价是 CSS 隐藏的元素仍在 DOM 里，这些分区都很轻，可以接受。
+ *
+  * 2026-09-23 换肤：展开箭头换成和风折角、标题改衬线（与分组头同一套语言）。
+ *
+ * ## 与 `SettingRow` 的关系（2026-09-23 设置页重构）
+ *
+ * 两者用**同一套材质**（`bg-surface` + `shadow-card` + `rounded-md`），区别只在用途：
+ *   - `SettingRow`：简单设置一行说完 → 平铺、不折叠；
+ *   - `CollapsibleSection`：长列表 / 表单（条目库、覆盖清单、账号列表、寮时间逐条、备份文本框）
+ *     → 默认收起，靠 `summary` 在不展开时也能看到关键结论。
+ * 行间距由父级的 `space-y-1.5` 统一给，所以这里**不再自带 `mt-4`**。
  */
 export interface CollapsibleSectionProps {
   /** 供锚点跳转用的 DOM id（例如今日页入口卡的「去设置」跳过来后滚动定位到本分区） */
@@ -29,7 +39,7 @@ export interface CollapsibleSectionProps {
   children: ReactNode;
   /** 默认展开（个别高频分区用） */
   defaultOpen?: boolean;
-  /** 危险分区（清空勾选）走红色边框 */
+  /** 危险分区（清空勾选）走朱红边框 */
   tone?: 'normal' | 'danger';
 }
 
@@ -48,8 +58,8 @@ export default function CollapsibleSection({
   return (
     <section
       id={id}
-      className={`mt-4 overflow-hidden rounded-lg border bg-surface ${
-        danger ? 'border-danger-line' : 'border-line-soft'
+      className={`overflow-hidden rounded-md border bg-surface shadow-card ${
+        danger ? 'border-crimson-soft' : 'border-line-soft'
       }`}
     >
       <div className="flex items-center gap-2 px-3 py-2.5">
@@ -59,16 +69,22 @@ export default function CollapsibleSection({
           onClick={() => setOpen((v) => !v)}
           className="flex min-w-0 flex-1 cursor-pointer items-center gap-2 text-left"
         >
-          <ChevronRight
+          <Icon
+            name="chevron-right"
             size={13}
-            strokeWidth={2.4}
-            className={`flex-none transition-transform duration-120 ${open ? 'rotate-90' : ''} ${
-              danger ? 'text-danger' : 'text-ink-4'
+            className={`transition-transform duration-120 ${open ? 'rotate-90' : ''} ${
+              danger ? 'text-crimson' : 'text-gold opacity-70'
             }`}
           />
           <span className="min-w-0 flex-1">
-            <span className={`block text-lg ${danger ? 'text-danger' : 'text-ink'}`}>{title}</span>
-            {summary ? <span className="mt-0.5 block text-sm text-ink-3">{summary}</span> : null}
+            <span
+              className={`block font-serif text-base tracking-card ${
+                danger ? 'text-crimson' : 'text-ink'
+              }`}
+            >
+              {title}
+            </span>
+            {summary ? <span className="mt-1 block text-sm text-ink-3">{summary}</span> : null}
           </span>
         </button>
         {aside ? <span className="flex flex-none items-center gap-2">{aside}</span> : null}

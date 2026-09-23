@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Check, Clock, UserRound } from 'lucide-react';
+import Icon from '../icons/Icon';
 import { guildTimeTargets } from '../../domain/guildTime';
 import { useModalFocus } from '../../hooks/useModalFocus';
 import { useDeviceStore } from '../../stores/device';
@@ -7,12 +7,12 @@ import { useGuildTimeStore } from '../../stores/guildTime';
 import { useItemStore } from '../../stores/items';
 import { useSessionStore } from '../../stores/session';
 
-const STEPS = ['选择档案', '配置寮时间', '开始自查'] as const;
+const STEPS = ['选择账号', '配置寮时间', '开始自查'] as const;
 
 const btnGhost =
-  'cursor-pointer rounded-sm border border-line px-3 py-1.5 text-sm text-ink-2 transition-colors duration-120 hover:border-ink-4';
+  'cursor-pointer rounded-sm border border-line px-3 py-1.5 text-sm text-ink-2 transition-colors duration-120 hover:bg-surface';
 const btnPrimary =
-  'cursor-pointer rounded-sm bg-brand px-3 py-1.5 text-sm text-white transition-colors duration-120 hover:bg-brand-deep';
+  'cursor-pointer rounded-sm border border-line bg-gold-soft px-3 py-1.5 text-sm text-gold-hi transition-colors duration-120 hover:border-gold-hi';
 
 /**
  * 冷启动三步引导（设计文档 §9 S4b-2 / K6）。
@@ -29,7 +29,7 @@ export default function OnboardingDialog() {
   const session = useSessionStore((s) => s.session);
   const profiles = useSessionStore((s) => s.profiles);
   const switchProfile = useSessionStore((s) => s.switchProfile);
-  /* 寮时间是**档案级**（2026-09-16 起）：第 2 步配的就是"当前这个号所在寮的时间"。
+  /* 寮时间是**账号级**（2026-09-16 起）：第 2 步配的就是"当前这个号所在寮的时间"。
      引导本身仍是设备级一次性标记（`yys:onboarded`），两者归属不同、互不影响。 */
   const guildTime = useGuildTimeStore((s) => s.guildTime);
   const setGuildTime = useGuildTimeStore((s) => s.setGuildTime);
@@ -47,20 +47,20 @@ export default function OnboardingDialog() {
   const finish = () => markOnboarded();
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/40 px-4 py-6">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-scrim/60 px-4 py-6">
       <div
         ref={ref}
         tabIndex={-1}
         role="dialog"
         aria-modal="true"
         aria-label="冷启动引导"
-        className="flex max-h-full w-full max-w-md flex-col overflow-hidden rounded-lg border border-line bg-surface shadow-lg"
+        className="flex max-h-full w-full max-w-md flex-col overflow-hidden rounded-lg border border-line bg-surface-3 shadow-panel"
       >
         <header className="flex items-center gap-2 border-b border-line-faint px-4 py-3">
-          <span className="flex h-6 w-6 items-center justify-center rounded-md bg-brand text-sm text-white">
+          <span className="flex h-6 w-6 items-center justify-center rounded-md bg-gold text-sm text-white">
             {step + 1}
           </span>
-          <h2 className="flex-1 text-xl font-medium text-ink">{STEPS[step]}</h2>
+          <h2 className="flex-1 font-serif text-xl tracking-card text-ink">{STEPS[step]}</h2>
           <span className="text-sm text-ink-3">
             {step + 1} / {STEPS.length}
           </span>
@@ -70,8 +70,8 @@ export default function OnboardingDialog() {
           {step === 0 ? (
             <div>
               <p className="flex items-center gap-1.5 text-sm text-ink-3">
-                <UserRound size={13} />
-                勾选状态按「游戏档案」隔离 —— 大号和小号各记各的，互不干扰。
+                <Icon name="hito" size={13} />
+                勾选状态按「游戏账号」隔离 —— 大号和小号各记各的，互不干扰。
               </p>
               <div className="mt-2.5 space-y-1.5">
                 {profiles.map((p) => {
@@ -82,21 +82,21 @@ export default function OnboardingDialog() {
                       type="button"
                       onClick={() => void switchProfile(p.id)}
                       className={`flex w-full cursor-pointer items-center gap-2 rounded-md border px-3 py-2 text-left transition-colors duration-120 ${
-                        active ? 'border-brand bg-brand-soft' : 'border-line hover:border-ink-4'
+                        active ? 'border-line bg-gold-soft' : 'border-line-soft hover:bg-surface'
                       }`}
                     >
                       <span className="min-w-0 flex-1 truncate text-lg text-ink">{p.name}</span>
                       <span className="text-sm text-ink-3">
                         {[p.server, p.channel].filter(Boolean).join(' · ') || '未填区服'}
                       </span>
-                      {active ? <Check size={14} className="text-brand" /> : null}
+                      {active ? <Icon name="check" size={14} className="text-gold" /> : null}
                     </button>
                   );
                 })}
               </div>
               {profiles.length <= 1 ? (
                 <p className="mt-2 text-sm leading-relaxed text-ink-3">
-                  目前只有这一个档案。要加大号 / 小号，去「我的 → 档案」新建即可。
+                  目前只有这一个账号。要加大号 / 小号，去「设置 → 账号」新建即可。
                 </p>
               ) : null}
             </div>
@@ -105,7 +105,7 @@ export default function OnboardingDialog() {
           {step === 1 ? (
             <div>
               <p className="flex items-center gap-1.5 text-sm text-ink-3">
-                <Clock size={13} />
+                <Icon name="tokei" size={13} />
                 这些是集体活动，时间由所在寮决定（写死必然错）。先填你寮的时间，之后可改。
               </p>
               <div className="mt-2.5">
@@ -118,12 +118,12 @@ export default function OnboardingDialog() {
                       aria-label={`${it.name} 的寮时间`}
                       value={guildTime[it.id] ?? ''}
                       onChange={(e) => void setGuildTime(it.id, e.target.value)}
-                      className="w-28 flex-none rounded-sm border border-line bg-surface px-2 py-1 text-lg text-ink focus:border-brand"
+                      className="w-28 flex-none rounded-sm border border-line bg-surface px-2 py-1 text-lg text-ink focus:border-gold-hi"
                     />
                   </div>
                 ))}
               </div>
-              <p className="mt-2 text-sm text-ink-3">留空也可以，之后在「我的 → 寮时间」里再配。</p>
+              <p className="mt-2 text-sm text-ink-3">留空也可以，之后在「设置 → 寮时间」里再配。</p>
             </div>
           ) : null}
 
@@ -135,7 +135,7 @@ export default function OnboardingDialog() {
               </p>
               <p className="mt-2 text-base leading-relaxed text-ink-2">
                 清单默认按<b>痛感分</b>排序（越不可重复、越有截止越靠前），
-                想自己排顺序就到「我的 → 条目管理」拖动调整。
+                想自己排顺序就到「设置 → 条目管理」拖动调整。
               </p>
               <div className="mt-3">
                 <button type="button" onClick={finish} className={btnPrimary}>

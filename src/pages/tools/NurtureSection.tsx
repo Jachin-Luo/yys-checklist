@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Check, Plus, Trash2 } from 'lucide-react';
+import Icon from '../../components/icons/Icon';
 import {
   endLabelOf,
   endPointOf,
@@ -35,7 +35,7 @@ import { useUiStore } from '../../stores/ui';
  * 添加时先问「立即开始 / 仅存计划」：任务才记完成状态，计划纯查看（虚线、不可点），
  * 决定开刷时点「开始」转正。用户常常只是"打算这个点寄"，不想一存就被判成未到。
  *
- * 数据落在**档案级**分片（`yys:plans:{profileId}`，2026-09-16 由设备级升格）：
+ * 数据落在**账号级**分片（`yys:plans:{profileId}`，2026-09-16 由设备级升格）：
  * 换号会切到该号自己的那份，且随备份一起走 —— 见 `stores/nurture.ts` 的说明。
  *
  * 布局注记（2026-09-20）：时间线**始终独占一行**，操作区的位置**分端**：
@@ -68,7 +68,7 @@ import { useUiStore } from '../../stores/ui';
 /** 点 chip 的语气：已完成 / 过期未完成（该收了）/ 未到；计划态一律虚线只读 */
 function toneOf(point: NurturePoint, selected: boolean, planned: boolean): string {
   if (planned) return 'border border-dashed border-line text-ink-3';
-  if (selected) return 'border border-brand bg-brand-soft text-brand';
+  if (selected) return 'border border-line bg-gold-soft text-gold-hi';
   if (point.doneAt !== undefined) return 'bg-success/10 text-success-deep';
   if (point.past) return 'bg-warn-soft text-warn';
   return 'bg-surface-3 text-ink-2';
@@ -96,7 +96,7 @@ function PointChips({
         const body = (
           <>
             <span className="flex items-center gap-0.5">
-              {p.doneAt !== undefined ? <Check size={10} strokeWidth={3} /> : null}
+              {p.doneAt !== undefined ? <Icon name="check" size={10} /> : null}
               {p.hm}
             </span>
             <i className="text-xs not-italic opacity-80">{p.index === 0 ? '上卡' : p.dayLabel}</i>
@@ -263,7 +263,7 @@ export default function NurtureSection() {
       <button
         type="button"
         onClick={() => promote(r.id)}
-        className="flex-none cursor-pointer rounded-sm bg-brand px-2 py-1 text-sm text-white transition-colors duration-120 hover:bg-brand-deep"
+        className="flex-none cursor-pointer rounded-sm border border-line bg-gold-soft px-2 py-1 text-sm text-gold-hi transition-colors duration-120 hover:border-gold-hi"
       >
         开始
       </button>
@@ -283,7 +283,7 @@ export default function NurtureSection() {
           onChange={(e) => setDoneDraft((s) => ({ ...s, [r.id]: e.target.value }))}
           aria-label={`${target.hm} 的实际完成时间`}
           title="实际完成时间；默认已填当前时间，可改"
-          className="w-[5.6rem] rounded-sm border border-line bg-surface px-1.5 py-1 text-sm text-ink transition-colors duration-120 focus:border-brand"
+          className="w-[5.6rem] rounded-sm border border-line bg-surface px-1.5 py-1 text-sm text-ink transition-colors duration-120 focus:border-gold-hi"
         />
         <button
           type="button"
@@ -293,7 +293,7 @@ export default function NurtureSection() {
               ? '改这个点的实际完成时间（这个点与它之后的点都会重算）'
               : '记这个点完成；这个点显示为实际时间，之后的点按实际时间 + 6h 顺延'
           }
-          className="flex-none cursor-pointer rounded-sm bg-brand px-2 py-1 text-sm text-white transition-colors duration-120 hover:bg-brand-deep"
+          className="flex-none cursor-pointer rounded-sm border border-line bg-gold-soft px-2 py-1 text-sm text-gold-hi transition-colors duration-120 hover:border-gold-hi"
         >
           {target.doneAt !== undefined ? '改时间' : '记完成'}
         </button>
@@ -305,7 +305,7 @@ export default function NurtureSection() {
               setActive(null);
             }}
             title="取消这个点的完成记录，回到按预计时间推"
-            className="flex-none cursor-pointer rounded-sm border border-line px-2 py-1 text-sm text-ink-2 transition-colors duration-120 hover:border-ink-4"
+            className="flex-none cursor-pointer rounded-sm border border-line px-2 py-1 text-sm text-ink-2 transition-colors duration-120 hover:border-line"
           >
             取消完成
           </button>
@@ -322,7 +322,7 @@ export default function NurtureSection() {
         onClick={() => void onRemove(r)}
         className="flex-none cursor-pointer rounded-sm border border-line px-1.5 py-1 text-ink-3 transition-colors duration-120 hover:border-danger-line hover:text-danger"
       >
-        <Trash2 size={12} strokeWidth={2} />
+        <Icon name="trash" size={12} />
       </button>
     );
 
@@ -382,23 +382,13 @@ export default function NurtureSection() {
 
   return (
     <div className="pb-6">
-      <div className="mx-3.5 mt-3 rounded-md bg-surface-3 px-3 py-2.5 text-sm leading-relaxed text-ink-2">
-        <b className="text-ink">结界寄养每次 6 小时</b>。填上卡时间、<b className="text-ink">卡的持续时间</b>
-        （如 22 小时）与<b className="text-ink">每次的延迟</b>（分钟，默认 0）→
-        自动排出收/续点（每点 = 前一点 + 6 小时 + 延迟，如 6:00 上卡、延迟 5 → 12:05 → 18:10），
-        跨天标明天/后天；<b className="text-ink">上卡时刻也作为一个点显示在任务里</b>，
-        <b className="text-ink">结束时间</b>由持续时间推算、只读不可改。
-        <b className="text-ink">每个点各自记完成</b>：点一下那个时间点，再用「现在」或填实际时间 ——
-        这个点会显示为你填的实际时间，之后的点按实际时间 + 6h 顺延，之前的点不动。
-        <b className="text-ink">添加时先问你要不要「立即开始」</b> —— 开始才算任务、才记录完成；
-        仅存计划的纯查看（虚线），不背状态。
-      </div>
+      {/* 只留推点规则（看不见、又必须知道的那一条）；其余（怎么记完成、计划与任务的区别）都在界面上 */}
+      <p className="mx-3.5 mt-3 text-sm leading-relaxed text-ink-3">
+        每次 6 小时 · 每点 = 前一点 + 6 小时 + 延迟；上卡时刻也作为一个点
+      </p>
 
       <div className="mx-3.5 mt-3 rounded-md border border-line-soft bg-surface px-3 py-2.5">
         <p className="text-lg text-ink">记一次结界寄养</p>
-        <p className="mt-0.5 text-sm text-ink-3">
-          上卡时间已默认填当前时间；填结界卡的持续时间，收/续点按每 6h 自动排
-        </p>
 
         <div className="mt-2 flex items-center gap-2">
           <span className="w-12 flex-none text-sm text-ink-3">上卡</span>
@@ -407,12 +397,12 @@ export default function NurtureSection() {
             onChange={(e) => setTime(e.target.value)}
             placeholder="如 21:00"
             aria-label="上卡时间"
-            className="min-w-0 flex-1 rounded-sm border border-line bg-surface px-2 py-1.5 text-lg text-ink transition-colors duration-120 focus:border-brand"
+            className="min-w-0 flex-1 rounded-sm border border-line bg-surface px-2 py-1.5 text-lg text-ink transition-colors duration-120 focus:border-gold-hi"
           />
           <button
             type="button"
             onClick={() => setTime(null)}
-            className="flex-none cursor-pointer rounded-sm border border-line px-2 py-1.5 text-sm text-ink-2 transition-colors duration-120 hover:border-ink-4"
+            className="flex-none cursor-pointer rounded-sm border border-line px-2 py-1.5 text-sm text-ink-2 transition-colors duration-120 hover:border-line"
           >
             用现在
           </button>
@@ -429,7 +419,7 @@ export default function NurtureSection() {
             value={hours}
             onChange={(e) => setHours(Number(e.target.value))}
             aria-label="结界卡持续时间（小时）"
-            className="w-20 rounded-sm border border-line bg-surface px-2 py-1.5 text-lg text-ink transition-colors duration-120 focus:border-brand"
+            className="w-20 rounded-sm border border-line bg-surface px-2 py-1.5 text-lg text-ink transition-colors duration-120 focus:border-gold-hi"
           />
           {/* 延迟（2026-09-20 新增）：每次收/续往后推几分钟。它逐点累积，
               所以点数提示必须带上它 —— 24h 的卡配 5 分钟延迟会从 4 个点变成 3 个 */}
@@ -441,7 +431,7 @@ export default function NurtureSection() {
             value={delay}
             onChange={(e) => setDelay(Number(e.target.value))}
             aria-label="每次收续延迟（分钟）"
-            className="w-20 rounded-sm border border-line bg-surface px-2 py-1.5 text-lg text-ink transition-colors duration-120 focus:border-brand"
+            className="w-20 rounded-sm border border-line bg-surface px-2 py-1.5 text-lg text-ink transition-colors duration-120 focus:border-gold-hi"
           />
           <span className="text-sm text-ink-3">
             分钟 · 将排 <b className="font-medium text-ink-2">{pointCountOf(hours, delay)}</b> 个收/续点
@@ -467,17 +457,17 @@ export default function NurtureSection() {
           <button
             type="button"
             onClick={submit}
-            className="inline-flex cursor-pointer items-center gap-1 rounded-sm bg-brand px-2.5 py-1.5 text-sm text-white transition-colors duration-120 hover:bg-brand-deep"
+            className="inline-flex cursor-pointer items-center gap-1 rounded-sm border border-line bg-gold-soft px-2.5 py-1.5 text-sm text-gold-hi transition-colors duration-120 hover:border-gold-hi"
           >
-            <Plus size={12} strokeWidth={2.4} />
+            <Icon name="plus" size={12} />
             下一步：确认添加
           </button>
         </div>
       </div>
 
       {ask ? (
-        <div className="mx-3.5 mt-2 flex flex-wrap items-center gap-2 rounded-md border border-brand bg-brand-soft px-3 py-2">
-          <p className="min-w-0 flex-1 text-sm leading-relaxed text-brand">
+        <div className="mx-3.5 mt-2 flex flex-wrap items-center gap-2 rounded-md border border-line bg-gold-soft px-3 py-2">
+          <p className="min-w-0 flex-1 text-sm leading-relaxed text-gold-hi">
             <b>{ask.base}</b> 上卡 · 持续 <b>{ask.hours}h</b>
             {ask.delay ? <> · 延迟 <b>{ask.delay}</b> 分</> : null} ·{' '}
             <b>{pointCountOf(ask.hours, ask.delay)}</b> 个收/续点 · 结束 <b>{endLabelOf(ask, now)}</b>
@@ -486,21 +476,21 @@ export default function NurtureSection() {
           <button
             type="button"
             onClick={() => confirmAdd(true)}
-            className="flex-none cursor-pointer rounded-sm bg-brand px-2 py-1 text-sm text-white transition-colors duration-120 hover:bg-brand-deep"
+            className="flex-none cursor-pointer rounded-sm border border-line bg-gold-soft px-2 py-1 text-sm text-gold-hi transition-colors duration-120 hover:border-gold-hi"
           >
             立即开始
           </button>
           <button
             type="button"
             onClick={() => confirmAdd(false)}
-            className="flex-none cursor-pointer rounded-sm border border-brand px-2 py-1 text-sm text-brand transition-colors duration-120 hover:bg-surface"
+            className="flex-none cursor-pointer rounded-sm border border-line px-2 py-1 text-sm text-gold-hi transition-colors duration-120 hover:bg-surface"
           >
             仅存计划
           </button>
           <button
             type="button"
             onClick={() => setAsk(null)}
-            className="flex-none cursor-pointer rounded-sm px-2 py-1 text-sm text-brand transition-colors duration-120 hover:bg-surface"
+            className="flex-none cursor-pointer rounded-sm px-2 py-1 text-sm text-gold-hi transition-colors duration-120 hover:bg-surface"
           >
             取消
           </button>
@@ -509,7 +499,7 @@ export default function NurtureSection() {
 
       <div className="flex items-baseline justify-between px-3.5 pb-1 pt-4">
         <span className="text-sm text-ink-3">进行中的任务 · {tasks.length} 条</span>
-        <span className="text-sm text-ink-3">✓=已完成 · 橙=该收了 · 点时间点可记完成</span>
+        <span className="text-sm text-ink-3">✓=已完成 · 点时间点可记完成</span>
       </div>
       {tasks.length ? (
         <div className="mx-3.5 overflow-hidden rounded-md border border-line-soft bg-surface">{tasks.map(row)}</div>
@@ -531,10 +521,6 @@ export default function NurtureSection() {
         </p>
       )}
 
-      <p className="px-3.5 pt-4 text-sm leading-relaxed text-ink-3">
-        寄养记录按<b className="text-ink-2">档案</b>保存：换号会切到该号自己的那份，且随备份一起走
-        （「我的 → 数据备份」），换设备时导一次即可带走。
-      </p>
     </div>
   );
 }

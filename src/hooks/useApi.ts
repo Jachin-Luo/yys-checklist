@@ -7,7 +7,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
  * 本 hook 只用于**变更后重取单份数据**（如改完筛选只重取 view）。
  *
  * 必须处理的三类竞态（缺一即出 bug）：
- *   1. 快速切换档案 → 旧档案的数据才返回，覆盖新档案视图 → `AbortSignal` 取消前一次请求
+ *   1. 快速切换账号 → 旧账号的数据才返回，覆盖新账号视图 → `AbortSignal` 取消前一次请求
  *      （Mock 的延迟函数必须响应 `signal.aborted`，见 `api/mock/latency.ts`）
  *   2. 同参数重复请求 → 连续两次 reload() 乱序返回，旧结果盖掉新结果 → 递增 `requestId`，只认最后一次
  *   3. 组件卸载后写状态 → React 警告 + 内存泄漏 → 卸载守卫：`abort()` + `requestId` 双重校验

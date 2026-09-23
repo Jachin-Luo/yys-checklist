@@ -1,5 +1,5 @@
 import { useEffect, useState, type ReactNode } from 'react';
-import { AlertTriangle, RotateCw } from 'lucide-react';
+import Icon from '../components/icons/Icon';
 import { Skeleton } from '../components/common/EmptyState';
 import { useToolsStore, type ToolTab } from '../stores/tools';
 import { useUiStore } from '../stores/ui';
@@ -8,7 +8,7 @@ import NurtureSection from './tools/NurtureSection';
 import YuhunSection from './tools/YuhunSection';
 
 /**
- * 工具页（设计文档 §9 S6）：御魂 / 悬赏 / 结界寄养 三段。
+ * 工具页（设计文档 §9 S6）：**结界寄养 / 御魂 / 悬赏** 三段，默认选中结界寄养（见 `DEFAULT_TAB`）。
  *
  * **懒加载**：三段的主数据合计约 180 KB，不在首屏主包里（`api/mock/db.ts` 用动态 `import()`）。
  * 因此进页面时先出骨架屏，数据到了再替换 —— 这是设计文档认可的"骨架屏只用于懒加载"场景。
@@ -19,10 +19,20 @@ import YuhunSection from './tools/YuhunSection';
  * **按需取**：寄养段零请求（纯本地），不为"统一"把三张表一次全拉。
  */
 const TABS: ReadonlyArray<{ key: ToolTab; label: string; hint: string }> = [
+  { key: 'nurture', label: '结界寄养', hint: '6h 收续点' },
   { key: 'yuhun', label: '御魂', hint: '副本轮换与掉落' },
   { key: 'bounty', label: '悬赏', hint: '式神出处反查' },
-  { key: 'nurture', label: '结界寄养', hint: '6h 收续点' },
 ];
+
+/**
+ * 默认分段 = 结界寄养（2026-09-23 用户要求：顺序调整为 结界寄养 / 御魂 / 悬赏，且默认落在寄养）。
+ *
+ * 它是三段里唯一**时间敏感**的 —— 收/续点到点就得记，晚一小时就记不准；
+ * 御魂与悬赏是"想起来才查"的类型，不急。另外它零请求（`stores/tools.ensure` 对 `nurture`
+ * 直接 resolve），所以从默认分段进来不会触发任何下载，**骨架屏只在真的切到那两段时出现** ——
+ * 这与"按需取"的既有口径一致，而不是把三张表一次全拉。
+ */
+const DEFAULT_TAB: ToolTab = 'nurture';
 
 /** 只接受三个合法分段名 —— 跳转请求来自外部，不能盲信字符串 */
 const isToolTab = (v?: string): v is ToolTab => v === 'yuhun' || v === 'bounty' || v === 'nurture';
@@ -33,7 +43,7 @@ export default function ToolsPage({ variant }: { variant: 'mobile' | 'desktop' }
     s.navRequest?.nav === 'tools' ? s.navRequest.section : undefined,
   );
   const clearNavRequest = useUiStore((s) => s.clearNavRequest);
-  const [tab, setTab] = useState<ToolTab>(() => (isToolTab(requestedTab) ? requestedTab : 'yuhun'));
+  const [tab, setTab] = useState<ToolTab>(() => (isToolTab(requestedTab) ? requestedTab : DEFAULT_TAB));
   const ensure = useToolsStore((s) => s.ensure);
   const loading = useToolsStore((s) => s.loading);
   const error = useToolsStore((s) => s.error);
@@ -59,7 +69,7 @@ export default function ToolsPage({ variant }: { variant: 'mobile' | 'desktop' }
     body = (
       <div className="mx-3 mt-3 rounded-md border border-danger-line bg-danger-soft px-3 py-3">
         <p className="flex items-center gap-1.5 text-lg text-danger">
-          <AlertTriangle size={13} strokeWidth={2.2} />
+          <Icon name="alert" size={13} />
           工具数据加载失败
         </p>
         <p className="mt-1 text-sm leading-relaxed text-ink-2">{error.message}</p>
@@ -68,7 +78,7 @@ export default function ToolsPage({ variant }: { variant: 'mobile' | 'desktop' }
           onClick={() => void ensure(tab)}
           className="mt-2 inline-flex cursor-pointer items-center gap-1 rounded-sm border border-danger-line bg-surface px-2 py-1 text-sm text-danger transition-colors duration-120 hover:bg-danger-soft"
         >
-          <RotateCw size={11} strokeWidth={2.4} />
+          <Icon name="refresh" size={11} />
           重试
         </button>
       </div>
@@ -85,7 +95,7 @@ export default function ToolsPage({ variant }: { variant: 'mobile' | 'desktop' }
   }
 
   return (
-    /* `mx-auto`：桌面内容容器上限 1024，本页上限 896 —— 不居中会整体贴左（与统计 / 我的两页同一口径） */
+    /* `mx-auto`：桌面内容容器上限 1024，本页上限 896 —— 不居中会整体贴左（与统计 / 设置两页同一口径） */
     <div className="mx-auto max-w-4xl">
       <div className="mx-3 mt-3 flex gap-1 rounded-md bg-surface-3 p-1">
         {TABS.map((t) => (
@@ -103,7 +113,7 @@ export default function ToolsPage({ variant }: { variant: 'mobile' | 'desktop' }
             {t.label}
             {/* 预取/加载中的分段显式带一个呼吸点：hover 预取时用户能看到"这个已经在拿了" */}
             {loading === t.key ? (
-              <span className="ml-1 inline-block h-1.5 w-1.5 animate-pulse rounded-full bg-brand align-middle" />
+              <span className="ml-1 inline-block h-1.5 w-1.5 animate-pulse rounded-full bg-gold align-middle" />
             ) : null}
           </button>
         ))}
