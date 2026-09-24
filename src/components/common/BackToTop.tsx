@@ -62,7 +62,11 @@ export default function BackToTop({
   /* 点完之后它自己就消失了：若焦点还留在上面，浏览器与读屏都会指着一个已隐藏的元素。
      主动 blur（把它交还给页面），比留着"隐藏但仍聚焦"的按钮干净 */
   useEffect(() => {
-    if (!shown && btnRef.current === document.activeElement) btnRef.current.blur();
+    if (shown) return;
+    /* `btnRef.current` 与 `document.activeElement` 都可能是 null，而严格相等比较
+       **不会**帮 TS 收窄两边 —— 得先把 ref 收进局部变量再判空，`el.blur()` 才不报 TS18047 */
+    const el = btnRef.current;
+    if (el && el === document.activeElement) el.blur();
   }, [shown]);
 
   const toTop = useCallback(() => {
