@@ -258,6 +258,18 @@ body {
   background-repeat: repeat;
 }
 
+/* 顶栏索引签的横向滚动条**只隐藏、不取消滚动**（`DesktopShell` 的 nav）。
+   768–1023px 放不下 7 个签时它仍可拖动/滚轮滑动，但 Windows 的实心滚动条
+   会横在顶栏正中，比"签被裁掉一条"难看得多 —— 滚动能力是兜底，观感归零。
+   两条规则缺一不可：Firefox 走 scrollbar-width，WebKit 走 ::-webkit-scrollbar */
+.genso-tabs {
+  scrollbar-width: none;
+}
+
+.genso-tabs::-webkit-scrollbar {
+  display: none;
+}
+
 .genso-texture-dots {
   background-image: var(--tex);
   background-repeat: repeat;

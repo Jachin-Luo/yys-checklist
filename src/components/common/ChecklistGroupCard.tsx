@@ -168,11 +168,12 @@ function ChecklistGroupCard({
         onMain();
       }}
     >
-      {/* 左缘朱线：进行中/已完成的行侧标记（参考稿 `.entry::before` 的 data-on 态） */}
+      {/* 左缘竖线：**常驻** —— 与单条卡同口径（2026-09-24 用户要求）。满段 = 朱红，
+          未满段 = 淡墨、悬停加深为朱红预告 */}
       <span
         aria-hidden
-        className={`absolute bottom-2.5 left-0 top-2.5 w-0.5 rounded-r-full bg-crimson transition-opacity duration-150 ${
-          done || pressing ? 'opacity-100' : 'opacity-0'
+        className={`absolute bottom-2.5 left-0 top-2.5 w-0.5 rounded-r-full transition-colors duration-150 ${
+          done ? 'bg-crimson' : 'bg-line group-hover:bg-crimson/40'
         }`}
       />
       <span
@@ -202,15 +203,15 @@ function ChecklistGroupCard({
         </i>
       </button>
 
+      {/* 组图标独占一列 —— 与单条卡同站位（参考稿 `.entry .glyph`），标题与下各行左对齐 */}
+      <Icon
+        name={CYCLE_ICON[step.cycle]}
+        size={17}
+        className={`mt-0.5 flex-none ${done ? 'text-ink-3' : 'text-gold-hi'}`}
+      />
+
       <div className="min-w-0 flex-1">
-        <div className="flex min-w-0 items-start gap-2.5">
-          {/* 组图标取当前步那条的周期符 —— 同组必然同周期（分组规则要求），所以它是稳定的 */}
-          <Icon
-            name={CYCLE_ICON[step.cycle]}
-            size={17}
-            className={`mt-0.5 ${done ? 'text-ink-3' : 'text-gold-hi'}`}
-          />
-          <h3
+        <h3
             className={`flex min-w-0 flex-wrap items-center gap-1.5 break-words text-base font-semibold leading-snug tracking-card ${
               done ? 'text-ink-3 line-through decoration-crimson decoration-1' : 'text-ink'
             }`}
@@ -242,8 +243,7 @@ function ChecklistGroupCard({
             {card.tags && unit.items[0].premium ? <PremiumTag /> : null}
             {/* 时间窗只在全组一致时显示；不一致时整项不显示（见文件头） */}
             {card.tags && sameTime ? <TimeTag item={step} /> : null}
-          </h3>
-        </div>
+        </h3>
 
         {/* 收益与类型同样"全组一致才显示" —— 逐次收益不同的组不显示，避免被读成合计。
             提示文案沿用数据里的 `gainNote`（如"每只 20 勾"，它本来就说明了这是**单次**收益），

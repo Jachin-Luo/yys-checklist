@@ -180,11 +180,14 @@ function ChecklistItem({
         handleToggle();
       }}
     >
-      {/* 左缘朱线：进行中/已完成的行侧标记（参考稿 `.entry::before` 的 data-on 态） */}
+      {/* 左缘竖线：**常驻**（2026-09-24 用户要求：原本只在长按/已完成时出现，"直接改成常驻"）。
+          参考稿 `.entry::before` 是 hover 0.30 / data-on 1 的状态线；按用户口径升级为
+          每行的固定结构线 —— 未完成 = 淡墨（`line`），悬停加深为朱红预告（参考稿的 hover 态）；
+          已完成 = 朱红。朱红仍只给"了结"的行，否则整列常红就成了警戒线 */}
       <span
         aria-hidden
-        className={`absolute bottom-2.5 left-0 top-2.5 w-0.5 rounded-r-full bg-crimson transition-opacity duration-150 ${
-          checked || pressing ? 'opacity-100' : 'opacity-0'
+        className={`absolute bottom-2.5 left-0 top-2.5 w-0.5 rounded-r-full transition-colors duration-150 ${
+          checked ? 'bg-crimson' : 'bg-line group-hover:bg-crimson/40'
         }`}
       />
 
@@ -207,19 +210,18 @@ function ChecklistItem({
         label={`${checked ? '取消完成' : '标记完成'}：${item.name}`}
       />
 
+      {/* 周期符独占一列（参考稿 `.entry .glyph` 的站位）：标题与其下所有行都从 body
+          左缘起 —— 之前它挤在标题行里，标题被顶右、下面的行缩回去，正是"没对齐"的来源 */}
+      <Icon
+        name={CYCLE_ICON[item.cycle]}
+        size={17}
+        /* 已完成侧 `text-ink-3` / 未完成侧 `text-gold-hi` —— 调色口径见文件头换肤一节 */
+        className={`mt-0.5 flex-none ${checked ? 'text-ink-3' : 'text-gold-hi'}`}
+      />
+
       <div className="min-w-0 flex-1">
-        <div className="flex min-w-0 items-start gap-2.5">
-          {/* 任务类型符：按状态调色（未完成金 85% / 已完成降到 ink-4 50%） */}
-          <Icon
-            name={CYCLE_ICON[item.cycle]}
-            size={17}
-            /* 已完成侧由 `text-ink-4 opacity-50`（≈1.68）提到 `text-ink-3`；
-               未完成侧由 `text-gold opacity-85`（2.45）提到 `text-gold-hi`（4.64）——
-               `gold` 从此只留给描边与纹样，文字金一律走 `gold-hi`（明版它才是压深的那个） */
-            className={`mt-0.5 ${checked ? 'text-ink-3' : 'text-gold-hi'}`}
-          />
-          {/* `break-words` 给超长不可断串兜底：名称里塞英文串 / UID 时，双列每列只有 ~390px */}
-          <h3
+        {/* `break-words` 给超长不可断串兜底：名称里塞英文串 / UID 时，双列每列只有 ~390px */}
+        <h3
             className={`flex min-w-0 flex-wrap items-center gap-1.5 break-words text-base font-semibold leading-snug tracking-card ${
               /* 已完成**任务名**同样提到 `ink-3`：它才是读者最需要看清的那行字，
                  裸 `ink-4` 在卡片上只有 3.56（暗版 3.14）。划线 + 卡底色已足够表达"已完成" */
@@ -238,8 +240,7 @@ function ChecklistItem({
             {/* 关掉 `tags` 时 `TimeTag` 一并消失 —— 它在没有时间窗时会渲染 `timeNote`
                 那句说明，同属"时间信息"，拆开反而会出现"关了一半"的怪异状态 */}
             {card.tags ? <TimeTag item={item} /> : null}
-          </h3>
-        </div>
+        </h3>
 
         {/* 收益徽章：移动端留在正文流；桌面端挪到下面的右列（`.pay`） */}
         {!payColumn ? (

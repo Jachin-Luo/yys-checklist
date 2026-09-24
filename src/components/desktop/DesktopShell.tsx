@@ -63,12 +63,17 @@ export default function DesktopShell() {
             </span>
           </div>
 
-          {/* 索引签：选中签 bg-surface + -mb-px 盖住分隔线，与册页连成一体 */}
+          {/* 索引签：选中签 bg-surface + -mb-px 盖住分隔线，与册页连成一体。
+              ⚠️ 这一格必须有收缩许可（min-w-0 + overflow-x-auto，**不是 flex-none**）：
+              768–1023px 时"品牌 + 7 签 + 右端三件套"放不下，它是唯一让位的元素；
+              滚动条本体由 `.genso-tabs` 隐藏（theme.css，滚动能力保留）。
+              `md` 档只显示图标（文字 hidden，读屏由 aria-label 承担）、`lg` 起恢复
+              图标 + 文字 —— 按 7×70px 的签宽估算，这个宽度段不收文字就放得下 */}
           <nav
             role="tablist"
             aria-label="页面导航"
             onKeyDown={onIdxKeyDown}
-            className="ml-auto flex flex-none items-end gap-0.5 self-end overflow-x-auto"
+            className="genso-tabs ml-auto flex min-w-0 items-end gap-0.5 self-end overflow-x-auto"
           >
             {NAV_ITEMS.map(({ key, label }) => {
               const active = nav === key;
@@ -79,6 +84,7 @@ export default function DesktopShell() {
                   role="tab"
                   data-nav={key}
                   aria-selected={active}
+                  aria-label={label}
                   onClick={() => setNav(key)}
                   className={`relative -mb-px flex flex-none cursor-pointer items-center gap-1.5 whitespace-nowrap rounded-t-sm border border-b-0 px-3 pb-2.5 pt-2 text-sm transition-colors duration-150 ease-genso ${
                     active
@@ -91,7 +97,7 @@ export default function DesktopShell() {
                     <i className="absolute left-1/2 top-0 h-0.5 w-4.5 -translate-x-1/2 rounded-b-full bg-crimson" />
                   ) : null}
                   <Icon name={NAV_ICON[key]} size={15} className={active ? 'text-gold-hi' : ''} />
-                  {label}
+                  <span className="hidden lg:inline">{label}</span>
                 </button>
               );
             })}

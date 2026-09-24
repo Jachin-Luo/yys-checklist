@@ -39,27 +39,24 @@ export function GainBadges({
   const rows = Object.entries(gain).filter(([, v]) => typeof v === 'number' && v > 0);
   if (!rows.length) return null;
   return (
-    <div
-      title={note}
-      className={
-        column
-          ? 'flex flex-col items-end gap-1.5'
-          : 'mt-1 flex flex-wrap items-center gap-1.5'
-      }
-    >
+    <div title={note} className={column ? 'flex flex-col items-end gap-1' : 'mt-1 flex flex-wrap items-center gap-1.5'}>
       <span className="text-2xs tracking-label text-ink-3">固定收益</span>
-      {rows.map(([k, v]) => (
-        <b
-          key={k}
-          className={`flex items-center gap-1.5 rounded-full border px-2 py-0.5 font-mono text-xs font-medium ${
-            CURRENCY_STYLE[k] ?? 'border-line bg-fill text-ink-2'
-          }`}
-        >
-          {/* 币种点（参考稿 `.chip::before`）：颜色即币种，三色在行内自成一条竖线 */}
-          <i aria-hidden className="h-1.5 w-1.5 flex-none rounded-full bg-current" />
-          {CURRENCY_LABEL[k] ?? k} +{v}
-        </b>
-      ))}
+      {/* 右列形态的徽章仍**横向换行**（参考稿 `.pay .chips{flex-wrap:wrap;justify-content:flex-end}`）
+          —— 竖排会把三币种摞成三行，右列高度反而被撑开 */}
+      <div className={column ? 'flex flex-wrap items-center justify-end gap-1.5' : 'contents'}>
+        {rows.map(([k, v]) => (
+          <b
+            key={k}
+            className={`flex items-center gap-1.5 rounded-full border px-2 py-0.5 font-mono text-xs font-medium ${
+              CURRENCY_STYLE[k] ?? 'border-line bg-fill text-ink-2'
+            }`}
+          >
+            {/* 币种点（参考稿 `.chip::before`）：颜色即币种，三色在行内自成一条竖线 */}
+            <i aria-hidden className="h-1.5 w-1.5 flex-none rounded-full bg-current" />
+            {CURRENCY_LABEL[k] ?? k} +{v}
+          </b>
+        ))}
+      </div>
     </div>
   );
 }
@@ -88,28 +85,25 @@ export function KindBadges({
   if (!rest.length) return null;
   const hasFixed = fixed.size > 0;
   return (
-    <div
-      className={
-        column
-          ? 'flex flex-col items-end gap-1.5'
-          : 'mt-1 flex flex-wrap items-center gap-1.5'
-      }
-    >
+    <div className={column ? 'flex flex-col items-end gap-1' : 'mt-1 flex flex-wrap items-center gap-1.5'}>
       <span className="text-2xs tracking-label text-ink-3">{hasFixed ? '另有' : '含'}</span>
-      {rest.map((k) => (
-        <b
-          key={k}
-          /* ⚠️ 字号类不能省（2026-09-24 用户反馈"奖励的字体大小太大了"）：
-             这里曾漏写字号，于是继承**根字号 16px** —— 比同一行的标签、
-             比上一行「固定收益」的徽章、甚至比任务名都大。教训见 CHANGELOG 同日条目：
-             **漏写字号的元素不会报错，只会悄悄变成 16px**。
-             册页稿后奖励块统一到 11px（`text-xs`）一族 */
-          className="rounded-full border border-dashed border-line px-2 py-0.5 font-normal text-xs text-ink-2"
-        >
-          {labels.get(k) ?? k}
-        </b>
-      ))}
-      <span className="text-xs text-ink-3">（数量不固定）</span>
+      {/* 右列形态同样横向换行右对齐（见 `GainBadges` 同名参数处的说明） */}
+      <div className={column ? 'flex flex-wrap items-center justify-end gap-1.5' : 'contents'}>
+        {rest.map((k) => (
+          <b
+            key={k}
+            /* ⚠️ 字号类不能省（2026-09-24 用户反馈"奖励的字体大小太大了"）：
+               这里曾漏写字号，于是继承**根字号 16px** —— 比同一行的标签、
+               比上一行「固定收益」的徽章、甚至比任务名都大。教训见 CHANGELOG 同日条目：
+               **漏写字号的元素不会报错，只会悄悄变成 16px**。
+               册页稿后奖励块统一到 11px（`text-xs`）一族 */
+            className="rounded-full border border-dashed border-line px-2 py-0.5 font-normal text-xs text-ink-2"
+          >
+            {labels.get(k) ?? k}
+          </b>
+        ))}
+        <span className="text-2xs text-ink-3">（数量不固定）</span>
+      </div>
     </div>
   );
 }
