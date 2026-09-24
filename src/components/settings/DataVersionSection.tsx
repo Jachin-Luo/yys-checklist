@@ -71,7 +71,7 @@ export default function DataVersionSection() {
 
       {fresh.stale ? (
         <p className="mt-2 flex items-start gap-1.5 text-sm leading-relaxed text-warn">
-          <Icon name="fumi" size={12} className="mt-0.5 flex-none" />
+          <Icon name="makimono" size={12} className="mt-0.5 flex-none" />
           数据快照已超过 {fresh.days} 天未更新，活动时间与掉落可能已变化 —— 以游戏内说明为准。
         </p>
       ) : null}

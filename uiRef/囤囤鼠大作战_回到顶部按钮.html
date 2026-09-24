@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>囤囤鼠大作战 · 回到顶部按钮 — 昇雲箭</title>
+<style>
+/* ══════════════════════════════════════════════════════════════
+   0 · TOKENS（与《囤囤鼠大作战_和风图标集》同一套色阶，明暗非反色而是重算）
+   ══════════════════════════════════════════════════════════════ */
+*,*::before,*::after{box-sizing:border-box}
+html,body{margin:0;padding:0}
+:root{
+  --sans:"PingFang SC","Microsoft YaHei","Hiragino Sans GB",sans-serif;
+  --serif:"Source Han Serif SC","Noto Serif SC","Songti SC",SimSun,serif;
+  --mono:ui-monospace,Consolas,"Roboto Mono",monospace;
+  --r:4px;
+  /* 朱印按钮自身（两主题共用底，因为朱印是品牌色，不随主题反相） */
+  --rt-bg-a:#D2413F; --rt-bg-b:#C1272D; --rt-bg-c:#8E1A20;
+  --rt-ink:#F2DFAE;          /* 朱底上的亮金：对比 4.9:1，远超图形要素 3:1 */
+  --rt-ring:rgba(242,223,174,.72);
+}
+/* ⚠ 用 [data-theme] 而不是 html[data-theme]：这样同一个页面里可以并存
+   「墨夜的一列」和「宣纸的一列」，各自拿到完整的一套变量 —— 状态矩阵就靠这个。 */
+[data-theme="dark"]{
+  --bg:#0B0A0D; --panel:#17161A; --card:#211F26; --card-2:#1B1A20;
+  --ink:#EDE4D3; --ink-2:#A79E8E; --mute:#6E6875;
+  --crimson:#C1272D; --gold:#C9A961; --gold-hi:#E3C77E;
+  --line:rgba(201,169,97,.42); --line-in:rgba(201,169,97,.16);
+  --bevel:inset 0 1px 0 rgba(255,255,255,.04), 0 1px 2px rgba(0,0,0,.35);
+  --tex:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='34.641'%3E%3Cpath d='M0 0H40M0 34.641H40M0 0L20 34.641L40 0M0 34.641L20 0L40 34.641M0 0V34.641M20 0V34.641M40 0V34.641' fill='none' stroke='%23C9A961' stroke-width='0.7' stroke-opacity='0.09'/%3E%3C/svg%3E");
+  --shadow-far:0 14px 30px -8px rgba(0,0,0,.7), 0 3px 8px rgba(0,0,0,.42);
+  --shadow-near:0 6px 14px -4px rgba(0,0,0,.6), 0 1px 3px rgba(0,0,0,.4);
+  --ok:#7FA86A;
+}
+[data-theme="light"]{
+  --bg:#DCD2BE; --panel:#F5EFE3; --card:#E3D7C1; --card-2:#EFE7D6;
+  --ink:#3A3540; --ink-2:#5A5245; --mute:#8E8574;
+  --crimson:#B7232A; --gold:#A8863F; --gold-hi:#8A6A24;
+  --line:rgba(168,134,63,.55); --line-in:rgba(168,134,63,.26);
+  --bevel:inset 0 1px 0 rgba(255,255,255,.55), 0 1px 2px rgba(140,115,80,.16);
+  --tex:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='34.641'%3E%3Cpath d='M0 0H40M0 34.641H40M0 0L20 34.641L40 0M0 34.641L20 0L40 34.641M0 0V34.641M20 0V34.641M40 0V34.641' fill='none' stroke='%23A8863F' stroke-width='0.7' stroke-opacity='0.13'/%3E%3C/svg%3E");
+  --shadow-far:0 14px 30px -10px rgba(120,96,60,.5), 0 3px 8px rgba(120,96,60,.22);
+  --shadow-near:0 6px 14px -6px rgba(120,96,60,.42), 0 1px 3px rgba(120,96,60,.2);
+  --rt-bg-a:#C93C38; --rt-bg-b:#B7232A; --rt-bg-c:#8A161C;
+  --rt-ring:rgba(250,236,206,.8);
+  --ok:#4F7A3E;
+}
+body{
+  background-color:var(--bg); color:var(--ink);
+  font-family:var(--sans); -webkit-font-smoothing:antialiased;
+  padding:34px 26px 72px;
+}
+.defs{position:absolute;width:0;height:0;overflow:hidden}
+.wrap{max-width:1180px;margin:0 auto}
+a{color:var(--gold)}
+
+/* ══ 1 · HERO ══ */
+.hero{padding:2px 0 24px;border-bottom:1px solid var(--line-in);margin-bottom:24px}
+.hero h1{
+  font-family:var(--serif);font-weight:900;font-size:29px;
+  letter-spacing:.05em;margin:0 0 10px;line-height:1.3;
+}
+.hero h1 b{color:var(--crimson)}
+.hero p{margin:0;color:var(--ink-2);font-size:12.5px;line-height:1.95;max-width:830px}
+.hero p em{font-style:normal;color:var(--gold);font-weight:600}
+.hero p b{color:var(--ink)}
+.stat{display:flex;gap:26px;margin-top:18px;flex-wrap:wrap}
+.stat i{font-style:normal;display:flex;flex-direction:column;gap:4px}
+.stat b{font-family:var(--mono);font-size:21px;font-weight:600;color:var(--gold);line-height:1}
+.stat span{font-size:10px;letter-spacing:.18em;color:var(--mute)}
+
+/* ══ 2 · 工具条 ══ */
+.tools{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:0 0 28px}
+.tb{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:8px 14px;border:1px solid var(--line-in);border-radius:var(--r);
+  background-color:var(--card);color:var(--ink-2);cursor:pointer;
+  font-family:var(--serif);font-size:12px;letter-spacing:.14em;
+  box-shadow:var(--bevel);transition:color .16s,border-color .16s;
+}
+.tb svg{width:15px;height:15px;display:block}
+.tb:hover{color:var(--ink);border-color:var(--line)}
+.tb.seg-on{color:var(--ink);border-color:var(--line);background-color:var(--card-2)}
+
+/* ══ 3 · SECTION 骨架 ══ */
+.sec{margin:0 0 38px}
+.sh{display:flex;align-items:center;gap:12px;margin:0 0 12px}
+.sh .no{
+  font-family:var(--mono);font-size:11px;color:var(--gold);
+  border:1px solid var(--line);border-radius:50%;
+  width:22px;height:22px;display:grid;place-items:center;flex:none;
+}
+.sh h2{font-family:var(--serif);font-size:17px;font-weight:900;letter-spacing:.1em;margin:0}
+.sh .ln{flex:1;height:1px;background:var(--line-in)}
+.sh .ct{font-family:var(--mono);font-size:10.5px;color:var(--mute);letter-spacing:.1em}
+.snote{color:var(--ink-2);font-size:12.5px;line-height:1.95;margin:0 0 18px;max-width:900px}
+.snote b{color:var(--ink)}
+.snote em{font-style:normal;color:var(--gold);font-weight:600}
+.snote code{
+  font-family:var(--mono);font-size:11.5px;color:var(--gold);
+  background:var(--line-in);padding:1px 5px;border-radius:3px;
+}
+
+/* ══ 4 · 卡网格 ══ */
+.grid{display:grid;gap:16px}
+.g4{grid-template-columns:repeat(4,1fr)}
+.g3{grid-template-columns:repeat(3,1fr)}
+.g2{grid-template-columns:repeat(2,1fr)}
+.card{
+  background-color:var(--card);background-image:linear-gradient(180deg,rgba(255,255,255,.03),transparent 40%);
+  border:1px solid var(--line-in);border-radius:6px;padding:14px;
+  box-shadow:var(--bevel);position:relative;
+}
+.card.win{border-color:var(--line);box-shadow:var(--bevel),0 0 0 1px var(--line-in)}
+.card .hd{display:flex;align-items:baseline;gap:8px;margin:0 0 12px}
+.card .hd b{font-family:var(--serif);font-size:13px;letter-spacing:.08em}
+.card .hd .k{
+  font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;
+  padding:2px 6px;border-radius:3px;border:1px solid var(--line-in);color:var(--mute);
+}
+.card .hd .k.pick{color:var(--rt-ink);background:var(--crimson);border-color:var(--crimson)}
+.cv{
+  background-color:var(--card-2);border:1px solid var(--line-in);border-radius:4px;
+  display:grid;place-items:center;padding:12px;background-image:var(--tex);
+}
+.cv.tall{padding:20px 12px}
+.cv svg{display:block;color:var(--gold-hi)}
+[data-theme="light"] .cv svg{color:var(--gold)}
+.card .ds{margin:11px 0 0;color:var(--ink-2);font-size:11.5px;line-height:1.85}
+.card .ds em{font-style:normal;color:var(--gold);font-weight:600}
+.card .ds b{color:var(--ink)}
+/* 变体展示格 */
+.vg{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:1px;background:var(--line-in);border:1px solid var(--line-in);border-radius:6px;overflow:hidden}
+.vg .v{background-color:var(--card);padding:20px 12px 12px;display:flex;flex-direction:column;align-items:center;gap:14px;background-image:var(--tex)}
+.vg .v .lbl{font-size:11px;color:var(--ink-2);text-align:center;line-height:1.7}
+.vg .v .lbl b{display:block;font-family:var(--serif);font-size:12px;letter-spacing:.08em;color:var(--ink);margin-bottom:3px}
+.vg .v .fit{display:grid;place-items:center;min-height:66px}
+.card .bad{margin-top:9px;padding-top:8px;border-top:1px solid var(--line-in);color:var(--ink-2);font-size:11px;line-height:1.8}
+.card .bad::before{content:"风险 · ";color:var(--crimson);font-weight:700}
+[data-theme="light"] .card .bad::before{color:var(--crimson)}
+
+/* 尺寸阶梯 */
+.rack{display:flex;align-items:flex-end;gap:14px;flex-wrap:wrap}
+.rack .r{display:flex;flex-direction:column;align-items:center;gap:7px}
+.rack .r svg{display:block;color:var(--ink)}
+.rack .r span{font-family:var(--mono);font-size:9.5px;color:var(--mute)}
+.rack.on-cv .r svg{color:var(--gold-hi)}
+[data-theme="light"] .rack.on-cv .r svg{color:var(--gold)}
+
+/* ══ 5 · 解剖图 ══ */
+.anat{display:grid;grid-template-columns:300px 1fr;gap:20px;align-items:start}
+.anbox{
+  background-color:var(--card-2);border:1px solid var(--line-in);border-radius:6px;
+  padding:14px;background-image:var(--tex);
+}
+.anbox svg{display:block;width:100%;height:auto}
+.ktab{width:100%;border-collapse:collapse;font-size:11.5px}
+.ktab th{
+  text-align:left;font-family:var(--mono);font-size:10px;letter-spacing:.12em;
+  color:var(--mute);font-weight:500;padding:0 8px 7px 0;border-bottom:1px solid var(--line-in);
+}
+.ktab td{padding:6px 8px 6px 0;border-bottom:1px solid var(--line-in);color:var(--ink-2);vertical-align:top}
+.ktab td:first-child{font-family:var(--mono);color:var(--gold);white-space:nowrap}
+.ktab td:last-child{padding-right:0}
+.ktab b{color:var(--ink)}
+
+/* ══ 6 · 状态矩阵 ══ */
+.mat{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1px;background:var(--line-in);border:1px solid var(--line-in);border-radius:6px;overflow:hidden}
+.mat .m{background-color:var(--card);padding:22px 12px 12px;display:flex;flex-direction:column;align-items:center;gap:12px}
+.mat .m>span{font-family:var(--mono);font-size:10px;color:var(--mute);letter-spacing:.1em;text-align:center;line-height:1.6}
+.mat .m>span b{display:block;color:var(--ink-2);font-family:var(--sans);font-size:11.5px;letter-spacing:.06em;margin-bottom:3px}
+
+/* ══ 7 · 朱印回顶按钮（本体）══════════════════════════════════
+   圆润四律：角越圆线越淡 / 阴影要散不要贴 / 留白跟着角走 / 零件也得圆
+   结构 = 圆底(朱红径向渐变) + 内金圈(inset ring) + 外金环(:after) + 金色箭头
+   ═══════════════════════════════════════════════════════════ */
+.rt{
+  --d:44px;
+  position:relative;display:inline-grid;place-items:center;
+  width:var(--d);height:var(--d);border:0;border-radius:50%;padding:0;
+  cursor:pointer;-webkit-tap-highlight-color:transparent;
+  color:var(--rt-ink);
+  background-color:var(--rt-bg-b);
+  background-image:radial-gradient(126% 126% at 34% 20%, var(--rt-bg-a) 0%, var(--rt-bg-b) 45%, var(--rt-bg-c) 100%);
+  box-shadow:
+    inset 0 0 0 1px var(--rt-ring),
+    inset 0 1px 0 rgba(255,255,255,.18),
+    var(--shadow-near);
+  transition:transform .18s cubic-bezier(.2,.85,.3,1), box-shadow .18s, opacity .24s;
+}
+/* 外金环：外扩一圈，hover 时才亮起（角越圆，线越淡 → 用 1px + 半透明） */
+.rt::after{
+  content:"";position:absolute;inset:-5px;border-radius:50%;
+  border:1px solid var(--rt-ring);opacity:0;
+  transform:scale(.9);transition:opacity .2s,transform .2s;
+  pointer-events:none;
+}
+.rt svg{width:56%;height:56%;display:block;overflow:visible}
+.rt:hover,.rt.sim-hover{
+  transform:translateY(-2px);
+  box-shadow:
+    inset 0 0 0 1px var(--rt-ring),
+    inset 0 1px 0 rgba(255,255,255,.22),
+    var(--shadow-far);
+}
+.rt:hover::after,.rt.sim-hover::after{opacity:1;transform:scale(1)}
+.rt:active,.rt.sim-down{transform:translateY(0) scale(.955);transition-duration:.07s}
+.rt.sim-down{transition-duration:0s}
+.rt:focus-visible{outline:2px solid var(--rt-ring);outline-offset:4px}
+/* 尺寸档 */
+.rt.lg{--d:52px}
+.rt.sm{--d:36px}
+/* 到顶态：抬起来反而碍事 → 淡出但保留占位（不 display:none，避免焦点丢失） */
+.rt.at-top{opacity:.28;transform:translateY(5px) scale(.94);pointer-events:none}
+/* 未达阈值 = 隐藏 */
+.rt.spec{cursor:default}
+.rt.idle{opacity:0;transform:translateY(12px) scale(.9);pointer-events:none}
+
+/* 进度环变体：环是 .rt 的兄弟 svg，必须用 .rt .ring 提升特异性压过 .rt svg{56%} */
+.rt.with-ring{--d:48px}
+.rt .ring{position:absolute;inset:-7px;width:calc(100% + 14px);height:calc(100% + 14px);pointer-events:none}
+.rt .ring .tk{fill:none;stroke:var(--line-in);stroke-width:2}
+.rt .ring .pg{fill:none;stroke:var(--gold);stroke-width:2;stroke-linecap:round;transform:rotate(-90deg);transform-origin:50% 50%}
+[data-theme="dark"] .rt .ring .pg{stroke:var(--gold-hi)}
+
+/* 带文字的胶囊变体 */
+.rt.pill{
+  width:auto;height:auto;border-radius:999px;padding:9px 16px 9px 13px;
+  display:inline-flex;align-items:center;gap:8px;
+  font-family:var(--serif);font-size:12px;letter-spacing:.12em;font-weight:700;
+}
+.rt.pill svg{width:15px;height:15px;flex:none}
+
+/* 固定实例（本页右下角真按钮） */
+.rt-fixed{position:fixed;right:28px;bottom:28px;z-index:60}
+
+/* ══ 8 · 集成场景 ══ */
+.scene{
+  background-color:var(--panel);border:1px solid var(--line-in);border-radius:6px;
+  padding:0;overflow:hidden;box-shadow:var(--bevel)
+}
+.scene .bar{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  padding:7px 11px;border-bottom:1px solid var(--line-in);
+  font-family:var(--mono);font-size:10px;color:var(--mute);letter-spacing:.1em;
+}
+.scene .body{padding:14px;position:relative;min-height:150px;background-image:var(--tex)}
+.scene .body.center{display:grid;place-items:center}
+.scene .body.corner{display:flex;align-items:flex-end;justify-content:flex-end}
+.tl{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:9px}
+.tl li{display:flex;align-items:center;gap:9px;font-size:11.5px;color:var(--ink-2)}
+.tl li svg{width:15px;height:15px;flex:none;color:var(--gold)}
+.tl li.on{color:var(--ink)}
+.tl li .dot{width:5px;height:5px;border-radius:50%;background:var(--mute);flex:none}
+.tl li.on .dot{background:var(--crimson);box-shadow:0 0 0 3px rgba(193,39,45,.2)}
+.phone{
+  width:148px;border:1px solid var(--line);border-radius:14px;overflow:hidden;
+  background-color:var(--panel);display:flex;flex-direction:column
+}
+.phone .pk{height:22px;display:grid;place-items:center;border-bottom:1px solid var(--line-in);font-family:var(--mono);font-size:8.5px;color:var(--mute)}
+.phone .pb{flex:1;padding:10px;display:flex;flex-direction:column;gap:7px;min-height:190px;background-image:var(--tex)}
+.sk{height:9px;border-radius:3px;background:var(--line-in)}
+.sk.w70{width:70%}.sk.w50{width:50%}.sk.w85{width:85%}
+.phone .pf{height:30px;border-top:1px solid var(--line-in);display:flex;align-items:center;justify-content:space-around}
+.phone .pf svg{width:14px;height:14px;color:var(--mute)}
+.phone .pf svg.on{color:var(--gold)}
+
+/* ══ 9 · 代码 ══ */
+.code{position:relative;margin:0 0 14px}
+.code pre{
+  margin:0;background-color:#0E0D11;border:1px solid var(--line-in);border-radius:6px;
+  padding:15px 15px 15px;overflow:auto;max-height:460px;
+  font-family:var(--mono);font-size:11.5px;line-height:1.75;color:#CFC6B4;
+}
+[data-theme="light"] .code pre{background-color:#26242B;color:#DCD3C2}
+.code pre .c{color:#7C7484}
+.code pre .k{color:#E3C77E}
+.code pre .s{color:#D98A84}
+.code .cp{
+  position:absolute;top:9px;right:9px;
+  font-family:var(--mono);font-size:10px;letter-spacing:.08em;
+  padding:4px 9px;border-radius:4px;cursor:pointer;
+  border:1px solid var(--line-in);background-color:rgba(255,255,255,.06);color:#A79E8E;
+  transition:color .16s,border-color .16s;
+}
+.code .cp:hover{color:#EDE4D3;border-color:var(--line)}
+.code .cp.done{color:#9CC98A;border-color:rgba(156,201,138,.5)}
+
+/* ══ 10 · 清单 ══ */
+.chk{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(2,1fr);gap:9px 22px}
+.chk li{display:flex;gap:9px;font-size:12px;line-height:1.75;color:var(--ink-2);align-items:flex-start}
+.chk li svg{width:14px;height:14px;flex:none;margin-top:3px;color:var(--ok)}
+.chk li b{color:var(--ink)}
+.chk li.no svg{color:var(--crimson)}
+
+/* ══ 11 · 对比表 ══ */
+.cmp{width:100%;border-collapse:collapse;font-size:11.5px}
+.cmp th{
+  text-align:left;font-family:var(--mono);font-size:10px;letter-spacing:.1em;
+  color:var(--mute);font-weight:500;padding:0 10px 8px 0;border-bottom:1px solid var(--line-in);
+}
+.cmp td{padding:9px 10px 9px 0;border-bottom:1px solid var(--line-in);color:var(--ink-2);vertical-align:middle}
+.cmp td:last-child{padding-right:0}
+.cmp td.n{font-family:var(--serif);color:var(--ink);font-weight:700;letter-spacing:.06em;white-space:nowrap}
+.cmp td svg{display:block;color:var(--gold-hi)}
+[data-theme="light"] .cmp td svg{color:var(--gold)}
+.cmp .pick{color:var(--gold);font-weight:700}
+
+@media (max-width:900px){
+  .g4{grid-template-columns:repeat(2,1fr)}
+  .g3,.g2{grid-template-columns:1fr}
+  .anat{grid-template-columns:1fr}
+  .chk{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<!-- ══════════════════════════════════════════════════════════════
+     符号库 · 24 视野 / 线宽 1.7 / 圆头圆角 —— 与《和风图标集》同一套规格
+     ⚠ <symbol> 必须待在 <svg> 内部。放进 <div> 会被当未知标签，<use> 全部引空。
+     ══════════════════════════════════════════════════════════════ -->
+<svg class="defs" aria-hidden="true" focusable="false"><defs>
+
+<!-- 基线：不做和风改造的普通上箭头。仅作对照，不进产品。 -->
+<symbol id="g-basic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round">
+  <path d="M12,19.6 V4.6"/>
+  <path d="M4.8,11.8 L12,4.6 L19.2,11.8"/>
+</symbol>
+
+<!-- ★ 定稿 · 昇雲箭（A）
+     云拱托起一支箭，箭尾刚接进云里 ——「从页面底部升回顶部」这件事，
+     和风里最省字的说法就是「昇」。云拱用一条对称贝塞尔，不是波浪拼贴，
+     所以 17px 下仍是一条干净的拱，而不是三坨墨。
+     bbox x 4.8–19.2 · y 3.2–20.6 · 中心 (12,11.9) -->
+<symbol id="g-ascend" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round">
+  <path d="M12,3.2 L14.2,8.4 L12,10.6 L9.8,8.4 Z"/>
+  <path d="M12,10.6 V15.2"/>
+  <path d="M12,13.0 L9.9,15.2"/>
+  <path d="M12,13.0 L14.1,15.2"/>
+  <path d="M4.8,20.6 C4.8,17.4 8.0,15.5 12,15.5 C16.0,15.5 19.2,17.4 19.2,20.6"/>
+</symbol>
+
+<!-- 备选 B · 三叠雲（巻雲三層）
+     三段云头自下而上收窄，读作「云梯 / 拾级登云」。和风纹样里「雲」是最正的一支，
+     但三朵云在 17px 会互相吃掉间距 —— 这是它落选的全部原因。 -->
+<symbol id="g-clouds" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round">
+  <path d="M2.8,20.4 C2.8,17.2 5.4,15.4 8.2,16.4 C10.0,15.0 13.2,15.0 15.0,16.4 C17.8,15.4 20.8,17.2 20.8,20.4"/>
+  <path d="M6.2,13.8 C6.2,11.6 8.2,10.2 10.4,11.0 C11.8,10.0 14.0,10.0 15.4,11.0 C17.6,10.2 18.6,11.6 18.6,13.8"/>
+  <path d="M8.8,7.4 C8.8,5.6 10.6,4.6 12.4,5.2 C13.6,4.6 15.2,5.4 15.2,7.4"/>
+</symbol>
+
+<!-- 备选 C · 雲梯
+     木梯两梁外撇 + 三道横档，直白表「往上」。识别仅次于定稿，
+     但梯子在日本器物谱里偏「工地」，和阴阳师的仪轨感不同频。 -->
+<symbol id="g-kumohashi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round">
+  <path d="M7.4,3.2 L5.2,20.8"/>
+  <path d="M16.6,3.2 L18.8,20.8"/>
+  <path d="M7.0,7.2 H17.0"/>
+  <path d="M6.4,11.6 H17.6"/>
+  <path d="M5.8,16.2 H18.2"/>
+</symbol>
+
+<!-- 备选 D · 破魔三矢
+     三支箭并拢，中间一支最高，底部一道束带 ——「三本矢」是日本正月破魔的吉祥物，
+     与「一次跳回顶端」的干脆劲儿同调。代价：三支箭各宽 1.1，17px 下只剩三个点。 -->
+<symbol id="g-hamaya" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round">
+  <path d="M12,2.8 L13.4,7.6 L12,9.5 L10.6,7.6 Z"/>
+  <path d="M12,9.5 V19.2"/>
+  <path d="M7.8,4.8 L8.9,8.8 L7.8,10.4 L6.7,8.8 Z"/>
+  <path d="M7.8,10.4 V19.8"/>
+  <path d="M16.2,4.8 L17.3,8.8 L16.2,10.4 L15.1,8.8 Z"/>
+  <path d="M16.2,10.4 V19.8"/>
+  <path d="M6.2,16.8 H17.8"/>
+</symbol>
+
+</defs></svg>
+<div class="wrap">
+
+  <header class="hero">
+    <h1>回到顶部按钮 · <b>昇雲箭</b></h1>
+    <p>独立一份稿子，<b>不改动任何既有文件</b>。规矩沿用《囤囤鼠大作战_和风图标集》：24 视野、线宽 1.7、圆头圆角、同一套朱红／金箔／宣纸白。
+      一枚回顶按钮在这套界面里要同时扛住三件事——<em>一眼知道是往上</em>、<em>摸起来像阴阳师的东西</em>、<em>缩到 17px 不糊</em>。
+      下面先把五个方向摆在桌上比，再定稿、再解剖、再验状态。
+      <br><em>这是一份纯样式稿</em> —— 只呈现样子与规格，<b>不接任何行为</b>，可以直接照抄进现有页面。</p>
+    <div class="stat">
+      <i><b>5</b><span>候选方案</span></i>
+      <i><b>24×24</b><span>图标坐标系</span></i>
+      <i><b>1.7</b><span>线宽</span></i>
+      <i><b>4.9:1</b><span>朱底金字对比度</span></i>
+      <i><b>3</b><span>尺寸档</span></i>
+    </div>
+  </header>
+
+  <div class="tools">
+    <button class="tb seg-on" id="tDark" type="button">墨夜</button>
+    <button class="tb" id="tLight" type="button">宣纸</button>
+    <span style="flex:1"></span>
+    <span style="font-size:11.5px;color:var(--mute);letter-spacing:.06em">右下角那枚常驻显示 · 不接行为</span>
+  </div>
+
+  <!-- ① 样式预览 ══════════════════════════════════════════ -->
+  <section class="sec" id="s-try">
+    <div class="sh"><span class="no">①</span><h2>按钮样式 · 实机预览</h2><i class="ln"></i><span class="ct">纯样式 · 无行为</span></div>
+    <p class="snote">右下角那枚就是成品的样子：朱红径向渐变底 + 1px 内金圈 + 亮金箭矢。
+      <b>它不接任何行为</b>——样式稿只负责「长什么样」；什么时候浮出来、点了滚不滚，是接入方的活。</p>
+    <div class="grid g2" style="align-items:stretch">
+      <div class="scene">
+        <div class="bar"><span>放进滚动容器里的样子</span><span>独立容器 · 静态</span></div>
+        <div class="body" style="height:192px;overflow:hidden;padding:0">
+          <div style="padding:14px;display:flex;flex-direction:column;gap:11px">
+            <div class="sk w85" style="height:11px"></div><div class="sk w70"></div><div class="sk w50"></div>
+            <div class="sk w85"></div><div class="sk w50"></div><div class="sk w70"></div>
+            <div class="sk w85"></div><div class="sk w50"></div><div class="sk w70"></div>
+            <div class="sk w85"></div><div class="sk w70"></div><div class="sk w50"></div>
+            <div class="sk w85"></div><div class="sk w50"></div><div class="sk w70"></div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="hd"><b>样式参数</b><span class="k">44px 档</span></div>
+        <table class="ktab">
+          <tr><td>直径</td><td><b>44px</b>，另备 36 / 52 两档</td></tr>
+          <tr><td>圆角</td><td>50% —— 正圆，无例外</td></tr>
+          <tr><td>底</td><td>径向渐变，光源在左上 34% / 20%<br><code>#C93C38 → #B7232A → #8A161C</code></td></tr>
+          <tr><td>边</td><td><b>1px 内金圈</b> <code>rgba(250,236,206,.8)</code>；外金环只在悬停亮起</td></tr>
+          <tr><td>图标</td><td>占按钮 <b>56%</b>，亮金 <code>#F2DFAE</code>，与底对比 <b>4.9:1</b></td></tr>
+          <tr><td>阴影</td><td>两段叠加：远而散（负扩散）＋ 近贴 1px。不做硬边投影</td></tr>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <div id="m-schemes"></div>
+  <div id="m-rack"></div>
+  <div id="m-anat"></div>
+  <div id="m-states"></div>
+  <div id="m-sizes"></div>
+  <div id="m-scene"></div>
+
+  <!-- ⑧ 代码 ══════════════════════════════════════════════ -->
+  <section class="sec" id="s-code">
+    <div class="sh"><span class="no">⑧</span><h2>复制即用</h2><i class="ln"></i><span class="ct">两段 · 零依赖</span></div>
+    <p class="snote">样式稿只有两段：<b>图标定义</b> ＋ <b>按钮样式</b>。注意第一段——
+      <b><code>&lt;symbol&gt;</code> 必须待在 <code>&lt;svg&gt;</code> 内部</b>，放进 <code>&lt;div&gt;</code>
+      会被浏览器当未知标签丢掉，所有 <code>&lt;use&gt;</code> 静默引空，页面上什么也看不见。</p>
+
+    <div class="code"><button class="cp" data-cp="c1" type="button">复制</button><pre id="c1"></pre></div>
+    <div class="code"><button class="cp" data-cp="c2" type="button">复制</button><pre id="c2"></pre></div>
+    <p class="snote" style="margin-top:16px">行为（什么时候浮出来、点了滚不滚）<b>不在这份稿子里</b>——
+      样式稿只管样子，免得接入方为了用一套视觉还得先拆掉一套逻辑。</p>
+  </section>
+
+  <!-- ⑨ 无障碍 ══════════════════════════════════════════════ -->
+  <section class="sec" id="s-a11y">
+    <div class="sh"><span class="no">⑨</span><h2>样式规范与约束</h2><i class="ln"></i><span class="ct">8 条</span></div>
+    <ul class="chk">
+      <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.6,12.6 L9.6,17.6 L19.4,6.8"/></svg><span><b>真 <code>&lt;button&gt;</code></b>，不是 div 挂 onclick —— 天然可 Tab、可回车触发。</span></li>
+      <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.6,12.6 L9.6,17.6 L19.4,6.8"/></svg><span><b>aria-label="回到顶部"</b>与 <code>title</code> 双写：读屏念得出，鼠标悬停也看得见。</span></li>
+      <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.6,12.6 L9.6,17.6 L19.4,6.8"/></svg><span>图标本体 <b>aria-hidden="true"</b>，不让读屏多念一个无名图形。</span></li>
+      <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.6,12.6 L9.6,17.6 L19.4,6.8"/></svg><span><b>焦点环</b>用 <code>:focus-visible</code> ＋ 2px 偏移，只在键盘操作时出现；鼠标点过不留环。</span></li>
+      <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.6,12.6 L9.6,17.6 L19.4,6.8"/></svg><span><b>命中区 44×44</b>（最小档 36 视觉尺寸外加 4px 外环命中），符合触屏 44px 推荐值。</span></li>
+      <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.6,12.6 L9.6,17.6 L19.4,6.8"/></svg><span><b>对比度 4.9:1</b>（#F2DFAE on #B7232A），图形要素要求 3:1 —— 留了余量给两套主题各自的渐变端。</span></li>
+      <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.6,12.6 L9.6,17.6 L19.4,6.8"/></svg><span><b>零件也得圆</b>：外金环用 <code>::after</code> 向外扩 5px，<b>不撑大按钮盒模型</b>——否则悬停时整块布局会跳 10px。</span></li>
+      <li class="no"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6.4,6.4 L17.6,17.6 M17.6,6.4 L6.4,17.6"/></svg><span><b>入场不用 opacity 关键帧</b>——可见性只交给类名，透明度只由 <code>transition</code> 承接。时间轴一旦冻结，<code>from{opacity:0}</code> 会让按钮永久停在 0（本项目踩过的坑）。</span></li>
+    </ul>
+  </section>
+
+</div>
+
+<!-- 常驻展示（样式稿不接行为，所以不给它 idle 隐藏态） -->
+<button class="rt rt-fixed" id="toTop" type="button" aria-label="回到顶部" title="回到顶部">
+  <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#g-ascend"/></svg>
+</button>
+<script>
+/* ══ 工具 ══ */
+const $ = id => document.getElementById(id);
+const ico = (n, s, cls) =>
+  `<svg viewBox="0 0 24 24" width="${s}" height="${s}"${cls ? ` class="${cls}"` : ''} aria-hidden="true"><use href="#g-${n}"/></svg>`;
+const RT = (extra, cls, size) => {
+  const st = size ? ` style="--d:${size}px"` : '';
+  const fan = `<svg viewBox="0 0 24 24" aria-hidden="true"><use href="#g-ascend"/></svg>`;
+  const ring = extra === 'ring'
+    ? `<svg class="ring" viewBox="0 0 62 62" aria-hidden="true">
+         <circle class="tk" cx="31" cy="31" r="29"/>
+         <circle class="pg" cx="31" cy="31" r="29" stroke-dasharray="182.2 182.2" stroke-dashoffset="${62}"/>
+       </svg>`
+    : '';
+  const clsAll = ['rt', cls].filter(Boolean).join(' ');
+  if (extra === 'pill')
+    return `<span class="rt pill spec"${st}>${fan}<span>回到顶部</span></span>`;
+  return `<span class="${clsAll} spec"${st}>${ring}${fan}</span>`;
+};
+
+/* ══ ② 五方案对稿 ══ */
+const SCH = [
+  { n:'basic', cn:'基线 · 上传箭头', tag:'对照 · 非候选',
+    ds:'不做和风改造时最省事的一枚：一根竖干线 + 两侧斜肩。识别度满分，但塞进朱印圆里就是随处可见的系统图标——界面会在这一笔上从「阴阳师」掉回「通用后台」。<br><em>它排第一不是候选，是尺子</em>：后面四枚都得在它旁边赢下「谁更像这套界面」这一局。',
+    bad:'' },
+  { n:'ascend', cn:'昇雲箭', tag:'★ 定稿', pick:true,
+    ds:'云拱托起一支箭，箭尾刚接进云里。<b>云拱是一条对称贝塞尔</b>，不是波浪拼贴——所以 17px 下它仍读成一条干净的拱，而不是三坨墨；箭矢保证「向上」这条语义不必靠猜。和风的「昇」正好落在这支箭上。',
+    bad:'有 3 条笔画落在 15px 高度带里，13px 以下开始并线。' },
+  { n:'clouds', cn:'三叠雲', tag:'备选',
+    ds:'三段云头自下而上收窄，读作「拾级登云」。雲纹是和风器物谱里最正统的一支，气质最贵——如果这个按钮是给「灵符兑换」那类仪式页面用的，它甚至比定稿更贴。',
+    bad:'17px 时云与云的净距只剩 1.2 单位，会糊成三条平行墨线。' },
+  { n:'kumohashi', cn:'雲梯', tag:'备选',
+    ds:'两梁外撇 + 三道横档。因为梁是外撇的，它比正梯多一层「仰视纵深」，识别度紧随定稿。',
+    bad:'梯子在日本器物谱里偏「工地／脚手架」，与本 project 的仪轨感不同频。' },
+  { n:'hamaya', cn:'破魔三矢', tag:'备选',
+    ds:'三矢并拢、中矢最高、底部一道束带——「三本矢」是正月破魔的吉祥物，与「一次跳回顶端」的干脆劲儿同调，也是最容易被记住的一枚。',
+    bad:'三支箭各宽 1.1 单位，17px 下只剩三根竖丝。' }
+];
+
+$('m-schemes').innerHTML = `
+<section class="sec">
+  <div class="sh"><span class="no">②</span><h2>方案对稿</h2><i class="ln"></i><span class="ct">5 选 1</span></div>
+  <p class="snote">判断顺序是固定的，不能倒过来：<b>先看 17px 还能不能认</b>（底栏位置的真实尺寸），再看它像不像和风器物。
+    一枚在 48px 漂亮、在 17px 糊成一团的图形，对导航栏来说是零分——因为导航栏只在 17px 出现。</p>
+  <div class="grid g3">
+    ${SCH.map(s => `
+      <article class="card${s.pick ? ' win' : ''}">
+        <div class="hd"><b>${s.cn}</b><span class="k${s.pick ? ' pick' : ''}">${s.tag}</span></div>
+        <div class="cv" style="min-height:124px">${ico(s.n, 54)}</div>
+        <p class="ds">${s.ds}</p>
+        ${s.bad ? `<p class="bad">${s.bad}</p>` : ''}
+      </article>`).join('')}
+  </div>
+</section>`;
+
+/* ══ ③ 尺寸阶梯 ══ */
+const STEPS = [14, 17, 20, 24, 32, 48];
+const SURV = {
+  basic:     ['清晰', '清晰', '清晰', '清晰', '清晰', '清晰', '10px 仍可辨'],
+  ascend:    ['并线', '可用', '稳定', '稳定', '舒展', '完整', '15px 起稳定'],
+  clouds:    ['糊', '糊', '紧张', '可辨', '舒展', '完整', '20px 起可辨'],
+  kumohashi: ['模糊', '可用', '稳定', '稳定', '舒展', '完整', '17px 起稳定'],
+  hamaya:    ['糊', '竖丝', '紧张', '可辨', '舒展', '完整', '24px 才成型']
+};
+const RACK = ['basic', 'ascend', 'clouds', 'kumohashi', 'hamaya'];
+
+$('m-rack').innerHTML = `
+<section class="sec">
+  <div class="sh"><span class="no">③</span><h2>尺寸阶梯</h2><i class="ln"></i><span class="ct">5 案 × 6 档</span></div>
+  <p class="snote">同一枚图形从 14px 摆到 48px，中间不换画法、不加简化版。<b>「并线」「糊」「竖丝」是我实际看到的判决</b>，
+    不是估计——把它们写进表里，是为了让下一次改的人知道每一枚的断点在哪。</p>
+  <table class="cmp">
+    <thead><tr><th>方案</th>${STEPS.map(s => `<th style="text-align:center">${s}px</th>`).join('')}<th>存活度</th></tr></thead>
+    <tbody>
+      ${RACK.map((n, i) => {
+        const s = SCH.find(x => x.n === n);
+        return `<tr>
+          <td class="n">${s.cn}${s.pick ? ' <span class="pick">★</span>' : ''}</td>
+          ${STEPS.map(v => `<td style="text-align:center;padding-top:6px;padding-bottom:6px">${ico(n, v, 'inline' + v)}</td>`).join('')}
+          <td>${SURV[n][6]}</td>
+        </tr>`;
+      }).join('')}
+    </tbody>
+  </table>
+</section>`;
+
+/* ══ ④ 定稿解剖 ══ */
+const ANAT = `
+<svg viewBox="-3.6 -4.4 33.2 32" style="width:100%;height:auto" aria-label="昇雲箭定稿几何标注">
+  <rect x="0" y="0" width="24" height="24" fill="none" stroke="var(--line-in)" stroke-width="0.16"/>
+  <path d="M4,0V24 M8,0V24 M16,0V24 M20,0V24 M0,4H24 M0,8H24 M0,16H24 M0,20H24"
+        stroke="var(--line-in)" stroke-width="0.09"/>
+  <path d="M12,0V24 M0,12H24" stroke="var(--line)" stroke-width="0.14" stroke-dasharray="0.7 0.7"/>
+  <g fill="none" stroke="var(--gold-hi)" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round">
+    <path d="M12,3.2 L14.2,8.4 L12,10.6 L9.8,8.4 Z"/>
+    <path d="M12,10.6 V15.2"/>
+    <path d="M12,13.0 L9.9,15.2"/>
+    <path d="M12,13.0 L14.1,15.2"/>
+    <path d="M4.8,20.6 C4.8,17.4 8.0,15.5 12,15.5 C16.0,15.5 19.2,17.4 19.2,20.6"/>
+  </g>
+  <circle cx="12" cy="11.9" r="0.5" fill="var(--crimson)"/>
+  <path d="M12,9.6 V14.2 M9.7,11.9 H14.3" stroke="var(--crimson)" stroke-width="0.16" stroke-dasharray="0.45 0.45"/>
+  <path d="M4.8,-2.3 V-0.9 M19.2,-2.3 V-0.9 M4.8,-1.6 H19.2" stroke="var(--mute)" stroke-width="0.14"/>
+  <text x="12" y="-2.9" text-anchor="middle" font-size="1.5" fill="var(--ink-2)"
+        font-family="ui-monospace,Consolas,monospace">14.4</text>
+  <path d="M2.6,3.2 H1.2 M2.6,20.6 H1.2 M1.9,3.2 V20.6" stroke="var(--mute)" stroke-width="0.14"/>
+  <text x="0.4" y="11.9" text-anchor="middle" font-size="1.5" fill="var(--ink-2)"
+        font-family="ui-monospace,Consolas,monospace" transform="rotate(-90 0.4 11.9)">17.4</text>
+  <path d="M12,15.5 H22.4" stroke="var(--mute)" stroke-width="0.12" stroke-dasharray="0.4 0.4"/>
+  <text x="22.8" y="15.95" font-size="1.35" fill="var(--mute)"
+        font-family="ui-monospace,Consolas,monospace">云脊 15.5</text>
+</svg>`;
+
+const ROWS = [
+  ['镞尖', '(12, 3.2)', '顶端留白 3.2 —— 比图标集惯例的 2~3 稍宽。回顶按钮是<b>圆形底</b>，圆会在四角吃掉视觉体积，留白收紧会让箭尖顶到金圈。'],
+  ['镞肩', '(14.2, 8.4) / (9.8, 8.4)', '镞宽 4.4。这是全集里最「锐」的一组夹角，因为箭镞要一眼读成尖，不能像菱形宝石。'],
+  ['箭杆', '(12, 10.6) → (12, 15.2)', '杆长 4.6 —— 恰好是箭镞高度的一半。再长，整枚就变「十字」；再短，箭镞与箭羽会挤在一起。'],
+  ['箭羽', '(12,13.0) → (9.9,15.2) / (14.1,15.2)', '两片对称，末端与杆端齐平。羽从杆身中点起分，不是从末端起——起得太靠下会读成「三叉戟」。'],
+  ['云脊', '(12, 15.5)', '箭羽末端 15.2 与云脊 15.5 之间留 <b>0.3 的空隙</b>：箭是「坐在云上」，不是「插进云里」——差这 0.3，整枚的气质从「落」变回「昇」。'],
+  ['云脚', '(4.8, 20.6) / (19.2, 20.6)', '底端<b>不封口</b>。封口会瞬间变成「倒置的伞」或「碗」，与图标集里团扇那类「面」的图形撞车。'],
+  ['拱高比', '5.1 / 14.4 = 0.354', '拱高（20.6−15.5＝5.1）÷ 弦长 14.4。大于 0.30 才读成「拱」，小于 0.25 会退化成一条直线。这是放射／拱形类图形的老判据。'],
+  ['中心', '(12, 11.9)', '与画布中心 (12,12) 差 0.1。包围盒与墨迹质心在实心锐器上天然一致，两套指标同向 —— 可以放心按包围盒对齐。']
+];
+
+$('m-anat').innerHTML = `
+<section class="sec">
+  <div class="sh"><span class="no">④</span><h2>定稿解剖</h2><i class="ln"></i><span class="ct">20 单位画布放大 9×</span></div>
+  <p class="snote">这一张是<b>可复算的图纸</b>，不是示意图。左边网格是 4 单位格，红点是中心准星；右边每一行都给出坐标与它存在的理由——
+    下次要改这枚图形的人，看这张表就够了。</p>
+  <div class="anat">
+    <div class="anbox">${ANAT}</div>
+    <table class="ktab">
+      <thead><tr><th>元素</th><th>坐标</th><th>为什么是这个值</th></tr></thead>
+      <tbody>${ROWS.map(r => `<tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td></tr>`).join('')}</tbody>
+    </table>
+  </div>
+</section>`;
+
+/* ══ ⑤ 状态矩阵 ══ */
+const STATES = [
+  ['默认', '', '常年态。阴影近而窄、外金环不亮'],
+  ['悬停', 'sim-hover', '上浮 2px，阴影换成远而散，外金环由 0.9 缩放到 1.0 —— 圆润四律里的「阴影要散不要贴」'],
+  ['按下', 'sim-down', '回落到原高度并缩到 0.955，位移 0.07s —— 只给「按到了」的触觉，不给等待感'],
+  ['键盘焦点', 'focus-ring', '2px 金环 + 4px 偏移，只由 :focus-visible 触发'],
+  ['到顶', 'at-top', '已回到顶端时淡到 28% 并下沉 —— 此时它没有用，但留位不重排'],
+  ['未达阈值', 'idle', '滚过 320px 之前完全隐藏，不做「半透明待命」']
+];
+const cell = (s, dark) => {
+  const cls = s[1] === 'focus-ring' ? '' : s[1];
+  const st = s[1] === 'focus-ring'
+    ? 'outline:2px solid var(--rt-ring);outline-offset:4px;'
+    : '';
+  return `<div class="m">
+    <span class="rt ${cls} spec" style="--d:44px;${st}">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#g-ascend"/></svg>
+    </span>
+    <span><b>${s[0]}</b>${s[2]}</span>
+  </div>`;
+};
+
+$('m-states').innerHTML = `
+<section class="sec">
+  <div class="sh"><span class="no">⑤</span><h2>状态矩阵</h2><i class="ln"></i><span class="ct">2 主题 × 6 态</span></div>
+  <p class="snote">按钮是<b>朱印</b>：朱红底 + 内金圈。它不跟主题反相 —— 因为朱印是品牌色，白天夜里都得是那一枚印。
+    跟着主题变的是它周围的<b>阴影与地面</b>：墨夜里阴影是纯黑深井，宣纸上换成暖褐。</p>
+  <div class="grid g2" style="gap:20px">
+    <div>
+      <div class="sh" style="margin-bottom:10px"><h2 style="font-size:13px">墨夜</h2><i class="ln"></i><span class="ct">data-theme=dark</span></div>
+      <div class="mat" data-theme="dark">${STATES.map(s => cell(s, true)).join('')}</div>
+    </div>
+    <div>
+      <div class="sh" style="margin-bottom:10px"><h2 style="font-size:13px">宣纸</h2><i class="ln"></i><span class="ct">data-theme=light</span></div>
+      <div class="mat" data-theme="light">${STATES.map(s => cell(s, false)).join('')}</div>
+    </div>
+  </div>
+</section>`;
+
+/* ══ ⑥ 尺寸与变体 ══ */
+const SIZES = [['sm', 36, '小', '内嵌在卡片角落或表格行尾'], ['', 44, '中', '默认档，也是触屏 44px 推荐命中值'], ['lg', 52, '大', '首页／空态等大面积页面']];
+
+$('m-sizes').innerHTML = `
+<section class="sec">
+  <div class="sh"><span class="no">⑥</span><h2>尺寸与变体</h2><i class="ln"></i><span class="ct">3 档 × 3 变体</span></div>
+  <p class="snote">图标本体不随尺寸重画——<b>同一份 24 单位路径</b>缩放到三档，因为它的断点在 13px，
+    三档（36/44/52）全部安全。变的只有外圈命中区与外金环的扩张量。</p>
+  <div class="vg" style="margin-bottom:16px">
+    ${SIZES.map(s => `<div class="v">
+      <div class="fit">${RT('', '', s[1])}</div>
+      <div class="lbl"><b>${s[2]} · ${s[1]}px</b>${s[3]}</div>
+    </div>`).join('')}
+  </div>
+  <div class="sh" style="margin:22px 0 12px"><h2 style="font-size:13px">两个衍生变体</h2><i class="ln"></i><span class="ct">同一枚图形，不改笔画</span></div>
+  <div class="vg">
+    <div class="v">
+      <div class="fit">${RT('ring')}</div>
+      <div class="lbl"><b>进度环版 · 48px</b>外环随阅读进度填充（本页右下角那枚没启用）。<b>只在超长文档用</b>——进度环会让人误以为它在「下载」。</div>
+    </div>
+    <div class="v">
+      <div class="fit">${RT('pill')}</div>
+      <div class="lbl"><b>胶囊版 · 带文字</b>图标缩到 15px，文字补上语义。适合按钮旁边还有别的浮动控件、需要彼此区分的场景。</div>
+    </div>
+  </div>
+</section>`;
+
+/* ══ ⑦ 集成场景 ══ */
+const LILI = ['收集今日素材', '完成三次协战', '整理仓库至 90%', '喂养达摩一只', '参与限时活动', '领取每周礼盒'];
+const TODOS = LILI.map((t, i) => {
+  const done = i < 2;
+  return `<li class="${done ? '' : 'on'}">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+      ${done ? '<path d="M4.6,12.6 L9.6,17.6 L19.4,6.8"/>' : '<circle cx="12" cy="12" r="8.2"/>'}
+    </svg><span style="flex:1;${done ? 'text-decoration:line-through;opacity:.55' : ''}">${t}</span>
+    <span style="font-family:var(--mono);font-size:10px;color:var(--mute)">${done ? '+1' : '待'}</span></li>`;
+});
+const todo = TODOS.join('');
+
+$('m-scene').innerHTML = `
+<section class="sec">
+  <div class="sh"><span class="no">⑦</span><h2>集成场景</h2><i class="ln"></i><span class="ct">3 个落点</span></div>
+  <p class="snote">同一枚按钮落到三处会看到三种问题：<b>右下浮动最怕和底栏打架</b>、<b>手机端最怕压住内容</b>、<b>卡片角落最怕超出圆角</b>。
+    下面按真实位置摆好，看它会不会挡东西。</p>
+  <div class="grid g3" style="align-items:start">
+    <div class="scene">
+      <div class="bar"><span>清单页 · 长列表</span><span>浮动 右下</span></div>
+      <div class="body corner" style="min-height:190px">
+        <ul class="tl" style="flex:1">${todo}</ul>
+        <span class="rt spec" style="margin-left:12px">${ico2()}</span>
+      </div>
+    </div>
+    <div class="scene" style="display:flex;flex-direction:column;align-items:center">
+      <div class="bar" style="width:100%"><span>手机端</span><span>底栏 +8px</span></div>
+      <div class="body center" style="width:100%;padding:16px">
+        <div class="phone">
+          <div class="pk">囤囤鼠大作战</div>
+          <div class="pb" style="position:relative">
+            <div class="sk w70" style="height:11px"></div><div class="sk w50"></div>
+            <div class="sk w85"></div><div class="sk w70"></div><div class="sk w50"></div><div class="sk w85"></div>
+            <span class="rt spec" style="--d:32px;position:absolute;right:7px;bottom:9px">${ico2()}</span>
+          </div>
+          <div class="pf">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M7,8.6 L12,5 L17,8.6 V19.8 A1.6,1.6 0 0 1 15.4,21.4 H8.6 A1.6,1.6 0 0 1 7,19.8 Z"/></svg>
+            <svg class="on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M12,20.2 L2.5,8.9 M12,20.2 L12,5.4 M12,20.2 L21.5,8.9 M2.5,8.9 A14.8,14.8 0 0 1 21.5,8.9"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round"><circle cx="12" cy="3.4" r="1.15"/><path d="M5.6,6.2 H18.4 V20 A1.5,1.5 0 0 1 16.9,21.5 H7.1 A1.5,1.5 0 0 1 5.6,20 Z"/><path d="M5.6,9.6 H18.4"/></svg>
+          </div>
+        </div>
+        <p class="snote" style="margin:12px 0 0;font-size:11px;text-align:center">
+          浮动按钮底距要比底栏高 <b>8px</b>，否则两枚圆会在视觉上「贴」成一组，<br>让底栏的「本周」看着像被挤住。</p>
+      </div>
+    </div>
+    <div class="scene">
+      <div class="bar"><span>卡片角落 · 36px 档</span><span>内嵌 偏移 12px</span></div>
+      <div class="body" style="min-height:190px;display:flex;flex-direction:column;justify-content:space-between">
+        <ul class="tl">${TODOS.slice(0, 3).join('')}</ul>
+        <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:12px">
+          <div>
+            <div class="sk w70" style="margin-bottom:8px"></div>
+            <div class="sk w50"></div>
+          </div>
+          <span class="rt sm spec">${ico2()}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>`;
+
+function ico2(){ return `<svg viewBox="0 0 24 24" aria-hidden="true"><use href="#g-ascend"/></svg>`; }
+
+/* ══ 主题 ══ */
+const htmlEl = document.documentElement;
+function setTheme(t){
+  htmlEl.dataset.theme = t;
+  $('tDark').classList.toggle('seg-on', t === 'dark');
+  $('tLight').classList.toggle('seg-on', t === 'light');
+}
+$('tDark').addEventListener('click', () => setTheme('dark'));
+$('tLight').addEventListener('click', () => setTheme('light'));
+setTheme(htmlEl.dataset.theme || 'dark');
+
+/* ══ ⑧ 代码 ══ */
+const C1 = `<!-- ⚠ 必须放在 <svg> 里。放进 <div> 会被当未知标签，<use> 全部引空。 -->
+<svg class="defs" aria-hidden="true" focusable="false"><defs>
+  <symbol id="g-ascend" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round">
+    <path d="M12,3.2 L14.2,8.4 L12,10.6 L9.8,8.4 Z"/>
+    <path d="M12,10.6 V15.2"/>
+    <path d="M12,13.0 L9.9,15.2"/>
+    <path d="M12,13.0 L14.1,15.2"/>
+    <path d="M4.8,20.6 C4.8,17.4 8.0,15.5 12,15.5 C16.0,15.5 19.2,17.4 19.2,20.6"/>
+  </symbol>
+</defs></svg>
+
+<!-- 放到页面右下角（body 直系子元素，别塞进任何 transform 容器） -->
+<button class="rt" id="toTop" type="button" aria-label="回到顶部" title="回到顶部">
+  <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#g-ascend"/></svg>
+</button>`;
+
+const C2 = `/* 朱印回顶按钮 —— 圆润四律：角越圆线越淡 / 阴影要散不要贴 / 留白跟着角走 / 零件也得圆 */
+.rt{
+  --d:44px;                                    /* ⑥ 三档只需改这一个值：36 / 44 / 52 */
+  position:fixed; right:28px; bottom:28px; z-index:60;
+  display:inline-grid; place-items:center;
+  width:var(--d); height:var(--d); padding:0; border:0; border-radius:50%;
+  cursor:pointer; -webkit-tap-highlight-color:transparent;
+  color:#F2DFAE;                               /* 朱底上的亮金：对比 4.9:1（图形要素要求 3:1） */
+  background-color:#B7232A;
+  background-image:radial-gradient(126% 126% at 34% 20%, #C93C38, #B7232A 45%, #8A161C);
+  box-shadow:
+    inset 0 0 0 1px rgba(250,236,206,.8),      /* 内金圈：1px 半透明，圆角大了线就得淡 */
+    inset 0 1px 0 rgba(255,255,255,.18),
+    0 6px 14px -6px rgba(120,96,60,.42),       /* 阴影要散：大模糊 + 负扩散，别贴边 */
+    0 1px 3px rgba(120,96,60,.2);
+  transition:transform .18s cubic-bezier(.2,.85,.3,1), box-shadow .18s, opacity .24s;
+}
+.rt::after{                                    /* 外金环：只有悬停才亮，且从 0.9 舒张到 1.0 */
+  content:""; position:absolute; inset:-5px; border-radius:50%;
+  border:1px solid rgba(250,236,206,.8);
+  opacity:0; transform:scale(.9);
+  transition:opacity .2s, transform .2s; pointer-events:none;
+}
+.rt svg{ width:56%; height:56%; display:block }        /* 零件也得圆：56% 让箭尖离金圈有呼吸 */
+
+.rt:hover{ transform:translateY(-2px);
+  box-shadow: inset 0 0 0 1px rgba(250,236,206,.8), inset 0 1px 0 rgba(255,255,255,.22),
+              0 14px 30px -10px rgba(120,96,60,.5), 0 3px 8px rgba(120,96,60,.22) }
+.rt:hover::after{ opacity:1; transform:scale(1) }
+.rt:active{ transform:translateY(0) scale(.955) }
+.rt:focus-visible{ outline:2px solid rgba(250,236,206,.8); outline-offset:4px }
+
+.rt.idle{ opacity:0; transform:translateY(12px) scale(.9); pointer-events:none }
+.rt.at-top{ opacity:.28; transform:translateY(5px) scale(.94); pointer-events:none }
+
+@media (prefers-reduced-motion: reduce){
+  .rt{ transition:opacity .2s }                /* 只保留淡入淡出 */
+  .rt:hover{ transform:none }
+  .rt:active{ transform:none }
+}`;
+
+
+
+
+
+function paint(code){
+  const esc = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  return code.split('\n').map(line => {
+    const t = line.trim();
+    return /^(\/\*|\*|\/\/|<!--)/.test(t) || /^\*/.test(t)
+      ? `<span class="c">${esc(line)}</span>`
+      : esc(line);
+  }).join('\n');
+}
+$('c1').innerHTML = paint(C1);
+$('c2').innerHTML = paint(C2);
+
+function copyText(t){
+  if (navigator.clipboard && location.protocol !== 'file:') return navigator.clipboard.writeText(t);
+  const ta = document.createElement('textarea');
+  ta.value = t; ta.setAttribute('readonly', '');
+  ta.style.cssText = 'position:fixed;top:-1000px;opacity:0';
+  document.body.appendChild(ta); ta.select();
+  try { document.execCommand('copy'); } catch (e) { /* 静默 */ }
+  document.body.removeChild(ta);
+  return Promise.resolve();
+}
+document.querySelectorAll('.cp').forEach(b => {
+  b.addEventListener('click', async () => {
+    await copyText($(b.dataset.cp).innerText);
+    b.classList.add('done'); b.textContent = '已复制';
+    setTimeout(() => { b.classList.remove('done'); b.textContent = '复制'; }, 1500);
+  });
+});
+
+</script>
+</body>
+</html>

@@ -1,17 +1,19 @@
 import type { ReactNode } from 'react';
 
+import { cardBox } from './controls';
+
 /**
- * 设置行 —— 参考稿 §7 的 `.srow`：**复用任务卡的同一套材质**，不新造一种卡片。
+ * 设置行 —— **复用任务卡的同一套材质**，不新造一种卡片。
  *
  * ```
- * background-color: var(--card)  →  bg-surface
- * box-shadow: var(--card-bevel)  →  shadow-card
- * border-radius: var(--r-md)      →  rounded-md（4px）
- * padding: 11px 14px              →  px-3.5 py-2.5
- * 行间距 6px                       →  由父级 space-y-1.5 统一控制
+ * background-color: var(--card)  →  bg-surface（纯白浮起）
+ * box-shadow: var(--sh-card)     →  shadow-card
+ * border-radius: var(--r-md)     →  rounded-md（2026-09-24 起 14px）
+ * padding: 12px 16px             →  px-4 py-3
+ * 行间距                          →  由父级 space-y-1.5 统一控制
  * ```
  *
- * 左侧是「衬线标题 13px + 说明 10.5px 弱化色」，右侧控件 `flex:none` ——
+ * 左侧是「衬线标题 13px + 说明 12px 弱化色」，右侧控件 `flex:none` ——
  * 与清单卡是同一个"盒子"，只换了内部布局。这样设置页不需要第二套卡片语言。
  *
  * `children` 用于**挂在行下方的附属内容**（如数据版本的键值明细）：
@@ -32,7 +34,7 @@ export default function SettingRow({
   children?: ReactNode;
 }) {
   return (
-    <div className="rounded-md bg-surface px-3.5 py-2.5 shadow-card">
+    <div className={`px-4 py-3 ${cardBox.solid}`}>
       <div className="flex items-center justify-between gap-4">
         <div className="min-w-0 flex-1">
           <p className="font-serif text-base tracking-card text-ink">{title}</p>

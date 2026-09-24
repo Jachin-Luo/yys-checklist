@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import type { Item } from '../api/types';
 import { hiddenByCover } from '../domain/autoDaily';
 import { applyGuildTimeAll } from '../domain/guildTime';
+import { groupedMemberIds } from '../domain/grouping';
 import { buildComparator, effectiveSortBy, isVisible } from '../domain/sort';
 import { useCheckStore } from '../stores/check';
 import { useGuildTimeStore } from '../stores/guildTime';
@@ -65,7 +66,6 @@ export function useChecklist(target: ChecklistTarget): Checklist {
       /* 筛选入口暂时下线：开关关着时一律传空数组，避免"看不见的筛选"把条目悄悄滤掉
          （见 `stores/view.SHOW_KIND_FILTER` 的说明） */
       showKinds: SHOW_KIND_FILTER ? (view.showKinds as string[]) : [],
-      hideDone: view.hideDone,
       today: now.getDay(),
     };
 
@@ -80,13 +80,29 @@ export function useChecklist(target: ChecklistTarget): Checklist {
       return it.cycle === 'weekly';
     });
 
-    /* coverMode 只影响**列表渲染**：`hide` 时不渲染被覆盖项；
-       它绝不进入统计与漏失口径（那是 domain/stats 的事，被覆盖项照样计入）。
-       入口自身永不被隐藏，否则整块入口会连着自己一起消失。 */
-    const listed = inScope.filter((it) => !hiddenByCover(it, coveredSet, coverMode));
+    /* 分组成员**豁免下面的视图筛选**（2026-09-24，用户报"地域鬼王怎么还是没有合并"）：
+       覆盖设置会触发「隐藏被覆盖项」、条目还可能带 `days` 只在某几天适用，而当时还有一个
+       **没有 UI 却仍生效**的「隐藏已完成」（同日已整体删除）—— 无论哪一条把组里的成员
+       滤掉，那个三步任务就会**静默散成几张卡**，且只有动过的那一组出问题（没动过的组
+       不缺口，于是看起来像"偶然"）。过滤器只能决定"这条自己显不显示"，不能决定
+       "这个分组存不存在"。
+       传进去的是 `inScope`（**条目库层**）：被用户在「条目管理」里手动隐藏的条目本来就
+       不在其中，不会被复活 —— 那是用户的明确取舍，复活了还会被误勾。
 
-    const sorted = listed
-      .filter((it) => isVisible(it, checked[it.id], visibility))
+       粒度也定死：分组是**一个单元**，要么整张在、要么整张不在 —— 不做"只藏一半"
+       （全组完成时它照旧整张进「已完成」段）。
+
+       coverMode 的另一半口径不变：它只影响**列表渲染**，绝不进入统计与漏失口径
+       （那是 domain/stats 的事，被覆盖项照样计入）；入口自身也永不被隐藏，
+       否则整块入口会连着自己一起消失。 */
+    const groupMates = groupedMemberIds(inScope);
+
+    const sorted = inScope
+      .filter((it) =>
+        groupMates.has(it.id)
+          ? true
+          : !hiddenByCover(it, coveredSet, coverMode) && isVisible(it, visibility),
+      )
       .sort(comparator);
 
     const hub = sorted.find((it) => it.isAutoHub) ?? null;

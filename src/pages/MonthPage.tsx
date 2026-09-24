@@ -1,4 +1,5 @@
-import ChecklistItem from '../components/common/ChecklistItem';
+import ChecklistEntry from '../components/common/ChecklistEntry';
+import { groupChecklist } from '../domain/grouping';
 import { EmptyState, SectionTitle } from '../components/common/EmptyState';
 import PageHead from '../components/common/PageHead';
 import ViewBar from '../components/common/ViewBar';
@@ -52,12 +53,8 @@ export default function MonthPage({ variant }: { variant: 'mobile' | 'desktop' }
       </SectionTitle>
       {pending.length ? (
         <div className={CHECKLIST_GRID}>
-          {pending.map((item) => (
-            <ChecklistItem
-              key={item.id}
-              item={item}
-              dimmed={isDimmed(item.id)}
-            />
+          {groupChecklist(pending, done).pending.map((u) => (
+            <ChecklistEntry key={u.key} unit={u} dimmedOf={isDimmed} />
           ))}
         </div>
       ) : (
@@ -66,16 +63,12 @@ export default function MonthPage({ variant }: { variant: 'mobile' | 'desktop' }
 
       {done.length ? (
         <>
-          <SectionTitle icon="suzu" count={done.length}>
+          <SectionTitle icon="done" count={done.length}>
             已完成
           </SectionTitle>
           <div className={CHECKLIST_GRID}>
-            {done.map((item) => (
-              <ChecklistItem
-                key={item.id}
-                item={item}
-                dimmed={isDimmed(item.id)}
-              />
+            {groupChecklist(pending, done).done.map((u) => (
+              <ChecklistEntry key={u.key} unit={u} dimmedOf={isDimmed} />
             ))}
           </div>
         </>

@@ -28,17 +28,30 @@ import { SnakeEye } from '../ornament';
  *
  * | 通道 | 未完成 | 已完成 |
  * |---|---|---|
- * | 左侧 3px 竖条 + 上下菱形挂角 | `state-active` 靛蓝 | `crimson-soft` 暗朱 |
- * | 卡片底 | `surface`（浮起） | `card-done`（主动沉下去） |
+ * | 左侧 3px 竖条 + 上下菱形挂角 → 2026-09-24 起只留**圆头竖条** | `state-active` 靛蓝 | `crimson-soft` 暗朱 |
+ * | 卡片底 | `surface`（纯白浮起） | `card-done`（主动沉下去） |
  * | 任务名 | 衬线 14.5px + 字距 .6px，`ink` | `ink-4` + 朱红划除线 |
  * | 底轨 2px | 空槽 | 朱红满格 |
  *
+ * ## 2026-09-24 圆润版
+ *
+ *   - **竖条去掉上下菱形挂角**：菱形是方正语言的角饰，挂在 14px 圆角的卡片上会"穿帮"；
+ *     改成整条圆头（`rounded-full`）+ 卡片 `overflow-hidden`，两端自然收进圆角里。
+ *     **任务卡左侧的菱形符格（勾选控件）保留** —— 参考稿自己说了"点一次菱形推进一步"，
+ *     菱形是任务卡的语言，圆润版只换了表单类控件（见 `ProfilePickDialog` 的圆角方块）。
+ *   - 悬停从 `surface-3`（更暗）改成 `surface-hi`（更亮的暖白）：卡片已经是最亮的纯白，
+ *     再往暗里压等于"悬停 = 沉下去"，与浮起方向反了。
+ *   - 置顶星标改圆头，未置顶色从 `line`（本条线的色）改成 `ink-4`（装饰图标档）。
+ *
  * **关于"序号"与"菱形进度格"**：参考稿的任务卡左侧有 01/02 序号、第二行有一排菱形进度格
- * （格数 = 目标次数）。本项目**不做**：
- *   - 序号 —— 清单顺序由用户拖拽 / 痛感分决定，序号是伪信息；
- *   - 进度格 —— 数据模型是布尔勾选（`CheckState.checked`），没有 `cur/total`，
- *     画出来的格子只能是"一格"或"假进度"。真实进度做在**分组头**那一层
- *     （`SectionTitle.progress`，见 `EmptyState.tsx`）。
+ * （格数 = 目标次数）。
+ *   - 序号 —— 仍然**不做**：清单顺序由用户拖拽 / 痛感分决定，序号是伪信息；
+ *   - 进度格 —— **单条卡不做，聚合卡做**（2026-09-24 改口）。这条前提原本是
+ *     "数据模型是布尔勾选，没有 `cur/total`"，但按次数聚合之后 `cur/total` 是**真的**
+ *     （组内已完成条数 / 可见步数，见 `domain/grouping.unitProgress`），所以
+ *     "第 k/N 次"那类条目的进度画得出来，也画在它的卡上（`ChecklistGroupCard` 的菱形进度格）。
+ *     单条卡仍然没有次数可言 —— 它的"进度"就是"做没做"，左侧菱形符格本身就是那个答案，
+ *     再排一排格子只会是"一格"或假进度。
  *
  * `dimmed` 表示「被一键日常覆盖且当前为弱化显示」。**完成态优先**：已完成项走完成样式，
  * 不再二次叠加弱化，避免低到看不清。
@@ -81,12 +94,12 @@ interface Props {
  */
 const CYCLE_ICON: Record<Cycle, IconName> = {
   once: 'ofuda',
-  daily: 'torii',
+  daily: 'ema',
   weekly: 'ougi',
   monthly: 'koyomi',
   limited: 'chochin',
-  version: 'chochin',
-  season: 'chochin',
+  version: 'nobori',
+  season: 'nobori',
 };
 
 function ChecklistItem({
@@ -133,7 +146,11 @@ function ChecklistItem({
   const kindLabels = dictIndexOf(meta, 'gainKind');
   const labelMap = new Map([...kindLabels.entries()].map(([k, v]) => [k, v.label]));
 
-  const opacity = checked ? 'opacity-60' : dimmed ? 'opacity-70' : '';
+  /* 2026-09-24 去掉"已完成整卡 opacity-60"：那是三级衰减相乘里的第二级，
+     叠上卡底色与文字色之后，已完成项文字实测只有 **1.68:1**（暗版 1.83）——
+     已接近"消失"，与既定口径「不消失、沉下去」相悖。沉下去由卡底色（`card-done`）
+     + 朱红划线 + 菱形符三个通道承担，不需要再整卡调透明度。 */
+  const opacity = dimmed ? 'opacity-70' : '';
   /* 高亮位只允许给"还没了结"的条目：已完成必须沉下去（参考稿铁律二） */
   const isHighlight = highlight && !checked;
   const barColor = checked ? 'bg-crimson-soft' : 'bg-state-active';
@@ -147,7 +164,7 @@ function ChecklistItem({
            见 `styles/base.css` 该类的说明 */
         'group no-press-select relative grid cursor-pointer grid-cols-[1.25rem_minmax(0,1fr)_auto] items-start gap-x-2.5',
         'overflow-hidden rounded-md px-3.5 pb-4 pt-3 shadow-card transition-all duration-300 ease-genso',
-        checked ? 'bg-card-done' : 'bg-surface hover:bg-surface-3',
+        checked ? 'bg-card-done' : 'bg-surface hover:bg-surface-hi',
         isHighlight ? 'bg-gold-soft ring-1 ring-gold-hi hover:shadow-ready' : '',
         pressing ? 'scale-[0.985]' : '',
         opacity,
@@ -159,14 +176,12 @@ function ChecklistItem({
         handleToggle();
       }}
     >
-      {/* 左侧符纸条 + 上下菱形挂角（参考稿 .bar） */}
+      {/* 左侧符纸条：圆润版去掉上下菱形挂角（菱形是方正语言的角饰，挂在 14px 圆角上会穿帮），
+          整条改圆头 + 卡片 `overflow-hidden`，两端自然收进圆角 */}
       <span
         aria-hidden
-        className={`absolute bottom-4 left-0 top-3 w-[3px] rounded-sm transition-colors duration-300 ${barColor}`}
-      >
-        <i className={`absolute -left-[1.25px] -top-1 h-1.5 w-1.5 rotate-45 ${barColor}`} />
-        <i className={`absolute -bottom-1 -left-[1.25px] h-1.5 w-1.5 rotate-45 ${barColor}`} />
-      </span>
+        className={`absolute bottom-4 left-0 top-3 w-[3px] rounded-full transition-colors duration-300 ${barColor}`}
+      />
 
       {/* 卡片底轨 2px（硬约束：不得超过 2px，超过就变成第二根分隔线） */}
       <span aria-hidden className="absolute bottom-0 left-0 h-0.5 w-full bg-track">
@@ -202,12 +217,17 @@ function ChecklistItem({
           <Icon
             name={CYCLE_ICON[item.cycle]}
             size={17}
-            className={`mt-0.5 ${checked ? 'text-ink-4 opacity-50' : 'text-gold opacity-85'}`}
+            /* 已完成侧由 `text-ink-4 opacity-50`（≈1.68）提到 `text-ink-3`；
+               未完成侧由 `text-gold opacity-85`（2.45）提到 `text-gold-hi`（4.64）——
+               `gold` 从此只留给描边与纹样，文字金一律走 `gold-hi`（明版它才是压深的那个） */
+            className={`mt-0.5 ${checked ? 'text-ink-3' : 'text-gold-hi'}`}
           />
           {/* `break-words` 给超长不可断串兜底：名称里塞英文串 / UID 时，双列每列只有 ~390px */}
           <h3
             className={`flex min-w-0 flex-wrap items-center gap-1.5 break-words font-serif text-lg leading-snug tracking-card ${
-              checked ? 'text-ink-4 line-through decoration-crimson decoration-1' : 'text-ink'
+              /* 已完成**任务名**同样提到 `ink-3`：它才是读者最需要看清的那行字，
+                 裸 `ink-4` 在卡片上只有 3.56（暗版 3.14）。划线 + 卡底色已足够表达"已完成" */
+              checked ? 'text-ink-3 line-through decoration-crimson decoration-1' : 'text-ink'
             }`}
           >
             {item.name}
@@ -244,11 +264,11 @@ function ChecklistItem({
           e.stopPropagation();
           void togglePin(item.id);
         }}
-        className={`mt-0.5 flex-none cursor-pointer rounded-sm p-0.5 transition-colors duration-120 ${
-          pinned ? 'text-gold-hi' : 'text-line hover:text-gold'
+        className={`mt-0.5 flex-none cursor-pointer rounded-full p-1 transition-colors duration-150 ease-genso hover:bg-fill ${
+          pinned ? 'text-gold-hi' : 'text-ink-4 hover:text-gold-hi'
         }`}
       >
-        <Icon name="star5" size={13} className={pinned ? '' : 'opacity-60'} />
+        <Icon name="pin" size={13} className={pinned ? '' : 'opacity-60'} />
       </button>
     </article>
   );

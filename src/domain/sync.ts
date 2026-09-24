@@ -77,7 +77,7 @@ export const SYNC_PARTS: readonly SyncPart[] = [
   {
     key: 'viewPrefs',
     label: '清单显示偏好',
-    desc: '奖励类型筛选、隐藏已完成、置顶条目。偏个人口味，故默认不同步。',
+    desc: '奖励类型筛选、置顶条目与卡片信息密度。偏个人口味，故默认不同步。',
     byDefault: false,
   },
 ];
@@ -143,7 +143,6 @@ export function applyParts(
     }
     if (pick.has('viewPrefs')) {
       view.showKinds = [...source.view.showKinds];
-      view.hideDone = source.view.hideDone;
       view.pinned = [...source.view.pinned];
       /* 卡片信息密度也属于"清单显示偏好"：多号对"卡片要多详细"的偏好通常一致 */
       view.card = source.view.card ? { ...source.view.card } : undefined;

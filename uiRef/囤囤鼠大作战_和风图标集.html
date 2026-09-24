@@ -1,0 +1,1099 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>囤囤鼠大作战 · 和风图标集 — 阴阳师朱印版</title>
+<style>
+/* ══════════════════════════════════════════════════════════════
+   0 · TOKENS（与《阴阳师任务录_朱印深化版》同一套色阶，明暗非反色而是重算）
+   ══════════════════════════════════════════════════════════════ */
+*,*::before,*::after{box-sizing:border-box}
+html,body{margin:0;padding:0}
+:root{
+  --sans:"PingFang SC","Microsoft YaHei","Hiragino Sans GB",sans-serif;
+  --serif:"Source Han Serif SC","Noto Serif SC","Songti SC",SimSun,serif;
+  --mono:ui-monospace,Consolas,"Roboto Mono",monospace;
+  --r:4px;
+}
+html[data-theme="dark"]{
+  --bg:#0B0A0D; --panel:#17161A; --card:#211F26; --card-2:#1B1A20;
+  --ink:#EDE4D3; --ink-2:#A79E8E; --mute:#6E6875;
+  --crimson:#C1272D; --gold:#C9A961; --gold-hi:#E3C77E;
+  --line:rgba(201,169,97,.42); --line-in:rgba(201,169,97,.16);
+  --chip-keep:rgba(110,104,117,.16);
+  --chip-new:rgba(201,169,97,.13);
+  --chip-redraw:rgba(193,39,45,.18);
+  --bevel:inset 0 1px 0 rgba(255,255,255,.04), 0 1px 2px rgba(0,0,0,.35);
+  --tex:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='34.641'%3E%3Cpath d='M0 0H40M0 34.641H40M0 0L20 34.641L40 0M0 34.641L20 0L40 34.641M0 0V34.641M20 0V34.641M40 0V34.641' fill='none' stroke='%23C9A961' stroke-width='0.7' stroke-opacity='0.09'/%3E%3C/svg%3E");
+  --on-crimson:#F6EFE1;
+}
+html[data-theme="light"]{
+  --bg:#DCD2BE; --panel:#F5EFE3; --card:#E3D7C1; --card-2:#EFE7D6;
+  --ink:#3A3540; --ink-2:#5A5245; --mute:#8E8574;
+  --crimson:#B7232A; --gold:#A8863F; --gold-hi:#8A6A24;
+  --line:rgba(168,134,63,.55); --line-in:rgba(168,134,63,.26);
+  --chip-keep:rgba(142,133,116,.14);
+  --chip-new:rgba(168,134,63,.16);
+  --chip-redraw:rgba(183,35,42,.13);
+  --bevel:inset 0 1px 0 rgba(255,255,255,.55), 0 1px 2px rgba(140,115,80,.16);
+  --tex:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='34.641'%3E%3Cpath d='M0 0H40M0 34.641H40M0 0L20 34.641L40 0M0 34.641L20 0L40 34.641M0 0V34.641M20 0V34.641M40 0V34.641' fill='none' stroke='%23A8863F' stroke-width='0.7' stroke-opacity='0.13'/%3E%3C/svg%3E");
+  --on-crimson:#F8F3E8;
+}
+body{
+  background:var(--bg); color:var(--ink);
+  font-family:var(--sans); -webkit-font-smoothing:antialiased;
+  padding:34px 26px 72px;
+}
+.defs{position:absolute;width:0;height:0;overflow:hidden}
+.wrap{max-width:1180px;margin:0 auto}
+a{color:var(--gold)}
+
+/* ══ 1 · HERO ══ */
+.hero{padding:2px 0 24px;border-bottom:1px solid var(--line-in);margin-bottom:24px}
+.hero h1{
+  font-family:var(--serif);font-weight:900;font-size:29px;
+  letter-spacing:.05em;margin:0 0 10px;line-height:1.3;
+}
+.hero h1 b{color:var(--crimson)}
+.hero p{margin:0;color:var(--ink-2);font-size:12.5px;line-height:1.95;max-width:820px}
+.hero p em{font-style:normal;color:var(--gold);font-weight:600}
+.stat{display:flex;gap:26px;margin-top:18px;flex-wrap:wrap}
+.stat i{font-style:normal;display:flex;flex-direction:column;gap:4px}
+.stat b{font-family:var(--mono);font-size:21px;font-weight:600;color:var(--gold);line-height:1}
+.stat span{font-size:10px;letter-spacing:.18em;color:var(--mute)}
+
+/* ══ 2 · 工具条 ══ */
+.tools{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:0 0 28px}
+.tb{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:8px 14px;border:1px solid var(--line-in);border-radius:var(--r);
+  background-color:var(--card);color:var(--ink-2);cursor:pointer;
+  font-family:var(--serif);font-size:12px;letter-spacing:.14em;
+  box-shadow:var(--bevel);transition:color .16s,border-color .16s;
+}
+.tb svg{width:15px;height:15px;display:block}
+.tb:hover{color:var(--ink);border-color:var(--line)}
+.seg{
+  display:inline-flex;border:1px solid var(--line-in);border-radius:var(--r);
+  overflow:hidden;background-color:var(--card);box-shadow:var(--bevel);
+}
+.seg button{
+  border:0;background:transparent;color:var(--ink-2);cursor:pointer;
+  padding:8px 13px;font-family:var(--mono);font-size:11.5px;letter-spacing:.04em;
+}
+.seg button+button{border-left:1px solid var(--line-in)}
+.seg button.on{
+  background-image:linear-gradient(var(--crimson),var(--crimson));
+  color:var(--on-crimson);
+}
+.tools .sp{flex:1}
+.tools .lbl{font-size:10.5px;letter-spacing:.18em;color:var(--mute)}
+
+/* ══ 3 · 分区 ══ */
+.sec{margin:0 0 36px}
+.sh{display:flex;align-items:center;gap:12px;margin:0 0 2px}
+.sh .no{
+  font-family:var(--mono);font-size:11px;color:var(--gold);white-space:nowrap;
+  border:1px solid var(--line-in);border-radius:2px;padding:2px 7px;
+}
+.sh h2{
+  font-family:var(--serif);font-size:16px;font-weight:700;
+  letter-spacing:.2em;margin:0;white-space:nowrap;
+}
+.sh .ln{flex:1;height:1px;background-color:var(--line-in)}
+.sh .ct{font-family:var(--mono);font-size:11px;color:var(--mute);white-space:nowrap}
+.snote{
+  margin:10px 0 16px;font-size:12px;line-height:1.95;color:var(--ink-2);max-width:920px;
+  border-left:2px solid var(--line-in);padding-left:14px;
+}
+.snote b{color:var(--gold);font-weight:600}
+.snote em{font-style:normal;color:var(--crimson);font-weight:600}
+.snote code,.foot code{
+  font-family:var(--mono);font-size:11px;color:var(--crimson);
+  background-color:var(--chip-redraw);padding:1px 4px;border-radius:2px;
+}
+
+/* ══ 4 · 图标卡 ══ */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(198px,1fr));gap:12px}
+.ic{
+  position:relative;overflow:hidden;
+  background-color:var(--card);border:1px solid var(--line-in);border-radius:var(--r);
+  box-shadow:var(--bevel);padding:15px 15px 13px;
+  display:flex;flex-direction:column;gap:10px;
+}
+.ic::before{
+  content:'';position:absolute;inset:0;
+  background-image:var(--tex);opacity:.55;pointer-events:none;
+}
+.ic>*{position:relative}
+.ic .top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
+.ic .glyph{
+  width:calc(54px * var(--z,1));height:calc(54px * var(--z,1));
+  flex:none;color:var(--ink);
+  display:flex;align-items:center;justify-content:center;
+  border:1px solid var(--line-in);border-radius:3px;background-color:var(--card-2);
+  transition:width .18s,height .18s;
+}
+.ic .glyph svg{
+  width:calc(38px * var(--z,1));height:calc(38px * var(--z,1));
+  display:block;transition:width .18s,height .18s;
+}
+.ic .nm{font-family:var(--serif);font-size:13.5px;font-weight:600;letter-spacing:.05em;line-height:1.45;margin:0}
+.ic .id{font-family:var(--mono);font-size:10.5px;color:var(--gold);letter-spacing:.02em;margin:0}
+.ic .ds{font-size:11.5px;line-height:1.78;color:var(--ink-2);margin:0}
+.ic .ds b{color:var(--gold);font-weight:600}
+.ic .strip{
+  display:flex;align-items:flex-end;gap:10px;margin-top:auto;
+  padding-top:10px;border-top:1px solid var(--line-in);
+}
+.ic .strip i{font-style:normal;display:flex;flex-direction:column;align-items:center;gap:3px}
+.ic .strip svg{display:block;color:var(--ink)}
+.ic .strip em{font-family:var(--mono);font-size:9px;font-style:normal;color:var(--mute)}
+.kind{
+  font-family:var(--mono);font-size:9px;letter-spacing:.1em;white-space:nowrap;
+  padding:2.5px 6px;border-radius:2px;border:1px solid var(--line-in);color:var(--mute);
+}
+.kind.keep{background-color:var(--chip-keep)}
+.kind.new{color:var(--gold);border-color:var(--line);background-color:var(--chip-new)}
+.kind.redraw{color:var(--crimson);border-color:var(--crimson);background-color:var(--chip-redraw)}
+.kind.drop{text-decoration:line-through;background-color:var(--chip-keep)}
+
+/* ══ 5 · 旧→新 对照 ══ */
+.cmp{display:grid;grid-template-columns:repeat(auto-fill,minmax(326px,1fr));gap:12px}
+.cm{
+  background-color:var(--card);border:1px solid var(--line-in);border-radius:var(--r);
+  box-shadow:var(--bevel);padding:15px;display:flex;flex-direction:column;gap:11px;
+}
+.cm .rw{display:flex;align-items:center;gap:11px}
+.cm .cell{flex:1;min-width:0;display:flex;align-items:center;gap:11px}
+.cm .box{
+  width:48px;height:48px;flex:none;border-radius:3px;
+  display:flex;align-items:center;justify-content:center;
+  border:1px solid var(--line-in);background-color:var(--card-2);
+}
+.cm .box svg{width:32px;height:32px;display:block}
+.cm .cell.old .box{color:var(--mute);opacity:.7}
+.cm .cell.new .box{color:var(--ink);border-color:var(--line)}
+.cm .arw{flex:none;font-family:var(--mono);color:var(--crimson);font-size:15px}
+.cm .tx{display:flex;flex-direction:column;gap:3px;min-width:0}
+.cm .tx b{font-family:var(--serif);font-size:12.5px;font-weight:600}
+.cm .tx span{font-size:10.5px;line-height:1.65;color:var(--ink-2)}
+.cm .tag{
+  font-family:var(--mono);font-size:10px;color:var(--gold);
+  padding-top:9px;border-top:1px solid var(--line-in);
+}
+
+/* ══ 7b · 本轮复审对照（旧 → 新 · 带问题分级）══ */
+.cm .sg{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.cm .sg i{
+  font-style:normal;font-family:var(--mono);font-size:9.5px;letter-spacing:.05em;
+  padding:2px 7px;border-radius:999px;border:1px solid var(--line-in);color:var(--ink-2);
+  white-space:nowrap;
+}
+.cm .sg i.p0{color:#fff;background-color:var(--crimson);border-color:var(--crimson)}
+.cm .sg i.p1{color:var(--crimson);border-color:var(--crimson)}
+.cm .sg i.p2{color:var(--gold);border-color:var(--line)}
+.cm .hd{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
+.cm .hd b{font-family:var(--serif);font-size:13px;font-weight:600;letter-spacing:.04em}
+.cm .hd em{font-style:normal;font-family:var(--mono);font-size:10px;color:var(--mute)}
+.cm .fx{font-size:11.5px;line-height:1.78;color:var(--ink-2);margin:0}
+.cm .fx u{text-decoration:none;color:var(--crimson);font-weight:600}
+.cm .fx s{text-decoration:none;color:var(--gold);font-weight:600}
+.cm .cell.old .box{color:var(--mute);opacity:.55}
+
+/* ══ 6 · 场景实测 ══ */
+.mock{
+  background-color:var(--card);border:1px solid var(--line-in);border-radius:var(--r);
+  box-shadow:var(--bevel);padding:18px;margin-bottom:12px;
+}
+.mock>h3{
+  font-family:var(--serif);font-size:13px;font-weight:600;letter-spacing:.16em;
+  margin:0 0 14px;color:var(--ink-2);
+}
+.navbar{display:flex;gap:2px;flex-wrap:wrap;border-top:1px solid var(--line-in);padding-top:13px}
+.nvit{
+  display:flex;flex-direction:column;align-items:center;gap:6px;
+  padding:9px 13px;border-radius:3px;min-width:58px;
+  color:var(--ink-2);font-size:10.5px;letter-spacing:.12em;font-family:var(--serif);
+}
+.nvit svg{width:17px;height:17px;display:block}
+.nvit.on{
+  color:var(--gold-hi);background-color:var(--card-2);
+  box-shadow:inset 0 -2px 0 var(--crimson);
+}
+.rows{display:flex;flex-direction:column;gap:8px}
+.trow{
+  display:flex;align-items:center;gap:11px;
+  padding:11px 13px;border:1px solid var(--line-in);border-radius:3px;
+  background-color:var(--card-2);
+}
+.trow .bar{width:3px;height:23px;flex:none;border-radius:1px;background-color:var(--crimson)}
+.trow>svg{flex:none;color:var(--ink-2)}
+.trow>svg:last-child{color:var(--mute);opacity:.6}
+.trow .tx{flex:1;min-width:0;font-family:var(--serif);font-size:12.5px}
+.trow .mt{font-family:var(--mono);font-size:10.5px;color:var(--mute);white-space:nowrap}
+.trow.done>svg{color:var(--mute);opacity:.55}
+.trow.done .tx{color:var(--mute);text-decoration:line-through}
+.ghead{
+  display:flex;align-items:center;gap:10px;font-family:var(--serif);
+  font-size:12.5px;letter-spacing:.14em;color:var(--ink-2);
+}
+.ghead svg{width:16px;height:16px;display:block;color:var(--gold)}
+.ghead .gl{flex:1;height:1px;background-color:var(--line-in)}
+.ghead .pill{font-family:var(--mono);font-size:10px;color:var(--mute)}
+.fields{display:flex;gap:16px;flex-wrap:wrap;color:var(--ink-2);font-size:11px}
+.fields span{display:inline-flex;align-items:center;gap:6px}
+.fields svg{width:14px;height:14px;display:block}
+.baracts{display:flex;gap:8px;flex-wrap:wrap}
+.act{
+  display:inline-flex;align-items:center;gap:7px;
+  padding:7px 12px;border:1px solid var(--line-in);border-radius:3px;
+  background-color:var(--card-2);color:var(--ink-2);
+  font-size:11.5px;font-family:var(--serif);letter-spacing:.08em;
+}
+.act svg{width:15px;height:15px;display:block}
+.act.danger{color:var(--crimson);border-color:var(--crimson)}
+.act.prime{color:var(--on-crimson);border-color:var(--crimson);background-image:linear-gradient(var(--crimson),var(--crimson))}
+.act.prime svg{color:var(--on-crimson)}
+
+/* ══ 7 · 源码 ══ */
+details.src{
+  background-color:var(--card);border:1px solid var(--line-in);border-radius:var(--r);
+  box-shadow:var(--bevel);margin-bottom:12px;
+}
+details.src>summary{
+  padding:15px 18px;cursor:pointer;list-style:none;
+  font-family:var(--serif);font-size:13px;letter-spacing:.14em;
+  display:flex;align-items:center;gap:10px;
+}
+details.src>summary::-webkit-details-marker{display:none}
+details.src>summary::before{content:'▸';color:var(--crimson);font-size:12px}
+details.src[open]>summary::before{content:'▾'}
+details.src>summary span{margin-left:auto;font-family:var(--mono);font-size:10.5px;color:var(--mute);letter-spacing:0}
+details.src pre{
+  margin:0;padding:15px 18px 20px;border-top:1px solid var(--line-in);
+  overflow:auto;max-height:560px;
+  font-family:var(--mono);font-size:11px;line-height:1.72;color:var(--ink-2);
+}
+.foot{
+  margin-top:44px;padding-top:20px;border-top:1px solid var(--line-in);
+  font-size:11px;line-height:2;color:var(--mute);
+}
+@media (max-width:680px){
+  body{padding:22px 14px 52px}
+  .hero h1{font-size:22px}
+  .grid{grid-template-columns:repeat(auto-fill,minmax(160px,1fr))}
+  .cmp{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<svg class="defs" aria-hidden="true" focusable="false"><defs>
+
+<!-- ═══ A1 · 基础印记 ═══
+     star5 / rhomb 原版用的是微型 viewBox（-1.2 -1.2 2.4 2.4），经 <use> 拟合后
+     会几乎撑满容器，与其余「24 视野 + 2~3 单位留白」的符号缩放不一致 —— 本版统一到 24 坐标系。
+     seimei【本轮重画】原画的是「空心五角星」（十顶点轮廓），与 star5 属同一族剪影，
+     既不晴明纹也不徽记；且体量 21.8×21.1 为全集最大、重心下坠 1.46、底边贴到 24。 -->
+
+<!-- 晴明纹 · 五芒星【本轮重画】一笔连星（桔梗印）：五个外顶点按 144° 步进连成自交五角。
+     圆半径 8.6、圆心 (12,12.4)，与 star5 彻底分开：晴明纹是「线」，star5 是「面」。 -->
+<symbol id="g-seimei" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round">
+  <path d="M12,3.8 L17.05,19.36 L3.82,9.74 L20.18,9.74 L6.95,19.36 Z"/>
+</symbol>
+
+<symbol id="g-star5" viewBox="0 0 24 24" fill="currentColor">
+  <path d="M12,4.6 L13.66,9.71 L19.04,9.71 L14.69,12.87 L16.35,17.99 L12,14.83 L7.65,17.99 L9.31,12.87 L4.96,9.71 L10.34,9.71 Z"/>
+</symbol>
+
+<symbol id="g-rhomb" viewBox="0 0 24 24" fill="currentColor">
+  <path d="M12,4.6 L17.33,12 L12,19.4 L6.67,12 Z"/>
+</symbol>
+
+<symbol id="g-grip" viewBox="0 0 24 24" fill="currentColor">
+  <circle cx="9.4" cy="6.8" r="1.35"/><circle cx="14.6" cy="6.8" r="1.35"/>
+  <circle cx="9.4" cy="12" r="1.35"/><circle cx="14.6" cy="12" r="1.35"/>
+  <circle cx="9.4" cy="17.2" r="1.35"/><circle cx="14.6" cy="17.2" r="1.35"/>
+</symbol>
+
+<!-- ═══ A2 · 周期器物（内容语义 → 和风承担）═══ -->
+
+<!-- 绘马 · 每日／今日页【本轮重画】
+     上一版是「宽檐 + 窄身 + 菱窗」，剪影读成「房子 / 邮筒」，与 koyomi 撞成一对。
+     本版回到绘马的本形：五角木牌（顶脊与牌身同宽）+ 挂绳 + 菱纹（绘马之「绘」）。
+     与 koyomi 彻底分开：绘马是「尖顶 + 挂绳 + 菱」，历札是「平顶 + 挂环 + 日期格」。 -->
+<symbol id="g-ema" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round">
+  <path d="M12,2.8 V5.0"/>
+  <path d="M7,8.6 L12,5 L17,8.6 V19.8 A1.6,1.6 0 0 1 15.4,21.4 H8.6 A1.6,1.6 0 0 1 7,19.8 Z"/>
+  <path d="M12,12.6 L13.8,14.9 L12,17.2 L10.2,14.9 Z"/>
+</symbol>
+
+<!-- 折扇 · 每周／本周页【本轮校正】上一版几何是对的，但包围盒 6.15–22.65 —— 重心下坠 2.4，
+     为全集最严重，落进底栏后扇轴几乎坐到底线。本版整体上移 1.6（形体一字未动）。 -->
+<symbol id="g-ougi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round">
+  <path d="M12,20.2 L2.5,8.9"/>
+  <path d="M12,20.2 L6.9,6.3"/>
+  <path d="M12,20.2 L12,5.4"/>
+  <path d="M12,20.2 L17.1,6.3"/>
+  <path d="M12,20.2 L21.5,8.9"/>
+  <path d="M2.5,8.9 A14.8,14.8 0 0 1 21.5,8.9"/>
+</symbol>
+
+<!-- 历札 · 每月／本月页【本轮重画】
+     上一版是「尖顶 + 两条横线」，与 ema 撞成一对，且读成「吊牌 / 门牌」。
+     本版取挂历牌：平顶牌身 + 顶环 + 表头分割线 + 四个日期格。
+     与 ema 彻底分开：历札是「平顶 + 挂环 + 日期格」，绘马是「尖顶 + 挂绳 + 菱纹」。 -->
+<symbol id="g-koyomi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round">
+  <circle cx="12" cy="3.4" r="1.15"/>
+  <path d="M12,4.55 V6.2"/>
+  <path d="M5.6,6.2 H18.4 V20 A1.5,1.5 0 0 1 16.9,21.5 H7.1 A1.5,1.5 0 0 1 5.6,20 Z"/>
+  <path d="M5.6,9.6 H18.4"/>
+  <circle cx="9.4" cy="12.8" r="0.85" fill="currentColor" stroke="none"/>
+  <circle cx="14.6" cy="12.8" r="0.85" fill="currentColor" stroke="none"/>
+  <circle cx="9.4" cy="16.9" r="0.85" fill="currentColor" stroke="none"/>
+  <circle cx="14.6" cy="16.9" r="0.85" fill="currentColor" stroke="none"/>
+</symbol>
+
+<!-- 提灯 · 限时／活动【本轮校正】原底绳伸到 22.6、重心下坠 0.9。
+     本版收短底绳到 21.5、整体上移 0.4，包围盒 1.85–22.35，重心回 12.1。 -->
+<symbol id="g-chochin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round">
+  <path d="M8.4,2.7 H15.6"/>
+  <path d="M9.2,4.9 H14.8 L17.4,8.9 V14.9 L14.8,19.1 H9.2 L6.6,14.9 V8.9 Z"/>
+  <path d="M12,2.7 V4.9"/>
+  <path d="M7.4,11.9 H16.6"/>
+  <path d="M12,19.1 V21.5"/>
+</symbol>
+
+<!-- 御灵符 · 一次性 / 页边封印【本轮修缺】原尖端落在 y=24.2 —— 已越出 24 视野 0.2，
+     加上 1.7 线宽后墨迹到 25.05，17px 下尖端被裁平。本版收短到 21.6 并整体上移。 -->
+<symbol id="g-ofuda" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round">
+  <path d="M7.7,2.2 H16.3 V18.6 L12,21.6 L7.7,18.6 Z"/>
+  <path d="M12,6 V17"/>
+  <path d="M8.8,9.2 H15.2"/>
+  <path d="M9.8,13.2 H14.2"/>
+</symbol>
+
+<!-- 幟（のぼり）· 版本／赛季【新】旗杆 + 立旗 + 旗面文字。
+     初版画的是御币（币柄 + 左右折纸垂），17px 下折纸与币柄挤成一束，整体读成一把伞 ——
+     器物的「折叠细节」在小尺寸必糊，改取轮廓更强的立帜。 -->
+<symbol id="g-nobori" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round">
+  <path d="M6.4,2.8 V21.2"/>
+  <path d="M6.4,5 H18.6 V13.4 H6.4"/>
+  <path d="M10,9.2 H15.2"/>
+</symbol>
+
+<!-- ═══ A3 · 页面导航 ═══ -->
+
+<!-- 柱状 · 统计【本轮校正】原基线 y=19.8、最高柱只到 8.6 —— 包围盒 7.75–20.65，重心下坠 2.2，
+     底栏七位并排时明显比左右低半格。本版抬高基线到 19、加高最高柱到 5.4，重心回 12.2。 -->
+<symbol id="g-chart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round">
+  <path d="M4.4,19 H19.6"/>
+  <path d="M7.8,19 V12.2"/>
+  <path d="M12,19 V5.4"/>
+  <path d="M16.2,19 V9.2"/>
+</symbol>
+
+<!-- 金槌 · 工具【本轮校正】原重心下坠 1.2（包围盒 4.95–21.45）。
+     本版整体上移 1.2，锤头上沿升到 4.6、柄端收到 19.4，重心回 12。 -->
+<symbol id="g-kanazuchi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round">
+  <path d="M7.4,4.6 H16.6 A1.8,1.8 0 0 1 18.4,6.4 V9 A1.8,1.8 0 0 1 16.6,10.8 H7.4 A1.8,1.8 0 0 1 5.6,9 V6.4 A1.8,1.8 0 0 1 7.4,4.6 Z"/>
+  <path d="M12,10.8 V19.4"/>
+</symbol>
+
+<!-- 双滑杆 · 设置【新】两轨两钮。
+     为何不用齿轮：齿形在 17px 下会糊成一圈噪点（违反 sprite 铁律二），滑轨的
+     线 + 实心钮在小尺寸下边界依然干净，是「设置」在 17px 内唯一读得出来的画法。 -->
+<symbol id="g-setting" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round">
+  <path d="M7.4,5.4 V18.6"/>
+  <path d="M16.6,5.4 V18.6"/>
+  <path d="M5.5,7.9 H9.3 A1.7,1.7 0 0 1 9.3,11.3 H5.5 A1.7,1.7 0 0 1 5.5,7.9 Z" fill="currentColor" stroke="none"/>
+  <path d="M14.7,12.7 H18.5 A1.7,1.7 0 0 1 18.5,16.1 H14.7 A1.7,1.7 0 0 1 14.7,12.7 Z" fill="currentColor" stroke="none"/>
+</symbol>
+
+<!-- ═══ B1 · 字段（条目内的小标记）═══ -->
+
+<!-- 鸟居 · 入口 path【本轮校正】原顶笠木之上多出一根竖线（M12,6.2 V3.4），
+     17px 下读成「旗杆 / 天线」，且额束画在贯的下方 —— 真实鸟居的额束在岛木与贯之间。
+     本版去顶竖线、把额束移回两梁之间，并把整体上移 0.6（原包围盒下坠 0.7）。 -->
+<symbol id="g-torii" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round">
+  <path d="M2.4,4.4 H21.6"/>
+  <path d="M4,7.6 H20"/>
+  <path d="M5.6,7.6 L6.8,19.6"/>
+  <path d="M18.4,7.6 L17.2,19.6"/>
+  <path d="M12,4.4 V7.6"/>
+</symbol>
+
+<!-- 锁 · 条件 condition（保留）-->
+<symbol id="g-joumae" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round">
+  <path d="M8.4,10.6 V7.8 A3.6,3.6 0 0 1 15.6,7.8 V10.6"/>
+  <path d="M6.6,10.6 H17.4 A1.4,1.4 0 0 1 18.8,12 V19 A1.4,1.4 0 0 1 17.4,20.4 H6.6 A1.4,1.4 0 0 1 5.2,19 V12 A1.4,1.4 0 0 1 6.6,10.6 Z"/>
+</symbol>
+
+<!-- 纸（折角）· 备注 note（保留）-->
+<symbol id="g-fumi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round">
+  <path d="M6.4,3.4 H14.6 L18.2,7 V19.4 A1.6,1.6 0 0 1 16.6,21 H6.4 A1.6,1.6 0 0 1 4.8,19.4 V5 A1.6,1.6 0 0 1 6.4,3.4 Z"/>
+  <path d="M14.4,3.4 V7.2 H18.2"/>
+  <path d="M8.6,11.8 H15.4"/>
+  <path d="M8.6,15.6 H13.4"/>
+</symbol>
+
+<!-- 时计 · 时间窗（保留）-->
+<symbol id="g-tokei" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round">
+  <circle cx="12" cy="13.2" r="7.4"/>
+  <path d="M12,9 V13.4 L15.2,15.4"/>
+  <path d="M12,3.2 V5.8"/>
+</symbol>
+
+<!-- 卷物 · 数据快照／数据版本【新】纸身 + 左右卷轴。
+     原用「纸（fumi）」，与「备注」撞图 —— 一卷为一版，故立此一枚。 -->
+<symbol id="g-makimono" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round">
+  <path d="M9.6,6.2 H14.4 V17.8 H9.6 Z"/>
+  <path d="M9.6,6.2 L6.6,7.8 V16.2 L9.6,17.8"/>
+  <path d="M14.4,6.2 L17.4,7.8 V16.2 L14.4,17.8"/>
+</symbol>
+
+<!-- ═══ B2 · 状态 ═══ -->
+
+<!-- 裸勾 · 即时反馈「成功／已保存」（保留）-->
+<symbol id="g-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round">
+  <path d="M5.4,12.6 L10.2,17.4 L18.6,6.8"/>
+</symbol>
+
+<!-- 三角警示 · 失败／危险／临期（保留）-->
+<symbol id="g-alert" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round">
+  <path d="M12,3.6 L21.2,20.2 H2.8 Z"/>
+  <path d="M12,9.6 V14.4"/>
+  <path d="M12,17.4 V17.5"/>
+</symbol>
+
+<!-- 环勾 · 已完成【新】圆环 + 对勾 = 盖印。
+     原用「铃（suzu）」，铃是提示不是完成。与裸勾的分工：裸勾 = 一次性反馈，
+     环勾 = 长期驻留的状态标记（组头 / 条目角标）。 -->
+<symbol id="g-done" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round">
+  <circle cx="12" cy="12" r="8.2"/>
+  <path d="M7.9,12.3 L10.7,15.1 L16.1,9.4"/>
+</symbol>
+
+<!-- 沙漏 · 结界寄养倒计时（保留）-->
+<symbol id="g-sunabochi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round">
+  <path d="M7.4,4.4 H16.6"/>
+  <path d="M7.4,19.6 H16.6"/>
+  <path d="M8.6,4.4 V7.6 L15.4,16.4 V19.6"/>
+  <path d="M15.4,4.4 V7.6 L8.6,16.4 V19.6"/>
+</symbol>
+
+<!-- 达摩 · 全清／达成【本轮重画】
+     上一版读成「鬼脸 / 骷髅」：环眼半径 2.1 过大、嘴里只剩一道小勾，整张脸立起来像 emoji。
+     本版回到不倒翁本形：底重顶圆的坐姿 + 两道眉 + 两只小圆眼，去掉嘴。
+     语义收窄：原兼「设置」，本版只留「有愿 / 愿成」。 -->
+<symbol id="g-daruma" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round">
+  <path d="M12,2.6 C16.2,2.6 20.2,8 20.2,14.4 C20.2,18.9 16.6,21.4 12,21.4 C7.4,21.4 3.8,18.9 3.8,14.4 C3.8,8 7.8,2.6 12,2.6 Z"/>
+  <path d="M7.5,10.5 C8.2,9.7 9.6,9.7 10.3,10.5"/>
+  <path d="M13.7,10.5 C14.4,9.7 15.8,9.7 16.5,10.5"/>
+  <circle cx="8.9" cy="13.4" r="1.25"/>
+  <circle cx="15.1" cy="13.4" r="1.25"/>
+</symbol>
+
+<!-- 图钉 · 置顶【新】圆帽 + 针 + 挡片。
+     原用实心五芒星，与晴明纹同图 —— 置顶需要一枚「钉住」的动作隐喻，不是徽记。 -->
+<symbol id="g-pin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round">
+  <path d="M10.3,4 H13.7 A1.7,1.7 0 0 1 13.7,7.4 H10.3 A1.7,1.7 0 0 1 10.3,4 Z"/>
+  <path d="M12,7.4 V20.4"/>
+</symbol>
+
+<!-- ═══ C1 · 操作（通用隐喻，维持现状；只拉开回转三兄弟）═══ -->
+
+<symbol id="g-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round">
+  <path d="M12,5.4 V18.6"/>
+  <path d="M5.4,12 H18.6"/>
+</symbol>
+
+<!-- 屑笼 · 删除。同时接管「清空配置」（原误用「恢复」的图）-->
+<symbol id="g-trash" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round">
+  <path d="M4.8,7.4 H19.2"/>
+  <path d="M9.4,7.4 V5.2 A1.2,1.2 0 0 1 10.6,4 H13.4 A1.2,1.2 0 0 1 14.6,5.2 V7.4"/>
+  <path d="M7,7.4 L8,19.6 A1.4,1.4 0 0 0 9.4,20.9 H14.6 A1.4,1.4 0 0 0 16,19.6 L17,7.4"/>
+</symbol>
+
+<symbol id="g-fude" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round">
+  <path d="M4.6,19.4 L4.9,15.7 L16.2,4.4 A1.7,1.7 0 0 1 18.6,4.4 L19.6,5.4 A1.7,1.7 0 0 1 19.6,7.8 L8.3,19.1 Z"/>
+  <path d="M4.6,19.4 L8.3,19.1"/>
+  <path d="M14.6,6 L18,9.4"/>
+</symbol>
+
+<!-- 箱 · 归档【本轮校正】原包围盒 4.95–21.45，重心下坠 1.1、且箱底几乎压线。
+     本版整体上移 1，盖沿升到 4.8、箱底收到 19.4。 -->
+<symbol id="g-hako" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round">
+  <path d="M4.6,4.8 H19.4 V8.4 H4.6 Z"/>
+  <path d="M5.8,8.4 V18 A1.4,1.4 0 0 0 7.2,19.4 H16.8 A1.4,1.4 0 0 0 18.2,18 V8.4"/>
+  <path d="M10.2,12.4 H13.8"/>
+</symbol>
+
+<symbol id="g-hito" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round">
+  <circle cx="12" cy="8.2" r="3.6"/>
+  <path d="M4.8,20.4 A7.2,7.2 0 0 1 19.2,20.4"/>
+</symbol>
+
+<!-- 叠纸 · 多账号／复制【本轮校正】两张纸并排，原重心左偏 0.7（包围盒左 3.6 右 19.0）。
+     本版整体右移 0.7，回到左右对称。 -->
+<symbol id="g-kasane" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round">
+  <path d="M9.3,6.4 H18.3 A1.4,1.4 0 0 1 19.7,7.8 V19.2 A1.4,1.4 0 0 1 18.3,20.6 H9.3 A1.4,1.4 0 0 1 7.9,19.2 V7.8 A1.4,1.4 0 0 1 9.3,6.4 Z"/>
+  <path d="M5.7,16.8 A1.4,1.4 0 0 1 4.3,15.4 V4.2 A1.4,1.4 0 0 1 5.7,2.8 H13.7"/>
+</symbol>
+
+<!-- 神乐铃 · 一键日常【改；本轮校正】摇铃开工 = 一次做完今日全部。
+     原用「金槌」，与「工具」导航撞图 —— 锤归工具，铃归仪式。
+     本轮再把重心拉回：原柄头球 r=1.6 顶到 y=0.95、整体高悬 1.8，本版收球到 r=1.45 并下移 0.5。 -->
+<symbol id="g-suzu" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round">
+  <circle cx="12" cy="5.6" r="1.45"/>
+  <path d="M12,7.05 V8.2"/>
+  <path d="M6.4,17.2 C6.4,12 8.8,8.2 12,8.2 C15.2,8.2 17.6,12 17.6,17.2 Z"/>
+  <path d="M4.4,17.2 H19.6"/>
+  <path d="M12,17.4 V19.8"/>
+</symbol>
+
+<!-- 开弧 · 撤销【重画】只留一段 U 形开弧 + 左箭头，不留任何闭环。
+     三兄弟的间距就此拉开：撤销 = 开弧 / 刷新 = 单环 / 恢复 = 双环。 -->
+<symbol id="g-undo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round">
+  <path d="M9.2,13.6 L4.6,9 L9.2,4.4"/>
+  <path d="M4.6,9 H15.2 A4.86,4.86 0 0 1 20.06,13.86 A4.86,4.86 0 0 1 15.2,18.72 H11.2"/>
+</symbol>
+
+<!-- 双环 · 恢复／恢复默认【重画】两段弧（上、下）+ 两个折角，形成「可逆」的双向回转。
+     原版与「刷新」互为镜像，只在方向上不同；现在轮廓差别更大（两处缺口 vs 一处缺口）。 -->
+<symbol id="g-restore" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round">
+  <path d="M18.34,9.04 A7,7 0 0 0 5.66,9.04"/>
+  <path d="M5.66,14.96 A7,7 0 0 0 18.34,14.96"/>
+  <path d="M18.34,5.2 V9.04"/>
+  <path d="M5.66,18.8 V14.96"/>
+</symbol>
+
+<!-- 单环 · 刷新【本轮校正】原环口只有约 26°，14px 下环体闭合成圆 —— 与「环勾 done」的
+     剪影重合度 0.59，两枚在工具区并排时会互相冒充。本版把缺口开到 100°（右上象限全开），
+     箭头移到开口顶端顺向指出，缺口取 80°（14px 下约合 6.4px 的空档）；
+     从此「刷新」是开口 C 环、「已完成」是闭环带勾。 -->
+<symbol id="g-refresh" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round">
+  <path d="M19.73,14.87 A8,8 0 1 1 15.38,5.55"/>
+  <path d="M13.98,3.13 L15.38,5.55 L12.62,6.04"/>
+</symbol>
+
+<symbol id="g-sougo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round">
+  <path d="M4.6,9.2 H19.4"/>
+  <path d="M16.6,6.4 L19.4,9.2 L16.6,12"/>
+  <path d="M19.4,15 H4.6"/>
+  <path d="M7.4,12.2 L4.6,15 L7.4,17.8"/>
+</symbol>
+
+<symbol id="g-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round">
+  <circle cx="10.8" cy="10.8" r="6"/>
+  <path d="M15.4,15.4 L20.4,20.4"/>
+</symbol>
+
+<symbol id="g-filter" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round">
+  <path d="M4.6,7.6 H19.4"/>
+  <path d="M7.4,12 H16.6"/>
+  <path d="M10.2,16.4 H13.8"/>
+</symbol>
+
+<symbol id="g-close" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round">
+  <path d="M6.4,6.4 L17.6,17.6"/>
+  <path d="M17.6,6.4 L6.4,17.6"/>
+</symbol>
+
+<symbol id="g-chevron-down" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round">
+  <path d="M6.6,9.4 L12,14.8 L17.4,9.4"/>
+</symbol>
+<symbol id="g-chevron-up" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round">
+  <path d="M6.6,14.6 L12,9.2 L17.4,14.6"/>
+</symbol>
+<symbol id="g-chevron-right" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round">
+  <path d="M9.4,6.6 L14.8,12 L9.4,17.4"/>
+</symbol>
+
+<symbol id="g-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round">
+  <circle cx="12" cy="12" r="4.4"/>
+  <path d="M12,2.6 V5"/>
+  <path d="M12,19 V21.4"/>
+  <path d="M2.6,12 H5"/>
+  <path d="M19,12 H21.4"/>
+</symbol>
+<symbol id="g-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round">
+  <path d="M20.4,14.6 A9,9 0 1 1 9.4,3.6 A8.2,8.2 0 0 0 20.4,14.6 Z"/>
+</symbol>
+
+<!-- ═══ C2 · 装饰与存废 ═══ -->
+
+<!-- 注连绳 · 收束横幅【本轮校正】启用：原定义后无人调用，页内一直走内联 SVG。
+     原波浪 M0.8→23.2，加 1.7 线宽后左右各越出 24 视野 0.05（横幅拉伸时两端被切）。
+     本版把波浪收进 1.4→22.6，振幅与相位不变。 -->
+<symbol id="g-shimenawa" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round">
+  <path d="M1.4,7.6 C4.4,10.2 8.4,5 12,7.6 C15.6,10.2 19.6,5 22.6,7.6"/>
+  <path d="M5.4,9.6 V15"/>
+  <path d="M11,10.4 V16"/>
+  <path d="M16.6,9.6 V15"/>
+  <path d="M7.6,10.4 V17"/>
+  <path d="M13.2,11.2 V17.8"/>
+  <path d="M18.8,10.4 V17"/>
+</symbol>
+
+<!-- 团扇 · 觉醒材料【本轮重画；仍建议删】
+     原画法从底部枢轴向外放射六条线 —— 与折扇（ougi）同构，且收口在底部，17px 下读成「盾牌 / 垃圾铲」。
+     本版改取团扇本形：横椭圆扇面（无扇骨）+ 束带 + 直柄。与折扇的分界是「面 vs 楔」——
+     折扇是有枢轴、有放射骨的楔形，团扇是一整张圆面挂在一根直柄上。
+     注意：该分区（觉醒材料）早已不存在，此枚仍无调用点 —— 此处只把形修正，若确认不用，整枚删去更干净。 -->
+<symbol id="g-sensu" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round">
+  <path d="M12,2.6 C17.5,2.6 20.8,5.5 20.8,10.2 C20.8,14.9 17.5,17.8 12,17.8 C6.5,17.8 3.2,14.9 3.2,10.2 C3.2,5.5 6.5,2.6 12,2.6 Z"/>
+  <path d="M10.3,18.6 H13.7"/>
+  <path d="M12,14.4 V21.6"/>
+</symbol>
+</defs></svg>
+<div class="wrap">
+
+  <header class="hero">
+    <h1>囤囤鼠大作战 · <b>和风图标集</b></h1>
+    <p>按《05-icon-inventory》的槽位清单重设计。<em>语义优先、和风其次</em>：删除 / 新增 / 编辑 / 工具 / 设置这类
+       有明确动作含义的槽位，图形必须一眼读得出动作；每日 / 每周 / 每月 / 限时 / 一次性这类「内容语义」槽位，
+       才交给阴阳师的器物去承担——它们靠约定学习，不承担识别压力。</p>
+    <p><b>本轮追加</b>：对上一版未动的其余 44 枚做了逐枚复审（几何包围盒 + 墨迹质心 + 剪影两两 IoU），
+       查出 16 枚问题并全部修完 —— 详见 ⑧ <em>本轮复审 · 旧 → 新 对照</em>。</p>
+    <div class="stat" id="stat"></div>
+  </header>
+
+  <div class="tools">
+    <button class="tb" id="themeBtn" type="button">
+      <svg viewBox="0 0 24 24"><use href="#g-moon"/></svg><span id="themeTxt">切到明版</span>
+    </button>
+    <span class="lbl">预览尺寸</span>
+    <div class="seg" id="zoomSeg">
+      <button type="button" data-z="1" class="on">1×</button>
+      <button type="button" data-z="1.5">1.5×</button>
+      <button type="button" data-z="2">2×</button>
+    </div>
+    <span class="sp"></span>
+    <span class="lbl" id="legend">■ 保留 &nbsp; ■ 新增 &nbsp; ■ 重画</span>
+  </div>
+
+  <main id="app"></main>
+
+  <footer class="foot">
+    交付：<b>囤囤鼠大作战 · 和风图标集</b>（单文件 / 零外部依赖 / 明暗双主题）。<br>
+    源文件对应 <code>components/icons/sprite.tsx</code>：本页每枚符号都是可直接替换的
+    <code>&lt;symbol&gt;</code> 源码，见文末「源码」折叠区。<br>
+    笔法沿用 sprite.tsx 铁律：24×24 视野 · <code>stroke=currentColor</code> · 线宽 1.7 · 圆头圆角 · 单条路径 ≤7 段。
+  </footer>
+</div>
+<script>
+/* ══════════════════════════════════════════════════════════════
+   数据层：槽位 → 图标 → 图形 → 存废
+   k: keep 保留 / new 新增图形 / redraw 重画或改派 / drop 建议删
+   ══════════════════════════════════════════════════════════════ */
+const S = [
+{ no:'①', name:'周期 · 内容语义交给和风',
+  note:'这一组的六个槽位<b>不承担动作识别</b>——它们是「这条任务多久轮一次」的类别标记，靠约定学习即可，所以放心交给阴阳师的器物。挑器物的标准是<em>轮廓必须彼此分得开</em>：五角木牌 / 扇形 / 挂历牌 / 灯笼形 / 尖底符 / 立帜，六个剪影在 14px 下也不会混。',
+  items:[
+    {n:'ema',      cn:'每日 · 今日条目',  ds:'绘马 —— 五角木牌 + 挂绳 + 菱纹。一日一愿，牌挂上去就是今天的。', k:'new'},
+    {n:'ougi',     cn:'每周 · 每周条目',  ds:'折扇 —— 扇骨七日一折，展开即一周。本轮重心上移 1.6，见 ⑧。',   k:'keep'},
+    {n:'koyomi',   cn:'每月 · 每月条目',  ds:'历札 —— 挂历牌：平顶牌身 + 顶环 + 表头 + 日期格，每页一月。',     k:'redraw'},
+    {n:'chochin',  cn:'限时 · 限时条目',  ds:'提灯 —— 纸灯笼，挂起即开场，节庆与活动共用。',           k:'keep'},
+    {n:'ofuda',    cn:'一次性条目',       ds:'御灵符 —— 贴一次即封印，不做第二次。本轮把被裁的符尾收回视野内。', k:'keep'},
+    {n:'nobori',   cn:'版本 · 赛季',      ds:'幟 —— 旗杆 + 立旗。新一期挂旗开张，与「本月」的历札彻底分开。', k:'new'}
+  ]},
+
+{ no:'②', name:'页面 · 导航七位',
+  note:'前四枚是<b>页面即周期</b>，与①共用同一张图 —— 这不算「一枚担多义」，因为用户看到的同一件事。真正的问题是原来<b>统计借了晴明纹、设置借了达摩</b>：它们和「品牌徽记 / 许愿」共用图形，属于两张不相干的含义挤在同一张画上。这一组的三枚（统计 / 工具 / 设置）必须各有独立语义。',
+  items:[
+    {n:'ema',       cn:'今日',  ds:'与「每日」同图 —— 页面即周期。',                                    k:'new'},
+    {n:'ougi',      cn:'本周',  ds:'与「每周」同图。',                                                 k:'keep'},
+    {n:'koyomi',    cn:'本月',  ds:'与「每月」同图。',                                                 k:'keep'},
+    {n:'chochin',   cn:'限时',  ds:'与「限时」同图。',                                                 k:'keep'},
+    {n:'chart',     cn:'统计',  ds:'三柱 + 基线 —— 本组的胜负手。原为晴明纹，与品牌徽记同图，语义完全无关。本轮再校正重心（见 ⑧）。', k:'new'},
+    {n:'kanazuchi', cn:'工具',  ds:'金槌 —— 锤即工具，说得通。修的是它<b>同时被「一键日常」占用</b>的撞图。', k:'keep'},
+    {n:'setting',   cn:'设置',  ds:'双滑杆 —— 两轨两钮。原为达摩，达摩是「愿 / 缘」，与设置毫无关系。', k:'new'}
+  ]},
+
+{ no:'③', name:'字段 · 条目里的小标记',
+  note:'这一组数量少、语义清晰，原有三枚已可读，整体保留。只补一枚：<b>数据快照</b>原来借的是「备注」的纸，两处不同含义共用一个形状。',
+  items:[
+    {n:'torii',     cn:'入口 path',       ds:'鸟居 —— 穿过鸟居即进入。本版收紧为单一含义：今日页已改由绘马承担；本轮去掉顶部多余竖线，见 ⑧。', k:'keep'},
+    {n:'joumae',    cn:'条件 condition',  ds:'锁 —— 未达条件不得参与。',                                          k:'keep'},
+    {n:'fumi',      cn:'备注 note',       ds:'折角纸 —— 一页附注。',                                              k:'keep'},
+    {n:'tokei',     cn:'时间窗 · 寮时间',  ds:'时计 —— 表盘 + 指针 + 挂环。',                                      k:'keep'},
+    {n:'makimono',  cn:'数据快照 · 版本',  ds:'卷物 —— 纸身 + 左右卷轴。一卷为一版；原为「纸」，与备注撞图。',        k:'new'}
+  ]},
+
+{ no:'④', name:'状态 · 反馈与徽记',
+  note:'关键是分清<b>两种「完成」</b>：<em>裸勾</em>是「刚保存成功」这种一闪而过的即时反馈；<em>环勾</em>是「这条已完成」这种长期驻留在界面上的状态。原版两者都借了别的东西——完成态借了铃（铃是提示），置顶态借了实心五芒星（与晴明纹同图）。',
+  items:[
+    {n:'check',     cn:'成功 · 已保存',    ds:'裸勾 —— 一次性反馈，说完就走。',                       k:'keep'},
+    {n:'alert',     cn:'失败 · 危险 · 临期', ds:'三角警示 —— 通用共识，保持原样。',                   k:'keep'},
+    {n:'done',      cn:'已完成',           ds:'环勾 —— 圆环 + 对勾。原为神乐铃（铃是提示，不是完成）。', k:'new'},
+    {n:'sunabochi', cn:'结界卡倒计时',      ds:'沙漏 —— 漏完即到期。',                                k:'keep'},
+    {n:'daruma',    cn:'全清 · 达成',       ds:'达摩 —— 不倒翁坐姿 + 眉 + 眼。原兼「设置」，本版只留愿；本轮再重画一次（原读成鬼脸），见 ⑧。', k:'redraw'},
+    {n:'pin',       cn:'置顶',             ds:'图钉 —— 圆帽 + 针 + 挡片。原为实心五芒星，与晴明纹撞图。', k:'new'},
+    {n:'star5',     cn:'稀有度',           ds:'实心五角星 —— 几何重画，统一到 24 坐标系（原用微型 viewBox，<use> 缩放与其余符号不一致）。', k:'redraw'},
+    {n:'rhomb',     cn:'聚合卡进度格',      ds:'实心菱形 —— 同上，统一 24 坐标系。',                  k:'redraw'}
+  ]},
+
+{ no:'⑤', name:'操作 · 通用隐喻，维持现状',
+  note:'这十几种已是<b>跨产品共识</b>——加号、叉、放大镜、折角改了只会更难认，和风化在这里是有害的。本组只做三件事：<em>把「恢复」从「刷新」的镜像里拉出来</em>（撤销本就是开弧，无需动）、<em>把撞图的两处归位</em>（金槌归工具、清空归屑笼）、<em>铃改派给一键日常</em>。',
+  items:[
+    {n:'plus',      cn:'新建 · 添加',   ds:'加号 —— 不动。',                                    k:'keep'},
+    {n:'trash',     cn:'删除 · 清空配置', ds:'屑笼 —— 不动。顺带接管「清空配置」：那处原来显示的是「恢复」的图。', k:'keep'},
+    {n:'fude',      cn:'编辑',          ds:'笔 —— 不动。',                                      k:'keep'},
+    {n:'hako',      cn:'归档',          ds:'箱 —— 不动。',                                      k:'keep'},
+    {n:'hito',      cn:'账号 · 用户',    ds:'人 —— 不动。',                                      k:'keep'},
+    {n:'kasane',    cn:'多账号 · 复制',  ds:'叠纸 —— 多份。',                                    k:'keep'},
+    {n:'suzu',      cn:'一键日常',      ds:'神乐铃 —— 摇铃开工。原为金槌，与「工具」撞图，本版改派。', k:'redraw'},
+    {n:'undo',      cn:'撤销',          ds:'开弧 —— U 形开弧 + 左箭头，本枚<b>维持原样</b>：它本来就是开弧，与两个环天然分得开。', k:'keep'},
+    {n:'restore',   cn:'恢复 · 恢复默认', ds:'双环 —— 两段弧 + 两个折角，形成「可逆」的双向回转。',  k:'redraw'},
+    {n:'refresh',   cn:'刷新 · 重新生成', ds:'开口 C 环 + 顺向箭头 —— 本轮把环口由 26° 开到 80°，免得与「环勾」混。', k:'keep'},
+    {n:'sougo',     cn:'同步',          ds:'双直箭头 —— 不动。',                                  k:'keep'},
+    {n:'search',    cn:'搜索',          ds:'放大镜 —— 不动。',                                    k:'keep'},
+    {n:'filter',    cn:'筛选',          ds:'三线递减 —— 不动。',                                  k:'keep'},
+    {n:'close',     cn:'关闭 · 清空输入', ds:'叉 —— 不动。',                                      k:'keep'},
+    {n:'grip',      cn:'拖拽排序',      ds:'六点柄 —— 不动。',                                    k:'keep'},
+    {n:'chevron-down', cn:'展开 · 折叠', ds:'折角（下 / 上 / 右三向）—— 不动。',                   k:'keep'},
+    {n:'sun',       cn:'明版',          ds:'日 —— 圆 + 四道芒（八道芒在 14px 下糊成毛边）。',       k:'keep'},
+    {n:'moon',      cn:'暗版',          ds:'弦月 —— 外大弧 + 内小弧。',                            k:'keep'}
+  ]},
+
+{ no:'⑥', name:'装饰与存废',
+  note:'两枚<b>死符号</b>必须给个结论，否则下一个人找图时会以为它在被使用。',
+  items:[
+    {n:'seimei',    cn:'品牌徽记',   ds:'晴明纹 —— 一笔连星的五芒星（桔梗印）。本轮由「空心星」重画，与 star5 分家。', k:'redraw'},
+    {n:'shimenawa', cn:'收束横幅',   ds:'注连绳 —— 从「定义后无人调用」转为启用；本轮把越界的波浪收回视野内。', k:'redraw'},
+    {n:'ofuda',     cn:'页边封印',   ds:'御灵符 —— 右缘装饰，与「一次性」共用同一枚。',            k:'keep'},
+    {n:'torii',     cn:'空态大图',   ds:'鸟居 —— 一座无人通过的入口，与「入口」字段共用。',        k:'keep'},
+    {n:'sensu',     cn:'觉醒材料',   ds:'团扇 —— 该分区早已不存在。本轮把「盾牌」修成团扇本形，但<b>仍建议直接删除</b>（无调用点）。', k:'drop'}
+  ]}
+];
+
+/* 九处「旧 → 新」对照 */
+const CMP = [
+  {cn:'每日 / 今日页', old:'torii',    oldn:'鸟居',       nw:'ema',       nwn:'绘马',
+   why:'鸟居原本一图担四义：今日页 / 每日条目 / 入口字段 / 空态。今日页改用绘马后，鸟居收敛为「入口」单一含义。'},
+  {cn:'统计',         old:'seimei',   oldn:'晴明纹',     nw:'chart',     nwn:'柱状',
+   why:'五芒星与统计无关，而且它就是品牌徽记本身 —— 同一张图不能既当 logo 又当功能图标。'},
+  {cn:'设置',         old:'daruma',   oldn:'达摩',       nw:'setting',   nwn:'双滑杆',
+   why:'达摩是「愿 / 缘」，与设置无关。齿轮在 17px 下会糊成一圈噪点，故取滑轨 + 实心钮的画法。'},
+  {cn:'已完成',       old:'suzu',     oldn:'神乐铃',     nw:'done',      nwn:'环勾',
+   why:'铃是提示（摇铃 = 叫你注意），不是完成。完成态需要一枚真正表示「已完成」的图。'},
+  {cn:'置顶',         old:'star5',    oldn:'实心五芒星', nw:'pin',       nwn:'图钉',
+   why:'实心五芒星本质是晴明纹的实心版，读者会把它当徽记。置顶要的是「钉住」这个动作。'},
+  {cn:'数据快照',     old:'fumi',     oldn:'纸',         nw:'makimono',  nwn:'卷物',
+   why:'与「备注」共用同一张纸。一卷为一版，卷物比纸更贴「数据版本」这件事。'},
+  {cn:'一键日常',     old:'kanazuchi',oldn:'金槌',       nw:'suzu',      nwn:'神乐铃',
+   why:'金槌同时出现在导航「工具」和这张入口卡上，两个槽位抢同一张图。锤归工具、铃归仪式。'},
+  {cn:'清空配置',     old:'restore',  oldn:'回转箭头',   nw:'trash',     nwn:'屑笼',
+   why:'「清空」用了「恢复」的图 —— 语义完全相反。这是调用点写错，不是图形问题。'},
+  {cn:'恢复 · 恢复默认', old:'restore', oldn:'单环（旧画法）', nw:'restore', nwn:'双环（新画法）',
+   oldRaw:'<path d="M3.6,12 A8.4,8.4 0 1 0 12,3.6 C9.65,3.6 7.4,4.54 5.71,6.16 L3.6,8.2"/><path d="M3.6,3.4 V8.2 H8.4"/>',
+   why:'旧版与「刷新」是互为镜像的同一枚环，只在方向上不同，扫一眼分不开。改成两段弧 + 两个折角的双环后，缺口数不同，轮廓一眼可辨。'}
+];
+const SIZES = [24, 17, 14, 12];
+const KIND  = { keep:'保留', new:'新增', redraw:'重画 / 改派', drop:'建议删' };
+
+const ico = (n, s) =>
+  `<svg viewBox="0 0 24 24" width="${s}" height="${s}" aria-hidden="true"><use href="#g-${n}" width="24" height="24"/></svg>`;
+
+/* ══════════════════════════════════════════════════════════════
+   ⑧ 本轮复审：对「其余 44 枚」逐枚做几何 + 剪影量化，再人眼复核。
+   判据（全部可复算）：
+     · 越界 —— 几何包围盒 + 半线宽，是否落在 0–24 视野外
+     · 偏心 —— 包围盒中心与 12 的距离；放射形/实心形另看墨迹质心
+     · 撞图 —— 同尺度光栅化后两两剪影的 IoU
+   分级：P0 看得出错 / P1 重心或语义偏 / P2 一致性打磨
+   ══════════════════════════════════════════════════════════════ */
+const FIX = [
+ { n:'seimei', cn:'品牌徽记', lv:'P0', tags:['语义错位','重心下坠 1.46','体量超限'],
+   issue:'画的不是晴明纹，而是「空心五角星」——与 star5 同族剪影；且体量 21.8×21.1 为全集最大、重心下坠 1.46，底缘墨迹贴到 24 视野边。',
+   fix:'重画为一笔连星的真·五芒星（桔梗印）：圆半径 8.6、圆心 (12,12.4)。与 star5 的分界变成「线 vs 面」。',
+   oldRaw:'<path d="M12,3.73 L14.46,11.12 L22.03,11.12 L15.96,18.34 L18.34,23.18 L12,18.51 L5.66,23.18 L8.04,18.34 L1.97,11.12 L9.54,11.12 Z"/>' },
+
+ { n:'ema', cn:'每日 · 今日页', lv:'P0', tags:['语义错位','与 koyomi 撞图'],
+   issue:'宽檐 + 窄身 + 菱窗，剪影读成「房子 / 邮筒」；与 koyomi 的剪影重合度 0.453，两枚在周期组里互相冒充。',
+   fix:'回到绘马本形：五角木牌（顶脊与牌身同宽）+ 挂绳 + 菱纹（绘马之「绘」）。',
+   oldRaw:'<path d="M12,3.2 V6.6"/><path d="M12,6.6 L19.4,10.4 H4.6 Z"/><path d="M7.2,10.4 V18.4 A2,2 0 0 0 9.2,20.4 H14.8 A2,2 0 0 0 16.8,18.4 V10.4"/><path d="M12,13.2 L13.9,15.4 L12,17.6 L10.1,15.4 Z"/>' },
+
+ { n:'koyomi', cn:'每月 · 本月页', lv:'P0', tags:['语义错位','与 ema 撞图'],
+   issue:'尖顶 + 两条横线，17px 下读成「吊牌 / 门牌」；而且那个尖顶正是绘马该有的形 —— 两枚的形对调了。',
+   fix:'改取挂历牌：平顶牌身 + 顶环 + 表头分割线 + 四个日期格。与绘马的分界是「平顶挂环 + 日期格 vs 尖顶挂绳 + 菱纹」。',
+   oldRaw:'<path d="M12,2.6 L7.4,6.6 H16.6 Z"/><path d="M7.4,6.6 V20.4 A1.6,1.6 0 0 0 9,22 H15 A1.6,1.6 0 0 0 16.6,20.4 V6.6"/><path d="M10.4,11 H13.6"/><path d="M10.4,15.4 H13.6"/>' },
+
+ { n:'daruma', cn:'全清 · 达成', lv:'P0', tags:['语义错位','墨量最重 34.7%'],
+   issue:'环眼半径 2.1 过大、嘴里只剩一道小勾 —— 整张脸立起来像 emoji / 骷髅，而不是达摩；同时是全集墨量最重的一枚。',
+   fix:'回到不倒翁本形：底重顶圆的坐姿 + 两道眉 + 两只小圆眼，去掉嘴。',
+   oldRaw:'<path d="M12,2.4 C17,2.4 20.4,8 20.4,14.4 C20.4,19.6 16.6,22.2 12,22.2 C7.4,22.2 3.6,19.6 3.6,14.4 C3.6,8 7,2.4 12,2.4 Z"/><circle cx="8.9" cy="12.6" r="2.1"/><circle cx="15.1" cy="12.6" r="2.1"/><path d="M12,15.6 C11.2,16.6 11.2,18 12,18.6"/>' },
+
+ { n:'sensu', cn:'觉醒材料（已废槽位）', lv:'P0', tags:['语义错位','与折扇同构','墨量 31.4%'],
+   issue:'六条线从底部枢轴放射、收口在下 —— 与折扇（ougi）同一套构造，17px 下读成「盾牌 / 垃圾铲」。',
+   fix:'改取团扇本形：横椭圆扇面（无扇骨）+ 扇柄穿入扇面 + 束带。与折扇分界为「面 vs 楔」。<b>该槽位早已无调用点，形修好了，但仍建议整枚删去。</b>',
+   oldRaw:'<path d="M12,21.6 V11"/><path d="M12,21.6 C6.2,20.6 3.4,15.4 3.2,8.2"/><path d="M12,21.6 C17.8,20.6 20.6,15.4 20.8,8.2"/><path d="M3.2,8.2 C7.4,4.6 16.6,4.6 20.8,8.2"/><path d="M8.4,20.6 L5.4,8.2"/><path d="M15.6,20.6 L18.6,8.2"/>' },
+
+ { n:'ofuda', cn:'一次性 · 页边封印', lv:'P0', tags:['越界裁切 1.05'],
+   issue:'符尾尖端落在 y=24.2 —— 已越出 24 视野；加上 1.7 线宽后墨迹到 25.05，17px 下尖端被裁成平口。这是全集唯一一枚真被切掉的图。',
+   fix:'收短符身并整体上移：尖端落到 21.6，墨迹 1.35–22.45，重心回 11.9。',
+   oldRaw:'<path d="M7.4,2.4 H16.6 V20.4 L12,24.2 L7.4,20.4 Z"/><path d="M12,6.4 V17.6"/><path d="M8.6,9.4 H15.4"/><path d="M9.6,13.4 H14.4"/>' },
+
+ { n:'ougi', cn:'每周 · 本周页', lv:'P1', tags:['重心下坠 2.4'],
+   issue:'包围盒 6.15–22.65、重心下坠 2.4 —— 全集最严重的一枚，落进底栏后扇轴几乎坐到底线，比左右六位低半格。',
+   fix:'整体上移 1.6（形体一字未动）：包围盒 4.55–21.05，重心回 12.8。',
+   oldRaw:'<path d="M12,21.8 L2.5,10.5"/><path d="M12,21.8 L6.9,7.9"/><path d="M12,21.8 L12,7.0"/><path d="M12,21.8 L17.1,7.9"/><path d="M12,21.8 L21.5,10.5"/><path d="M2.5,10.5 A14.8,14.8 0 0 1 21.5,10.5"/>' },
+
+ { n:'chart', cn:'统计', lv:'P1', tags:['重心下坠 2.2'],
+   issue:'基线 y=19.8、最高柱只到 8.6 —— 包围盒 7.75–20.65，最高柱的柱顶只到视野中线，导航七位并排时明显低一截。',
+   fix:'抬高基线到 19、加高最高柱到 5.4：包围盒 4.55–19.85，重心回 12.2。',
+   oldRaw:'<path d="M4.4,19.8 H19.6"/><path d="M7.8,19.8 V14.2"/><path d="M12,19.8 V8.6"/><path d="M16.2,19.8 V11.4"/>' },
+
+ { n:'suzu', cn:'一键日常', lv:'P1', tags:['重心高悬 1.8'],
+   issue:'柄头球 r=1.6 顶到 y=0.95 —— 上方只剩 1 单位留白、下方空 4.5，整体高悬 1.8；球过大也让主干读成一串。',
+   fix:'收球到 r=1.45 并整体下移 0.5：包围盒 3.3–20.65，重心回 11.97。',
+   oldRaw:'<circle cx="12" cy="3.4" r="1.6"/><path d="M12,5 V6.4"/><path d="M6.4,15.6 C6.4,10.4 8.8,6.6 12,6.6 C15.2,6.6 17.6,10.4 17.6,15.6 Z"/><path d="M4.4,15.6 H19.6"/><path d="M12,15.8 V18.6"/>' },
+
+ { n:'torii', cn:'入口 path · 空态', lv:'P1', tags:['多余笔画','重心下坠 0.7'],
+   issue:'顶笠木之上多出一根竖线（M12,6.2 V3.4）——17px 下读成「旗杆 / 天线」；且额束画在贯的下方，真实鸟居的额束在岛木与贯之间。',
+   fix:'去掉顶竖线、把额束移回两梁之间，并整体上移 0.6。',
+   oldRaw:'<path d="M2,6.2 H22"/><path d="M3.6,9.4 H20.4"/><path d="M5.4,9.4 L6.6,22"/><path d="M18.6,9.4 L17.4,22"/><path d="M12,9.6 V14.4"/><path d="M12,6.2 V3.4"/>' },
+
+ { n:'kanazuchi', cn:'工具', lv:'P1', tags:['重心下坠 1.2'],
+   issue:'包围盒 4.95–21.45，重心下坠 1.2 —— 与「设置」并排时锤头浮在上面、柄端压到底线。',
+   fix:'整体上移 1.2：锤头上沿 4.6、柄端 19.4，重心回 12。',
+   oldRaw:'<path d="M7.4,5.8 H16.6 A1.8,1.8 0 0 1 18.4,7.6 V10.2 A1.8,1.8 0 0 1 16.6,12 H7.4 A1.8,1.8 0 0 1 5.6,10.2 V7.6 A1.8,1.8 0 0 1 7.4,5.8 Z"/><path d="M12,12 V20.6"/>' },
+
+ { n:'hako', cn:'归档 · 数据', lv:'P1', tags:['重心下坠 1.1'],
+   issue:'包围盒 4.95–21.45，重心下坠 1.1，箱底几乎压线。',
+   fix:'整体上移 1：盖沿 4.8、箱底 19.4。',
+   oldRaw:'<path d="M4.6,5.8 H19.4 V9.4 H4.6 Z"/><path d="M5.8,9.4 V19 A1.4,1.4 0 0 0 7.2,20.4 H16.8 A1.4,1.4 0 0 0 18.2,19 V9.4"/><path d="M10.2,13.4 H13.8"/>' },
+
+ { n:'chochin', cn:'限时 · 活动', lv:'P1', tags:['重心下坠 0.9','底绳伸到 22.6'],
+   issue:'底部垂穗一路伸到 y=22.6（墨迹 23.45），重心下坠 0.9；与「御灵符」并排时垂穗比符尾还低。',
+   fix:'收短垂穗到 21.5 并整体上移 0.4：包围盒 1.85–22.35，重心回 12.1。',
+   oldRaw:'<path d="M8.4,3.2 H15.6"/><path d="M9.2,5.4 H14.8 L17.4,9.4 V15.4 L14.8,19.6 H9.2 L6.6,15.4 V9.4 Z"/><path d="M12,3.2 V5.4"/><path d="M7.4,12.4 H16.6"/><path d="M12,19.6 V22.6"/>' },
+
+ { n:'shimenawa', cn:'收束横幅', lv:'P1', tags:['左右各越界 0.05'],
+   issue:'波浪自 x=0.8 到 23.2，加 1.7 线宽后左右各越出 24 视野 0.05 —— 横幅拉伸时两端被切。',
+   fix:'把波浪收进 1.4–22.6，振幅与相位不变。',
+   oldRaw:'<path d="M0.8,7.6 C4,10 8,5.4 12,7.6 C16,9.8 20,5.4 23.2,7.6"/>' },
+
+ { n:'refresh', cn:'刷新 · 重新生成', lv:'P1', tags:['与环勾难分（IoU 0.59）'],
+   issue:'环口只有约 26°，14px 下环体闭合成圆 —— 与「环勾 done（已完成）」的剪影重合度 0.593，两枚在工具区并排会互相冒充。',
+   fix:'把缺口开到 80°（14px 下约 6.4px 空档），箭头移到开口顶端顺向指出。从此「刷新」是开口 C 环、「已完成」是闭环带勾，重合度降到 0.463。',
+   oldRaw:'<path d="M20.4,12 A8.4,8.4 0 1 1 12,3.6 C14.35,3.6 16.6,4.54 18.29,6.16 L20.4,8.2"/><path d="M20.4,3.4 V8.2 H15.6"/>' },
+
+ { n:'kasane', cn:'多账号 · 复制', lv:'P2', tags:['重心左偏 0.7'],
+   issue:'两张纸并排，包围盒左 3.6 右 19.0 —— 重心左偏 0.7，与「账号 · 人」并排时不居中。',
+   fix:'整体右移 0.7，回到左右对称。',
+   oldRaw:'<path d="M8.6,6.4 H17.6 A1.4,1.4 0 0 1 19,7.8 V19.2 A1.4,1.4 0 0 1 17.6,20.6 H8.6 A1.4,1.4 0 0 1 7.2,19.2 V7.8 A1.4,1.4 0 0 1 8.6,6.4 Z"/><path d="M5,16.8 A1.4,1.4 0 0 1 3.6,15.4 V4.2 A1.4,1.4 0 0 1 5,2.8 H13"/>' }
+];
+const LV_CN = { P0:'P0 · 看得出错', P1:'P1 · 重心或语义偏', P2:'P2 · 一致性打磨' };
+
+/* ── 统计 ── */
+(function stat(){
+  const all = S.flatMap(g => g.items);
+  const c = k => all.filter(i => i.k === k).length;
+  document.getElementById('stat').innerHTML = [
+    ['槽位总数', all.length], ['保留', c('keep')], ['新增图形', c('new')],
+    ['重画 / 改派', c('redraw')], ['本轮复审修正', FIX.length], ['建议删除', c('drop')]
+  ].map(([t, v]) => `<i><b>${v}</b><span>${t}</span></i>`).join('');
+})();
+
+/* ── 分区 ── */
+function sec(g){
+  const cards = g.items.map(it => `
+    <article class="ic">
+      <div class="top">
+        <div class="glyph">${ico(it.n, 38)}</div>
+        <span class="kind ${it.k}">${KIND[it.k]}</span>
+      </div>
+      <p class="nm">${it.cn}</p>
+      <p class="id">#g-${it.n}</p>
+      <p class="ds">${it.ds}</p>
+      <div class="strip">${SIZES.map(s => `<i>${ico(it.n, s)}<em>${s}</em></i>`).join('')}</div>
+    </article>`).join('');
+  return `<section class="sec">
+    <div class="sh">
+      <span class="no">${g.no}</span><h2>${g.name}</h2>
+      <i class="ln"></i><span class="ct">${g.items.length} 枚</span>
+    </div>
+    <p class="snote">${g.note}</p>
+    <div class="grid">${cards}</div>
+  </section>`;
+}
+
+/* ── 旧→新 对照 ── */
+function cmpSection(){
+  const rows = CMP.map(r => `
+    <article class="cm">
+      <div class="rw">
+        <div class="cell old"><div class="box">${r.oldRaw
+          ? `<svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round">${r.oldRaw}</svg>`
+          : ico(r.old, 32)}</div>
+          <div class="tx"><b>${r.oldn}</b><span>#g-${r.old}</span></div></div>
+        <span class="arw">→</span>
+        <div class="cell new"><div class="box">${ico(r.nw, 32)}</div>
+          <div class="tx"><b>${r.nwn}</b><span>#g-${r.nw}</span></div></div>
+      </div>
+      <p class="ds" style="font-size:11.5px;line-height:1.8;color:var(--ink-2);margin:0">${r.why}</p>
+      <div class="tag">槽位 · ${r.cn}</div>
+    </article>`).join('');
+  return `<section class="sec">
+    <div class="sh"><span class="no">⑦</span><h2>旧 → 新 对照 · 第一轮（语义）</h2>
+      <i class="ln"></i><span class="ct">${CMP.length} 处</span></div>
+    <p class="snote">左边是<b>现状</b>，右边是<b>本版</b>。每一处改的都是「形状说的和中文写的不是一回事」——
+      不是审美偏好，而是读者要在两个不同的概念之间做一次多余的翻译。
+      这一表只覆盖<b>与中文对不上</b>的槽位；其余 44 枚的逐枚复审见 ⑧。</p>
+    <div class="cmp">${rows}</div>
+  </section>`;
+}
+
+/* ── ⑧ 本轮复审 · 旧→新 对照 ── */
+function fixSection(){
+  const rows = FIX.map((r, i) => `
+    <article class="cm">
+      <div class="hd"><b>${String(i + 1).padStart(2, '0')} · ${r.cn}</b><em>#g-${r.n}</em></div>
+      <div class="rw">
+        <div class="cell old"><div class="box">
+          <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round">${r.oldRaw}</svg>
+        </div><div class="tx"><b>旧</b><span>上一版</span></div></div>
+        <span class="arw">→</span>
+        <div class="cell new"><div class="box">${ico(r.n, 32)}</div>
+          <div class="tx"><b>新</b><span>本轮</span></div></div>
+      </div>
+      <div class="sg"><i class="${r.lv.toLowerCase()}">${LV_CN[r.lv]}</i>${r.tags.map(t => `<i>${t}</i>`).join('')}</div>
+      <p class="fx"><u>问题</u> ${r.issue}</p>
+      <p class="fx"><s>处置</s> ${r.fix}</p>
+    </article>`).join('');
+  const c = lv => FIX.filter(r => r.lv === lv).length;
+  return `<section class="sec">
+    <div class="sh"><span class="no">⑧</span><h2>本轮复审 · 旧 → 新 对照</h2>
+      <i class="ln"></i><span class="ct">${FIX.length} 枚 · P0 ${c('P0')} / P1 ${c('P1')} / P2 ${c('P2')}</span></div>
+    <p class="snote">上一轮只重设计了「与中文对不上」的槽位，其余 44 枚沿用了原样。<b>本表是那 44 枚的逐枚复审</b>——
+      先把每枚按「24 视野 + 半线宽」算包围盒（查越界）、算包围盒中心到 (12,12) 的距离（查偏心）、
+      再同尺度光栅化后两两比剪影 IoU（查撞图），最后人眼复核。
+      <em>结论：16 枚有问题</em>——6 枚越界或语义错位（P0）、9 枚重心或笔画（P1）、1 枚对齐（P2）。</p>
+    <p class="snote">已复算确认：修订后<b>全集 45 枚零越界</b>，任意两枚在 14px 下加 1px 容差后仍互不相混；
+      「环勾 / 刷新」的剪影重合度由 0.593 降到 0.463。
+      另有两类被量化指标误报、经人眼复核<b>确认无需改</b>：<em>① 实心星 / 实心菱</em>的墨迹质心本就落在形心（star5、rhomb 偏移均 &lt; 0.1，
+      它们的「点」天然顶到上缘，按包围盒判会误判为偏高）；<em>② 三角形 / 鸟居 / 柱状</em>这类「横长笔画集中在一处」的形，
+      质心天然偏向横画（alert、torii、chart 的质心偏移 2.4–3.0，但包围盒居中）——这两种形按质心改会把整族带歪。</p>
+    <p class="snote">另有一处<b>本表未动、需你拍板</b>：姊妹稿 <code>阴阳师任务录_朱印深化版.html</code> 内嵌了 9 枚<b>更早的</b>副本
+      （<code>i-seimei / i-torii / i-ofuda / i-chochin / i-shimenawa / i-sensu / i-daruma / i-suzu / i-ougi</code>），
+      几何都早于本版、线宽另取 1.4–1.5，上面这 16 处毛病里有 9 处在那份文件里<b>原样存在</b>。
+      但它同时在用晴明纹充当「设置」页签（本版已把这两件事拆成 seimei 与 setting），已不只是画法问题 ——
+      所以本次只改本文件，那份要不要一起翻新，等你说。</p>
+    <div class="cmp">${rows}</div>
+  </section>`;
+}
+
+/* ── 场景实测 ── */
+function navItem(n, label, on){
+  return `<div class="nvit${on ? ' on' : ''}">${ico(n, 17)}<span>${label}</span></div>`;
+}
+function field(n, label){ return `<span>${ico(n, 14)}${label}</span>`; }
+function act(n, label, cls){ return `<span class="act ${cls || ''}">${ico(n, 15)}${label}</span>`; }
+function trow(n, label, meta, done){
+  return `<div class="trow${done ? ' done' : ''}"><i class="bar"></i>
+    ${ico(n, 18)}<span class="tx">${label}</span>
+    <span class="mt">${meta}</span>${done ? ico('done', 17) : ''}</div>`;
+}
+
+function mocks(){
+  return `<section class="sec">
+    <div class="sh"><span class="no">⑨</span><h2>场景实测</h2><i class="ln"></i>
+      <span class="ct">按真实基准尺寸</span></div>
+    <p class="snote">设计稿好看不算数，<b>落到真实尺寸与真实组合里</b>才算数。下面四处都用项目里的真实基准：
+      导航 17、任务类型 18、字段 14、操作条 15、组头 16。</p>
+
+    <div class="mock">
+      <h3>底部导航 · 七位</h3>
+      <div class="navbar">
+        ${navItem('ema','今日',true)}${navItem('ougi','本周',false)}${navItem('koyomi','本月',false)}
+        ${navItem('chochin','限时',false)}${navItem('chart','统计',false)}
+        ${navItem('kanazuchi','工具',false)}${navItem('setting','设置',false)}
+      </div>
+    </div>
+
+    <div class="mock">
+      <h3>今日页 · 组头与任务行</h3>
+      <div class="rows">
+        <div class="ghead">${ico('ema',16)}日常委托<i class="gl"></i><span class="pill">02</span></div>
+        ${trow('ema','逢魔之时 · 三次','12:00 前')}
+        ${trow('ema','寮三十 · 结界寄养','剩 03:24')}
+        <div class="ghead">${ico('done',16)}已完成<i class="gl"></i><span class="pill">01</span></div>
+        ${trow('ougi','每周悬赏 · 五轮','已完成', true)}
+      </div>
+    </div>
+
+    <div class="mock">
+      <h3>条目字段行</h3>
+      <div class="fields">
+        ${field('torii','入口 · 御魂副本')}
+        ${field('joumae','条件 · 等级 40')}
+        ${field('tokei','时间 · 19:00–23:00')}
+        ${field('fumi','备注 · 需双人协作')}
+        ${field('makimono','数据 · 2026-09 快照')}
+        ${field('sunabochi','倒计时 · 02:11:40')}
+      </div>
+    </div>
+
+    <div class="mock">
+      <h3>操作条</h3>
+      <div class="baracts">
+        ${act('plus','新建','prime')}${act('fude','编辑')}${act('trash','删除','danger')}
+        ${act('hako','归档')}${act('restore','恢复')}${act('undo','撤销')}
+        ${act('refresh','刷新')}${act('sougo','同步')}${act('suzu','一键日常')}
+        ${act('pin','置顶')}
+      </div>
+    </div>
+  </section>`;
+}
+
+/* ── 源码 ── */
+function srcSection(){
+  const raw = document.querySelector('.defs defs').innerHTML
+    .replace(/<!--[\s\S]*?-->/g, '')
+    .split('\n').map(l => l.trim()).filter(Boolean).join('\n');
+  return `<section class="sec">
+    <div class="sh"><span class="no">⑩</span><h2>源码</h2><i class="ln"></i>
+      <span class="ct">${document.querySelectorAll('.defs symbol').length} 枚 &lt;symbol&gt;</span></div>
+    <p class="snote">这是本页渲染所用的<b>同一份</b>定义，直接整段替换 <code>sprite.tsx</code> 里
+      <code>&lt;defs&gt;</code> 的内容即可。笔法铁律原样保留：<code>viewBox 0 0 24 24</code> /
+      <code>fill=none</code> / <code>stroke=currentColor</code> / 线宽 1.7 / 圆头圆角。</p>
+    <details class="src"><summary>展开完整 &lt;defs&gt; 源码<span>${raw.split('\n').length} 行</span></summary>
+      <pre>${raw.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</pre>
+    </details>
+  </section>`;
+}
+
+/* ── 组装 ── */
+document.getElementById('app').innerHTML =
+  S.map(sec).join('') + cmpSection() + fixSection() + mocks() + srcSection();
+S.filter(g => g.no !== '②').forEach(g => {}); // noop：保持顺序可读
+
+/* ── 主题 ── */
+const root = document.documentElement;
+const tBtn = document.getElementById('themeBtn');
+const tTxt = document.getElementById('themeTxt');
+const tIco = tBtn.querySelector('use');
+function applyTheme(t){
+  root.setAttribute('data-theme', t);
+  tTxt.textContent = t === 'dark' ? '切到明版' : '切到暗版';
+  tIco.setAttribute('href', t === 'dark' ? '#g-moon' : '#g-sun');
+}
+tBtn.addEventListener('click', () =>
+  applyTheme(root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'));
+
+/* ── 预览尺寸 ── */
+document.getElementById('zoomSeg').addEventListener('click', e => {
+  const b = e.target.closest('button');
+  if (!b) return;
+  document.querySelectorAll('#zoomSeg button').forEach(x => x.classList.toggle('on', x === b));
+  root.style.setProperty('--z', b.dataset.z);
+});
+
+/* ── URL 参数直达 ??theme=light ── */
+applyTheme(new URLSearchParams(location.search).get('theme') === 'light' ? 'light' : 'dark');
+</script>
+</body>
+</html>

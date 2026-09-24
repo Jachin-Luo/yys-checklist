@@ -3,11 +3,25 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>式神委托 · 任务录 — 阴阳师朱印深化版</title>
+<title>囤囤鼠大作战 · 任务录 — 阴阳师朱印深化版</title>
 <style>
 /* ============================================================
    0 · TOKENS
    ============================================================ */
+/* ============================================================
+   0 · FONT — 标题专用（OFL 开源粗明朝 · 仅含标题所用五个码位，2 KB）
+   内嵌 base64，页面仍是单文件、零外部请求。
+   注意：子集只覆盖标题字形，改标题需重新生成子集。
+   ============================================================ */
+@font-face{
+  font-family:"Logo Ming SC";
+  font-style:normal;
+  font-weight:900;
+  font-display:block;
+  unicode-range:U+4F5C,U+56E4,U+5927,U+6218,U+9F20;
+  src:url(data:font/woff2;base64,d09GMgABAAAAAAgAABIAAAAADUQAAAefAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAGYFeGx4cQAZgP1NUQVQqAFwRCAqNWIpnCxAAATYCJAMUBCAFhBQHIAwHFyQYEBuNCsjE55+29fcxIzEDiB5UxPnKFqtYkYjRmLmRuJljbEXrVsKvKP7nmOmibTiLFtubUsVfZt2RHFi2RVKTn4DfNrag/YgcqDudVUYQE2qFFOo7b4KGMCklqwhhxpm97dA29Ta0Qdtc29mCsLbazlqEtdf2d0ILoS+SqnbHRMyB6wdS4HaEAq2cYAYo6rmPSiW3uw7Z6QWtHeJONZRczFsBYl0Giirxe6B1JwC6xdhY12Js7G+pb+jq7ero9Egw4MBxSaIuMehYzFYrlhTwxiCGkmAdWovVitVQ1FNp6iNqEWwAwQoBAU3mhYtUIYAERQQCAbZKDU8u1H0QpZipHV+vSc3NTUUcNDs0VLd1GWuj5xPXGiERZdAtELzlDsJ6ATFBUJ5aOAimNzX3kwcIPrIgKmpRuYhLS+ylpbydNNLsQ+QQQwAhNLkVxZ+WTq1T7dAQH3491/rRyf2H3Pa/t+27ms8xB7flBMRqha0AkVXJpThvWW9A8HwG9Als4M+XgAIDe5qiKIplRVJWKpPJaDHLsBNoqb2tVO4qZSUyEU1L5GJGLn5Nar5CKmMYmqb1Ijtha5O8oUE0w7axUdjUxxoGD126NoVnpLiTr13zeFkZS5vuM8wsPb9XazYXOd55440iGXB+TaKe55U0f3GMYWb/F2khf9wbetPF+wwjIkRvC3mXQc/vVdLv76mEnJTzvBIMIfopYL2KR444eRHj4KUnaES1jDoZpr1nP5QU8/xkgWmIZVeuZEdGnEbOuLH6fZtgumhmmBWXjxObUkjJ7MFD1554sHZGobYt4/dONm8lBIScTEotPHrlmFnz+jXFswf3Xbo0heeVNWqjniuovucNQxnPTzZbLJb8oRGnLW+4ORSd2qU8OPbwoTbKLURvsZzaeXFMt/n0aXVNzhEOpQxha/SMoGhclKywEEgCk4kqT/MvMNRMMKQcDDEeeOMNg8NFc1G5h6Aod9vOo8riA1sIZSiAwvoDb7yR6rCXb5AG3b+D55VbLRaLx9BKp5ETLg5Fh3apRs/e1T6k9INle0P2ms1BjgeePfOsHH9wbOvBFbot2487GixPth0d023Zvt2xZvzJsa0Hz38b/A9NNeKC6Wx6VTXKxB+8afWV8C+KsEYwagOk6gbIiXH6l5ov13LRo3Mqb0WPBnjcKZ8TPVp5KyB6FG27B5PLsbHrjFuss8eNxZlGnNv1uyZWHR31ZPiM8L8Ijio8eyMhPFwRu/TQ/cbE4YyMbbGnsNAtsw7n1n+miVVbcvKHF/s5vvVxMD0x9zUXG+OFa9HhEQrP5o4jpqWZQSO6uMLjqffw3lSJc4KbyhiNTVGlXIOLS0L6/MYU3S9Wm/oeF6eqhO+5vdwPn4gffeTeFWVXqDux0+Zsm9+s6XzhzqW3Ue050Vf1w+zWpcXid+1vUVdGHZVW5pbkP8Eb0lG5F+sgrNmTPKtiF0N1tvyuUEnTpTEJ3j9Jta5PVnC+HAIXrIHlE/cExz+Y5W1j69UuMntSJTzjciB6tGfZ2f6FfnMGMtftzTzF3aSed48GMqkRyxvmjDY3a9nWuLQ1+tDekeRjE0+IshGYMBcnDn7rLXpr1+9Bhw2Tn88N+dtPV7bs0ti2xQEzMoNnLa0cjt9kn5JaLPkhgDSK7k48kz7826Hns1/pMn4aVJ8ZP/5/Yf0CN9v8nOpb3u/Lf1t00jtNnKt7tS43b9zLfeOYsBBJRPnMV/UOV+x1eihEzot2BDtfYY8NlAR+fSrKJiFWpVo39S7zfcKZ5e+zd+TcP9zfYdw/HNb53jTSc0TxNBOyJLPEPcz8c3q77urSh2NfpK+9/pliyrCdcPMpT1OUnU+PqZhqF/ZJfOI8CwOZMPPP6e26q0sfjn2Rvvb6Z4opw3bCzac8TVF2Frnk+5+FqGBLVWn5RknIbI+6QaY+7OauC+/pMpnQFuelIj7lRp7v0/MZ0nxRj+cH/80TnO/tfz9l6A/PfPrQ5KvCDXGSQzkvlYupZb+tUiyddits6It1+fSRqdfE6/vfMyx60zOPfhD8+OjCqLjZFUHql3/TnZlOqrS1Qh+zgtpgO9mh9189Ypwnxqpk3OJLhPtk5Q8LOayUgjNwAACQgfzk8dv/Kf2rbaN+E1PUlzaNj+/tvHq568veD/61+ecbtkMkAyAc9CXTWICe///HfNfsxX9t/otgO4ZwMYajHn/wM6kvIUceVMiG0SMvErQidjIcuXUxmDedGGmJ9ZaQmAeLQEtULAHkhGFRiMHjRRpm2aAKnSwhJiKLKUcIHLOEQAqMIFGBkQ9LQDtqYUQbDGhAC5rQjP5Dcz+60YcI+JqHdaEbDehEI7rQiX60owXGj5v70AAfdKEXTchBF/pXfy1EA3rRgkYUIhHe+FD8U9VnxRgP0yAAPvCDHwLhjTT4IxLN0cEIqaZZpL/0kIxEB2olNIhkIxowQ0gFhGCMQTrYVOQiF6mIpIUscDdh4FXf67uosaCx/Jq0O4zwSL7cD/4Ihfft7AAEQYN41KMLdfT07qUpNTB95/dBLQw++U12wBceUkO1jp2s5xCA7W0XiXXxSXo1iALk1/+lzZHy/2//+YxsXCrCTwfVDRUmwBXOUAIAAAA=) format("woff2");
+}
+
 *,*::before,*::after{box-sizing:border-box}
 html,body{margin:0;padding:0}
 :root{
@@ -48,6 +62,13 @@ html[data-theme="dark"]{
   --gohei-crease:rgba(23,22,26,.9);
   --shadow:0 24px 60px rgba(0,0,0,.55),0 2px 0 rgba(0,0,0,.4);
   --card-bevel:inset 0 1px 0 rgba(255,255,255,.035),0 1px 2px rgba(0,0,0,.35);
+  /* 标题金箔 · 暗版：亮金向上 + 近黑描边 + 外光晕（发光感） */
+  --logo-hi:#F8EBC0;
+  --logo-mid:#D9B96A;
+  --logo-lo:#A07D2A;
+  --logo-edge:#16100A;
+  --logo-drop:rgba(0,0,0,.42);
+  --logo-glow:rgba(217,185,106,.30);
   --mat-pat:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='40'%20height='34.641'%3E%3Cpath%20d='M0%200H40M0%2034.641H40M0%200L20%2034.641L40%200M0%2034.641L20%200L40%2034.641M0%200V34.641M20%200V34.641M40%200V34.641'%20fill='none'%20stroke='%23C9A961'%20stroke-width='0.7'%20stroke-opacity='0.10'/%3E%3C/svg%3E");
   --dot-pat:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='8'%20height='8'%3E%3Ccircle%20cx='4'%20cy='4'%20r='0.7'%20fill='%23EDE4D3'%20fill-opacity='0.13'/%3E%3C/svg%3E");
 }
@@ -82,6 +103,13 @@ html[data-theme="light"]{
   --gohei-crease:rgba(168,134,63,.55);
   --shadow:0 20px 46px rgba(120,100,70,.28),0 1px 0 rgba(255,255,255,.6);
   --card-bevel:inset 0 1px 0 rgba(255,255,255,.55),0 1px 2px rgba(140,115,80,.16);
+  /* 标题金箔 · 明版：整阶压深 + 深褐描边 + 去光晕（描线感，方向与暗版相反） */
+  --logo-hi:#B48D33;
+  --logo-mid:#8E6A1E;
+  --logo-lo:#63480C;
+  --logo-edge:#2E2008;
+  --logo-drop:rgba(120,92,40,.30);
+  --logo-glow:rgba(0,0,0,0);
   --mat-pat:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='40'%20height='34.641'%3E%3Cpath%20d='M0%200H40M0%2034.641H40M0%200L20%2034.641L40%200M0%2034.641L20%200L40%2034.641M0%200V34.641M20%200V34.641M40%200V34.641'%20fill='none'%20stroke='%23A8863F'%20stroke-width='0.7'%20stroke-opacity='0.13'/%3E%3C/svg%3E");
   --dot-pat:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='8'%20height='8'%3E%3Ccircle%20cx='4'%20cy='4'%20r='0.7'%20fill='%233A3540'%20fill-opacity='0.15'/%3E%3C/svg%3E");
 }
@@ -146,6 +174,7 @@ body{
   position:absolute;inset:0;border-radius:var(--r-lg);
   background-image:var(--mat-pat);background-repeat:repeat;
   pointer-events:none;z-index:0;
+  opacity:var(--tex-k,1);transition:opacity .18s ease;   /* 浓度由设置页滑块统一缩放 */
 }
 .texture::after{
   content:'';position:absolute;inset:0;
@@ -190,9 +219,43 @@ body{
   width:34px;height:34px;flex:none;color:var(--crimson);
   fill:currentColor;filter:drop-shadow(0 0 6px var(--ready-glow));
 }
+/* — 顶栏主标题：金箔浮雕美术字 ————————————————————————
+   配方（复刻阴阳师 LOGO 的观感，非其字体）：
+     ① 三层纵向金箔渐变：上高光 / 中主金 / 下暗金 / 回中金。
+     ② 外描边靠「另一层同形文字」实现 —— 这是本项目实测后
+        唯一可行的办法。三种想当然的写法在 Chromium 下都会失败：
+          · background-clip:text + text-shadow
+                → 阴影绘制在填充之上，把金箔整块盖成深色（字形变黑）；
+          · background-clip:text + -webkit-text-stroke
+                → 描边同样打掉裁剪，只剩一圈轮廓、填充丢失；
+          · background-clip:text + filter:drop-shadow
+                → 能活，但仍是单层，拿不到渐变。
+        所以用两层、各只带一种效果：
+          下层 .lg-st 透明填充 + 居中描边
+          上层 .lg-fl 只做金箔渐变裁剪
+     ③ 描边 3px 是居中描边，净外扩 1.5px；字距 2.5px 给相邻字的
+        描边留呼吸位，否则两字的描边会在缝隙里叠成一条深色实线。
+   可见性只由 display 决定，不依赖任何动画。 */
 .brand h1{
-  margin:0;font-family:var(--serif);font-size:19px;font-weight:600;
-  letter-spacing:5px;color:var(--ink);line-height:1.2;
+  display:inline-grid;
+  margin:0;
+  font-family:"Logo Ming SC",var(--serif);
+  font-size:22px;font-weight:900;letter-spacing:2.5px;line-height:1.15;
+  filter:drop-shadow(0 2px 3px var(--logo-drop));
+}
+.brand h1>span{grid-area:1/1}
+/* 下层 · 只负责描边 */
+.brand h1 .lg-st{
+  color:transparent;
+  -webkit-text-stroke:3px var(--logo-edge);
+}
+/* 上层 · 只负责金箔渐变。此处不得再叠加 stroke / text-shadow，会打掉裁剪。 */
+.brand h1 .lg-fl{
+  background-image:linear-gradient(180deg,
+    var(--logo-hi) 0%, var(--logo-mid) 34%,
+    var(--logo-lo) 64%, var(--logo-mid) 100%);
+  -webkit-background-clip:text;background-clip:text;
+  color:transparent;
 }
 .brand p{
   margin:5px 0 0;font-size:10.5px;letter-spacing:.16em;color:var(--ink-2);
@@ -303,10 +366,13 @@ body{
 .tab .tc{
   font-family:var(--mono);font-size:9.5px;letter-spacing:.04em;
   padding:1px 5px;border-radius:20px;border:1px solid var(--line-inner);
-  color:var(--ink-mute);
+  color:var(--ink-mute);transition:.25s ease;
 }
+/* 本组清空：角标淡出（不是消失，是"这摊子收拾完了"） */
+.tab .tc.is-clear{border-color:transparent;opacity:.5}
 .tab:hover{color:var(--gold);background:var(--ready-bg)}
 .tab:hover .ti{opacity:1}
+.tab:focus-visible{outline:1px solid var(--gold);outline-offset:-1px}
 .tab.is-on{
   color:var(--gold);background:var(--panel-2);
   border-color:var(--line-outer);border-bottom-color:var(--panel-2);
@@ -345,7 +411,9 @@ body{
 /* ============================================================
    6.7 · 设置页（纯视觉稿）
    ============================================================ */
-.pill.static-tag{border-style:dashed;color:var(--ink-mute)}
+/* 设置页开关联动 · 全局隐藏类 */
+.panel.hide-ticon .task .ticon{display:none}
+.panel.no-track .task .track{display:none}
 
 .sgroup{margin-bottom:14px}
 .sgroup-h{
@@ -379,7 +447,7 @@ body{
 }
 .segi{
   padding:4px 12px;border-radius:2px;font-size:11px;letter-spacing:.1em;
-  color:var(--ink-2);transition:.25s ease;
+  color:var(--ink-2);transition:.25s ease;cursor:pointer;
 }
 .segi.is-on{
   color:var(--gold-hi);background:var(--card);
@@ -389,7 +457,9 @@ body{
 /* 滑块 */
 .slider{
   position:relative;flex:none;width:132px;height:16px;display:flex;align-items:center;
+  cursor:pointer;border-radius:3px;
 }
+.slider:focus-visible{outline:1px solid var(--gold);outline-offset:3px}
 .slider::before{
   content:'';position:absolute;left:0;right:0;height:2px;background:var(--track);
 }
@@ -407,7 +477,9 @@ body{
 .sw{
   width:20px;height:20px;border-radius:50%;background:var(--sw);
   box-shadow:inset 0 0 0 1px rgba(0,0,0,.15);
+  cursor:pointer;transition:transform .15s ease;
 }
+.sw:hover{transform:scale(1.12)}
 .sw.is-on{
   box-shadow:inset 0 0 0 2px var(--card),0 0 0 1.5px var(--gold);
 }
@@ -416,7 +488,7 @@ body{
 .switch{
   position:relative;flex:none;width:34px;height:19px;border-radius:20px;
   background:var(--panel-2);border:1px solid var(--line-inner);
-  display:inline-flex;align-items:center;padding:2px;
+  display:inline-flex;align-items:center;padding:2px;cursor:pointer;
 }
 .switch i{
   width:13px;height:13px;border-radius:50%;background:var(--ink-mute);
@@ -430,7 +502,9 @@ body{
 .pk{
   padding:4px 10px;border-radius:2px;font-size:11px;letter-spacing:.08em;
   border:1px solid var(--line-inner);color:var(--ink-2);
+  cursor:pointer;transition:.2s ease;
 }
+.pk:hover{border-color:var(--line-outer);color:var(--gold)}
 .pk.is-on{border-color:var(--line-outer);color:var(--gold);background:var(--ready-bg)}
 
 /* 时分输入 */
@@ -442,6 +516,8 @@ body{
   font-variant-numeric:tabular-nums;
 }
 .numfield .colon{font-style:normal;opacity:.6}
+.numfield span{cursor:pointer;transition:color .18s ease}
+.numfield span:hover{color:var(--crimson)}
 
 /* 底部动作 */
 .sfoot{
@@ -449,8 +525,12 @@ body{
 }
 .sbtn{
   padding:9px 22px;border-radius:3px;font-family:var(--serif);
-  font-size:12.5px;letter-spacing:.22em;cursor:default;
+  font-size:12.5px;letter-spacing:.22em;cursor:pointer;
+  transition:background-color .2s ease,border-color .2s ease,color .2s ease;
 }
+.sbtn:hover{border-color:var(--line-outer);color:var(--gold-hi);background-color:var(--ready-bg)}
+.sbtn.primary.is-dirty{box-shadow:inset 0 0 0 1px var(--line-inner),0 0 0 1px var(--line-outer)}
+.sbtn:focus-visible{outline:1px solid var(--gold);outline-offset:2px}
 .sbtn.ghost{border:1px solid var(--line-inner);color:var(--ink-2)}
 .sbtn.primary{
   border:1px solid var(--line-outer);color:var(--gold-hi);
@@ -466,6 +546,115 @@ body{
   font-size:10px;letter-spacing:.14em;color:var(--ink-mute);
 }
 .snote svg{width:13px;height:13px;flex:none;opacity:.6}
+
+/* ============================================================
+   6.5 · 设置页 · 收纳结构（折叠分组 + 自绘下拉）
+   —— 项目少时用平铺（.sgroup）就够；项目一多，缺了这两层会
+      变成一条几百像素长的滚轴，找一项要滚半天。
+   ============================================================ */
+
+/* ---- 折叠分组 ---- */
+.fgrp{margin-bottom:9px}
+.fgrp-h{
+  position:relative;display:flex;align-items:center;gap:9px;
+  padding:10px 13px;border-radius:var(--r-md);cursor:pointer;
+  background-color:var(--panel-2);border:1px solid var(--line-inner);
+  transition:background-color .2s ease,border-color .2s ease;
+}
+.fgrp-h:hover{border-color:var(--line-outer)}
+.fgrp-h:focus-visible{outline:1px solid var(--gold);outline-offset:2px}
+.fgrp.is-open .fgrp-h{border-bottom-left-radius:0;border-bottom-right-radius:0}
+.fgrp-h .fgi{width:15px;height:15px;flex:none;color:var(--gold);opacity:.85}
+.fgrp-h .fgn{
+  flex:none;font-family:var(--serif);font-size:12.5px;letter-spacing:.2em;color:var(--gold);
+}
+/* 组头摘要：收起状态下唯一能读到这组现状的地方 */
+.fgrp-h .fgs{
+  flex:1;min-width:0;text-align:right;
+  font-family:var(--mono);font-size:10px;letter-spacing:.02em;color:var(--ink-mute);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+/* 指示器：菱形框内 ＋ / －（展开时竖笔高度收为 0） */
+.fga{
+  position:relative;flex:none;width:11px;height:11px;
+  border:1px solid var(--line-outer);transform:rotate(45deg);
+  display:flex;align-items:center;justify-content:center;
+  transition:background-color .2s ease;
+}
+.fga::before,.fga::after{
+  content:'';position:absolute;background:var(--gold);
+  transition:height .22s ease;
+}
+.fga::before{width:5px;height:1px}
+.fga::after{width:1px;height:5px}
+.fgrp.is-open .fga{background-color:var(--ready-bg)}
+.fgrp.is-open .fga::after{height:0}
+
+/* 组体：可见性只由 display 决定（见陷阱七），入场只做 transform */
+.fgrp-b{display:none;padding:8px 0 2px}
+.fgrp.is-open .fgrp-b{display:block;animation:fgOpen .26s ease}
+@keyframes fgOpen{from{transform:translateY(-4px)}to{transform:translateY(0)}}
+
+/* ---- 自绘下拉 ----
+   为什么不用原生 <select>：option 列表由系统绘制，Windows 上永远是
+   白底系统配色，跟墨金主题无法统一，且改不动任何一笔。 */
+.sel{position:relative;flex:none}
+.sel-b{
+  display:inline-flex;align-items:center;gap:10px;
+  padding:6px 11px;border-radius:3px;cursor:pointer;
+  background-color:var(--panel-2);border:1px solid var(--line-inner);
+  box-shadow:inset 2px 0 0 var(--crimson);   /* 符纸竖条：做进触发钮内缘 */
+  transition:border-color .2s ease;
+}
+.sel-b:hover{border-color:var(--line-outer)}
+.sel-b:focus-visible{outline:1px solid var(--gold);outline-offset:2px}
+.sel-v{
+  font-family:var(--serif);font-size:12px;letter-spacing:.08em;
+  color:var(--gold-hi);white-space:nowrap;
+}
+/* 箭头用菱形的一半：两条边旋转 45°，与全篇的菱形节点同源 */
+.sel-a{
+  width:6px;height:6px;flex:none;
+  border-right:1px solid var(--gold);border-bottom:1px solid var(--gold);
+  transform:rotate(45deg) translate(-1px,-1px);
+  transition:transform .25s ease;
+}
+.sel.is-open .sel-a{transform:rotate(-135deg) translate(-1px,-1px)}
+
+.sel-p{
+  position:absolute;top:calc(100% + 5px);right:0;z-index:30;
+  min-width:100%;padding:5px;display:none;
+  background-color:var(--card);border:1px solid var(--line-outer);
+  border-radius:var(--r-md);
+  box-shadow:0 10px 26px rgba(0,0,0,.42);
+}
+/* 靠底部的行改为向上展开，避免弹层越过面板边界 */
+.sel.up .sel-p{top:auto;bottom:calc(100% + 5px)}
+.sel.is-open .sel-p{display:block;animation:selOpen .2s ease}
+@keyframes selOpen{from{transform:translateY(-4px)}to{transform:translateY(0)}}
+/* 顶部一道金线，呼应面板工艺层 */
+.sel-p::before{
+  content:'';position:absolute;left:8px;right:8px;top:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--gold),transparent);opacity:.6;
+}
+.sel-o{
+  position:relative;display:block;padding:7px 13px 7px 15px;border-radius:2px;
+  font-family:var(--serif);font-size:12px;letter-spacing:.1em;
+  color:var(--ink-2);white-space:nowrap;cursor:pointer;
+  transition:background-color .16s ease,color .16s ease;
+}
+.sel-o:hover{background-color:var(--panel-2);color:var(--gold-hi)}
+.sel-o.is-on{background-color:var(--ready-bg);color:var(--gold-hi)}
+.sel-o.is-on::before{
+  content:'';position:absolute;left:5px;top:50%;transform:translateY(-50%);
+  width:2px;height:11px;background:var(--crimson);
+}
+
+/* ---- 行内小按钮（记录 / 数据组里的动作） ---- */
+.sbtn.sm{padding:6px 14px;font-size:11.5px;letter-spacing:.16em}
+.sbtn.danger{border:1px solid var(--crimson);color:var(--crimson)}
+.sbtn.danger:hover{border-color:var(--crimson);color:var(--bg);background-color:var(--crimson)}
+
 
 /* ============================================================
    7 · 任务卡
@@ -736,7 +925,7 @@ body{
 
 <!-- ============ 顶部工具条 ============ -->
 <div class="bar-top">
-  <div class="hint">点击卡片 <b>标记完成</b> · 点击菱形 <b>推进度</b></div>
+  <div class="hint">点击卡片 <b>标记完成</b> · 点击菱形 <b>推进度</b> · 点击符签 <b>切换分组</b></div>
   <button class="tbtn" id="themeBtn" type="button" aria-label="切换明暗主题">
     <svg viewBox="-1.2 -1.2 2.4 2.4"><use href="#rhomb"/></svg>
     <span id="themeTxt">明版</span>
@@ -749,7 +938,7 @@ body{
     <i class="tl"></i><i class="tr"></i><i class="bl"></i><i class="br"></i>
   </div>
   <div class="texture"></div>
-  <div class="spine"><span>式神委托</span><i></i><span>壹期</span></div>
+  <div class="spine"><span>囤囤鼠大作战</span><i></i><span>壹期</span></div>
   <div class="ofuda-deco">
     <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-ofuda"/></svg>
     <div class="tag">封印</div>
@@ -762,7 +951,7 @@ body{
       <div class="brand">
         <svg class="emblem" viewBox="-1.3 -1.3 2.6 2.6" aria-hidden="true"><use href="#pentagram"/></svg>
         <div>
-          <h1>式神委托</h1>
+          <h1 aria-label="囤囤鼠大作战"><span class="lg-st">囤囤鼠大作战</span><span class="lg-fl">囤囤鼠大作战</span></h1>
           <p>今日任务录 · 阴阳寮</p>
         </div>
       </div>
@@ -963,143 +1152,386 @@ body{
     </section>
 
     <!-- ============================================================
-         TAB · 设置（仅视觉稿，标注为静态展示）
+         TAB · 设置（控件已通电：改动即时生效，「存档」写入本机）
          ============================================================ -->
     <section class="tpane" data-pane="settings">
 
-      <div class="ghead"><span class="gt"><svg viewBox="0 0 24 24"><use href="#i-seimei"/></svg>阴阳寮设置</span><i class="gl"></i><span class="pill static-tag">静态</span></div>
+      <div class="ghead"><span class="gt"><svg viewBox="0 0 24 24"><use href="#i-seimei"/></svg>阴阳寮设置</span><i class="gl"></i><span class="pill" id="themePill">暗版</span></div>
 
-      <!-- 设置项 1 · 主题 -->
-      <div class="sgroup">
-        <div class="sgroup-h">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-daruma"/></svg>
-          <span>观感</span>
-          <i class="gl"></i>
+      <!-- ============================================================
+           ① 观感
+           ============================================================ -->
+      <div class="fgrp is-open" data-grp="look">
+        <div class="fgrp-h" role="button" tabindex="0" aria-expanded="true">
+          <svg class="fgi" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-daruma"/></svg>
+          <span class="fgn">观感</span>
+          <span class="fgs"></span>
+          <i class="fga" aria-hidden="true"></i>
         </div>
+        <div class="fgrp-b">
 
-        <div class="srow">
-          <div class="scell">
-            <div class="sk">界面主题</div>
-            <div class="sd">明暗双版 · 同一套零件，色阶各自重算</div>
+          <div class="srow">
+            <div class="scell">
+              <div class="sk">界面主题</div>
+              <div class="sd">明暗双版 · 同一套零件，色阶各自重算</div>
+            </div>
+            <div class="seg" data-seg="theme">
+              <span class="segi is-on" data-v="dark">暗版</span>
+              <span class="segi" data-v="light">明版</span>
+            </div>
           </div>
-          <div class="seg">
-            <span class="segi is-on">暗版</span>
-            <span class="segi">明版</span>
-          </div>
-        </div>
 
-        <div class="srow">
-          <div class="scell">
-            <div class="sk">底纹浓度</div>
-            <div class="sd">麻叶纹与细点阵的可见程度</div>
+          <div class="srow">
+            <div class="scell">
+              <div class="sk">底纹浓度</div>
+              <div class="sd">麻叶纹与细点阵的可见程度</div>
+            </div>
+            <div class="slider" tabindex="0" role="slider" aria-label="底纹浓度"
+                 aria-valuemin="0" aria-valuemax="100" aria-valuenow="58">
+              <i class="slider-fill"></i>
+              <b class="slider-knob"></b>
+            </div>
           </div>
-          <div class="slider">
-            <i class="slider-fill"></i>
-            <b class="slider-knob"></b>
-          </div>
-        </div>
 
-        <div class="srow">
-          <div class="scell">
-            <div class="sk">朱印强调色</div>
-            <div class="sd">状态条、划除线、徽记统一取色</div>
+          <div class="srow">
+            <div class="scell">
+              <div class="sk">朱印强调色</div>
+              <div class="sd">状态条、划除线、徽记统一取色</div>
+            </div>
+            <div class="swatches">
+              <b class="sw is-on" style="--sw:#C1272D"></b>
+              <b class="sw" style="--sw:#B7232A"></b>
+              <b class="sw" style="--sw:#8B1A1F"></b>
+              <b class="sw" style="--sw:#9E1E25"></b>
+            </div>
           </div>
-          <div class="swatches">
-            <b class="sw is-on" style="--sw:#C1272D"></b>
-            <b class="sw" style="--sw:#B7232A"></b>
-            <b class="sw" style="--sw:#8B1A1F"></b>
-            <b class="sw" style="--sw:#9E1E25"></b>
-          </div>
-        </div>
-      </div>
 
-      <!-- 设置项 2 · 委托 -->
-      <div class="sgroup">
-        <div class="sgroup-h">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-torii"/></svg>
-          <span>委托</span>
-          <i class="gl"></i>
-        </div>
+          <!-- 选项 4 个 -> 用下拉，不再用分段控件 -->
+          <div class="srow">
+            <div class="scell">
+              <div class="sk">标题浮雕强度</div>
+              <div class="sd">影响主标题的描边厚度与外光晕</div>
+            </div>
+            <div class="sel" data-sel="emboss">
+              <span class="sel-b" role="button" tabindex="0" aria-haspopup="listbox" aria-expanded="false">
+                <span class="sel-v">标准</span><i class="sel-a" aria-hidden="true"></i>
+              </span>
+              <div class="sel-p" role="listbox" aria-label="标题浮雕强度">
+                <span class="sel-o" role="option" data-v="none">关闭</span>
+                <span class="sel-o" role="option" data-v="lite">轻</span>
+                <span class="sel-o is-on" role="option" data-v="std">标准</span>
+                <span class="sel-o" role="option" data-v="bold">加重</span>
+              </div>
+            </div>
+          </div>
 
-        <div class="srow">
-          <div class="scell">
-            <div class="sk">任务类型图标</div>
-            <div class="sd">在任务名左侧显示类型徽记</div>
+          <div class="srow">
+            <div class="scell">
+              <div class="sk">符纸挂角</div>
+              <div class="sd">面板右缘的御灵符与封印小字</div>
+            </div>
+            <span class="switch is-on" data-k="corner"><i></i></span>
           </div>
-          <span class="switch is-on"><i></i></span>
-        </div>
 
-        <div class="srow">
-          <div class="scell">
-            <div class="sk">卡片底轨进度</div>
-            <div class="sd">卡底内嵌 2px 轨道，实心段等于完成比例</div>
+          <div class="srow">
+            <div class="scell">
+              <div class="sk">卡片金线描边</div>
+              <div class="sd">关闭后仅留底材质，不加金线勾边</div>
+            </div>
+            <span class="switch is-on" data-k="cardLine"><i></i></span>
           </div>
-          <span class="switch is-on"><i></i></span>
-        </div>
 
-        <div class="srow">
-          <div class="scell">
-            <div class="sk">全清达摩点睛</div>
-            <div class="sd">任务全数完成时点亮达摩右眼</div>
-          </div>
-          <span class="switch is-on"><i></i></span>
-        </div>
-
-        <div class="srow">
-          <div class="scell">
-            <div class="sk">排序方式</div>
-            <div class="sd">默认按重置紧迫度降序，快过期的排最上</div>
-          </div>
-          <div class="pick">
-            <span class="pk is-on">紧迫度</span>
-            <span class="pk">类型</span>
-            <span class="pk">序号</span>
-          </div>
-        </div>
-
-        <div class="srow">
-          <div class="scell">
-            <div class="sk">每日刷新时刻</div>
-            <div class="sd">日常委托的重置时间点</div>
-          </div>
-          <div class="numfield"><span>04</span><i class="colon">:</i><span>00</span></div>
         </div>
       </div>
 
-      <!-- 设置项 3 · 提示 -->
-      <div class="sgroup">
-        <div class="sgroup-h">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-suzu"/></svg>
-          <span>提示</span>
-          <i class="gl"></i>
+      <!-- ============================================================
+           ② 委托
+           ============================================================ -->
+      <div class="fgrp is-open" data-grp="quest">
+        <div class="fgrp-h" role="button" tabindex="0" aria-expanded="true">
+          <svg class="fgi" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-torii"/></svg>
+          <span class="fgn">委托</span>
+          <span class="fgs"></span>
+          <i class="fga" aria-hidden="true"></i>
         </div>
+        <div class="fgrp-b">
 
-        <div class="srow">
-          <div class="scell">
-            <div class="sk">重置前提醒</div>
-            <div class="sd">倒计时进入 30 分钟内时提示一次</div>
+          <div class="srow">
+            <div class="scell">
+              <div class="sk">任务类型图标</div>
+              <div class="sd">在任务名左侧显示类型徽记</div>
+            </div>
+            <span class="switch is-on" data-k="icons"><i></i></span>
           </div>
-          <span class="switch"><i></i></span>
+
+          <div class="srow">
+            <div class="scell">
+              <div class="sk">卡片底轨进度</div>
+              <div class="sd">卡底内嵌 2px 轨道，实心段等于完成比例</div>
+            </div>
+            <span class="switch is-on" data-k="track"><i></i></span>
+          </div>
+
+          <div class="srow">
+            <div class="scell">
+              <div class="sk">全清达摩点睛</div>
+              <div class="sd">任务全数完成时点亮达摩右眼</div>
+            </div>
+            <span class="switch is-on" data-k="daruma"><i></i></span>
+          </div>
+
+          <!-- 选项由 3 个增至 5 个 -> 从分段按钮组升级为下拉 -->
+          <div class="srow">
+            <div class="scell">
+              <div class="sk">排序方式</div>
+              <div class="sd">默认按重置紧迫度降序，快过期的排最上</div>
+            </div>
+            <div class="sel" data-sel="sort">
+              <span class="sel-b" role="button" tabindex="0" aria-haspopup="listbox" aria-expanded="false">
+                <span class="sel-v">紧迫度</span><i class="sel-a" aria-hidden="true"></i>
+              </span>
+              <div class="sel-p" role="listbox" aria-label="排序方式">
+                <span class="sel-o is-on" role="option" data-v="urgent">紧迫度</span>
+                <span class="sel-o" role="option" data-v="type">类型</span>
+                <span class="sel-o" role="option" data-v="index">序号</span>
+                <span class="sel-o" role="option" data-v="rarity">稀有度</span>
+                <span class="sel-o" role="option" data-v="latest">接取顺序</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="srow">
+            <div class="scell">
+              <div class="sk">每日刷新时刻</div>
+              <div class="sd">日常委托的重置时间点</div>
+            </div>
+            <div class="numfield" id="resetAt" title="点小时 +1 · 点分钟 +5">
+              <span data-u="h">04</span><i class="colon">:</i><span data-u="m">00</span>
+            </div>
+          </div>
+
+          <div class="srow">
+            <div class="scell">
+              <div class="sk">周常刷新日</div>
+              <div class="sd">每周委托的重置星期</div>
+            </div>
+            <div class="sel" data-sel="weekday">
+              <span class="sel-b" role="button" tabindex="0" aria-haspopup="listbox" aria-expanded="false">
+                <span class="sel-v">周一</span><i class="sel-a" aria-hidden="true"></i>
+              </span>
+              <div class="sel-p" role="listbox" aria-label="周常刷新日">
+                <span class="sel-o is-on" role="option" data-v="1">周一</span>
+                <span class="sel-o" role="option" data-v="2">周二</span>
+                <span class="sel-o" role="option" data-v="3">周三</span>
+                <span class="sel-o" role="option" data-v="4">周四</span>
+                <span class="sel-o" role="option" data-v="5">周五</span>
+                <span class="sel-o" role="option" data-v="6">周六</span>
+                <span class="sel-o" role="option" data-v="7">周日</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="srow">
+            <div class="scell">
+              <div class="sk">逾期任务置顶</div>
+              <div class="sd">已过重置时刻仍未完的委托提到最前</div>
+            </div>
+            <span class="switch" data-k="dueTop"><i></i></span>
+          </div>
+
         </div>
+      </div>
 
-        <div class="srow">
-          <div class="scell">
-            <div class="sk">可提交待领奖提醒</div>
-            <div class="sd">打满但未领取时置顶并加重提示</div>
+      <!-- ============================================================
+           ③ 提示
+           ============================================================ -->
+      <div class="fgrp" data-grp="alert">
+        <div class="fgrp-h" role="button" tabindex="0" aria-expanded="false">
+          <svg class="fgi" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-suzu"/></svg>
+          <span class="fgn">提示</span>
+          <span class="fgs"></span>
+          <i class="fga" aria-hidden="true"></i>
+        </div>
+        <div class="fgrp-b">
+
+          <div class="srow">
+            <div class="scell">
+              <div class="sk">重置前提醒</div>
+              <div class="sd">倒计时进入阈值内时提示一次</div>
+            </div>
+            <span class="switch" data-k="notifyReset"><i></i></span>
           </div>
-          <span class="switch is-on"><i></i></span>
+
+          <div class="srow">
+            <div class="scell">
+              <div class="sk">提醒提前量</div>
+              <div class="sd">距重置还有多久开始提示</div>
+            </div>
+            <div class="sel" data-sel="lead">
+              <span class="sel-b" role="button" tabindex="0" aria-haspopup="listbox" aria-expanded="false">
+                <span class="sel-v">30 分钟</span><i class="sel-a" aria-hidden="true"></i>
+              </span>
+              <div class="sel-p" role="listbox" aria-label="提醒提前量">
+                <span class="sel-o" role="option" data-v="10">10 分钟</span>
+                <span class="sel-o is-on" role="option" data-v="30">30 分钟</span>
+                <span class="sel-o" role="option" data-v="60">1 小时</span>
+                <span class="sel-o" role="option" data-v="180">3 小时</span>
+                <span class="sel-o" role="option" data-v="1440">1 天</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="srow">
+            <div class="scell">
+              <div class="sk">可提交待领奖提醒</div>
+              <div class="sd">打满但未领取时置顶并加重提示</div>
+            </div>
+            <span class="switch is-on" data-k="notifyReady"><i></i></span>
+          </div>
+
+          <div class="srow">
+            <div class="scell">
+              <div class="sk">全清鸣铃</div>
+              <div class="sd">一组委托全部达成时响一次铃</div>
+            </div>
+            <span class="switch is-on" data-k="bellClear"><i></i></span>
+          </div>
+
+          <div class="srow">
+            <div class="scell">
+              <div class="sk">静默时段</div>
+              <div class="sd">该时段内不发出任何提醒</div>
+            </div>
+            <div class="numfield" id="quietAt" title="点小时 +1 · 点分钟 +5">
+              <span data-u="h">23</span><i class="colon">:</i><span data-u="m">00</span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ============================================================
+           ④ 记录
+           ============================================================ -->
+      <div class="fgrp" data-grp="log">
+        <div class="fgrp-h" role="button" tabindex="0" aria-expanded="false">
+          <svg class="fgi" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-ofuda"/></svg>
+          <span class="fgn">记录</span>
+          <span class="fgs"></span>
+          <i class="fga" aria-hidden="true"></i>
+        </div>
+        <div class="fgrp-b">
+
+          <div class="srow">
+            <div class="scell">
+              <div class="sk">已完成留存</div>
+              <div class="sd">到期后自动清理已完成条目</div>
+            </div>
+            <div class="sel" data-sel="keep">
+              <span class="sel-b" role="button" tabindex="0" aria-haspopup="listbox" aria-expanded="false">
+                <span class="sel-v">7 天</span><i class="sel-a" aria-hidden="true"></i>
+              </span>
+              <div class="sel-p" role="listbox" aria-label="已完成留存">
+                <span class="sel-o" role="option" data-v="1">1 天</span>
+                <span class="sel-o" role="option" data-v="3">3 天</span>
+                <span class="sel-o is-on" role="option" data-v="7">7 天</span>
+                <span class="sel-o" role="option" data-v="30">30 天</span>
+                <span class="sel-o" role="option" data-v="0">永久保留</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="srow">
+            <div class="scell">
+              <div class="sk">已完成折叠</div>
+              <div class="sd">已完成条目收进列表末尾的折叠区</div>
+            </div>
+            <span class="switch" data-k="folding"><i></i></span>
+          </div>
+
+          <div class="srow">
+            <div class="scell">
+              <div class="sk">显示完成时刻</div>
+              <div class="sd">在已完成条目右侧标注达成时间</div>
+            </div>
+            <span class="switch is-on" data-k="showTime"><i></i></span>
+          </div>
+
+          <div class="srow">
+            <div class="scell">
+              <div class="sk">导出记录</div>
+              <div class="sd">生成任务流水，含接取与达成时间</div>
+            </div>
+            <span class="sbtn sm ghost" id="btnExport" role="button" tabindex="0">导 出</span>
+          </div>
+
+          <div class="srow">
+            <div class="scell">
+              <div class="sk">清空已完成</div>
+              <div class="sd">删除全部已达成记录，不可撤销</div>
+            </div>
+            <span class="sbtn sm danger" id="btnWipe" role="button" tabindex="0">清 空</span>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ============================================================
+           ⑤ 数据
+           ============================================================ -->
+      <div class="fgrp" data-grp="data">
+        <div class="fgrp-h" role="button" tabindex="0" aria-expanded="false">
+          <svg class="fgi" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-shimenawa"/></svg>
+          <span class="fgn">数据</span>
+          <span class="fgs"></span>
+          <i class="fga" aria-hidden="true"></i>
+        </div>
+        <div class="fgrp-b">
+
+          <div class="srow">
+            <div class="scell">
+              <div class="sk">自动存档</div>
+              <div class="sd">每次改动后静默写入本机</div>
+            </div>
+            <span class="switch is-on" data-k="autoSave"><i></i></span>
+          </div>
+
+          <div class="srow">
+            <div class="scell">
+              <div class="sk">存档位置</div>
+              <div class="sd">本机存储随浏览器清理，云端需登录</div>
+            </div>
+            <span class="pill">本机</span>
+          </div>
+
+          <div class="srow">
+            <div class="scell">
+              <div class="sk">上次存档</div>
+              <div class="sd">最近一次写入本机的时间</div>
+            </div>
+            <span class="pill" id="lastSave">尚无存档</span>
+          </div>
+
+          <div class="srow">
+            <div class="scell">
+              <div class="sk">导入存档</div>
+              <div class="sd">从剪贴板粘贴 JSON 覆盖当前设置</div>
+            </div>
+            <span class="sbtn sm ghost" id="btnImport" role="button" tabindex="0">导 入</span>
+          </div>
+
         </div>
       </div>
 
       <!-- 底部动作 -->
       <div class="sfoot">
-        <span class="sbtn ghost">恢复默设</span>
-        <span class="sbtn primary">存 档</span>
+        <span class="sbtn ghost"   id="btnReset" role="button" tabindex="0">恢复默设</span>
+        <span class="sbtn primary" id="btnSave"  role="button" tabindex="0">存 档</span>
       </div>
 
       <div class="snote">
         <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-ofuda"/></svg>
-        <span>本页仅为视觉稿 · 所有控件为静态展示，不承载交互</span>
+        <span>改动即时生效 · 点「存档」写入本机，下次打开自动恢复</span>
       </div>
 
     </section>
@@ -1131,24 +1563,285 @@ body{
 
 <script>
 /* ============================================================
-   主题切换
+   设置状态模型
+   —— 所有改动即时生效（本次打开期间有效）；
+      点「存档」写入本机 localStorage，下次打开自动恢复。
    ============================================================ */
-const root = document.documentElement;
-const themeBtn = document.getElementById('themeBtn');
-const themeTxt = document.getElementById('themeTxt');
-themeBtn.addEventListener('click', () => {
-  const next = root.dataset.theme === 'dark' ? 'light' : 'dark';
+const root         = document.documentElement;
+const themeBtn     = document.getElementById('themeBtn');
+const themeTxt     = document.getElementById('themeTxt');
+const themePill    = document.getElementById('themePill');
+/* 限定到主题那一组：.seg 一旦在别处复用，全选会把它们也扫进来，
+   点击时 setTheme() 会收到不相干的 data-v 而回退成 dark。 */
+const segs         = [...document.querySelectorAll('.seg[data-seg="theme"] .segi')];
+const settingsPane = document.querySelector('.tpane[data-pane="settings"]');
+const SWITCHES     = [...settingsPane.querySelectorAll('.switch')];
+const SWATCHES     = [...settingsPane.querySelectorAll('.swatches .sw')];
+const saveBtn      = document.getElementById('btnSave');
+const resetBtn     = document.getElementById('btnReset');
+const snoteEl      = document.querySelector('.snote span');
+const ACCENTS      = SWATCHES.map(el => el.style.getPropertyValue('--sw').trim());
+
+const KEY = 'onmyoji-quest-log.v1';
+const DEFAULTS = {
+  theme:'dark', tex:58, accent:0,
+  emboss:'std', corner:true, cardLine:true,
+  icons:true, track:true, daruma:true,
+  sort:'urgent', resetH:4, resetM:0, weekday:'1', dueTop:false,
+  notifyReset:false, notifyReady:true, lead:'30', bellClear:true,
+  keep:'7', folding:false, showTime:true, autoSave:true
+};
+let S = Object.assign({}, DEFAULTS);
+let darumaOn = true;
+const p2 = n => String(n).padStart(2, '0');
+
+/* ---- 主题：右上角按钮与设置页分段控件走同一个入口，永不脱节 ---- */
+function setTheme(next){
+  if (next !== 'dark' && next !== 'light') next = 'dark';
+  S.theme = next;
   root.dataset.theme = next;
-  themeTxt.textContent = next === 'dark' ? '明版' : '暗版';
+  themeTxt.textContent = next === 'dark' ? '明版' : '暗版';   /* 按钮显示"将切到"的版本 */
+  if (themePill) themePill.textContent = next === 'dark' ? '暗版' : '明版';
+  segs.forEach(s => s.classList.toggle('is-on', s.dataset.v === next));
+}
+themeBtn.addEventListener('click', () => {
+  setTheme(root.dataset.theme === 'dark' ? 'light' : 'dark');
+  markDirty();
 });
-/* 支持 ?theme=light / ?theme=dark 直达 */
-(function initTheme(){
-  const q = new URLSearchParams(location.search).get('theme');
-  if (q === 'light' || q === 'dark') {
-    root.dataset.theme = q;
-    themeTxt.textContent = q === 'dark' ? '明版' : '暗版';
-  }
+
+/* ---- 底纹浓度：58% 即原设计基准（--tex-k = 1），100% 约 1.72 倍 ---- */
+function setTex(v){
+  S.tex = Math.max(0, Math.min(100, Math.round(v)));
+  root.style.setProperty('--tex-k', (S.tex / 58).toFixed(3));
+  const sl = settingsPane.querySelector('.slider');
+  const f  = settingsPane.querySelector('.slider-fill');
+  const n  = settingsPane.querySelector('.slider-knob');
+  if (f)  f.style.width = S.tex + '%';
+  if (n)  n.style.left  = S.tex + '%';
+  if (sl) sl.setAttribute('aria-valuenow', S.tex);
+}
+
+/* ---- 朱印强调色：只改 --crimson。
+        --crimson-deep 全篇未被引用；--crimson-soft 仅服务"已完成"态，
+        本就该保持低饱和，故不随强调色联动。 ---- */
+function setAccent(i){
+  S.accent = Math.max(0, Math.min(ACCENTS.length - 1, i));
+  root.style.setProperty('--crimson', ACCENTS[S.accent]);
+  SWATCHES.forEach((s, j) => s.classList.toggle('is-on', j === S.accent));
+}
+
+/* ---- 开关：三个委托类开关会真实改变任务卡的 DOM 呈现 ---- */
+function setSwitch(key, on){
+  S[key] = !!on;
+  const el = SWITCHES.find(s => s.dataset.k === key);
+  if (el) el.classList.toggle('is-on', !!on);
+  const panel = document.querySelector('.panel');
+  if (key === 'icons') panel.classList.toggle('hide-ticon', !on);
+  if (key === 'track') panel.classList.toggle('no-track', !on);
+  if (key === 'daruma') { darumaOn = !!on; updateStats(); }
+}
+
+/* ---- 排序：紧迫度 = 原序 / 类型 = 按徽记 / 序号 = 按编号 ---- */
+function setPicks(v){
+  S.sort = v;
+  /* 排序项已从分段按钮组升级为下拉（5 个选项，分段会挤爆一行）。
+     两条路径共用同一套 data-v 语义，保留 .pk 兼容旧结构。 */
+  settingsPane.querySelectorAll('.pk').forEach(p => p.classList.toggle('is-on', p.dataset.v === v));
+  setSelect('sort', v);
+  sortTasks(v);
+}
+function sortTasks(key){
+  document.querySelectorAll('.tpane').forEach(pane => {
+    const list = [...pane.querySelectorAll('.task')];
+    if (list.length < 2) return;
+    list.sort((a, b) => {
+      if (key === 'index') {
+        return (+a.querySelector('.idx').textContent) - (+b.querySelector('.idx').textContent);
+      }
+      if (key === 'type') {
+        const ha = a.querySelector('.ticon use').getAttribute('href') || '';
+        const hb = b.querySelector('.ticon use').getAttribute('href') || '';
+        return ha.localeCompare(hb) || (+a.dataset.ord - +b.dataset.ord);
+      }
+      return (+a.dataset.ord) - (+b.dataset.ord);
+    });
+    list.forEach(t => pane.appendChild(t));
+  });
+}
+
+/* ---- 每日刷新时刻 ---- */
+function setTime(h, m){
+  S.resetH = ((h % 24) + 24) % 24;
+  S.resetM = ((m % 60) + 60) % 60;
+  const f = document.getElementById('resetAt');
+  if (!f) return;
+  f.querySelector('[data-u="h"]').textContent = p2(S.resetH);
+  f.querySelector('[data-u="m"]').textContent = p2(S.resetM);
+}
+
+
+/* ============================================================
+   设置页 · 收纳结构（折叠分组 + 自绘下拉）
+   ============================================================ */
+
+/* ---- 折叠分组 ---- */
+function initFold(){
+  settingsPane.querySelectorAll('.fgrp').forEach(g => {
+    const h = g.querySelector('.fgrp-h');
+    if (!h) return;
+    const toggle = () => {
+      const open = !g.classList.contains('is-open');
+      g.classList.toggle('is-open', open);
+      h.setAttribute('aria-expanded', open ? 'true' : 'false');
+    };
+    h.addEventListener('click', toggle);
+    h.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); }
+    });
+  });
+}
+
+/* ---- 自绘下拉 ---- */
+function selOf(name){ return settingsPane.querySelector('.sel[data-sel="' + name + '"]'); }
+
+function setSelect(name, v){
+  const sel = selOf(name);
+  if (!sel) return;
+  sel.querySelectorAll('.sel-o').forEach(o => o.classList.toggle('is-on', o.dataset.v === v));
+  const on = sel.querySelector('.sel-o.is-on');
+  if (on) sel.querySelector('.sel-v').textContent = on.textContent.trim();
+  refreshSummaries();
+}
+
+function closeSelects(except){
+  settingsPane.querySelectorAll('.sel.is-open').forEach(s => {
+    if (s === except) return;
+    s.classList.remove('is-open');
+    const b = s.querySelector('.sel-b');
+    if (b) b.setAttribute('aria-expanded', 'false');
+  });
+}
+
+function initSelect(){
+  settingsPane.querySelectorAll('.sel').forEach(sel => {
+    const btn = sel.querySelector('.sel-b');
+    const pop = sel.querySelector('.sel-p');
+    if (!btn || !pop) return;
+
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      const open = !sel.classList.contains('is-open');
+      closeSelects(sel);
+      sel.classList.remove('up');
+      sel.classList.toggle('is-open', open);
+      btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+      /* 弹层若会越过视口底部，改为向上展开 */
+      if (open && pop.getBoundingClientRect().bottom > window.innerHeight - 12) {
+        sel.classList.add('up');
+      }
+    });
+
+    pop.querySelectorAll('.sel-o').forEach(o => {
+      o.addEventListener('click', e => {
+        e.stopPropagation();
+        const name = sel.dataset.sel;
+        /* 排序有副作用（真的重排任务卡），单独走 setPicks */
+        if (name === 'sort') setPicks(o.dataset.v);
+        else { S[name] = o.dataset.v; setSelect(name, o.dataset.v); }
+        sel.classList.remove('is-open');
+        btn.setAttribute('aria-expanded', 'false');
+        markDirty();
+      });
+    });
+  });
+  document.addEventListener('click', () => closeSelects(null));
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeSelects(null); });
+}
+
+/* ---- 组头摘要：收起状态下唯一能读到这组现状的地方 ----
+   显示规则：下拉当前值 > 分段当前值 > 开关开启计数。 */
+function refreshSummaries(){
+  settingsPane.querySelectorAll('.fgrp').forEach(g => {
+    const box = g.querySelector('.fgs');
+    if (!box) return;
+    const bits = [];
+    const sv = g.querySelector('.sel-v');
+    if (sv) bits.push(sv.textContent.trim());
+    else {
+      const sg = g.querySelector('.seg .segi.is-on');
+      if (sg) bits.push(sg.textContent.trim());
+    }
+    const sw = [...g.querySelectorAll('.switch')];
+    if (sw.length) bits.push(sw.filter(s => s.classList.contains('is-on')).length + '/' + sw.length + ' 开');
+    box.textContent = bits.join(' · ');
+  });
+}
+
+/* ---- 静默时段：演示用，仅本时段内自增，不入状态模型 ---- */
+(function(){
+  const f = document.getElementById('quietAt');
+  if (!f) return;
+  let hh = 23, mm = 0;
+  f.addEventListener('click', e => {
+    const u = e.target.dataset.u;
+    if (u === 'h') hh = (hh + 1) % 24;
+    if (u === 'm') mm = (mm + 5) % 60;
+    f.querySelector('[data-u="h"]').textContent = p2(hh);
+    f.querySelector('[data-u="m"]').textContent = p2(mm);
+    markDirty();
+  });
 })();
+
+initFold();
+initSelect();
+refreshSummaries();
+
+/* ---- 未存档标记 / 存档 / 读取 ---- */
+let dirty = false;
+function markDirty(){
+  dirty = true;
+  if (saveBtn) saveBtn.classList.add('is-dirty');
+  if (snoteEl) snoteEl.textContent = '有改动未存档 · 点「存档」写入本机，下次打开自动恢复';
+  refreshSummaries();
+}
+function commit(){
+  dirty = false;
+  if (saveBtn) saveBtn.classList.remove('is-dirty');
+  let ok = true;
+  try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) { ok = false; }
+  if (snoteEl) snoteEl.textContent = ok
+    ? '已存档 · ' + new Date().toLocaleTimeString('zh-CN', {hour12:false}) + ' · 下次打开自动恢复'
+    : '本机存储不可用 · 改动仅在本次打开期间有效';
+}
+function loadState(){
+  try {
+    const raw = localStorage.getItem(KEY);
+    if (!raw) return false;
+    const o = JSON.parse(raw);
+    Object.keys(DEFAULTS).forEach(k => { if (k in o) S[k] = o[k]; });
+    return true;
+  } catch (e) { return false; }
+}
+function applyState(){
+  setTheme(S.theme);
+  setTex(S.tex);
+  setAccent(S.accent);
+  setSwitch('icons',  S.icons);
+  setSwitch('track',  S.track);
+  setSwitch('daruma', S.daruma);
+  setPicks(S.sort);
+  setTime(S.resetH, S.resetM);
+  /* 本轮新增的设置项 */
+  setSwitch('corner',   S.corner);
+  setSwitch('cardLine', S.cardLine);
+  setSwitch('dueTop',   S.dueTop);
+  setSwitch('bellClear', S.bellClear);
+  setSwitch('folding',  S.folding);
+  setSwitch('showTime', S.showTime);
+  setSwitch('autoSave', S.autoSave);
+  ['emboss', 'weekday', 'lead', 'keep'].forEach(k => setSelect(k, S[k]));
+  setSelect('sort', S.sort);
+}
 
 /* ============================================================
    倒计时 · 等宽防跳
@@ -1206,7 +1899,7 @@ function render(task) {
   updateStats();
 }
 
-/* 统计三卡 */
+/* 统计三卡 + Tab 角标 */
 function updateStats() {
   const all = [...document.querySelectorAll('.task')];
   const n = s => all.filter(t => t.dataset.state === s).length;
@@ -1214,9 +1907,22 @@ function updateStats() {
   document.getElementById('stReady').textContent  = pad(n('ready'));
   document.getElementById('stDone').textContent   = pad(n('done'));
 
-  /* 达摩点睛：全部任务完成时点亮右眼 */
+  /* 达摩点睛：全部任务完成时点亮右眼（设置页可关闭） */
   const allDone = all.length > 0 && all.every(t => t.dataset.state === 'done');
-  document.querySelector('.panel').classList.toggle('all-done', allDone);
+  document.querySelector('.panel').classList.toggle('all-done', allDone && darumaOn);
+
+  /* Tab 角标 = 组内未完成数；本组清空后显示 -- 并淡出 */
+  tabs.forEach(tb => {
+    const pane = document.querySelector('.tpane[data-pane="' + tb.dataset.tab + '"]');
+    if (!pane) return;
+    const list = [...pane.querySelectorAll('.task')];
+    if (!list.length) return;
+    const left = list.filter(t => t.dataset.state !== 'done').length;
+    const tc = tb.querySelector('.tc');
+    if (!tc) return;
+    tc.textContent = pad(left);
+    tc.classList.toggle('is-clear', left === 0);
+  });
 }
 
 /* 点击菱形 → 推进度 */
@@ -1254,8 +1960,116 @@ document.querySelectorAll('.task').forEach(task => {
   });
 });
 
-/* 初始化 */
+/* ============================================================
+   Tab 导航
+   —— 选中签与面板一一对应（data-tab <-> data-pane）
+   ============================================================ */
+const tabs  = [...document.querySelectorAll('.tab')];
+const panes = [...document.querySelectorAll('.tpane')];
+
+function goTab(name){
+  if (!tabs.some(t => t.dataset.tab === name)) name = 'daily';
+  tabs.forEach(t => {
+    const on = t.dataset.tab === name;
+    t.classList.toggle('is-on', on);
+    t.setAttribute('aria-selected', on ? 'true' : 'false');
+    t.tabIndex = on ? 0 : -1;
+  });
+  panes.forEach(p => p.classList.toggle('is-on', p.dataset.pane === name));
+}
+tabs.forEach(t => {
+  t.addEventListener('click', () => goTab(t.dataset.tab));
+  /* 方向键在签之间游走，符合 tablist 惯例 */
+  t.addEventListener('keydown', e => {
+    const i = tabs.indexOf(t);
+    let n = null;
+    if (e.key === 'ArrowRight')      n = tabs[(i + 1) % tabs.length];
+    else if (e.key === 'ArrowLeft')  n = tabs[(i - 1 + tabs.length) % tabs.length];
+    else if (e.key === 'Home')       n = tabs[0];
+    else if (e.key === 'End')        n = tabs[tabs.length - 1];
+    if (n) { e.preventDefault(); goTab(n.dataset.tab); n.focus(); }
+  });
+});
+
+/* ============================================================
+   设置页事件绑定
+   ============================================================ */
+segs.forEach(s => s.addEventListener('click', () => { setTheme(s.dataset.v); markDirty(); }));
+
+SWITCHES.forEach(el => el.addEventListener('click', () => {
+  setSwitch(el.dataset.k, !el.classList.contains('is-on'));
+  markDirty();
+}));
+
+settingsPane.querySelectorAll('.pk').forEach(p => p.addEventListener('click', () => {
+  setPicks(p.dataset.v); markDirty();
+}));
+
+SWATCHES.forEach((s, i) => s.addEventListener('click', () => { setAccent(i); markDirty(); }));
+
+document.getElementById('resetAt').addEventListener('click', e => {
+  const u = e.target.dataset.u;
+  if (u === 'h') { setTime(S.resetH + 1, S.resetM); markDirty(); }
+  if (u === 'm') { setTime(S.resetH, S.resetM + 5); markDirty(); }
+});
+
+/* 底纹浓度滑块：拖动 + 方向键 */
+(function(){
+  const box = settingsPane.querySelector('.slider');
+  if (!box) return;
+  let drag = false;
+  const fromEvent = e => {
+    const r = box.getBoundingClientRect();
+    setTex((e.clientX - r.left) / r.width * 100);
+  };
+  box.addEventListener('pointerdown', e => {
+    drag = true; box.setPointerCapture(e.pointerId); fromEvent(e);
+  });
+  box.addEventListener('pointermove', e => { if (drag) fromEvent(e); });
+  box.addEventListener('pointerup',   () => { if (drag) { drag = false; markDirty(); } });
+  box.addEventListener('keydown', e => {
+    if (e.key === 'ArrowLeft')  { setTex(S.tex - 2); markDirty(); e.preventDefault(); }
+    if (e.key === 'ArrowRight') { setTex(S.tex + 2); markDirty(); e.preventDefault(); }
+  });
+})();
+
+/* 存档 / 恢复默设 */
+saveBtn.addEventListener('click', commit);
+resetBtn.addEventListener('click', () => {
+  S = Object.assign({}, DEFAULTS);
+  applyState();
+  try { localStorage.removeItem(KEY); } catch (e) {}
+  dirty = false;
+  saveBtn.classList.remove('is-dirty');
+  if (snoteEl) snoteEl.textContent = '已恢复默设 · 本机存档已清除';
+});
+/* 两个按钮是 span，补键盘可达性 */
+[saveBtn, resetBtn].forEach(b => b.addEventListener('keydown', e => {
+  if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); b.click(); }
+}));
+
+/* ============================================================
+   初始化
+   ============================================================ */
+/* 记录各组原始次序，供"紧迫度"排序还原 */
+document.querySelectorAll('.tpane').forEach(p =>
+  [...p.querySelectorAll('.task')].forEach((t, i) => t.dataset.ord = i));
+
 document.querySelectorAll('.task').forEach(render);
+
+const hadSave = loadState();
+const qs = new URLSearchParams(location.search);
+const qTheme = qs.get('theme');
+if (qTheme === 'light' || qTheme === 'dark') S.theme = qTheme;
+
+applyState();
+
+if (snoteEl) snoteEl.textContent = hadSave
+  ? '已从本机恢复上次存档 · 改动即时生效，点「存档」覆盖'
+  : '改动即时生效 · 点「存档」写入本机，下次打开自动恢复';
+
+/* 支持 ?tab=settings 直达 */
+goTab(qs.get('tab') || 'daily');
 </script>
 </body>
 </html>

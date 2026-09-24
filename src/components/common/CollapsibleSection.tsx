@@ -73,7 +73,7 @@ export default function CollapsibleSection({
             name="chevron-right"
             size={13}
             className={`transition-transform duration-120 ${open ? 'rotate-90' : ''} ${
-              danger ? 'text-crimson' : 'text-gold opacity-70'
+              danger ? 'text-crimson' : 'text-gold-hi'
             }`}
           />
           <span className="min-w-0 flex-1">

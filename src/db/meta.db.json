@@ -382,7 +382,6 @@
     "sortBy": "weight",
     "showKinds": [],
     "minWeight": 0,
-    "hideDone": false,
     "pinned": []
   }
 }

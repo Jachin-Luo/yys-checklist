@@ -168,6 +168,7 @@ src/domain/enums.ts 的字面量联合类型  ←── 双向校验 ──→  
 | `cardDisplay.ts` | `DEFAULT_CARD_DISPLAY`、`CardPresetKey` / `CardPreset` / `CARD_PRESETS`（极简 / 简要 / 完整）、`CARD_FIELDS`、`effectiveCardDisplay`、`matchPreset`、`hiddenFieldCount` | 清单卡片**显示哪些字段**（2026-09-16 新增，存在 `view.card`）。预设只是"一次设六项"的快捷键，改任一项后 `matchPreset` 返回 null；默认 = 全部显示，故不改变既有观感 |
 | `guildTime.ts` | `GuildTimePrefs`（类型在 `api/types`，此处 re-export）、`isValidHm`、`guildTimeTargets`、`configuredCount`、`applyGuildTime`、`applyGuildTimeAll`、`withGuildTime` | 寮时间在展示层叠加（**不写回主数据**）。2026-09-16 起配置本身是**账号级**分片 |
 | `sync.ts` | `SyncPartKey` / `SyncPart` / `SYNC_PARTS`、`SyncSource` / `SyncPatch`、`defaultSyncKeys`、`applyParts`、`describeKeys` | 账号间配置同步：可同步内容清单 + **字段级接管**规则（只勾「一键日常覆盖」时不动目标的筛选与置顶）。勾选状态与日志刻意不在清单内 |
+| `grouping.ts` | `ItemUnit`、`groupByCount`、`unitProgress` | **渲染层聚合**（2026-09-24）：把 `地域鬼王 1/3 · 2/3 · 3/3` 这类"同一件事的第 k / N 次"折成一张卡。**数据一行不改**，依据只有名字里的 `k/N` 后缀与 `cycle` + `path` 是否全同，`k` 必须恰好凑齐 `1..N`，否则整堆退回单条。进度 = 组内真实已完成条数，不另记计数 |
 | `nurture.ts` | `NURTURE_HOURS`(6)、`MAX_NURTURE_N`(5)、`NurtureRecord`（含 `dones`）/ `NurturePoint`（含 `index` / `doneAt`）、`isHM` / `normalizeHM` / `nowHM` / `hmToDate`、`baseTsOf` / `nurturePointsFrom` / `recordPoints` / `nurturePoints`、`markPointDone` / `clearPointDone` / `nextPendingPoint`、`pointStats`、`NurtureDue` / `nextDue` / `dueText`、`nurtureId`、`makeNurture`、`sortNurture` | 结界寄养 6 小时收 / 续点派生：点列表 = 上卡点 + 逐点递推（`dones` 逐点记实际完成时间）；`nextDue` / `dueText` 供壳层常驻徽章用 |
 | `yuhun.ts` | `MODE_LABEL`、`WEEK_ORDER`、`DungeonDay`、`hasDayGrid`、`dungeonDay`、`resolveFollow`、`OldFollowInfo`、`oldFollowInfo`、`groupBySection` | 御魂副本轮换与掉落派生 |
 | `bounty.ts` | `BountySpotRef` / `BountyEntry` / `BountyUnionRow`、`buildBountyEntries`、`matchBounty`、`bountyUnion`、`fullCoverage`、`RankedEntry`、`pinMatches` | 悬赏出处派生、线索反查与并集 |
@@ -196,7 +197,7 @@ src/domain/enums.ts 的字面量联合类型  ←── 双向校验 ──→  
   与 `WEIGHT_LEGEND` 图例均已删除 —— 界面里除了「默认排序」不会再出现痛感的任何出口。
 - 一键日常入口恒排第 0 位：`domain/sort.buildComparator` 的前置特判，**不参与上面的比较**。
 - 排序优先级：星标置顶 > （自定义顺序若已调过则接管）> 痛感分；同分兜底依次为截止日 → 周期 → 自定义顺序。
-- 可见性：`domain/sort.isVisible`（奖励类型筛选 + 隐藏已完成 + 一键日常覆盖导致隐藏）。
+- 可见性：`domain/sort.isVisible`（奖励类型筛选 + 「今天是否适用」`days`）与 `domain/autoDaily.hiddenByCover`（一键日常覆盖导致隐藏）。2026-09-24 删掉了「隐藏已完成」—— 它当时已无 UI 却仍在过滤里生效，会在按次数聚合之前抽走已勾条目（见 `domain/grouping` 的缺员说明），属"用户改不了、也看不出"的隐患。
 
 ### 7.3 一键日常：配置 ≠ 状态
 

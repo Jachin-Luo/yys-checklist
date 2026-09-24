@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import Alert from '../components/common/Alert';
-import ChecklistItem from '../components/common/ChecklistItem';
+import ChecklistEntry from '../components/common/ChecklistEntry';
+import { groupByCount, groupChecklist } from '../domain/grouping';
 import { EmptyState, SectionTitle } from '../components/common/EmptyState';
 import PageHead from '../components/common/PageHead';
 import ViewBar from '../components/common/ViewBar';
@@ -38,12 +39,11 @@ export default function LimitedPage({ variant }: { variant: 'mobile' | 'desktop'
     const visibility = {
       /* 同 `hooks/useChecklist`：筛选总开关关着时传空数组（见 `stores/view.SHOW_KIND_FILTER`） */
       showKinds: SHOW_KIND_FILTER ? (view.showKinds as string[]) : [],
-      hideDone: view.hideDone,
       today: now.getDay(),
     };
     const list = items
       .filter((it) => it.cycle === 'limited')
-      .filter((it) => isVisible(it, checked[it.id], visibility))
+      .filter((it) => isVisible(it, visibility))
       .sort(
         buildComparator({ sortBy: 'deadline', pinned: view.pinned, order: overrides?.order ?? [] }),
       );
@@ -51,14 +51,14 @@ export default function LimitedPage({ variant }: { variant: 'mobile' | 'desktop'
     /* 版本 / 赛季条目单独成区：无 deadline，不参与"剩余天数升序"与临期预警（理由见组件注释） */
     const extra = items
       .filter((it) => it.cycle === 'version' || it.cycle === 'season')
-      .filter((it) => isVisible(it, checked[it.id], visibility))
+      .filter((it) => isVisible(it, visibility))
       .sort(
         buildComparator({ sortBy: 'deadline', pinned: view.pinned, order: overrides?.order ?? [] }),
       );
 
     const once = items
       .filter((it) => it.cycle === 'once')
-      .filter((it) => isVisible(it, checked[it.id], visibility))
+      .filter((it) => isVisible(it, visibility))
       .sort(
         buildComparator({ sortBy: 'deadline', pinned: view.pinned, order: overrides?.order ?? [] }),
       );
@@ -110,12 +110,12 @@ export default function LimitedPage({ variant }: { variant: 'mobile' | 'desktop'
       </SectionTitle>
       {pending.length ? (
         <div className={CHECKLIST_GRID}>
-          {pending.map((item) => (
-            <ChecklistItem
-              key={item.id}
-              item={item}
+          {groupChecklist(pending, done).pending.map((u) => (
+            <ChecklistEntry
+              key={u.key}
+              unit={u}
               showDeadline
-              highlight={urgentIds.has(item.id)}
+              highlightOf={(id) => urgentIds.has(id)}
             />
           ))}
         </div>
@@ -128,12 +128,12 @@ export default function LimitedPage({ variant }: { variant: 'mobile' | 'desktop'
 
       {done.length ? (
         <>
-          <SectionTitle icon="suzu" count={done.length}>
+          <SectionTitle icon="done" count={done.length}>
             已完成
           </SectionTitle>
           <div className={CHECKLIST_GRID}>
-            {done.map((item) => (
-              <ChecklistItem key={item.id} item={item} showDeadline />
+            {groupChecklist(pending, done).done.map((u) => (
+              <ChecklistEntry key={u.key} unit={u} showDeadline />
             ))}
           </div>
         </>
@@ -148,15 +148,15 @@ export default function LimitedPage({ variant }: { variant: 'mobile' | 'desktop'
             版本 / 赛季按开服锚点重置 · 版本活动于上线当日维护完成后（通常 9:00）才计入
           </Alert>
           <SectionTitle
-            icon="koyomi"
+            icon="nobori"
             count={extraPending.length}
             aside={<span className="text-sm text-ink-3">已完成 {extraDone.length}</span>}
           >
             版本 / 赛季
           </SectionTitle>
           <div className={CHECKLIST_GRID}>
-            {[...extraPending, ...extraDone].map((item) => (
-              <ChecklistItem key={item.id} item={item} showDeadline />
+            {groupByCount([...extraPending, ...extraDone]).map((u) => (
+              <ChecklistEntry key={u.key} unit={u} showDeadline />
             ))}
           </div>
         </>
@@ -172,8 +172,8 @@ export default function LimitedPage({ variant }: { variant: 'mobile' | 'desktop'
             一次性
           </SectionTitle>
           <div className={CHECKLIST_GRID}>
-            {[...oncePending, ...onceDone].map((item) => (
-              <ChecklistItem key={item.id} item={item} showDeadline={Boolean(item.deadline)} />
+            {groupByCount([...oncePending, ...onceDone]).map((u) => (
+              <ChecklistEntry key={u.key} unit={u} showDeadline={(it) => Boolean(it.deadline)} />
             ))}
           </div>
         </>

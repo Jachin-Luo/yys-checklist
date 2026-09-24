@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import Icon from '../icons/Icon';
+import { btn, option } from './controls';
 import { useModalFocus } from '../../hooks/useModalFocus';
 import { aliveProfiles, useSessionStore } from '../../stores/session';
 import { useUiStore } from '../../stores/ui';
@@ -76,7 +77,7 @@ export default function ProfilePickDialog() {
 
   return (
     <div
-      className="fixed inset-0 z-[60] flex items-center justify-center bg-scrim/60 px-4"
+      className="fixed inset-0 z-[60] flex items-center justify-center bg-scrim/60 px-4 backdrop-blur-sm"
       onClick={() => answerPick(null)}
     >
       <div
@@ -86,10 +87,10 @@ export default function ProfilePickDialog() {
         aria-modal="true"
         aria-label={`${action}其他账号的完成状态`}
         onClick={(e) => e.stopPropagation()}
-        className="w-full max-w-sm overflow-hidden rounded-lg border border-line bg-surface-3 shadow-panel"
+        className="w-full max-w-sm overflow-hidden rounded-2xl border border-line bg-surface-3 shadow-panel"
       >
         <div className="flex items-start gap-2 px-4 py-3.5">
-          <Icon name="kasane" size={16} className="mt-0.5 flex-none text-gold" />
+          <Icon name="kasane" size={16} className="mt-0.5 flex-none text-gold-hi" />
           <div className="min-w-0 flex-1">
             <h2 className="font-serif text-lg tracking-card text-ink">同时{action}到其他账号</h2>
             <p className="mt-1 truncate text-sm text-ink-2" title={pickState.itemName}>
@@ -102,7 +103,7 @@ export default function ProfilePickDialog() {
           {/* 当前账号做成一条「压上来的纸片」（`bg-surface` 浮在面板底上）：
               它与下方可选的账号行在**材质上就分出"只读 / 可点"两档**，
               不需要靠一行小字去解释"它为什么不能点"。 */}
-          <div className="flex items-center gap-2 rounded-sm bg-surface px-2.5 py-2 text-sm text-ink-3 shadow-card">
+          <div className="flex items-center gap-2 rounded-md bg-surface px-3 py-2 text-sm text-ink-3 shadow-card">
             <Icon name="check" size={12} className="flex-none text-crimson" />
             <span className="min-w-0 truncate">
               当前：<b className="font-medium text-ink">{currentName}</b>
@@ -120,20 +121,21 @@ export default function ProfilePickDialog() {
                     type="button"
                     aria-pressed={on}
                     onClick={() => toggle(p.id)}
-                    className={`flex w-full cursor-pointer items-center gap-2.5 rounded-sm px-2.5 py-2 text-left transition-colors duration-120 ${
-                      /* `ring-inset`：列表在 `overflow-y-auto` 里，非内嵌的 ring 会被容器裁掉 1px */
-                      on ? 'bg-gold-soft text-gold-hi ring-1 ring-inset ring-line' : 'text-ink hover:bg-surface'
-                    }`}
+                    className={`${option.base} ${on ? option.on : option.off}`}
                   >
-                    {/* 菱形符格（与清单卡勾选控件同一形状语言：金描边空心 → 朱红实心）。
+                    {/* 圆角方块 + 勾号（参考稿 §10 `.cb`）。2026-09-24 圆润版把**表单类多选**从
+                        菱形符格改成它：菱形是**任务卡**的符格语言（示例文件里"点一次菱形推进一步"
+                        说的正是任务卡），表单控件不再是它。
                         这里是**行内指示器**而不是嵌套按钮 —— 行本身已是 `button`，
                         再套一层会产出非法 HTML；点击与键盘由行自己承担。 */}
-                    <span className="flex h-4 w-4 flex-none items-center justify-center">
-                      <i
-                        className={`block h-2.5 w-2.5 rotate-45 border transition-colors duration-220 ease-genso ${
-                          on ? 'border-crimson bg-crimson' : 'border-gold'
-                        }`}
-                      />
+                    <span
+                      className={`flex h-5 w-5 flex-none items-center justify-center rounded-xs border transition-colors duration-220 ease-genso ${
+                        on
+                          ? 'border-transparent bg-gradient-to-b from-crimson-hi to-crimson text-on-crimson'
+                          : 'border-line bg-fill'
+                      }`}
+                    >
+                      {on ? <Icon name="check" size={12} /> : null}
                     </span>
                     <span className="min-w-0 flex-1 truncate font-serif text-base tracking-card">
                       {p.name}
@@ -154,7 +156,7 @@ export default function ProfilePickDialog() {
           <button
             type="button"
             onClick={() => answerPick(null)}
-            className="cursor-pointer rounded-sm border border-line px-3 py-1.5 text-sm text-ink-2 transition-colors duration-120 hover:bg-surface"
+            className={`${btn.base} ${btn.md} ${btn.out}`}
           >
             取消
           </button>
@@ -162,7 +164,7 @@ export default function ProfilePickDialog() {
             type="button"
             disabled={!selected.length}
             onClick={confirm}
-            className="cursor-pointer rounded-sm border border-line bg-gold-soft px-3 py-1.5 text-sm text-gold-hi transition-colors duration-120 hover:border-gold-hi disabled:cursor-not-allowed disabled:opacity-40"
+            className={`${btn.base} ${btn.md} ${btn.pri}`}
           >
             {selected.length
               ? `${action}到 ${selected.length} 个账号`

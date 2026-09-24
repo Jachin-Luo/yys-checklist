@@ -139,7 +139,6 @@
       "mode": "weekly",
       "section": "orochi",
       "sort": 3,
-      "tip": "掉率口碑差，日常不建议刷；官方「御魂自选」时优先刷它。新御魂也可从秘卷屋/秘魂屋换到",
       "weekendRandom": true,
       "randNote": "周末 = 火之车 + 元兴寺/叠叩/钓瓶火/隐念/应声虫 随机",
       "followId": null,
@@ -471,11 +470,6 @@
       "dungeonId": "yama_1_10",
       "dow": 3,
       "tip": "魍魉/魅妖是控制核心；周三神秘商店开放"
-    },
-    {
-      "dungeonId": "yama_1_10",
-      "dow": 4,
-      "tip": "针女老牌输出，心眼适合残血收割"
     },
     {
       "dungeonId": "yama_1_10",

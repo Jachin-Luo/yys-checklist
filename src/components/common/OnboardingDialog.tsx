@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import Icon from '../icons/Icon';
+import { btn, field, option } from './controls';
 import { guildTimeTargets } from '../../domain/guildTime';
 import { useModalFocus } from '../../hooks/useModalFocus';
 import { useDeviceStore } from '../../stores/device';
@@ -8,11 +9,6 @@ import { useItemStore } from '../../stores/items';
 import { useSessionStore } from '../../stores/session';
 
 const STEPS = ['选择账号', '配置寮时间', '开始自查'] as const;
-
-const btnGhost =
-  'cursor-pointer rounded-sm border border-line px-3 py-1.5 text-sm text-ink-2 transition-colors duration-120 hover:bg-surface';
-const btnPrimary =
-  'cursor-pointer rounded-sm border border-line bg-gold-soft px-3 py-1.5 text-sm text-gold-hi transition-colors duration-120 hover:border-gold-hi';
 
 /**
  * 冷启动三步引导（设计文档 §9 S4b-2 / K6）。
@@ -47,17 +43,17 @@ export default function OnboardingDialog() {
   const finish = () => markOnboarded();
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-scrim/60 px-4 py-6">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-scrim/60 px-4 py-6 backdrop-blur-sm">
       <div
         ref={ref}
         tabIndex={-1}
         role="dialog"
         aria-modal="true"
         aria-label="冷启动引导"
-        className="flex max-h-full w-full max-w-md flex-col overflow-hidden rounded-lg border border-line bg-surface-3 shadow-panel"
+        className="flex max-h-full w-full max-w-md flex-col overflow-hidden rounded-2xl border border-line bg-surface-3 shadow-panel"
       >
         <header className="flex items-center gap-2 border-b border-line-faint px-4 py-3">
-          <span className="flex h-6 w-6 items-center justify-center rounded-md bg-gold text-sm text-white">
+          <span className="flex h-6 w-6 items-center justify-center rounded-md bg-gold text-sm text-on-gold">
             {step + 1}
           </span>
           <h2 className="flex-1 font-serif text-xl tracking-card text-ink">{STEPS[step]}</h2>
@@ -81,15 +77,13 @@ export default function OnboardingDialog() {
                       key={p.id}
                       type="button"
                       onClick={() => void switchProfile(p.id)}
-                      className={`flex w-full cursor-pointer items-center gap-2 rounded-md border px-3 py-2 text-left transition-colors duration-120 ${
-                        active ? 'border-line bg-gold-soft' : 'border-line-soft hover:bg-surface'
-                      }`}
+                      className={`${option.base} ${active ? option.on : option.off}`}
                     >
                       <span className="min-w-0 flex-1 truncate text-lg text-ink">{p.name}</span>
                       <span className="text-sm text-ink-3">
                         {[p.server, p.channel].filter(Boolean).join(' · ') || '未填区服'}
                       </span>
-                      {active ? <Icon name="check" size={14} className="text-gold" /> : null}
+                      {active ? <Icon name="check" size={14} className="text-gold-hi" /> : null}
                     </button>
                   );
                 })}
@@ -113,13 +107,17 @@ export default function OnboardingDialog() {
                   <div key={it.id} className="flex items-center gap-2 border-b border-line-faint py-2 last:border-0">
                     <span className="min-w-0 flex-1 truncate text-lg text-ink">{it.name}</span>
                     <span className="flex-none text-sm text-ink-3">参考 {it.time ?? '—'}</span>
-                    <input
-                      type="time"
-                      aria-label={`${it.name} 的寮时间`}
-                      value={guildTime[it.id] ?? ''}
-                      onChange={(e) => void setGuildTime(it.id, e.target.value)}
-                      className="w-28 flex-none rounded-sm border border-line bg-surface px-2 py-1 text-lg text-ink focus:border-gold-hi"
-                    />
+                    {/* 时间输入：外壳持边框、内层 input 无边框（参考稿 §8 的 `.wt` 口径）——
+                        定宽给外壳，不能给内层，否则会被 `field.input` 的 `flex-1` 吃掉 */}
+                    <span className={`w-28 flex-none ${field.base} ${field.sm}`}>
+                      <input
+                        type="time"
+                        aria-label={`${it.name} 的寮时间`}
+                        value={guildTime[it.id] ?? ''}
+                        onChange={(e) => void setGuildTime(it.id, e.target.value)}
+                        className={field.input}
+                      />
+                    </span>
                   </div>
                 ))}
               </div>
@@ -138,7 +136,7 @@ export default function OnboardingDialog() {
                 想自己排顺序就到「设置 → 条目管理」拖动调整。
               </p>
               <div className="mt-3">
-                <button type="button" onClick={finish} className={btnPrimary}>
+                <button type="button" onClick={finish} className={`${btn.base} ${btn.md} ${btn.pri}`}>
                   开始使用
                 </button>
               </div>
@@ -147,16 +145,28 @@ export default function OnboardingDialog() {
         </div>
 
         <footer className="flex items-center gap-2 border-t border-line-faint px-4 py-3">
-          <button type="button" onClick={() => markOnboarded()} className={`${btnGhost} mr-auto`}>
+          <button
+            type="button"
+            onClick={() => markOnboarded()}
+            className={`${btn.base} ${btn.md} ${btn.ghost} mr-auto`}
+          >
             跳过引导
           </button>
           {step > 0 ? (
-            <button type="button" onClick={() => setStep(step - 1)} className={btnGhost}>
+            <button
+              type="button"
+              onClick={() => setStep(step - 1)}
+              className={`${btn.base} ${btn.md} ${btn.out}`}
+            >
               上一步
             </button>
           ) : null}
           {step < STEPS.length - 1 ? (
-            <button type="button" onClick={() => setStep(step + 1)} className={btnPrimary}>
+            <button
+              type="button"
+              onClick={() => setStep(step + 1)}
+              className={`${btn.base} ${btn.md} ${btn.pri}`}
+            >
               下一步
             </button>
           ) : null}

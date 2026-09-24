@@ -1,3 +1,5 @@
+import { useRef } from 'react';
+import BackToTop from '../common/BackToTop';
 import NavContent from '../common/NavContent';
 import NurtureBadge from '../common/NurtureBadge';
 import ProfileSwitcher from '../common/ProfileSwitcher';
@@ -24,6 +26,8 @@ import { NAV_ITEMS, useUiStore } from '../../stores/ui';
 export default function DesktopShell() {
   const nav = useUiStore((s) => s.nav);
   const setNav = useUiStore((s) => s.setNav);
+  /* 内容区的滚动容器 —— 回顶按钮监听它的 `scroll` 并由它执行回到顶部 */
+  const scrollRef = useRef<HTMLElement>(null);
 
   return (
     <div className="flex h-full">
@@ -91,13 +95,23 @@ export default function DesktopShell() {
         <OfudaDeco />
       </aside>
 
-      <main className="flex-1 overflow-y-auto">
-        {/* 内容区上限（1024）与整体框架在这里；窄页（统计 768 / 工具 896 / 设置 672）
-            各自 `mx-auto` 让内容在大屏居中，不由这一层替它们居中 */}
-        <div className="mx-auto max-w-5xl">
-          <NavContent variant="desktop" />
-        </div>
-      </main>
+      {/* 内容区 + 回顶按钮。按钮锚在**这一层**（`relative`）而不是视口：
+          它的右下就是内容区的右下，与侧栏宽度、窗口大小都无关（`right-7/bottom-7` 取自参考稿
+          的 `.rt-fixed`）。`min-w-0` 是行向 flex 的收缩许可 —— 没有它子项不肯缩。 */}
+      <div className="relative flex min-w-0 flex-1 flex-col">
+        {/* ⚠️ 这一层必须是 **flex**（不是普通块）：`main` 靠 `flex-1` 撑满可视高度，
+            普通块级子元素的高度是 auto —— 那会让 `main` 按内容高度长出去，
+            `overflow-y-auto` 就永远不触发（"整个页面跟着外面一起滚"的经典错法）。
+            `min-h-0` 同理：列向 flex 里不给收缩许可，子项不肯缩 */}
+        <main ref={scrollRef} className="min-h-0 min-w-0 flex-1 overflow-y-auto">
+          {/* 内容区上限（1024）与整体框架在这里；窄页（统计 768 / 工具 896 / 设置 672）
+              各自 `mx-auto` 让内容在大屏居中，不由这一层替它们居中 */}
+          <div className="mx-auto max-w-5xl">
+            <NavContent variant="desktop" />
+          </div>
+        </main>
+        <BackToTop target={scrollRef} className="bottom-7 right-7" />
+      </div>
     </div>
   );
 }

@@ -48,7 +48,7 @@ export default function NurtureBadge({
         type="button"
         onClick={() => requestNav({ nav: 'tools', section: 'nurture' })}
         title={tip}
-        className={`flex flex-none cursor-pointer items-center gap-1 rounded-sm px-1 py-0.5 text-sm font-medium text-gold-hi transition-colors duration-120 hover:bg-gold-soft ${className}`}
+        className={`flex flex-none cursor-pointer items-center gap-1 rounded-full px-2 text-sm font-medium text-gold-hi transition-colors duration-150 ease-genso hover:bg-gold-soft ${className}`}
       >
         <Icon name="sunabochi" size={12} />
         {left}
@@ -61,7 +61,7 @@ export default function NurtureBadge({
       type="button"
       onClick={() => requestNav({ nav: 'tools', section: 'nurture' })}
       title={tip}
-      className={`flex w-full min-w-0 cursor-pointer items-center gap-1.5 rounded-sm border border-line-soft bg-surface-3 px-2 py-1 text-sm text-ink-2 transition-colors duration-120 hover:border-line hover:text-ink ${className}`}
+      className={`flex h-6 w-full min-w-0 cursor-pointer items-center gap-1.5 rounded-full border border-line bg-fill px-2.5 text-sm text-ink-2 transition-colors duration-150 ease-genso hover:bg-fill-2 hover:text-ink ${className}`}
     >
       <Icon name="sunabochi" size={12} className="text-gold-hi" />
       <span className="min-w-0 flex-1 truncate text-left">结界卡 {when}</span>

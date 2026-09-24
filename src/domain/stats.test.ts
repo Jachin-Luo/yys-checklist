@@ -2,7 +2,7 @@
  * 统计单测。重点锁定三条口径纪律：
  *   ① 只统计固定数值（浮动收益不进分子分母）
  *   ② 被覆盖项照样计入（coverMode 不参与计算）
- *   ③ 忽略「隐藏已完成」—— 已勾条目的收益必须算进「已获得」，否则会归零
+ *   ③ 不受任何列表筛选影响 —— 已勾条目的收益必须算进「已获得」，否则会归零
  *
  * 2026-09-15：漏失明细（`missGroups`）与其用例已随「痛感只用于默认排序」删除。
  */
@@ -47,7 +47,7 @@ describe('summarizeGain：固定收益汇总', () => {
     expect(r.jade.pct).toBe(0);
   });
 
-  it('已勾条目计入「已获得」（忽略隐藏已完成的语义内置）', () => {
+  it('已勾条目计入「已获得」（不吃任何列表筛选）', () => {
     const r = summarizeGain(ITEMS, { d_card: Date.now() }, 'day');
     expect(r.jade.got).toBe(20);
     expect(r.jade.left).toBe(0);
@@ -65,7 +65,7 @@ describe('summarizeGain：固定收益汇总', () => {
     expect(r.blackFrag.pct).toBe(100);
   });
 
-  it('被一键日常覆盖的条目照样计入 —— coverMode 与 hideDone 都不参与计算', () => {
+  it('被一键日常覆盖的条目照样计入 —— coverMode 不参与计算', () => {
     const covered = { d_daruma: Date.now() };
     const r = summarizeGain(ITEMS, covered, 'day');
     /* d_daruma 在覆盖集合里（autoDaily），但收益必须照常计入 */

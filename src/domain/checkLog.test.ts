@@ -5,6 +5,7 @@ import {
   dayKey,
   dayKeyOf,
   eachDay,
+  idsLoggedOn,
   keyToTs,
   LOG_KEEP_DAYS,
   pruneDays,
@@ -15,6 +16,25 @@ import {
 
 /** 本地时区固定时刻，避免 UTC 偏移把日期翻到前一天 */
 const at = (y: number, m: number, d: number, h = 12) => new Date(y, m - 1, d, h).getTime();
+
+describe('idsLoggedOn（设置页「清空今天的记录」的依据）', () => {
+  it('取当天勾选的 id；那天没记录则返回空数组（不返回 undefined）', () => {
+    const days = { '2026-09-24': ['a', 'b'], '2026-09-23': ['c'] };
+    expect(idsLoggedOn(days, '2026-09-24')).toEqual(['a', 'b']);
+    expect(idsLoggedOn(days, '2026-09-01')).toEqual([]);
+  });
+
+  it('清空当天只掉当天那一格：上个周期的同一条记录保留', () => {
+    /* 这是设置页那颗按钮的真实配方：idsLoggedOn → `setMany(ids, null)`，
+       而 setMany 的日志侧走的就是 `removeEntrySince(该条目周期起点)`。
+       所以"清空今天"以后，昨天那次（上个周期）仍然留在日历上 —— 与
+       `domain/checkLog` 文件头第二条口径一致："本周期未完成"不等于"历史上从没完成过" */
+    const days = { '2026-09-24': ['a'], '2026-09-23': ['a'] };
+    const next = removeEntriesSince(days, idsLoggedOn(days, '2026-09-24'), keyToTs('2026-09-24')!);
+    expect(next['2026-09-24']).toBeUndefined();
+    expect(next['2026-09-23']).toEqual(['a']);
+  });
+});
 
 describe('dayKey / keyToTs / shiftDayKey', () => {
   it('时间戳 → 本地日期键', () => {

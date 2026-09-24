@@ -7,6 +7,7 @@ import { useItemStore } from '../stores/items';
 import { useThemeStore, type Theme } from '../stores/theme';
 import AutoDailySection from './settings/AutoDailySection';
 import CardDisplaySection from './settings/CardDisplaySection';
+import ClearDataSection from './settings/ClearDataSection';
 import GuildTimeSection from './settings/GuildTimeSection';
 import ItemManagerSection from './settings/ItemManagerSection';
 import ProfileSection from './settings/ProfileSection';
@@ -26,7 +27,7 @@ import ProfileSyncSection from './settings/ProfileSyncSection';
  * | 观感 | 界面主题 · 卡片显示字段 | **平铺设置行** |
  * | 委托 | 一键日常覆盖 · 条目管理 | 折叠（长列表） |
  * | 账号 | 游戏账号 · 同步到其他账号 · 寮时间 | 折叠（列表 / 表单） |
- * | 数据 | 数据版本 · 数据备份 | 平铺 + 折叠 |
+ * | 数据 | 数据版本 · 数据备份 · **清空记录** | 平铺 + 折叠（末位是危险区） |
  *
  * 为什么是**混合形态**而不是参考稿那种"全平铺"：参考稿的设置项全是单行控件
  * （分段 / 滑块 / 色板 / 开关），而本页有 5 个**长列表**——条目库 90+ 条、
@@ -62,7 +63,7 @@ export default function MePage() {
     /* `mx-auto`：本页上限 672，桌面内容容器 1024 —— 不居中时设置分区整体贴左（与统计 / 工具两页同一口径） */
     <div className="mx-auto max-w-2xl px-3.5 pb-10 pt-1">
       {/* ── 观感 ── */}
-      <SectionTitle icon="daruma" flush>
+      <SectionTitle icon="sun" flush>
         观感
       </SectionTitle>
       <div className="space-y-1.5">
@@ -103,6 +104,9 @@ export default function MePage() {
       <div className="space-y-1.5">
         <DataVersionSection />
         <BackupSection />
+        {/* 危险区排在组内最后（2026-09-24 用户要求新增）：本组其它分区都是只读或可逆操作，
+            而它是不可撤销的 —— 放在末尾既符合"影响面从小到大"，也让它在滚动路径上最后一次出现 */}
+        <ClearDataSection />
       </div>
 
       <p className="mt-5 text-sm leading-relaxed text-ink-3">{meta?.disclaimer}</p>

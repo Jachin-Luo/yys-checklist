@@ -195,7 +195,7 @@ export default function ProfileSection() {
         <span className="min-w-0 flex-1">
           <span className="flex items-center gap-1.5">
             <span className={`truncate text-lg ${active ? 'font-medium text-ink' : 'text-ink'}`}>{p.name}</span>
-            {active ? <Icon name="check" size={13} className="flex-none text-gold" /> : null}
+            {active ? <Icon name="check" size={13} className="flex-none text-gold-hi" /> : null}
             {p.isDefault ? (
               <span className="flex-none rounded-sm bg-surface-3 px-1.5 py-0.5 text-xs text-ink-3">默认</span>
             ) : null}

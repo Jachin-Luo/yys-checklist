@@ -210,7 +210,6 @@ export interface ViewDefaults {
    * 保留是为了不动契约形状与既有校验（与 `sortBy` 同一处理方式），**勿据此新增筛选 UI**。
    */
   minWeight: number;
-  hideDone: boolean;
   pinned: string[];
 }
 
@@ -311,7 +310,6 @@ export interface ViewPrefs {
   sortBy: SortBy;
   showKinds: GainKind[];
   minWeight: number;
-  hideDone: boolean;
   pinned: string[];
   /**
    * 清单卡片里显示哪些字段（2026-09-16 用户需求）。

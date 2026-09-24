@@ -1,16 +1,22 @@
 import type { ReactNode } from 'react';
 import Icon, { type IconName } from '../icons/Icon';
+import { cardBox } from './controls';
 import { CHECKLIST_GRID } from '../../styles/layout';
 
 /**
  * 空状态 —— 器物类**只做单色描边、不做填充色块**（参考稿禁止项）。
  * 上一版是一个灰圆底 + 收件箱图标；现在换成一座空鸟居：
  * 语义上正好是"这里今天没有要办的委托"，且不引入任何色块。
+ *
+ * 2026-09-24 圆润版：对齐参考稿 §12 `.empty` —— 虚线圆角框 + `bg-fill` 图标座。
+ * 虚线框是这里的重点：它同时表达"这里本该有内容"，比一段孤零零的灰字更能解释空的原因。
  */
 export function EmptyState({ title, hint }: { title: string; hint?: string }) {
   return (
-    <div className="flex flex-col items-center gap-3 px-6 py-12 text-center">
-      <Icon name="torii" size={30} className="text-gold opacity-40" />
+    <div className="flex flex-col items-center gap-2 rounded-xl border border-dashed border-line-soft px-5 py-8 text-center">
+      <span className="mb-0.5 flex h-12 w-12 items-center justify-center rounded-lg bg-fill text-ink-4">
+        <Icon name="torii" size={24} />
+      </span>
       <p className="font-serif text-lg tracking-card text-ink-2">{title}</p>
       {hint ? <p className="max-w-sm text-sm leading-relaxed text-ink-3">{hint}</p> : null}
     </div>
@@ -27,14 +33,11 @@ export function Skeleton({ rows = 4 }: { rows?: number }) {
   return (
     <div className={CHECKLIST_GRID} aria-hidden="true">
       {Array.from({ length: rows }, (_, i) => (
-        <div
-          key={i}
-          className="flex animate-pulse items-start gap-2.5 rounded-md bg-surface px-3.5 py-3 shadow-card"
-        >
-          <span className="mt-0.5 h-3.5 w-3.5 flex-none rotate-45 border border-line-soft bg-surface-3" />
+        <div key={i} className={`flex animate-pulse items-start gap-2.5 px-3.5 py-3 ${cardBox.solid}`}>
+          <span className="mt-0.5 h-3.5 w-3.5 flex-none rotate-45 border border-line-soft bg-fill" />
           <div className="min-w-0 flex-1 space-y-2">
-            <span className="block h-3 w-1/3 rounded-sm bg-surface-3" />
-            <span className="block h-2.5 w-2/3 rounded-sm bg-surface-3" />
+            <span className="block h-3 w-1/3 rounded-sm bg-fill-2" />
+            <span className="block h-2.5 w-2/3 rounded-sm bg-fill-2" />
           </div>
         </div>
       ))}
@@ -79,18 +82,18 @@ export function SectionTitle({
   return (
     <div className={`${flush ? '' : 'px-3.5'} pb-1.5 pt-4`}>
       <div className="flex items-center gap-2.5">
-        {icon ? <Icon name={icon} size={16} className="text-gold opacity-85" /> : null}
-        <span className="font-serif text-sm tracking-group text-gold">{children}</span>
+        {icon ? <Icon name={icon} size={16} className="text-gold-hi" /> : null}
+        <span className="font-serif text-sm tracking-group text-gold-hi">{children}</span>
         <i className="h-0 min-w-4 flex-1 border-t border-dashed border-line-soft" />
         {typeof count === 'number' ? (
-          <span className="rounded-full border border-line px-2 py-0.5 text-center font-mono text-2xs tracking-wide text-gold">
+          <span className="rounded-full border border-line px-2 py-0.5 text-center font-mono text-2xs tracking-wide text-gold-hi">
             {String(count).padStart(2, '0')}
           </span>
         ) : null}
         {aside}
       </div>
       {typeof progress === 'number' ? (
-        <div className="mt-2 h-0.5 w-full overflow-hidden bg-surface-3">
+        <div className="mt-2 h-0.5 w-full overflow-hidden bg-track">
           <i
             className="block h-full bg-crimson transition-all duration-350 ease-genso"
             style={{ width: `${Math.round(Math.min(1, Math.max(0, progress)) * 100)}%` }}

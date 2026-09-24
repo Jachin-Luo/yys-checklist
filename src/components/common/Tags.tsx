@@ -9,6 +9,9 @@ import Icon from '../icons/Icon';
  * 参考稿禁止用增加色块面积来提密度，密度要从"面"与"纹"里补。
  * 三态用四态色：进行中 = `state-active`（靛蓝）、未开始 = 金、
  * 已结束 = 弱化灰（它已经没有行动价值，不该抢视线）。
+ *
+ * 2026-09-24 圆润版：形态对齐参考稿 §10 `.tag` —— `rounded-xs`(8px) 小方角、
+ * 高 24、11px 字；"已结束"的底从 `surface-3` 换成填充层 `fill-2`（它是内嵌块，不是次级面板）。
  */
 export function TimeTag({ item, now }: { item: Item; now?: Date }) {
   const win = timeWindow(item, now);
@@ -19,11 +22,11 @@ export function TimeTag({ item, now }: { item: Item; now?: Date }) {
     win.state === 'open'
       ? 'border-state-active/40 bg-state-active/10 text-state-active'
       : win.state === 'over'
-        ? 'border-line-soft bg-surface-3 text-ink-3'
+        ? 'border-line bg-fill-2 text-ink-3'
         : 'border-line bg-gold-soft text-gold-hi';
   return (
     <span
-      className={`inline-flex flex-none items-center gap-1 rounded-sm border px-1.5 py-0.5 text-sm ${style}`}
+      className={`inline-flex h-6 flex-none items-center gap-1 rounded-xs border px-2 text-xs ${style}`}
     >
       <Icon name="tokei" size={11} />
       {win.text}
@@ -41,12 +44,12 @@ export function DeadlineTag({ item, now }: { item: Item; now?: Date }) {
   const badge = deadlineBadge(item, now);
   const style =
     badge.level === 'hot'
-      ? 'border-crimson bg-crimson/12 text-crimson'
+      ? 'border-crimson-soft bg-crimson/10 text-crimson'
       : badge.level === 'warn'
         ? 'border-line bg-gold-soft text-gold-hi'
-        : 'border-line-soft bg-surface-3 text-ink-2';
+        : 'border-line bg-fill-2 text-ink-2';
   return (
-    <span className={`inline-flex flex-none items-center gap-1 rounded-sm border px-1.5 py-0.5 text-sm ${style}`}>
+    <span className={`inline-flex h-6 flex-none items-center gap-1 rounded-xs border px-2 text-xs ${style}`}>
       {badge.level === 'hot' && badge.days !== null && badge.days <= 0 ? <Icon name="alert" size={11} /> : null}
       {badge.text}
     </span>

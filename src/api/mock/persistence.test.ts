@@ -58,7 +58,7 @@ describe('persist before committing cached data', () => {
     const before = await api.getView(scope);
     rejectWrites();
 
-    await expect(api.saveView(scope, { ...before, sortBy: 'name', hideDone: true })).rejects.toThrow(Error);
+    await expect(api.saveView(scope, { ...before, sortBy: 'name', minWeight: 3 })).rejects.toThrow(Error);
 
     expect(await api.getView(scope)).toEqual(before);
     expect(storage.getItem(KEY.view(scope.profileId))).toBeNull();

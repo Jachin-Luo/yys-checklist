@@ -48,7 +48,7 @@ function bootstrap() {
   useViewStore.setState({
     view: {
       profileId: 'p_main', sortBy: 'weight', showKinds: [], minWeight: 0,
-      hideDone: false, pinned: [], coverMode: 'dim', updatedAt: '',
+      pinned: [], coverMode: 'dim', updatedAt: '',
     },
     defaults: null,
     error: null,

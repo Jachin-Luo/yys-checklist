@@ -44,7 +44,7 @@ export default function GuildTimeSection() {
           onClick={() => void clearGuildTime()}
           className="flex cursor-pointer items-center gap-1 rounded-sm border border-line px-2 py-1 text-sm text-ink-2 transition-colors duration-120 hover:border-line disabled:cursor-not-allowed disabled:opacity-50"
         >
-          <Icon name="restore" size={12} />
+          <Icon name="trash" size={12} />
           清空配置
         </button>
       }

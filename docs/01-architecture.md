@@ -61,7 +61,7 @@ yys-checklist/
 | `src/stores/` | Zustand 状态容器（按领域分片） | `session.ts`、`items.ts`、`check.ts`、`view.ts`、`device.ts`、`ui.ts`、`tools.ts`、`nurture.ts` + 5 个 `*.test.ts` |
 | `src/hooks/` | 编排与副作用封装（竞态、首屏、断点、焦点、周期刷新） | `useApi.ts`、`useBootstrap.ts`、`useChecklist.ts`、`useAutoDaily.ts`、`useBreakpoint.ts`、`useDevicePrefs.ts`、`useModalFocus.ts`、`usePeriodRefresh.ts`、`useScope.ts` + `usePeriodRefresh.test.ts` |
 | `src/pages/` | 页面容器（只管排列） | `TodayPage.tsx`、`WeekPage.tsx`、`MonthPage.tsx`、`LimitedPage.tsx`、`StatsPage.tsx`、`ToolsPage.tsx`、`MePage.tsx`；`pages/settings/`：`ProfileSection.tsx`、`AutoDailySection.tsx`、`ItemManagerSection.tsx`、`GuildTimeSection.tsx`；`pages/tools/`：`YuhunSection.tsx`、`BountySection.tsx`、`NurtureSection.tsx` |
-| `src/components/` | 展示原子件与布局骨架 | `common/`（18）：`Alert.tsx`、`CheckBox.tsx`、`ChecklistItem.tsx`、`CollapsibleSection.tsx`、`ConfirmDialog.tsx`、`EmptyState.tsx`、`GainBadges.tsx`、`GainBar.tsx`、`HubCard.tsx`、`ItemField.tsx`、`NavContent.tsx`、`NurtureBadge.tsx`、`OnboardingDialog.tsx`、`ProfileSwitcher.tsx`、`ProgressBar.tsx`、`SaveErrorNotice.tsx`、`Tags.tsx`、`ViewBar.tsx`；`desktop/DesktopShell.tsx`；`mobile/MobileShell.tsx`；`settings/BackupSection.tsx`、`settings/DataVersionSection.tsx` |
+| `src/components/` | 展示原子件与布局骨架 | `common/`（19）：`Alert.tsx`、`BackToTop.tsx`、`CheckBox.tsx`、`ChecklistItem.tsx`、`CollapsibleSection.tsx`、`ConfirmDialog.tsx`、`EmptyState.tsx`、`GainBadges.tsx`、`GainBar.tsx`、`HubCard.tsx`、`ItemField.tsx`、`NavContent.tsx`、`NurtureBadge.tsx`、`OnboardingDialog.tsx`、`ProfileSwitcher.tsx`、`ProgressBar.tsx`、`SaveErrorNotice.tsx`、`Tags.tsx`、`ViewBar.tsx`；`desktop/DesktopShell.tsx`；`mobile/MobileShell.tsx`；`settings/BackupSection.tsx`、`settings/DataVersionSection.tsx` |
 | `src/services/` | 跨域用例编排与基础设施 | `localStore.ts`、`backupService.ts`、`clipboard.ts` + `localStore.test.ts` |
 | `src/styles/` | 设计令牌与共享容器类 | `index.css`、`base.css`、`layout.ts`、`tokens.ts` |
 | `src/test/` | 单测垫片 | `memoryStorage.ts` |
@@ -125,7 +125,7 @@ sequenceDiagram
 
 - `src/stores/ui.ts`：`NavKey`（type）、`NAV_ITEMS`（导航项数组）、`setNav`、state 字段 `nav` / `bootstrapLoading` / `bootstrapError` / `confirmState` / `bootstrapTick`。
 - `src/components/common/NavContent.tsx`：`switch (nav)` 分派 7 个一级页面；首屏 `bootstrapLoading` 时渲染 `Skeleton`。
-- 两套骨架各自渲染导航：`DesktopShell.tsx`（左侧固定 `w-56` 侧栏 + 底部 `ProfileSwitcher`）、`MobileShell.tsx`（顶部应用栏 + 底部固定 Tab，带 `safe-area` 与 `dvh` 处理）。两端页头是同一套品牌锁定（标题「囤囤鼠」/ 副标题「阴阳师任务清单」）；**进度不进顶栏**（2026-09-23 起）—— 每个页面各自展示自己的进度，顶栏只放身份与时间信息。
+- 两套骨架各自渲染导航：`DesktopShell.tsx`（左侧固定 `w-56` 侧栏 + 底部 `ProfileSwitcher`）、`MobileShell.tsx`（顶部应用栏 + 底部固定 Tab，带 `safe-area` 与 `dvh` 处理）。两端页头是同一套品牌锁定（标题「囤囤鼠」/ 副标题「阴阳师任务清单」）；**进度不进顶栏**（2026-09-23 起）—— 每个页面各自展示自己的进度，顶栏只放身份与时间信息。两端内容区共用**回顶按钮**（`common/BackToTop.tsx`：滚动量 > 4px 浮出、回到顶部即隐藏，锚在内容区右下 —— 移动端离底栏 8px、PC 28px）；它挂在**壳层**而不是各页面里，所以七个页面自动都有。挂载时内容区各包一层 `relative`，`main` 仍是唯一滚动容器。
 - 断点判据唯一来源：`src/hooks/useBreakpoint.ts`，`matchMedia('(min-width: 768px)')`；模块级首帧缓存避免闪烁。
 
 > 页面内部不应自行读屏宽 —— 全项目只有 `useBreakpoint` 读窗口宽度。新增布局差异请走 `components/mobile` / `components/desktop` 与 `styles/layout.ts`。
@@ -137,7 +137,7 @@ sequenceDiagram
 | `stores/session.ts` | `useSessionStore`、`aliveProfiles`、`currentProfile` | `session`、`profiles`、`error`、`saving` | `applySession`、`loadProfiles`、`switchProfile`、`createProfile`、`updateProfile`、`archiveProfile`、`restoreProfile`、`deleteProfile`、`setError` |
 | `stores/items.ts` | `useItemStore`、`resetItemsMemory`、`dictIndexOf` | `meta`、`items`、`presetItems`、`overrides`、`error` | `applyBootstrap`、`reloadItems`、`loadPreset`、`addItem`、`hideItem`、`restoreItem`、`removeItem`、`saveOrder`、`resetLibrary` |
 | `stores/check.ts` | `useCheckStore`、`resetCheckMemory`、`isChecked` | `checked`、`loading`、`error` | `applyChecked`、`toggle`、`setMany`、`toggleWithCascade`、`clearAll` |
-| `stores/view.ts` | `useViewStore`、`resetViewMemory`、`normalizeView`、`CoverMode` | `view`、`defaults`、`error` | `applyView`、`setSortBy`、`setShowKinds`、`setMinWeight`、`toggleHideDone`、`togglePin`、`setCoverMode`、`setAutoSet`、`resetAutoSet` |
+| `stores/view.ts` | `useViewStore`、`resetViewMemory`、`normalizeView`、`CoverMode` | `view`、`defaults`、`error` | `applyView`、`setSortBy`、`setShowKinds`、`setMinWeight`、`togglePin`、`setCoverMode`、`setAutoSet`、`resetAutoSet` |
 | `stores/device.ts` | `useDeviceStore` | `guildTime`、`onboarded`、`hydrated`、`error` | `hydrate`、`setGuildTime`、`clearGuildTime`、`markOnboarded`、`resetOnboarding` |
 | `stores/ui.ts` | `useUiStore`、`NAV_ITEMS`、`NavKey`、`ConfirmOptions` | `nav`、`navRequest`、`bootstrapLoading`、`bootstrapError`、`confirmState`、`bootstrapTick` | `setNav`、`requestNav`、`clearNavRequest`、`setBootstrapLoading`、`setBootstrapError`、`refreshBootstrap`、`askConfirm`、`answerConfirm` |
 | `stores/tools.ts` | `useToolsStore`、`ToolTab` | `yuhun`、`souls`、`bounty`、`loading`、`error` | `ensure`（模块级 `inflight` 去重） |
@@ -192,7 +192,7 @@ api.getBootstrap
 | `WeekPage.tsx` | `useChecklist('week')`（周常；月常已于 2026-09-15 拆到 `MonthPage`） |
 | `MonthPage.tsx` | `useChecklist('month')`（月常；每月 1 日 0 点刷新，页面顶部标本月区间） |
 | `LimitedPage.tsx` | `useChecklist`（限时分区，固定按剩余天数升序，无排序控件） |
-| `StatsPage.tsx` | `domain/calendar.buildMonthGrid`（月历）+ `stores/check` 的 `log` + `domain/stats.summarizeRangeGain`（区间收益）—— **不经过 `useChecklist`**，因此不受「隐藏已完成 / 覆盖隐藏」影响 |
+| `StatsPage.tsx` | `domain/calendar.buildMonthGrid`（月历）+ `stores/check` 的 `log` + `domain/stats.summarizeRangeGain`（区间收益）—— **不经过 `useChecklist`**，因此不受「覆盖隐藏 / 奖励类型筛选」影响 |
 | `ToolsPage.tsx` | `stores/tools.ensure`（御魂 / 悬赏 / 寄养三段懒加载） |
 | `MePage.tsx` | 设置页：**4 组**（观感 / 委托 / 账号 / 数据）共 9 个分区。来源是 `pages/settings/*` 六个（账号 / 同步到其他账号 / 一键日常 / 条目管理 / 卡片显示字段 / 寮时间）+ `components/settings/*` 两个（数据版本 / 数据备份） |
 

@@ -34,7 +34,7 @@ TypeScript 为严格模式（`tsconfig.app.json`），`npm run build` 会先跑 
 | --- | --- | --- |
 | 1 | 只统计固定数值（浮动收益不进分子分母） | `domain/stats.ts` `summarizeGain`（按 `gain` 过滤）、`PERIOD_META` |
 | 2 | 覆盖 / 隐藏只影响渲染，绝不影响统计 | `domain/stats.ts`（不读 `coverMode`）、`hooks/useChecklist.ts`（`hiddenByCover` 只作用于列表）、`domain/autoDaily.ts` |
-| 3 | 统计忽略「隐藏已完成」 | `pages/StatsPage.tsx` 直接吃原始 `checked`；`domain/sort.ts` `isVisible` 的 `keepDone` 豁免口 |
+| 3 | 统计不受列表筛选影响 | `pages/StatsPage.tsx` 直接吃原始 `checked`，不经过 `domain/sort.isVisible`（该函数按勾选状态过滤的口子与 `keepDone` 已于 2026-09-24 删除） |
 | 4 | 时间字段只提示，不限制勾选 | `domain/countdown.ts`；到期条目在数据层被 `domain/reset.activeItems` 过滤，不在渲染层判 |
 | 5 | 单一数据出口（页面不直连种子） | `src/api/index.ts` 唯一入口；`src/api/contract.ts` 唯一定义 |
 
@@ -136,7 +136,7 @@ TypeScript 为严格模式（`tsconfig.app.json`），`npm run build` 会先跑 
 | 用正则从奖励文本反推奖励类型 | 子串重叠会误判：「免费黑蛋礼包」→ 黑碎 + 黑蛋 + 达摩 + 碎片；「地域鬼王 皮肤券」→ 皮肤 + 券 | 逐条人工核定；奖励文本字段已整体删除，不要复活 |
 | 只改 `enums.ts` 或只改 `dicts` | `db:check` 会因双向对齐失败而报错 | 两侧同步改，再跑 `npm run db:check` |
 | 在页面里判「今天是否新周期」 | 会让口径分裂成两份 | 周期判定只在 `domain/reset.ts`，前台刷新只走 `usePeriodRefresh` |
-| 让「隐藏已完成 / 一键日常隐藏」参与统计 | 会造成「隐藏 = 少算收益」 | 统计只吃原始 `checked`（`pages/StatsPage.tsx`） |
+| 让「一键日常隐藏」参与统计 | 会造成「隐藏 = 少算收益」 | 统计只吃原始 `checked`（`pages/StatsPage.tsx`） |
 | 删掉 Mock 的延迟或 AbortSignal 处理 | 会写出没有 loading / 竞态的 UI，接后端时集中爆雷 | 保留 `api/mock/latency.ts` 的延迟语义 |
 | 直接 `window.localStorage.setItem` | 破坏「唯一出口」，且绕过分片键封装 | 走 `services/localStore.ts` 或 `api/mock/persist.ts` 的 `KEY` |
 | 把寮时间写进种子数据 | 各寮时间不同，写死即错 | 用户配置走 `stores/guildTime`（**账号级**，2026-09-16 由设备级升格），展示层叠加 |

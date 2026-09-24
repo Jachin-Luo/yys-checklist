@@ -1,3 +1,5 @@
+import { useRef } from 'react';
+import BackToTop from '../common/BackToTop';
 import NavContent from '../common/NavContent';
 import NurtureBadge from '../common/NurtureBadge';
 import ProfileSwitcher from '../common/ProfileSwitcher';
@@ -46,6 +48,8 @@ import { NAV_ITEMS, useUiStore } from '../../stores/ui';
 export default function MobileShell() {
   const nav = useUiStore((s) => s.nav);
   const setNav = useUiStore((s) => s.setNav);
+  /* 内容区的滚动容器 —— 回顶按钮监听它的 `scroll` 并由它执行回到顶部 */
+  const scrollRef = useRef<HTMLElement>(null);
 
   return (
     <div className="flex h-full flex-col">
@@ -74,9 +78,18 @@ export default function MobileShell() {
         </div>
       </header>
 
-      <main className="flex-1 overflow-y-auto">
-        <NavContent variant="mobile" />
-      </main>
+      {/* 内容区 + 回顶按钮。**回顶按钮锚在这一层**（`relative`），不是 `fixed` 到视口：
+          它的"底"就是底栏的顶（`bottom-2` = 比底栏高 8px，参考稿集成场景里量过的那个值），
+          于是底栏高度、iOS 安全区怎么变都不用改魔数。 */}
+      <div className="relative flex min-h-0 flex-1 flex-col">
+        {/* ⚠️ 用 `flex-1 min-h-0` 而不是 `h-full`：百分比高度要靠父级"已解析的高度"才成立，
+            而这一层的高度是 flex 算法给的 —— 走 flex 就完全不依赖那条链路。
+            `min-h-0` 是列向 flex 的收缩许可，没有它子项不肯收缩、`overflow-y-auto` 会失效 */}
+        <main ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto">
+          <NavContent variant="mobile" />
+        </main>
+        <BackToTop target={scrollRef} className="bottom-2 right-4" />
+      </div>
 
       {/* 底部 Tab：位置不变。金色底轨把七片签串在同一根轴上 */}
       <nav className="safe-bottom grid flex-none grid-cols-7 border-t border-line-soft bg-surface-3 pt-0">
@@ -88,20 +101,18 @@ export default function MobileShell() {
               type="button"
               onClick={() => setNav(key)}
               aria-current={active ? 'page' : undefined}
-              className={`relative flex cursor-pointer flex-col items-center gap-1 pb-2 pt-2.5 text-2xs tracking-wide transition-colors duration-120 ${
+              className={`relative flex cursor-pointer flex-col items-center gap-1 pb-2 pt-2.5 text-2xs tracking-wide transition-colors duration-150 ease-genso ${
                 active ? 'bg-surface text-gold-hi' : 'text-ink-3 hover:text-ink-2'
               }`}
             >
-              {/* 选中签的额束朱线 */}
+              {/* 选中签的额束朱线（保留：圆润版没有动"导航位置与选中指示"这条用户决策） */}
               {active ? (
-                <i className="absolute left-1/2 top-0 h-0.5 w-5 -translate-x-1/2 bg-crimson" />
+                <i className="absolute left-1/2 top-0 h-0.5 w-5 -translate-x-1/2 rounded-full bg-crimson" />
               ) : null}
               <Icon name={NAV_ICON[key]} size={16} className={active ? '' : 'opacity-70'} />
               {label}
-              {/* 签底节点：只留右下两边的描边小菱形 */}
-              {active ? (
-                <i className="absolute bottom-0 left-1/2 h-1.5 w-1.5 -translate-x-1/2 translate-y-1 rotate-45 border-b border-r border-line bg-surface" />
-              ) : null}
+              {/* 2026-09-24 圆润版**移除了签底那颗描边小菱形**：菱形是方正语言的角饰，
+                  在圆润版里没有对应物，留着只会在圆角底栏边上多出一枚孤立的尖角 */}
             </button>
           );
         })}

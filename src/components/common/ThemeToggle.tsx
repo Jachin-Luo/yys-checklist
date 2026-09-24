@@ -37,7 +37,7 @@ export default function ThemeToggle({
         onClick={toggle}
         title={`切换到${next}`}
         aria-label={`切换到${next}`}
-        className={`flex flex-none cursor-pointer items-center justify-center rounded-sm border border-line p-1.5 text-gold transition-colors duration-120 hover:border-gold-hi hover:bg-gold-soft hover:text-gold-hi ${className}`}
+        className={`flex flex-none cursor-pointer items-center justify-center rounded-full border border-line bg-fill p-1.5 text-gold-hi transition-colors duration-150 ease-genso hover:bg-fill-2 hover:text-ink ${className}`}
       >
         {/* 要切到暗版 → 显示月亮；要切到明版 → 显示太阳 */}
         <Icon name={theme === 'dark' ? 'sun' : 'moon'} size={14} />
@@ -51,7 +51,7 @@ export default function ThemeToggle({
       onClick={toggle}
       title={`切换到${next}`}
       aria-label={`切换到${next}`}
-      className={`group flex flex-none cursor-pointer items-center gap-1.5 rounded-sm border border-line px-2 py-1 text-2xs tracking-wide text-gold transition-colors duration-120 hover:border-gold-hi hover:bg-gold-soft hover:text-gold-hi ${className}`}
+      className={`group flex flex-none cursor-pointer items-center gap-1.5 rounded-full border border-line bg-fill px-3 py-1 text-2xs tracking-wide text-gold-hi transition-colors duration-150 ease-genso hover:bg-fill-2 hover:text-ink ${className}`}
     >
       <Icon name="rhomb" size={8} className="transition-transform duration-300 group-hover:rotate-90" />
       {next}

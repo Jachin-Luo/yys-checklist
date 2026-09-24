@@ -97,7 +97,9 @@ export default function ToolsPage({ variant }: { variant: 'mobile' | 'desktop' }
   return (
     /* `mx-auto`：桌面内容容器上限 1024，本页上限 896 —— 不居中会整体贴左（与统计 / 设置两页同一口径） */
     <div className="mx-auto max-w-4xl">
-      <div className="mx-3 mt-3 flex gap-1 rounded-md bg-surface-3 p-1">
+      {/* 2026-09-24 圆润版：分段条从"方角外框 + 选中段卡底描边"改成参考稿 §10 的**胶囊分段** ——
+          外轨全圆 + 填充底，选中段朱红渐变实心（它是本页最高频的切换控件，值得一个实心锚点） */}
+      <div className="mx-3 mt-3 inline-flex gap-0.5 rounded-full border border-line bg-fill-2 p-1">
         {TABS.map((t) => (
           <button
             key={t.key}
@@ -106,8 +108,10 @@ export default function ToolsPage({ variant }: { variant: 'mobile' | 'desktop' }
             onFocus={() => void ensure(t.key)}
             onClick={() => setTab(t.key)}
             title={t.hint}
-            className={`flex-1 cursor-pointer rounded-sm px-2 py-1.5 text-sm transition-colors duration-120 ${
-              tab === t.key ? 'bg-surface text-ink shadow-sm' : 'text-ink-2 hover:text-ink'
+            className={`h-7 cursor-pointer rounded-full px-4 text-sm transition-colors duration-150 ease-genso ${
+              tab === t.key
+                ? 'bg-gradient-to-b from-crimson-hi to-crimson text-on-crimson shadow-cta'
+                : 'text-ink-2 hover:text-ink'
             }`}
           >
             {t.label}

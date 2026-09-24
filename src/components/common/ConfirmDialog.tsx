@@ -1,4 +1,5 @@
 import Icon from '../icons/Icon';
+import { btn } from './controls';
 import { useModalFocus } from '../../hooks/useModalFocus';
 import { useUiStore } from '../../stores/ui';
 
@@ -16,6 +17,11 @@ import { useUiStore } from '../../stores/ui';
  *
  * 2026-09-23 换肤：遮罩改 `scrim`（暗版更沉）、弹窗改 `surface-3` + 朱印面板投影；
  * 危险动作从"实心朱红块"改成"细描边 + 极淡朱红底"——参考稿禁止用实心色块提密度。
+ *
+ * 2026-09-24 圆润版：遮罩补毛玻璃（参考稿 §11 `.mk` 的 `backdrop-filter: blur(7px)`）、
+ * 弹窗圆角放大到 30px；确认键从"金描边"升级为**朱红渐变实心**（参考稿 `.btn.pri`），
+ * 危险场景走 `.btn.dan`（同一支渐变，浅一档）。"取消"用 `.btn.out` 而不是参考稿的幽灵按钮 ——
+ * 本产品的取消是"退出这次操作"，需要一颗看得见的按钮，不能退到只剩文字。
  */
 export default function ConfirmDialog() {
   const confirmState = useUiStore((s) => s.confirmState);
@@ -29,7 +35,7 @@ export default function ConfirmDialog() {
 
   return (
     <div
-      className="fixed inset-0 z-[60] flex items-center justify-center bg-scrim/60 px-4"
+      className="fixed inset-0 z-[60] flex items-center justify-center bg-scrim/60 px-4 backdrop-blur-sm"
       onClick={() => answer(false)}
     >
       <div
@@ -39,7 +45,7 @@ export default function ConfirmDialog() {
         aria-modal="true"
         aria-label={confirmState.title}
         onClick={(e) => e.stopPropagation()}
-        className="w-full max-w-sm overflow-hidden rounded-lg border border-line bg-surface-3 shadow-panel"
+        className="w-full max-w-sm overflow-hidden rounded-2xl border border-line bg-surface-3 shadow-panel"
       >
         <div className="flex items-start gap-2 px-4 py-3.5">
           {danger ? (
@@ -61,18 +67,14 @@ export default function ConfirmDialog() {
           <button
             type="button"
             onClick={() => answer(false)}
-            className="cursor-pointer rounded-sm border border-line px-3 py-1.5 text-sm text-ink-2 transition-colors duration-120 hover:border-line hover:bg-surface"
+            className={`${btn.base} ${btn.md} ${btn.out}`}
           >
             取消
           </button>
           <button
             type="button"
             onClick={() => answer(true)}
-            className={`cursor-pointer rounded-sm border px-3 py-1.5 text-sm transition-colors duration-120 ${
-              danger
-                ? 'border-crimson-soft text-crimson hover:bg-crimson/10'
-                : 'border-line bg-gold-soft text-gold-hi hover:border-gold-hi'
-            }`}
+            className={`${btn.base} ${btn.md} ${danger ? btn.dan : btn.pri}`}
           >
             {confirmState.confirmLabel ?? '确认'}
           </button>

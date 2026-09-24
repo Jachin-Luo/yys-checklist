@@ -136,7 +136,7 @@ npm run dev          # http://localhost:5173/
 | 1 | UI 层零测试（`src/**/*.test.tsx` 为 0，21 个测试文件全在 domain / stores / hooks / services / api） | 组件与双布局无回归网 | 改组件或布局后只能手点验证，问题到线上才暴露 |
 | 2 | localStorage 分片无版本号与迁移机制（备份 bundle 有 `schemaVersion`，`yys:state\|view\|ovr\|checklog:{profileId}` 没有） | 老用户的本地数据 | 改数据结构并升级版本时，旧分片会被静默读入、不报警 |
 | 3 | `hooks/useBootstrap` 的「按序清空 items → check → view 再写回」是手工维护的隐式契约 | 切号正确性 | 新增 store 时漏改，出现「切号残留上一账号数据」 |
-| 4 | 保留但不可达的开关未在代码内标注：`SHOW_WEEKLY_ALERT`（今日页警示条）、`ViewPrefs.sortBy`（UI 不再写入）、`hideDone` / `isVisible` 保留口 | 可读性 | 后来者误以为它在生效，或误删相关逻辑 |
+| 4 | 保留但不可达的开关未在代码内标注：`SHOW_WEEKLY_ALERT`（今日页警示条）、`ViewPrefs.sortBy`（UI 不再写入） | 可读性 | 后来者误以为它在生效，或误删相关逻辑。**`hideDone` 已按此原则于 2026-09-24 整体删除** —— 它没有 UI 却仍在 `domain/sort.isVisible` 里生效，比"保留但不可达"更糟 |
 | 5 | `schema/item.schema.json` 与 `tools/build.js` 双轨校验 | 数据录入体验 | 两处规则漂移时，编辑器提示与运行时校验不一致 |
 | 6 | 三个「版本号」并存：`meta.version`（同时是备份 `schemaVersion`）、`meta.dataVersion`、`dataVersion.db.json` 的行版本 | 认知成本 | 写迁移或备份逻辑时用错号 |
 | 7 | 统计只覆盖 16 条带固定收益的条目 | 期望管理 | 不属缺陷，是「只统计固定数值」的既定口径 |
@@ -150,7 +150,7 @@ npm run dev          # http://localhost:5173/
 | 首屏一直骨架屏 / 停在 ErrorScreen | `hooks/useBootstrap.ts`、`stores/ui.ts` 的 `bootstrapLoading` / `bootstrapError` | Mock 失败注入（`?__fail=1`、`VITE_API_FAIL`）；契约方法抛错 |
 | 页面顶部出现「保存失败」提示 | `components/common/SaveErrorNotice.tsx`（聚合 5 处 `error`） | `localStorage` 配额 / 权限问题（`services/localStore.ts` 已转成可读文案）；写队列中的契约错误 |
 | 勾选了但统计页不变 | `domain/stats.ts` `summarizeGain` | 该条目没有固定数值 `gain` —— 这是口径，不是 bug |
-| 勾选后计入「已完成」但列表仍显示 | `domain/sort.ts` `isVisible` | 「隐藏已完成」未开；或该条目被一键日常覆盖且显示方式为「弱化」 |
+| 勾选后条目仍在列表里 | （设计如此，非故障） | 「已完成」的表达是**沉下去但仍在**（`card-done` + 划朱线），另有独立「已完成」分区；不复存在"勾了就消失"的开关（`hideDone` 已于 2026-09-24 删除） |
 | 到了新的一天 / 新的一周，勾选没归零 | `hooks/usePeriodRefresh.ts`、`domain/reset.ts` | 前台未触发刷新（切到后台再回来会重估）；或条目自带 `until` 被 `activeItems` 过滤下线 |
 | 报 `E_FORBIDDEN` / 越权 | `api/mock/userStore.ts` `assertScope` | `DataScope` 传了空 `userId` / `profileId`，或账号未加载完成就发起写操作 |
 | 单测里 `localStorage is not defined` | `src/test/memoryStorage.ts` | 测试开头需要 `installMemoryStorage()` |

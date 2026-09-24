@@ -172,25 +172,29 @@ export function buildComparator(ctx: SortContext): (a: Item, b: Item) => number 
 /**
  * 列表是否可见（视图筛选）：
  *   - 奖励类型 `showKinds`（空数组 = 全部）
- *   - 隐藏已完成
  *   - 今天是否适用（`days`）
  *
  * 2026-09-15「痛感只用于默认排序」：原先的 `minWeight` 门槛已删除 ——
  * 痛感不再是筛选维度，只作排序键（见 `buildComparator`）。
  *
- * `keepDone` 供统计场景豁免「隐藏已完成」——否则已勾的条目不算已获得，统计会归零。
+ * 2026-09-24 **删掉 `hideDone`，连同它的豁免口 `keepDone`**：它是全场唯一一条
+ * "**界面上碰不到、代码里却仍生效**"的筛选 —— 用户既改不了它，也没有任何地方能看出
+ * 它开着，而它会在聚合之前把已勾条目从数组里抽走（正是 `domain/grouping` 那次
+ * "分组静默散开"的成因之一）。"已完成"在本项目的表达是**沉下去但仍在**
+ * （`card-done` + 划朱线），不是消失 —— 页面上的「已完成」分区本身就是这个口径。
+ * 当初为统计留的豁免口 `keepDone` 早已没有调用方（统计不经过本函数）。
+ *
+ * `checkedAt` 参数一并去掉：它此前只服务于 `hideDone`。留着它只会让下一个读者
+ * 以为"这里还有什么在按状态筛"，而实际什么都不做。
  */
 export interface VisibilityContext {
   showKinds: string[];
-  hideDone: boolean;
-  keepDone?: boolean;
   today: number;
 }
 
-export function isVisible(it: Item, checkedAt: number | undefined, ctx: VisibilityContext): boolean {
+export function isVisible(it: Item, ctx: VisibilityContext): boolean {
   if (!it.isAutoHub) {
     if (ctx.showKinds.length && !(it.gainKind || []).some((k) => ctx.showKinds.includes(k))) return false;
-    if (ctx.hideDone && !ctx.keepDone && checkedAt !== undefined) return false;
     if (it.days && it.days.length && !it.days.includes(ctx.today)) return false;
   }
   return true;

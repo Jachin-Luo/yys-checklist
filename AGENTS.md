@@ -14,6 +14,13 @@
 **术语约定（2026-09-23）**：界面与文档统一称「**账号**」，对应代码层的 `Profile` / `profileId` 与持久化键 `yys:profiles`。
 改名只发生在文案层 —— **代码标识符与持久化键不动**（键名是已发布的数据契约，改了既有数据读不出来）。
 
+**样式约定（2026-09-24）**：控件（按钮 / 输入框 / chip / 标签 / 选项行 / 浮层 / 卡片 / 徽章）的类串**只有一条出口** ——
+`src/components/common/controls.ts`。需要新形态先在它里面加一档，不要在组件里另写一套；
+参考稿换代两次踩过的坑（同一颗主按钮散在 40 个文件里、改参考稿必漏）就是这条约定的由来。
+**例外只有一处**：Tailwind 类串表达不了的控件（径向渐变 / `inset` 内圈 / `::after` 外环 / 百分比图标等，
+任意值写法按纪律禁用）改由 `src/styles/theme.css` 的 `.genso-*` 类承担 —— 仍然是"只有一处定义"。
+现有两例：`.genso-daruma`（达摩点睛）、`.genso-rt`（回到顶部朱印按钮）。
+
 ---
 
 ## 一、红线（改动前必须理解，违反即视为实现错误）
@@ -46,7 +53,7 @@ Mock 的分片键由 `src/api/mock/persist.ts` 封装（`KEY` / `removeProfileSh
 | --- | --- | --- |
 | 只统计固定数值 | 浮动收益（只有类型没有数值）不进分子分母 | `domain/stats.ts` `summarizeGain` |
 | 覆盖 / 隐藏只影响渲染 | 绝不影响统计口径 | `domain/stats.ts`、`hooks/useChecklist.ts` |
-| 统计忽略「隐藏已完成」 | 统计直接吃原始勾选状态 | `pages/StatsPage.tsx` |
+| 统计不受列表筛选影响 | 统计直接吃原始勾选状态，不经过 `isVisible` | `pages/StatsPage.tsx` |
 | 时间只提示不限制勾选 | 到期条目在**数据层**过滤，不在渲染层判 | `domain/reset.ts` `activeItems`、`domain/countdown.ts` |
 | 单一数据出口 | 页面不直连种子，一律 store → api 契约 | `src/api/index.ts` / `src/api/contract.ts` |
 
@@ -133,7 +140,7 @@ node tools/verify.js      # 一键验收：tsc + eslint + vitest + build + db:ch
 | --- | --- |
 | `docs/README.md` | 文档总索引、按角色的推荐阅读路径、文档时效与更新约定 |
 | `docs/01-architecture.md` | 目录逐层职责、启动到首屏的渲染链路、导航机制、9 个 store 的职责与依赖方向、双布局差异 |
-| `docs/02-data-and-domain.md` | 数据契约、Mock 适配器与分片持久化、8 个 db.json 结构与规模、15 个 domain 模块导出表、特殊机制（一键日常 / 卡片显示 / 寮时间 / 备份 / 寄养 / 账号同步 / 御魂 / 悬赏） |
+| `docs/02-data-and-domain.md` | 数据契约、Mock 适配器与分片持久化、8 个 db.json 结构与规模、16 个 domain 模块导出表、特殊机制（一键日常 / 卡片显示 / 寮时间 / 备份 / 寄养 / 账号同步 / 御魂 / 悬赏） |
 | `docs/03-conventions-and-tests.md` | 分层约束的强制手段、口径纪律逐条落点、测试体系与写法、数据录入流程、工具脚本、常见坑 |
 | `docs/04-handover-guide.md` | 环境准备、6 类改动任务手册、未完成项与路线图、问题排查、「不要这样做」清单 |
 

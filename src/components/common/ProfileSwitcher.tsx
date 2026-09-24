@@ -55,7 +55,7 @@ export default function ProfileSwitcher({
         aria-expanded={open}
         onClick={() => setOpen((v) => !v)}
         title={region ? `${current?.name ?? '未选择账号'} · ${region}` : current?.name}
-        className="flex max-w-full cursor-pointer items-center gap-1.5 whitespace-nowrap rounded-sm border border-line-soft bg-surface px-2.5 py-1 text-sm text-ink-2 transition-colors duration-120 hover:border-line"
+        className="flex max-w-full cursor-pointer items-center gap-1.5 whitespace-nowrap rounded-full border border-line bg-fill px-3 py-1 text-sm text-ink-2 transition-colors duration-150 ease-genso hover:bg-fill-2"
       >
         <Icon name="hito" size={12} className="flex-none text-ink-3" />
         <span className="truncate">{current?.name ?? '未选择账号'}</span>

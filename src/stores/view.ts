@@ -53,7 +53,6 @@ interface ViewState {
    * **不要据此新增筛选 UI**。
    */
   setMinWeight: (minWeight: number) => Promise<void>;
-  toggleHideDone: () => Promise<void>;
   togglePin: (itemId: string) => Promise<void>;
   /** 被覆盖项的显示方式：dim 弱化 / hide 隐藏（只影响列表，不影响统计口径） */
   setCoverMode: (coverMode: CoverMode) => Promise<void>;
@@ -73,7 +72,6 @@ const FALLBACK: ViewPrefs = {
   sortBy: 'weight',
   showKinds: [],
   minWeight: 0,
-  hideDone: false,
   pinned: [],
   coverMode: 'dim',
   card: DEFAULT_CARD_DISPLAY,
@@ -116,8 +114,6 @@ export const useViewStore = create<ViewState>((set, get) => {
     setShowKinds: (showKinds) => persist({ ...get().view, showKinds }),
 
     setMinWeight: (minWeight) => persist({ ...get().view, minWeight }),
-
-    toggleHideDone: () => persist({ ...get().view, hideDone: !get().view.hideDone }),
 
     togglePin: (itemId) => {
       const { pinned } = get().view;

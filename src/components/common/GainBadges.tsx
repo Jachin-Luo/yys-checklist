@@ -35,8 +35,8 @@ export function GainBadges({ gain, note }: { gain?: Gain; note?: string }) {
       {rows.map(([k, v]) => (
         <b
           key={k}
-          className={`rounded-sm border px-1.5 py-0.5 font-mono text-sm font-medium ${
-            CURRENCY_STYLE[k] ?? 'border-line-soft bg-surface-3 text-ink-2'
+          className={`rounded-full border px-2 py-0.5 font-mono text-sm font-medium ${
+            CURRENCY_STYLE[k] ?? 'border-line bg-fill text-ink-2'
           }`}
         >
           {CURRENCY_LABEL[k] ?? k} +{v}
@@ -72,7 +72,7 @@ export function KindBadges({
       {rest.map((k) => (
         <b
           key={k}
-          className="rounded-sm border border-dashed border-line px-1.5 py-0.5 font-normal text-ink-2"
+          className="rounded-full border border-dashed border-line px-2 py-0.5 font-normal text-ink-2"
         >
           {labels.get(k) ?? k}
         </b>
@@ -85,7 +85,7 @@ export function KindBadges({
 /** 一键日常覆盖标记 —— 金箔小符（它是"已经有入口替你做了"，属中性提示不属危险） */
 export function CoveredTag() {
   return (
-    <span className="flex-none rounded-sm border border-line bg-gold-soft px-1.5 py-0.5 text-xs text-gold-hi">
+    <span className="flex-none rounded-xs border border-line bg-gold-soft px-2 py-0.5 text-xs text-gold-hi">
       一键
     </span>
   );
@@ -94,7 +94,7 @@ export function CoveredTag() {
 /** 付费前置标记 —— 朱红（花钱的门槛，与"条件"同一语义家族） */
 export function PremiumTag() {
   return (
-    <span className="flex-none rounded-sm border border-crimson/40 bg-crimson/10 px-1.5 py-0.5 text-xs text-crimson">
+    <span className="flex-none rounded-xs border border-crimson-soft bg-crimson/10 px-2 py-0.5 text-xs text-crimson">
       付费前置
     </span>
   );

@@ -48,6 +48,19 @@ export function shiftDayKey(key: string, delta: number): string {
 /** 某天勾选的条数（日历着色与悬停提示用） */
 export const dayCount = (days: LogDays, key: string): number => days[key]?.length ?? 0;
 
+/**
+ * 某天勾选的条目 id（设置页「清空今天的记录」用）。
+ *
+ * **以日志为事实来源，而不是去猜 `checked` 的时间戳窗口**：日志记的正是"那天勾了什么"，
+ * 是同一份用户数据的历史面（见本文件头两条口径）。拿它当"今天动了哪些条目"的依据，
+ * 于是清空当天 = 把这些 id 交给 `setMany(ids, null)`，日志会沿既有的
+ * 「取消勾选按周期起点回退」规则自行收敛 —— 不需要为这个功能新增任何状态逻辑。
+ *
+ * 与 `dayCount` 分开而不是让调用方自己 `days[key]?.length`：调用方要的是 id 列表，
+ * 写成 `days[key] ?? []` 时很容易漏掉 `?? []` 而在空日志上炸掉。
+ */
+export const idsLoggedOn = (days: LogDays, key: string): string[] => [...(days[key] ?? [])];
+
 /** 记一条完成。幂等：同一天重复勾同一条不重复记 */
 export function addEntry(days: LogDays, itemId: string, ts: number): LogDays {
   const key = dayKeyOf(ts);

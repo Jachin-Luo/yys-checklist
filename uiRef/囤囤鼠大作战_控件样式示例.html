@@ -1,0 +1,2227 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>囤囤鼠大作战 · 控件样式示例（圆润版）</title>
+<style>
+/* ============================================================
+   0 · FONT — 标题专用子集（与主页面同一份，来自主文件）
+   ============================================================ */
+@font-face{
+  font-family:"Logo Ming SC";
+  font-style:normal;font-weight:900;font-display:block;
+  unicode-range:U+4F5C,U+56E4,U+5927,U+6218,U+9F20;
+  src:url(data:font/woff2;base64,d09GMgABAAAAAAgAABIAAAAADUQAAAefAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAGYFeGx4cQAZgP1NUQVQqAFwRCAqNWIpnCxAAATYCJAMUBCAFhBQHIAwHFyQYEBuNCsjE55+29fcxIzEDiB5UxPnKFqtYkYjRmLmRuJljbEXrVsKvKP7nmOmibTiLFtubUsVfZt2RHFi2RVKTn4DfNrag/YgcqDudVUYQE2qFFOo7b4KGMCklqwhhxpm97dA29Ta0Qdtc29mCsLbazlqEtdf2d0ILoS+SqnbHRMyB6wdS4HaEAq2cYAYo6rmPSiW3uw7Z6QWtHeJONZRczFsBYl0Giirxe6B1JwC6xdhY12Js7G+pb+jq7ero9Egw4MBxSaIuMehYzFYrlhTwxiCGkmAdWovVitVQ1FNp6iNqEWwAwQoBAU3mhYtUIYAERQQCAbZKDU8u1H0QpZipHV+vSc3NTUUcNDs0VLd1GWuj5xPXGiERZdAtELzlDsJ6ATFBUJ5aOAimNzX3kwcIPrIgKmpRuYhLS+ylpbydNNLsQ+QQQwAhNLkVxZ+WTq1T7dAQH3491/rRyf2H3Pa/t+27ms8xB7flBMRqha0AkVXJpThvWW9A8HwG9Als4M+XgAIDe5qiKIplRVJWKpPJaDHLsBNoqb2tVO4qZSUyEU1L5GJGLn5Nar5CKmMYmqb1Ijtha5O8oUE0w7axUdjUxxoGD126NoVnpLiTr13zeFkZS5vuM8wsPb9XazYXOd55440iGXB+TaKe55U0f3GMYWb/F2khf9wbetPF+wwjIkRvC3mXQc/vVdLv76mEnJTzvBIMIfopYL2KR444eRHj4KUnaES1jDoZpr1nP5QU8/xkgWmIZVeuZEdGnEbOuLH6fZtgumhmmBWXjxObUkjJ7MFD1554sHZGobYt4/dONm8lBIScTEotPHrlmFnz+jXFswf3Xbo0heeVNWqjniuovucNQxnPTzZbLJb8oRGnLW+4ORSd2qU8OPbwoTbKLURvsZzaeXFMt/n0aXVNzhEOpQxha/SMoGhclKywEEgCk4kqT/MvMNRMMKQcDDEeeOMNg8NFc1G5h6Aod9vOo8riA1sIZSiAwvoDb7yR6rCXb5AG3b+D55VbLRaLx9BKp5ETLg5Fh3apRs/e1T6k9INle0P2ms1BjgeePfOsHH9wbOvBFbot2487GixPth0d023Zvt2xZvzJsa0Hz38b/A9NNeKC6Wx6VTXKxB+8afWV8C+KsEYwagOk6gbIiXH6l5ov13LRo3Mqb0WPBnjcKZ8TPVp5KyB6FG27B5PLsbHrjFuss8eNxZlGnNv1uyZWHR31ZPiM8L8Ijio8eyMhPFwRu/TQ/cbE4YyMbbGnsNAtsw7n1n+miVVbcvKHF/s5vvVxMD0x9zUXG+OFa9HhEQrP5o4jpqWZQSO6uMLjqffw3lSJc4KbyhiNTVGlXIOLS0L6/MYU3S9Wm/oeF6eqhO+5vdwPn4gffeTeFWVXqDux0+Zsm9+s6XzhzqW3Ue050Vf1w+zWpcXid+1vUVdGHZVW5pbkP8Eb0lG5F+sgrNmTPKtiF0N1tvyuUEnTpTEJ3j9Jta5PVnC+HAIXrIHlE/cExz+Y5W1j69UuMntSJTzjciB6tGfZ2f6FfnMGMtftzTzF3aSed48GMqkRyxvmjDY3a9nWuLQ1+tDekeRjE0+IshGYMBcnDn7rLXpr1+9Bhw2Tn88N+dtPV7bs0ti2xQEzMoNnLa0cjt9kn5JaLPkhgDSK7k48kz7826Hns1/pMn4aVJ8ZP/5/Yf0CN9v8nOpb3u/Lf1t00jtNnKt7tS43b9zLfeOYsBBJRPnMV/UOV+x1eihEzot2BDtfYY8NlAR+fSrKJiFWpVo39S7zfcKZ5e+zd+TcP9zfYdw/HNb53jTSc0TxNBOyJLPEPcz8c3q77urSh2NfpK+9/pliyrCdcPMpT1OUnU+PqZhqF/ZJfOI8CwOZMPPP6e26q0sfjn2Rvvb6Z4opw3bCzac8TVF2Frnk+5+FqGBLVWn5RknIbI+6QaY+7OauC+/pMpnQFuelIj7lRp7v0/MZ0nxRj+cH/80TnO/tfz9l6A/PfPrQ5KvCDXGSQzkvlYupZb+tUiyddits6It1+fSRqdfE6/vfMyx60zOPfhD8+OjCqLjZFUHql3/TnZlOqrS1Qh+zgtpgO9mh9189Ypwnxqpk3OJLhPtk5Q8LOayUgjNwAACQgfzk8dv/Kf2rbaN+E1PUlzaNj+/tvHq568veD/61+ecbtkMkAyAc9CXTWICe///HfNfsxX9t/otgO4ZwMYajHn/wM6kvIUceVMiG0SMvErQidjIcuXUxmDedGGmJ9ZaQmAeLQEtULAHkhGFRiMHjRRpm2aAKnSwhJiKLKUcIHLOEQAqMIFGBkQ9LQDtqYUQbDGhAC5rQjP5Dcz+60YcI+JqHdaEbDehEI7rQiX60owXGj5v70AAfdKEXTchBF/pXfy1EA3rRgkYUIhHe+FD8U9VnxRgP0yAAPvCDHwLhjTT4IxLN0cEIqaZZpL/0kIxEB2olNIhkIxowQ0gFhGCMQTrYVOQiF6mIpIUscDdh4FXf67uosaCx/Jq0O4zwSL7cD/4Ihfft7AAEQYN41KMLdfT07qUpNTB95/dBLQw++U12wBceUkO1jp2s5xCA7W0XiXXxSXo1iALk1/+lzZHy/2//+YxsXCrCTwfVDRUmwBXOUAIAAAA=) format("woff2");
+}
+
+*,*::before,*::after{box-sizing:border-box}
+html,body{margin:0;padding:0}
+
+/* ============================================================
+   1 · TOKENS — 圆润化的一套参数
+   四条铁律：① 角越圆线越淡 ② 阴影要散不要贴
+            ③ 留白跟着角走 ④ 内部零件也圆
+   ============================================================ */
+:root{
+  --sans:"PingFang SC","Microsoft YaHei","Hiragino Sans GB",sans-serif;
+  --serif:"Source Han Serif SC","Noto Serif SC","Songti SC",SimSun,serif;
+  --mono:ui-monospace,Consolas,"Roboto Mono",monospace;
+
+  /* 圆角阶 —— 比直愣版整体放大 3~5 倍 */
+  --r-xs:8px;   --r-sm:11px;  --r-md:14px;
+  --r-lg:18px;  --r-xl:24px;  --r-2xl:30px;
+  --r-full:999px;
+
+  /* 间距阶 —— 随圆角同比放大 */
+  --sp-1:6px; --sp-2:10px; --sp-3:14px; --sp-4:20px; --sp-5:28px;
+
+  --t-fast:.15s; --t:.22s;
+  --ease:cubic-bezier(.32,.72,.28,1);
+}
+
+/* — 暗版 · 墨底朱红金箔（柔化） — */
+html[data-theme="dark"]{
+  --bg:#0E0D12;
+  --panel:#191822;
+  --panel-2:#1F1E29;
+  --card:#23222F;
+  --card-hi:#2A2938;
+  --ink:#EFE9DE;
+  --ink-2:#A9A2B4;
+  --ink-mute:#726D80;
+  --crimson:#C9343A;
+  --crimson-hi:#E04A50;
+  --crimson-deep:#9E252B;
+  --gold:#CBAB6A;
+  --gold-hi:#E6CD8E;
+
+  /* 线：淡 */
+  --line:rgba(203,171,106,.18);
+  --line-2:rgba(203,171,106,.30);
+  --line-3:rgba(203,171,106,.46);
+  /* 面：半透明填充（输入框、内嵌块） */
+  --fill:rgba(255,255,255,.052);
+  --fill-2:rgba(255,255,255,.085);
+  --fill-3:rgba(255,255,255,.13);
+  /* 焦点环：宽而淡 */
+  --ring:rgba(203,171,106,.20);
+  --ring-err:rgba(201,52,58,.22);
+
+  --s-ok:#4FAE7B; --s-warn:#D9A340; --s-err:#D95056; --s-info:#5B93D6;
+  --ok-bg:rgba(79,174,123,.12);
+  --warn-bg:rgba(217,163,64,.12);
+  --err-bg:rgba(217,80,86,.12);
+  --info-bg:rgba(91,147,214,.12);
+
+  /* 三级柔和阴影：大扩散 + 低透明，无硬投影 */
+  --e1:0 1px 2px rgba(0,0,0,.26), 0 6px 16px rgba(0,0,0,.24);
+  --e2:0 2px 6px rgba(0,0,0,.28), 0 14px 34px rgba(0,0,0,.36);
+  --e3:0 8px 20px rgba(0,0,0,.34), 0 32px 72px rgba(0,0,0,.52);
+  --gloss:inset 0 1px 0 rgba(255,255,255,.05);
+
+  --mat-pat:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='44'%20height='38.105'%3E%3Cpath%20d='M0%200H44M0%2038.105H44M0%200L22%2038.105L44%200M0%2038.105L22%200L44%2038.105M0%200V38.105M22%200V38.105M44%200V38.105'%20fill='none'%20stroke='%23CBAB6A'%20stroke-width='0.7'%20stroke-opacity='0.085'/%3E%3C/svg%3E");
+  --mask:rgba(14,13,18,.72);
+}
+/* — 明版 · 和纸米白（全阶重算 · 卡片纯白浮起） — */
+html[data-theme="light"]{
+  --bg:#E7DDC9;
+  --panel:#FCF7ED;
+  --panel-2:#F5EDDD;
+  --card:#FFFFFF;
+  --card-hi:#FFFDF8;
+  --ink:#3B3644;
+  --ink-2:#6B6357;
+  --ink-mute:#8B8271;
+  --crimson:#BF2C33;
+  --crimson-hi:#A81F26;
+  --crimson-deep:#8E1C22;
+  --gold:#B08C44;
+  --gold-hi:#8C6B22;
+
+  --line:rgba(150,120,70,.22);
+  --line-2:rgba(150,120,70,.36);
+  --line-3:rgba(150,120,70,.52);
+  --fill:rgba(255,255,255,.75);
+  --fill-2:rgba(255,255,255,.95);
+  --fill-3:rgba(255,255,255,1);
+  --ring:rgba(191,44,51,.16);
+  --ring-err:rgba(191,44,51,.20);
+
+  --s-ok:#2E8B5E; --s-warn:#A97A1C; --s-err:#C0383E; --s-info:#2F6FB5;
+  --ok-bg:rgba(46,139,94,.10);
+  --warn-bg:rgba(169,122,28,.11);
+  --err-bg:rgba(192,56,62,.10);
+  --info-bg:rgba(47,111,181,.10);
+
+  --e1:0 1px 2px rgba(140,112,74,.10), 0 6px 16px rgba(140,112,74,.10);
+  --e2:0 2px 5px rgba(140,112,74,.10), 0 14px 30px rgba(140,112,74,.13);
+  --e3:0 8px 20px rgba(140,112,74,.14), 0 32px 66px rgba(140,112,74,.20);
+  --gloss:inset 0 1px 0 rgba(255,255,255,.9);
+
+  --mat-pat:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='44'%20height='38.105'%3E%3Cpath%20d='M0%200H44M0%2038.105H44M0%200L22%2038.105L44%200M0%2038.105L22%200L44%2038.105M0%200V38.105M22%200V38.105M44%200V38.105'%20fill='none'%20stroke='%23B08C44'%20stroke-width='0.7'%20stroke-opacity='0.115'/%3E%3C/svg%3E");
+  --mask:rgba(90,74,50,.34);
+}
+
+/* ============================================================
+   2 · BASE
+   ============================================================ */
+body{
+  min-height:100vh;background:var(--bg);color:var(--ink);
+  font-family:var(--sans);font-size:13px;line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+  transition:background var(--t) var(--ease),color var(--t) var(--ease);
+}
+.defs{position:absolute;width:0;height:0;overflow:hidden}
+svg.i{width:16px;height:16px;flex:none;
+  fill:none;stroke:currentColor;stroke-width:1.7;
+  /* 圆润第四律：线头线角全圆 */
+  stroke-linecap:round;stroke-linejoin:round}
+
+/* 底纹：铺在页面底，浓度压到极淡 */
+body::before{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background-image:var(--mat-pat);opacity:.55;
+}
+body::after{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:radial-gradient(120% 70% at 50% -10%,transparent 40%,var(--mask) 100%);
+}
+
+/* ============================================================
+   3 · SHELL — 左侧目录 + 右侧内容
+   ============================================================ */
+.shell{
+  position:relative;z-index:1;
+  max-width:1180px;margin:0 auto;padding:36px 26px 96px;
+  display:grid;grid-template-columns:196px minmax(0,1fr);gap:32px;
+  align-items:start;
+}
+@media (max-width:900px){
+  .shell{grid-template-columns:minmax(0,1fr);gap:20px;padding:24px 16px 64px}
+  .toc{position:static!important;max-height:none!important}
+  .toc-list{display:flex;flex-wrap:wrap;gap:6px}
+}
+
+/* 目录 */
+.toc{position:sticky;top:28px;max-height:calc(100vh - 56px);overflow:auto}
+.toc-t{
+  font-family:var(--mono);font-size:10px;letter-spacing:.22em;text-transform:uppercase;
+  color:var(--ink-mute);padding:0 12px 10px;
+}
+.toc-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:3px}
+.toc-list a{
+  position:relative;display:flex;align-items:center;gap:9px;
+  padding:8px 12px;border-radius:var(--r-sm);
+  color:var(--ink-2);text-decoration:none;font-size:12.5px;
+  transition:background var(--t-fast) var(--ease),color var(--t-fast) var(--ease)
+}
+.toc-list a:hover{background:var(--fill);color:var(--ink)}
+.toc-list a.is-on{background:var(--fill-2);color:var(--ink)}
+.toc-list a.is-on::before{
+  content:'';position:absolute;left:2px;top:50%;transform:translateY(-50%);
+  width:3px;height:15px;border-radius:var(--r-full);background:var(--crimson);
+}
+.toc-list .n{font-family:var(--mono);font-size:10px;color:var(--ink-mute);min-width:14px}
+.toc-list a.is-on .n{color:var(--gold)}
+
+/* ============================================================
+   4 · HERO
+   ============================================================ */
+.hero{
+  position:relative;overflow:hidden;
+  border:1px solid var(--line);border-radius:var(--r-2xl);
+  background:var(--panel);box-shadow:var(--e2);
+  padding:26px 28px;margin-bottom:8px;
+}
+.hero::before{
+  content:'';position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(90% 120% at 100% 0%,rgba(201,52,58,.075),transparent 62%);
+}
+.hero-r{position:relative;display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+.seal{
+  width:52px;height:52px;flex:none;border-radius:var(--r-lg);
+  display:grid;place-items:center;color:#fff;
+  background:linear-gradient(150deg,var(--crimson-hi),var(--crimson));
+  box-shadow:0 6px 16px rgba(201,52,58,.34),var(--gloss);
+}
+.seal svg.i{width:26px;height:26px;stroke-width:1.5}
+.hero-t h1{
+  margin:0;font-family:"Logo Ming SC",var(--serif);font-weight:900;
+  font-size:30px;letter-spacing:.10em;line-height:1.24;
+  /* 双层金箔：下层只管描边，上层只管渐变（互不干扰） */
+  background:linear-gradient(178deg,var(--gold-hi) 0%,var(--gold) 46%,var(--gold-hi) 100%);
+  -webkit-background-clip:text;background-clip:text;
+  -webkit-text-fill-color:transparent;color:transparent;
+}
+.hero-sub{margin:3px 0 0;font-size:11.5px;letter-spacing:.16em;color:var(--ink-mute)}
+.hero-tags{display:flex;gap:7px;margin-top:11px;flex-wrap:wrap}
+.pill{
+  display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 11px;
+  border-radius:var(--r-full);font-size:11px;letter-spacing:.04em;
+  border:1px solid var(--line);color:var(--ink-2);background:var(--fill)
+}
+.pill.gold{border-color:var(--line-2);color:var(--gold);background:rgba(203,171,106,.10)}
+.pill.red{border-color:rgba(201,52,58,.34);color:var(--crimson-hi);background:rgba(201,52,58,.10)}
+.hero-acts{margin-left:auto;display:flex;gap:8px;align-items:center}
+
+/* ============================================================
+   5 · SECTION 外壳
+   ============================================================ */
+.sec{margin-top:34px;scroll-margin-top:22px}
+.sec-h{display:flex;align-items:center;gap:10px;margin:0 4px 13px}
+.sec-h h2{
+  margin:0;font-family:var(--serif);font-weight:700;font-size:17px;letter-spacing:.07em;
+}
+.sec-h .num{
+  font-family:var(--mono);font-size:10px;color:var(--gold);
+  border:1px solid var(--line);border-radius:var(--r-xs);padding:1px 7px;
+}
+.sec-h .note{margin-left:auto;font-size:11px;color:var(--ink-mute);letter-spacing:.03em}
+.stage{
+  border:1px solid var(--line);border-radius:var(--r-xl);
+  background:var(--panel);box-shadow:var(--e1);
+  padding:22px;display:flex;flex-direction:column;gap:18px;
+}
+.grp{display:flex;flex-direction:column;gap:10px}
+.lbl{
+  font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--ink-mute);
+}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.col{display:flex;flex-direction:column;gap:10px;max-width:300px}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px}
+.hr{height:1px;background:var(--line);border:0;margin:2px 0}
+
+/* ============================================================
+   6 · BUTTON
+   ============================================================ */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  height:38px;padding:0 18px;border-radius:var(--r-md);
+  font-family:inherit;font-size:12.5px;letter-spacing:.05em;font-weight:500;
+  border:1px solid transparent;cursor:pointer;
+  transition:all var(--t) var(--ease);white-space:nowrap;
+  box-shadow:var(--gloss);
+}
+.btn:focus-visible{outline:none;box-shadow:0 0 0 3px var(--ring),var(--gloss)}
+.btn.pri{
+  color:#FFF6F0;border-color:rgba(201,52,58,.55);
+  background:linear-gradient(165deg,var(--crimson-hi),var(--crimson) 58%,var(--crimson-deep));
+  box-shadow:0 3px 8px rgba(201,52,58,.26),0 10px 22px rgba(201,52,58,.16),var(--gloss);
+}
+.btn.pri:hover{transform:translateY(-1px);box-shadow:0 5px 12px rgba(201,52,58,.32),0 16px 30px rgba(201,52,58,.22),var(--gloss)}
+.btn.pri:active{transform:translateY(0) scale(.985)}
+.btn.sec{
+  color:var(--gold);border-color:var(--line-2);background:var(--fill);
+}
+.btn.sec:hover{background:var(--fill-2);border-color:var(--line-3);color:var(--gold-hi)}
+.btn.ghost{color:var(--ink-2);background:transparent;border-color:transparent}
+.btn.ghost:hover{background:var(--fill);color:var(--ink)}
+.btn.out{
+  color:var(--ink);border-color:var(--line);background:var(--card);
+  box-shadow:var(--e1),var(--gloss);
+}
+.btn.out:hover{border-color:var(--line-2);background:var(--card-hi)}
+.btn.dan{
+  color:#FFF2F2;border-color:rgba(217,80,86,.5);
+  background:linear-gradient(165deg,#E05A60,#C9343A);
+  box-shadow:0 3px 8px rgba(201,52,58,.24),var(--gloss);
+}
+.btn.dan:hover{transform:translateY(-1px)}
+.btn:disabled,.btn.is-dis{opacity:.42;cursor:not-allowed;transform:none!important;box-shadow:none;filter:saturate(.6)}
+.btn.sm{height:30px;padding:0 13px;font-size:11.5px;border-radius:var(--r-sm);gap:6px}
+.btn.sm svg.i{width:14px;height:14px}
+.btn.lg{height:46px;padding:0 24px;font-size:13.5px;border-radius:var(--r-lg)}
+.btn.lg svg.i{width:18px;height:18px}
+.btn.cap{border-radius:var(--r-full);padding:0 20px}
+.btn.sq{width:38px;padding:0;border-radius:var(--r-md)}
+.btn.sq.sm{width:30px}
+.btn.sq.lg{width:46px}
+.btn.wide{width:100%}
+.btn .spin{
+  width:14px;height:14px;border-radius:50%;flex:none;
+  border:2px solid rgba(255,255,255,.32);border-top-color:#fff;
+  animation:spin .7s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.btn .spin{animation-duration:2s}}
+
+.btn-grp{display:inline-flex;gap:0;border-radius:var(--r-md);overflow:hidden;
+  border:1px solid var(--line);background:var(--fill);box-shadow:var(--gloss)}
+.btn-grp button{
+  height:36px;padding:0 16px;border:0;background:transparent;color:var(--ink-2);
+  font-family:inherit;font-size:12.5px;cursor:pointer;transition:all var(--t-fast) var(--ease);
+}
+.btn-grp button+button{border-left:1px solid var(--line)}
+.btn-grp button:hover{background:var(--fill-2);color:var(--ink)}
+.btn-grp button.is-on{
+  color:#FFF6F0;background:linear-gradient(165deg,var(--crimson-hi),var(--crimson));
+}
+/* ============================================================
+   7 · FIELD 外壳（label / hint / error 三件套）
+   ============================================================ */
+.fld{display:flex;flex-direction:column;gap:7px;width:100%;max-width:308px}
+.fld-l{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--ink-2)}
+.fld-l .req{color:var(--crimson-hi);font-size:13px;line-height:1}
+.fld-l .opt{margin-left:auto;font-family:var(--mono);font-size:10px;color:var(--ink-mute)}
+.fld-h{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--ink-mute)}
+.fld-h svg.i{width:12px;height:12px}
+.fld-h.err{color:var(--s-err)}
+.fld-h.ok{color:var(--s-ok)}
+
+/* ============================================================
+   8 · INPUT — 圆润输入框
+   外壳持边框，内层 input 无边框（这样前后缀共用一条圆角边）
+   ============================================================ */
+.wt{
+  display:flex;align-items:center;gap:9px;height:42px;padding:0 14px;
+  border:1px solid var(--line);border-radius:var(--r-md);background:var(--fill);
+  transition:border-color var(--t) var(--ease),background var(--t) var(--ease),
+             box-shadow var(--t) var(--ease);
+}
+.wt:hover{border-color:var(--line-2);background:var(--fill-2)}
+.wt:focus-within{border-color:var(--line-3);background:var(--fill-2);box-shadow:0 0 0 3px var(--ring)}
+.wt input{
+  flex:1;min-width:0;height:100%;border:0;background:transparent;outline:none;
+  color:var(--ink);font-family:inherit;font-size:13px;letter-spacing:.01em;
+}
+.wt input::placeholder{color:var(--ink-mute)}
+.wt > svg.i{color:var(--ink-mute);transition:color var(--t) var(--ease)}
+.wt:focus-within > svg.i{color:var(--gold)}
+.wt .suf{flex:none;font-family:var(--mono);font-size:11.5px;color:var(--ink-mute)}
+.wt .div{width:1px;height:18px;flex:none;background:var(--line)}
+.wt .clr{
+  width:20px;height:20px;flex:none;border-radius:50%;display:grid;place-items:center;
+  border:0;background:var(--fill-3);color:var(--ink-2);cursor:pointer;transition:all var(--t-fast)
+}
+.wt .clr:hover{background:var(--crimson);color:#fff}
+.wt .clr svg.i{width:11px;height:11px;stroke-width:2.6}
+.wt.cap{border-radius:var(--r-full);padding:0 18px}
+.wt.sm{height:34px;padding:0 12px;border-radius:var(--r-sm)}
+.wt.sm input{font-size:12px}
+.wt.lg{height:50px;padding:0 18px;border-radius:var(--r-lg)}
+.wt.lg input{font-size:14px}
+.wt.is-err{border-color:rgba(217,80,86,.55);background:var(--err-bg)}
+.wt.is-err:focus-within{box-shadow:0 0 0 3px var(--ring-err);border-color:var(--s-err)}
+.wt.is-err > svg.i{color:var(--s-err)}
+.wt.is-ok{border-color:rgba(79,174,123,.5)}
+.wt.is-ok > svg.i{color:var(--s-ok)}
+.wt.is-dis{opacity:.48;background:var(--fill)}
+.wt.is-dis input{cursor:not-allowed}
+.wt.is-ro{background:transparent;border-style:dashed;border-color:var(--line-2)}
+.wt.area{height:auto;padding:12px 14px;align-items:flex-start}
+.wt.area textarea{
+  width:100%;min-height:74px;border:0;background:transparent;outline:none;resize:vertical;
+  color:var(--ink);font-family:inherit;font-size:13px;line-height:1.7;
+}
+.wt.area textarea::placeholder{color:var(--ink-mute)}
+/* 隐藏原生 resize 手柄：那个小三角在圆角容器里很突兀，拖拽能力保留 */
+.wt.area textarea::-webkit-resizer{display:none}
+.ta-foot{display:flex;align-items:center;justify-content:space-between;
+  margin-top:6px;font-size:11px;color:var(--ink-mute)}
+.ta-foot .cn{font-family:var(--mono);font-size:10.5px}
+
+/* 步进器 */
+.stp{
+  display:inline-flex;align-items:center;gap:2px;height:40px;padding:0 4px;
+  border:1px solid var(--line);border-radius:var(--r-full);background:var(--fill)
+}
+.stp button{
+  width:30px;height:30px;border:0;border-radius:50%;background:transparent;color:var(--ink-2);
+  display:grid;place-items:center;cursor:pointer;transition:all var(--t-fast) var(--ease)
+}
+.stp button:hover{background:var(--fill-3);color:var(--ink)}
+.stp button:active{transform:scale(.92)}
+.stp input{
+  width:52px;height:100%;border:0;background:transparent;outline:none;text-align:center;
+  color:var(--ink);font-family:var(--mono);font-size:13px
+}
+
+/* 验证码格 */
+.otp{display:flex;gap:8px}
+.otp span{
+  width:42px;height:50px;border-radius:var(--r-sm);display:grid;place-items:center;
+  border:1px solid var(--line-2);background:var(--fill);
+  font-family:var(--mono);font-size:18px;color:var(--ink);
+  transition:all var(--t) var(--ease)
+}
+.otp span.is-on{border-color:var(--crimson-hi);background:var(--fill-2);box-shadow:0 0 0 3px var(--ring)}
+.otp span.is-empty{color:var(--ink-mute);border-style:dashed}
+
+/* ============================================================
+   9 · SELECT — 自绘下拉（弹层可溢出，圆润）
+   ⚠ 弹层开合禁止用 opacity 关键帧：动画被冻结时会永久停在 0。
+     这里用 display 控可见性 + animation 只做位移。
+   ============================================================ */
+.sel{position:relative;width:100%;max-width:308px}
+.sel.down-up .sel-p{top:auto;bottom:calc(100% + 8px);transform-origin:bottom center}
+.sel-b{
+  width:100%;height:42px;padding:0 14px;display:flex;align-items:center;gap:9px;
+  border:1px solid var(--line);border-radius:var(--r-md);background:var(--fill);
+  color:var(--ink);font-family:inherit;font-size:13px;cursor:pointer;text-align:left;
+  transition:border-color var(--t) var(--ease),background var(--t) var(--ease),
+             box-shadow var(--t) var(--ease);
+}
+.sel-b:hover{border-color:var(--line-2);background:var(--fill-2)}
+.sel.is-open .sel-b{border-color:var(--line-3);background:var(--fill-2);box-shadow:0 0 0 3px var(--ring)}
+.sel-b .cv{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sel-b .cv.ph{color:var(--ink-mute)}
+.sel-b .ar{flex:none;color:var(--ink-mute);transition:transform var(--t) var(--ease)}
+.sel.is-open .sel-b .ar{transform:rotate(180deg);color:var(--gold)}
+.sel-b .tags{flex:1;display:flex;gap:5px;flex-wrap:wrap;min-width:0}
+.sel-b .tags em{
+  display:inline-flex;align-items:center;gap:4px;height:22px;padding:0 8px;font-style:normal;
+  border-radius:var(--r-xs);font-size:11px;color:var(--gold);background:rgba(203,171,106,.14);
+  border:1px solid var(--line)
+}
+.sel-b .tags em svg{width:10px;height:10px;stroke-width:2.4;cursor:pointer}
+.sel-b.cap{border-radius:var(--r-full);padding:0 18px}
+.sel.is-dis .sel-b{opacity:.48;cursor:not-allowed}
+
+.sel-p{
+  display:none;position:absolute;z-index:60;top:calc(100% + 8px);left:0;right:0;
+  padding:7px;border-radius:var(--r-lg);background:var(--panel-2);
+  border:1px solid var(--line-2);box-shadow:var(--e3);
+  animation:pop var(--t) var(--ease);
+}
+@keyframes pop{from{transform:translateY(-7px) scale(.98)}to{transform:none}}
+.sel.is-open .sel-p{display:block}
+.sel-p.max{max-height:238px;overflow:auto}
+.sel-g{
+  font-family:var(--mono);font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--ink-mute);padding:8px 11px 5px
+}
+.sel-o{
+  display:flex;align-items:center;gap:10px;padding:9px 11px;border-radius:var(--r-sm);
+  color:var(--ink-2);font-size:12.5px;cursor:pointer;
+  transition:background var(--t-fast) var(--ease),color var(--t-fast) var(--ease)
+}
+.sel-o:hover{background:var(--fill-2);color:var(--ink)}
+.sel-o.is-on{color:var(--gold);background:var(--fill)}
+.sel-o .ck{opacity:0;transition:opacity var(--t-fast)}
+.sel-o.is-on .ck{opacity:1}
+.sel-o .sub{margin-left:auto;font-family:var(--mono);font-size:10px;color:var(--ink-mute)}
+.sel-o.sw2{justify-content:space-between}
+.sel-foot{
+  display:flex;gap:8px;margin-top:6px;padding:9px 11px 5px;
+  border-top:1px solid var(--line)
+}
+
+/* ============================================================
+   10 · CHOICE — 开关 / 复选 / 单选 / 分段 / 滑块 / 标签
+   ============================================================ */
+.sw{
+  position:relative;width:44px;height:25px;flex:none;border-radius:var(--r-full);cursor:pointer;
+  background:var(--fill-3);border:1px solid var(--line);
+  transition:background var(--t) var(--ease),border-color var(--t) var(--ease),
+             box-shadow var(--t) var(--ease)
+}
+.sw::after{
+  content:'';position:absolute;top:2px;left:2px;width:19px;height:19px;border-radius:50%;
+  background:var(--ink-2);transition:transform var(--t) var(--ease),background var(--t) var(--ease)
+}
+.sw:hover::after{background:var(--ink)}
+.sw.is-on{
+  background:linear-gradient(165deg,var(--crimson-hi),var(--crimson));border-color:transparent;
+  box-shadow:0 3px 10px rgba(201,52,58,.32),var(--gloss)
+}
+.sw.is-on::after{transform:translateX(19px);background:#FFF6F0}
+.sw.is-dis{opacity:.42;cursor:not-allowed}
+.sw.lg{width:52px;height:30px}
+.sw.lg::after{width:23px;height:23px}
+.sw.lg.is-on::after{transform:translateX(22px)}
+
+.cb{
+  width:20px;height:20px;flex:none;border-radius:7px;cursor:pointer;
+  border:1.5px solid var(--line-2);background:var(--fill);
+  display:grid;place-items:center;
+  transition:all var(--t) var(--ease)
+}
+.cb svg.i{width:12px;height:12px;stroke-width:2.8;color:#FFF6F0;
+  opacity:0;transform:scale(.55);transition:all var(--t) var(--ease)}
+.cb:hover{border-color:var(--line-3)}
+.cb.is-on{
+  background:linear-gradient(165deg,var(--crimson-hi),var(--crimson));border-color:transparent;
+  box-shadow:0 3px 9px rgba(201,52,58,.28),var(--gloss)
+}
+.cb.is-on svg.i{opacity:1;transform:none}
+.cb.is-half{border-color:var(--crimson-hi)}
+.cb.is-dis{opacity:.42;cursor:not-allowed}
+
+.rd{
+  width:20px;height:20px;flex:none;border-radius:50%;cursor:pointer;
+  border:1.5px solid var(--line-2);background:var(--fill);
+  display:grid;place-items:center;transition:all var(--t) var(--ease)
+}
+.rd::after{
+  content:'';width:9px;height:9px;border-radius:50%;background:var(--crimson-hi);
+  transform:scale(0);transition:transform var(--t) var(--ease)
+}
+.rd:hover{border-color:var(--line-3)}
+.rd.is-on{border-color:var(--crimson-hi);border-width:2px;background:var(--fill-2);
+  box-shadow:0 0 0 3px var(--ring)}
+.rd.is-on::after{transform:scale(1)}
+
+.opt{
+  display:flex;align-items:center;gap:10px;padding:11px 14px;cursor:pointer;
+  border:1px solid var(--line);border-radius:var(--r-md);background:var(--fill);
+  transition:all var(--t) var(--ease)
+}
+.opt:hover{border-color:var(--line-2);background:var(--fill-2)}
+.opt.is-on{border-color:var(--line-3);background:var(--fill-2)}
+.opt .ot{display:flex;flex-direction:column;gap:1px}
+.opt .ot b{font-size:12.5px;font-weight:500;color:var(--ink)}
+.opt .ot span{font-size:11px;color:var(--ink-mute)}
+.opt .badge{margin-left:auto}
+
+.seg{
+  display:inline-flex;gap:3px;padding:3px;border-radius:var(--r-full);
+  background:var(--fill-2);border:1px solid var(--line)
+}
+.segi{
+  height:30px;padding:0 16px;border:0;border-radius:var(--r-full);background:transparent;
+  color:var(--ink-2);font-family:inherit;font-size:12px;cursor:pointer;
+  transition:all var(--t) var(--ease)
+}
+.segi:hover{color:var(--ink);background:var(--fill-2)}
+.segi.is-on{
+  color:#FFF6F0;background:linear-gradient(165deg,var(--crimson-hi),var(--crimson));
+  box-shadow:0 2px 8px rgba(201,52,58,.28),var(--gloss)
+}
+.seg.gold .segi.is-on{
+  color:#1A1509;background:linear-gradient(165deg,var(--gold-hi),var(--gold));
+  box-shadow:0 2px 8px rgba(203,171,106,.30),var(--gloss)
+}
+
+.rng{width:100%;max-width:300px;display:flex;align-items:center;gap:12px}
+.rng input[type=range]{
+  flex:1;height:6px;border-radius:var(--r-full);outline:none;appearance:none;
+  background:linear-gradient(90deg,var(--crimson) var(--p,50%),var(--fill-3) var(--p,50%))
+}
+.rng input[type=range]::-webkit-slider-thumb{
+  appearance:none;width:20px;height:20px;border-radius:50%;cursor:grab;
+  background:var(--card);border:2px solid var(--crimson-hi);
+  box-shadow:0 2px 8px rgba(0,0,0,.28),var(--gloss);
+  transition:box-shadow var(--t) var(--ease),transform var(--t-fast)
+}
+.rng input[type=range]::-webkit-slider-thumb:active{cursor:grabbing;transform:scale(1.08)}
+.rng input[type=range]:focus-visible::-webkit-slider-thumb{box-shadow:0 0 0 5px var(--ring)}
+.rng .v{
+  font-family:var(--mono);font-size:11.5px;color:var(--gold);
+  min-width:40px;text-align:right
+}
+
+.chip{
+  height:30px;padding:0 13px;display:inline-flex;align-items:center;gap:6px;cursor:pointer;
+  border-radius:var(--r-full);border:1px solid var(--line);background:var(--fill);
+  color:var(--ink-2);font-size:12px;transition:all var(--t) var(--ease)
+}
+.chip:hover{border-color:var(--line-2);color:var(--ink);background:var(--fill-2)}
+.chip svg.i{width:13px;height:13px}
+.chip.is-on{color:var(--gold);border-color:var(--line-3);background:rgba(203,171,106,.13)}
+.chip.red.is-on{color:var(--crimson-hi);border-color:rgba(201,52,58,.4);background:rgba(201,52,58,.12)}
+.chip.sm{height:24px;padding:0 10px;font-size:11px}
+.chip .x{opacity:.6}
+.chip .x:hover{opacity:1}
+
+/* 普通标签 tag */
+.tag{
+  display:inline-flex;align-items:center;gap:5px;height:23px;padding:0 10px;
+  border-radius:var(--r-xs);font-size:11px;letter-spacing:.02em;
+  background:var(--fill-2);color:var(--ink-2);border:1px solid var(--line)
+}
+.tag.gold{color:var(--gold);background:rgba(203,171,106,.13);border-color:var(--line-2)}
+.tag.red{color:var(--crimson-hi);background:rgba(201,52,58,.12);border-color:rgba(201,52,58,.3)}
+.tag.ok{color:var(--s-ok);background:var(--ok-bg);border-color:rgba(79,174,123,.3)}
+
+/* 表格横向滚动容器 · 窄屏不撑破 */
+.tb-wrap{width:100%;overflow-x:auto}
+.tb-wrap .tb{min-width:500px}
+
+@media (prefers-reduced-motion:reduce){
+  .skel,.md,.dw,.sel-p,.pop-b,.toast{animation:none}
+}
+/* ============================================================
+   11 · MODAL / DRAWER — 浮层
+   ⚠ 遮罩不做透明度动画（动画冻结会停在透明起点）。
+     入场动效只给浮层本体，用 transform。
+   ============================================================ */
+.mk{
+  position:fixed;inset:0;z-index:100;display:none;
+  align-items:center;justify-content:center;padding:24px;
+  background:rgba(8,7,11,.60);backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px)
+}
+.mk.is-on{display:flex}
+.md{
+  position:relative;width:100%;max-width:426px;
+  border-radius:var(--r-2xl);background:var(--panel);
+  border:1px solid var(--line-2);box-shadow:var(--e3);
+  animation:mdIn var(--t) var(--ease);
+}
+@keyframes mdIn{from{transform:translateY(12px) scale(.975)}to{transform:none}}
+.md.sm{max-width:352px}
+.md.lg{max-width:560px}
+.md-h{display:flex;align-items:flex-start;gap:13px;padding:24px 26px 0}
+.md-h > .md-ic{
+  width:40px;height:40px;flex:none;border-radius:var(--r-md);display:grid;place-items:center;
+  background:var(--fill-2);color:var(--gold);border:1px solid var(--line)
+}
+.md-h > .md-ic.red{background:var(--err-bg);color:var(--s-err);border-color:rgba(217,80,86,.28)}
+.md-h > .md-ic.green{background:var(--ok-bg);color:var(--s-ok);border-color:rgba(79,174,123,.28)}
+.md-h h3{margin:0;font-family:var(--serif);font-size:16.5px;font-weight:700;letter-spacing:.05em}
+.md-h p{margin:4px 0 0;font-size:11.5px;color:var(--ink-mute);letter-spacing:.03em}
+.md-x{
+  position:absolute;top:16px;right:16px;width:30px;height:30px;border-radius:50%;
+  border:0;background:transparent;color:var(--ink-mute);display:grid;place-items:center;
+  cursor:pointer;transition:all var(--t-fast) var(--ease)
+}
+.md-x:hover{background:var(--fill-3);color:var(--ink)}
+.md-b{padding:16px 26px 2px;font-size:12.5px;line-height:1.78;color:var(--ink-2)}
+.md-f{display:flex;gap:10px;justify-content:flex-end;padding:20px 26px 24px}
+.md-f .btn{min-width:90px}
+.md-f.sb{justify-content:space-between}
+.md-note{
+  margin:14px 0 0;padding:12px 14px;border-radius:var(--r-md);
+  background:var(--warn-bg);border:1px solid rgba(217,163,64,.24);
+  font-size:11.5px;color:var(--ink-2);display:flex;gap:9px;align-items:flex-start
+}
+.md-note svg.i{color:var(--s-warn);margin-top:1px}
+
+/* 抽屉：悬浮式，四周留边，四角全圆 */
+.dw{
+  position:fixed;z-index:110;top:14px;right:14px;bottom:14px;width:min(360px,calc(100vw - 28px));
+  display:none;flex-direction:column;overflow:hidden;
+  border-radius:var(--r-2xl);background:var(--panel);
+  border:1px solid var(--line-2);box-shadow:var(--e3);
+  animation:dwIn var(--t) var(--ease)
+}
+@keyframes dwIn{from{transform:translateX(18px) scale(.99)}to{transform:none}}
+.dw.is-on{display:flex}
+.dw-h{display:flex;align-items:center;gap:11px;padding:20px 22px 14px;
+  border-bottom:1px solid var(--line)}
+.dw-h h3{margin:0;font-family:var(--serif);font-size:15px;letter-spacing:.05em}
+.dw-h .md-x{position:static;margin-left:auto}
+.dw-b{flex:1;overflow:auto;padding:18px 22px}
+.dw-f{padding:16px 22px 20px;border-top:1px solid var(--line);display:flex;gap:10px}
+.dw-f .btn{flex:1}
+
+/* 气泡确认 */
+.pop{position:relative;display:inline-block}
+.pop-b{
+  position:absolute;z-index:50;bottom:calc(100% + 10px);left:50%;width:232px;
+  transform:translateX(-50%);padding:15px 16px;
+  border-radius:var(--r-lg);background:var(--panel-2);
+  border:1px solid var(--line-2);box-shadow:var(--e3);
+  animation:pop var(--t) var(--ease)
+}
+.pop-b::after{
+  content:'';position:absolute;top:100%;left:50%;width:11px;height:11px;
+  transform:translate(-50%,-6px) rotate(45deg);
+  background:var(--panel-2);border-right:1px solid var(--line-2);border-bottom:1px solid var(--line-2)
+}
+/* 贴近容器左缘时的锚定变体：气泡左对齐不再溢出，箭头用 --arw 指向按钮中心 */
+.pop-b.anchor-l{left:0;transform:none}
+.pop-b.anchor-l::after{left:var(--arw,50%)}
+.pop-b h4{margin:0 0 5px;font-size:12.5px;color:var(--ink);font-weight:600}
+.pop-b p{margin:0 0 11px;font-size:11.5px;color:var(--ink-mute);line-height:1.65}
+.pop-b .r{display:flex;gap:8px;justify-content:flex-end}
+
+/* ============================================================
+   12 · FEEDBACK — 提示条 / 徽章 / 进度 / 骨架 / 空态
+   ============================================================ */
+.alert{
+  display:flex;gap:11px;align-items:flex-start;padding:13px 16px;
+  border-radius:var(--r-lg);border:1px solid var(--line);
+  background:var(--fill);font-size:12.5px;color:var(--ink-2);line-height:1.65
+}
+.alert svg.i{flex:none;margin-top:2px}
+.alert b{color:var(--ink);font-weight:600}
+.alert.info{background:var(--info-bg);border-color:rgba(91,147,214,.26)}
+.alert.info svg.i{color:var(--s-info)}
+.alert.ok{background:var(--ok-bg);border-color:rgba(79,174,123,.26)}
+.alert.ok svg.i{color:var(--s-ok)}
+.alert.warn{background:var(--warn-bg);border-color:rgba(217,163,64,.26)}
+.alert.warn svg.i{color:var(--s-warn)}
+.alert.err{background:var(--err-bg);border-color:rgba(217,80,86,.26)}
+.alert.err svg.i{color:var(--s-err)}
+
+.badge{
+  min-width:19px;height:19px;padding:0 6px;border-radius:var(--r-full);
+  background:var(--crimson);color:#FFF6F0;
+  font-family:var(--mono);font-size:10.5px;line-height:19px;text-align:center;
+  display:inline-block;box-shadow:0 2px 6px rgba(201,52,58,.34)
+}
+.badge.gold{background:linear-gradient(165deg,var(--gold-hi),var(--gold));color:#1A1509}
+.badge.mute{background:var(--fill-3);color:var(--ink-2);box-shadow:none}
+.badge.dot{min-width:0;width:9px;height:9px;padding:0;font-size:0}
+
+.bar{height:8px;border-radius:var(--r-full);background:var(--fill-3);overflow:hidden}
+.bar i{display:block;height:100%;border-radius:inherit;
+  background:linear-gradient(90deg,var(--crimson),var(--crimson-hi))}
+.bar.gold i{background:linear-gradient(90deg,var(--gold),var(--gold-hi))}
+.bar.thin{height:5px}
+.bar-strip{display:flex;align-items:center;gap:11px}
+.bar-strip .bar{flex:1}
+.bar-strip .pct{font-family:var(--mono);font-size:11px;color:var(--ink-mute);min-width:34px;text-align:right}
+
+.skel{
+  border-radius:var(--r-sm);
+  background:linear-gradient(90deg,var(--fill) 25%,var(--fill-3) 37%,var(--fill) 63%);
+  background-size:400% 100%;animation:shim 1.5s linear infinite
+}
+@keyframes shim{from{background-position:100% 0}to{background-position:0 0}}
+@media (prefers-reduced-motion:reduce){.skel{animation:none}}
+.skel.ln{height:11px;border-radius:var(--r-full)}
+.skel.av{width:38px;height:38px;border-radius:50%;flex:none}
+
+.empty{
+  display:flex;flex-direction:column;align-items:center;gap:9px;padding:32px 20px;
+  border:1.5px dashed var(--line-2);border-radius:var(--r-xl);
+  color:var(--ink-mute);text-align:center
+}
+.empty .ic{
+  width:52px;height:52px;border-radius:var(--r-lg);display:grid;place-items:center;
+  background:var(--fill);color:var(--ink-mute);margin-bottom:2px
+}
+.empty .ic svg.i{width:24px;height:24px;stroke-width:1.5}
+.empty b{color:var(--ink-2);font-size:12.5px;font-weight:500}
+.empty span{font-size:11.5px}
+
+/* Toast — 胶囊形，浮层居中 */
+.toast-root{
+  position:fixed;z-index:200;left:50%;bottom:30px;transform:translateX(-50%);
+  display:flex;flex-direction:column;align-items:center;gap:10px;pointer-events:none
+}
+.toast{
+  display:flex;align-items:center;gap:10px;padding:11px 18px;border-radius:var(--r-full);
+  background:var(--panel-2);border:1px solid var(--line-2);box-shadow:var(--e3);
+  font-size:12.5px;color:var(--ink);white-space:nowrap;
+  animation:tIn var(--t) var(--ease)
+}
+@keyframes tIn{from{transform:translateY(12px) scale(.95)}to{transform:none}}
+.toast svg.i{flex:none}
+.toast.ok svg.i{color:var(--s-ok)}
+.toast.err svg.i{color:var(--s-err)}
+.toast.warn svg.i{color:var(--s-warn)}
+.toast.info svg.i{color:var(--s-info)}
+
+/* Tooltip */
+.tip{position:relative;display:inline-flex}
+.tip-b{
+  position:absolute;z-index:50;bottom:calc(100% + 9px);left:50%;transform:translateX(-50%);
+  padding:7px 12px;border-radius:var(--r-sm);white-space:nowrap;
+  background:var(--panel-2);border:1px solid var(--line-2);box-shadow:var(--e2);
+  font-size:11.5px;color:var(--ink-2);opacity:0;visibility:hidden;
+  transition:opacity var(--t-fast) var(--ease),visibility var(--t-fast)
+}
+.tip:hover .tip-b{opacity:1;visibility:visible}
+
+/* ============================================================
+   13 · DATA — 表格 / 分页 / 头像组 / 折叠 / 步骤
+   ============================================================ */
+.tb{width:100%;border-collapse:separate;border-spacing:0;font-size:12.5px}
+.tb th{
+  font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--ink-mute);font-weight:400;text-align:left;padding:0 14px 10px
+}
+.tb td{padding:12px 14px;color:var(--ink-2);border-top:1px solid var(--line)}
+.tb tbody tr{transition:background var(--t-fast) var(--ease)}
+.tb tbody tr:hover td{background:var(--fill)}
+.tb tbody tr:hover td:first-child{border-radius:var(--r-sm) 0 0 var(--r-sm)}
+.tb tbody tr:hover td:last-child{border-radius:0 var(--r-sm) var(--r-sm) 0}
+.tb td b{color:var(--ink);font-weight:500}
+
+.avs{display:flex;align-items:center}
+.avs b{
+  width:34px;height:34px;border-radius:50%;margin-left:-10px;flex:none;
+  display:grid;place-items:center;font-family:var(--serif);font-size:12.5px;font-weight:700;
+  color:var(--ink);background:var(--card);border:2px solid var(--panel);
+  box-shadow:var(--e1)
+}
+.avs b:first-child{margin-left:0}
+.avs b.c1{background:linear-gradient(150deg,#8E3B41,#5C2429);color:#F3DDD6}
+.avs b.c2{background:linear-gradient(150deg,#7A6A3A,#4A3F1E);color:#F1E6C8}
+.avs b.c3{background:linear-gradient(150deg,#3F5A6E,#243544);color:#DDE8F0}
+.avs b.c4{background:linear-gradient(150deg,#5A4A6E,#322742);color:#E6DDF2}
+
+.pg{display:flex;gap:6px;align-items:center}
+.pg button{
+  min-width:34px;height:34px;padding:0 10px;border-radius:var(--r-sm);
+  border:1px solid var(--line);background:var(--fill);color:var(--ink-2);
+  font-family:inherit;font-size:12px;cursor:pointer;
+  display:grid;place-items:center;transition:all var(--t) var(--ease)
+}
+.pg button:hover{border-color:var(--line-2);color:var(--ink);background:var(--fill-2)}
+.pg button.is-on{
+  color:#FFF6F0;border-color:transparent;
+  background:linear-gradient(165deg,var(--crimson-hi),var(--crimson));
+  box-shadow:0 3px 10px rgba(201,52,58,.28),var(--gloss)
+}
+.pg .gap{width:16px;text-align:center;color:var(--ink-mute);font-size:12px}
+
+.fl{border:1px solid var(--line);border-radius:var(--r-lg);background:var(--fill);overflow:hidden}
+.fl+.fl{margin-top:9px}
+.fl-h{
+  display:flex;align-items:center;gap:10px;padding:13px 16px;cursor:pointer;
+  font-size:12.5px;color:var(--ink-2);transition:background var(--t-fast) var(--ease)
+}
+.fl-h:hover{background:var(--fill-2)}
+.fl-h b{color:var(--ink);font-weight:500}
+.fl-h .ar{margin-left:auto;color:var(--ink-mute);transition:transform var(--t) var(--ease)}
+.fl.is-open .fl-h .ar{transform:rotate(180deg)}
+.fl-b{display:none;padding:0 16px 15px;font-size:12px;color:var(--ink-mute);line-height:1.75}
+.fl.is-open .fl-b{display:block}
+
+.steps{display:flex;align-items:center;gap:0}
+.steps .s{display:flex;align-items:center;gap:9px}
+.steps .dot{
+  width:26px;height:26px;border-radius:50%;flex:none;display:grid;place-items:center;
+  border:1px solid var(--line-2);background:var(--fill);color:var(--ink-mute);
+  font-family:var(--mono);font-size:11px;transition:all var(--t) var(--ease)
+}
+.steps .s.done .dot{background:linear-gradient(165deg,var(--crimson-hi),var(--crimson));
+  border-color:transparent;color:#FFF6F0;box-shadow:0 3px 9px rgba(201,52,58,.26)}
+.steps .s.done .dot svg.i{width:13px;height:13px;stroke-width:2.6}
+.steps .s.now .dot{border-color:var(--gold);color:var(--gold);box-shadow:0 0 0 4px var(--ring)}
+.steps .lb{font-size:12px;color:var(--ink-mute);letter-spacing:.03em;white-space:nowrap}
+.steps .s.done .lb,.steps .s.now .lb{color:var(--ink)}
+.steps .ln{flex:1;height:1.5px;min-width:14px;margin:0 9px;border-radius:var(--r-full);
+  background:var(--line-2)}
+.steps .s.done+.ln{background:linear-gradient(90deg,var(--crimson),var(--line-2))}
+
+/* ============================================================
+   14 · UPLOAD
+   ============================================================ */
+.drop{
+  display:flex;flex-direction:column;align-items:center;gap:8px;padding:30px 22px;
+  border:1.5px dashed var(--line-2);border-radius:var(--r-xl);
+  background:var(--fill);color:var(--ink-mute);text-align:center;cursor:pointer;
+  transition:all var(--t) var(--ease)
+}
+.drop:hover{border-color:var(--gold);background:var(--fill-2);color:var(--ink-2)}
+.drop .ic{
+  width:50px;height:50px;border-radius:var(--r-lg);display:grid;place-items:center;
+  background:var(--fill-2);color:var(--gold);margin-bottom:3px
+}
+.drop .ic svg.i{width:23px;height:23px;stroke-width:1.6}
+.drop b{color:var(--ink);font-size:12.5px;font-weight:500}
+.drop span{font-size:11px}
+.file{
+  display:flex;align-items:center;gap:12px;padding:12px 15px;
+  border:1px solid var(--line);border-radius:var(--r-md);background:var(--fill)
+}
+.file .ic{
+  width:36px;height:36px;border-radius:var(--r-sm);flex:none;display:grid;place-items:center;
+  background:rgba(201,52,58,.12);color:var(--crimson-hi)
+}
+.file .nm{flex:1;min-width:0}
+.file .nm b{display:block;font-size:12.5px;font-weight:500;color:var(--ink);
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.file .nm span{font-size:11px;color:var(--ink-mute);font-family:var(--mono)}
+</style>
+</head>
+<body>
+<svg class="defs" aria-hidden="true" focusable="false"><!-- ============================================================
+     图标库 · 统一 24 viewBox / currentColor / linecap&linejoin:round
+     （圆润第四律：方头线是「直愣感」的第二大来源）
+     ============================================================ -->
+<symbol id="i-check" viewBox="0 0 24 24"><path d="M4.8 12.6l4.7 4.7L19.2 7.4"/></symbol>
+<symbol id="i-x" viewBox="0 0 24 24"><path d="M6.4 6.4l11.2 11.2M17.6 6.4L6.4 17.6"/></symbol>
+<symbol id="i-chev" viewBox="0 0 24 24"><path d="M6.5 9.5L12 15l5.5-5.5"/></symbol>
+<symbol id="i-chev-r" viewBox="0 0 24 24"><path d="M9.5 5.5L15 12l-5.5 6.5"/></symbol>
+<symbol id="i-ar-l" viewBox="0 0 24 24"><path d="M14 6l-6 6 6 6"/></symbol>
+<symbol id="i-ar-r" viewBox="0 0 24 24"><path d="M10 6l6 6-6 6"/></symbol>
+<symbol id="i-search" viewBox="0 0 24 24"><circle cx="10.8" cy="10.8" r="6.3"/><path d="M15.4 15.4l4.3 4.3"/></symbol>
+<symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5.5v13M5.5 12h13"/></symbol>
+<symbol id="i-minus" viewBox="0 0 24 24"><path d="M5.5 12h13"/></symbol>
+<symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8.4" r="3.9"/><path d="M4.6 20c1.1-3.9 3.9-5.9 7.4-5.9S18.3 16.1 19.4 20"/></symbol>
+<symbol id="i-bell" viewBox="0 0 24 24"><path d="M6.6 10.4a5.4 5.4 0 0110.8 0c0 4 1.4 5.6 1.4 5.6H5.2s1.4-1.6 1.4-5.6z"/><path d="M10.2 19.2a2 2 0 003.6 0"/></symbol>
+<symbol id="i-cal" viewBox="0 0 24 24"><rect x="3.8" y="5.4" width="16.4" height="14.4" rx="4"/><path d="M3.8 10.2h16.4M8.4 3.6v3.4M15.6 3.6v3.4"/></symbol>
+<symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.2"/><path d="M12 7.6V12l3.1 1.9"/></symbol>
+<symbol id="i-trash" viewBox="0 0 24 24"><path d="M4.8 7.2h14.4M9.6 7.2V5.6a1.6 1.6 0 011.6-1.6h1.6a1.6 1.6 0 011.6 1.6v1.6"/><path d="M6.6 7.2l.9 11.2a1.8 1.8 0 001.8 1.6h5.4a1.8 1.8 0 001.8-1.6l.9-11.2"/><path d="M10.4 11v5.4M13.6 11v5.4"/></symbol>
+<symbol id="i-edit" viewBox="0 0 24 24"><path d="M4.8 19.2h3.1L18.7 8.4a2.2 2.2 0 000-3.1l-.5-.5a2.2 2.2 0 00-3.1 0L4.8 15.6v3.6z"/><path d="M13.7 6.5l3.8 3.8"/></symbol>
+<symbol id="i-up" viewBox="0 0 24 24"><path d="M12 16.4V4.8M7.2 9.6L12 4.8l4.8 4.8"/><path d="M4.8 16.4v1.6a2.4 2.4 0 002.4 2.4h9.6a2.4 2.4 0 002.4-2.4v-1.6"/></symbol>
+<symbol id="i-dl" viewBox="0 0 24 24"><path d="M12 4.8v11.6M7.2 11.6L12 16.4l4.8-4.8"/><path d="M4.8 16.4v1.6a2.4 2.4 0 002.4 2.4h9.6a2.4 2.4 0 002.4-2.4v-1.6"/></symbol>
+<symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.2"/><path d="M12 11.2v5M12 7.9v.1"/></symbol>
+<symbol id="i-warn" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.2"/><path d="M12 7.6v5M12 15.7v.1"/></symbol>
+<symbol id="i-ok-c" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.2"/><path d="M8.4 12.2l2.6 2.6 4.6-5"/></symbol>
+<symbol id="i-err-c" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.2"/><path d="M9.2 9.2l5.6 5.6M14.8 9.2l-5.6 5.6"/></symbol>
+<symbol id="i-eye" viewBox="0 0 24 24"><path d="M2.8 12S6.4 6.2 12 6.2 21.2 12 21.2 12 17.6 17.8 12 17.8 2.8 12 2.8 12z"/><circle cx="12" cy="12" r="2.9"/></symbol>
+<symbol id="i-eye-off" viewBox="0 0 24 24"><path d="M4 9.4C3.2 10.5 2.8 12 2.8 12s3.6 5.8 9.2 5.8c1.4 0 2.6-.4 3.7-.9"/><path d="M9.1 7c.9-.5 1.9-.8 2.9-.8 5.6 0 9.2 5.8 9.2 5.8s-1 1.6-2.7 3"/><path d="M9.8 14.2a2.9 2.9 0 004-4"/><path d="M4.4 4.4l15.2 15.2"/></symbol>
+<symbol id="i-star" viewBox="0 0 24 24"><path d="M12 4.2l2.4 4.9 5.4.8-3.9 3.8.9 5.4-4.8-2.6-4.8 2.6.9-5.4-3.9-3.8 5.4-.8z"/></symbol>
+<symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="10.4" width="14" height="9.4" rx="3.4"/><path d="M8.4 10.4V8.2a3.6 3.6 0 017.2 0v2.2"/></symbol>
+<symbol id="i-mail" viewBox="0 0 24 24"><rect x="3.6" y="5.6" width="16.8" height="12.8" rx="4"/><path d="M4.6 9l6.2 4.2a2 2 0 002.4 0L19.4 9"/></symbol>
+<symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.3"/><path d="M12 3.4v2M12 18.6v2M3.4 12h2M18.6 12h2M6 6l1.4 1.4M16.6 16.6L18 18M18 6l-1.4 1.4M7.4 16.6L6 18"/></symbol>
+<symbol id="i-moon" viewBox="0 0 24 24"><path d="M20 14.6A8.4 8.4 0 019.4 4a8.5 8.5 0 1010.6 10.6z"/></symbol>
+<symbol id="i-more" viewBox="0 0 24 24"><circle cx="5.6" cy="12" r="1.3"/><circle cx="12" cy="12" r="1.3"/><circle cx="18.4" cy="12" r="1.3"/></symbol>
+<symbol id="i-refresh" viewBox="0 0 24 24"><path d="M19.6 12a7.6 7.6 0 01-13 5.4M4.4 12a7.6 7.6 0 0113-5.4"/><path d="M17.6 3.4v3.4h-3.4M6.4 20.6v-3.4h3.4"/></symbol>
+<symbol id="i-box" viewBox="0 0 24 24"><path d="M4 9.2l8-4.4 8 4.4v5.6l-8 4.4-8-4.4z"/><path d="M4 9.2l8 4.4 8-4.4M12 13.6v9"/></symbol>
+<symbol id="i-file" viewBox="0 0 24 24"><path d="M13.4 3.8H7.6a2.4 2.4 0 00-2.4 2.4v11.6a2.4 2.4 0 002.4 2.4h8.8a2.4 2.4 0 002.4-2.4V8.6z"/><path d="M13.4 3.8v4.8h5.4"/></symbol>
+<symbol id="i-set" viewBox="0 0 24 24"><circle cx="12" cy="12" r="2.9"/><path d="M19.2 12a7.2 7.2 0 00-.1-1.1l1.9-1.4-1.9-3.3-2.2.9a7.1 7.1 0 00-1.9-1.1L14.6 3.6h-3.8L10.4 6a7.1 7.1 0 00-1.9 1.1l-2.2-.9L4.4 9.5l1.9 1.4a7.2 7.2 0 000 2.2L4.4 14.5l1.9 3.3 2.2-.9a7.1 7.1 0 001.9 1.1l.4 2.4h3.8l.4-2.4a7.1 7.1 0 001.9-1.1l2.2.9 1.9-3.3-1.9-1.4c.1-.4.1-.7.1-1.1z"/></symbol>
+<symbol id="i-copy" viewBox="0 0 24 24"><rect x="9" y="9" width="10.4" height="10.4" rx="3.4"/><path d="M16 6.6V6a2.4 2.4 0 00-2.4-2.4H6.8A2.4 2.4 0 004.4 6v6.8A2.4 2.4 0 006.8 15h.6"/></symbol>
+<symbol id="i-filter" viewBox="0 0 24 24"><path d="M4.4 6.4h15.2M7.2 12h9.6M10 17.6h4"/></symbol>
+<symbol id="i-home" viewBox="0 0 24 24"><path d="M4.4 10.4L12 4.2l7.6 6.2v8a1.8 1.8 0 01-1.8 1.6H6.2a1.8 1.8 0 01-1.8-1.6z"/><path d="M9.8 20v-5.4h4.4V20"/></symbol>
+<symbol id="i-flame" viewBox="0 0 24 24"><path d="M12 3.4s4.6 3.6 4.6 7.8a4.6 4.6 0 11-9.2 0C7.4 9.4 8.6 8 8.6 8s.2 1.6 1.3 1.6c1.4 0 1.4-3 2.1-6.2z"/></symbol>
+<symbol id="i-gift" viewBox="0 0 24 24"><rect x="3.8" y="10.2" width="16.4" height="9.6" rx="3"/><path d="M3.8 14.2h16.4M12 10.2v9.6"/><path d="M12 10.2S10.6 4 8.1 4a2.1 2.1 0 000 6.2zM12 10.2s1.4-6.2 3.9-6.2a2.1 2.1 0 010 6.2z"/></symbol>
+<symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3.6l6.8 2.6v5.4c0 4.2-2.9 7.2-6.8 8.8-3.9-1.6-6.8-4.6-6.8-8.8V6.2z"/><path d="M9.2 12l2 2 3.6-4"/></symbol>
+<symbol id="i-qr" viewBox="0 0 24 24"><rect x="3.8" y="3.8" width="6.4" height="6.4" rx="2.4"/><rect x="13.8" y="3.8" width="6.4" height="6.4" rx="2.4"/><rect x="3.8" y="13.8" width="6.4" height="6.4" rx="2.4"/><path d="M13.8 13.8h3v3h-3zM20.2 13.8v6.4M17.8 20.2h2.4"/></symbol>
+<symbol id="i-lotus" viewBox="0 0 24 24"><path d="M12 5.4c1.9 1.9 2.9 3.9 2.9 5.9 0 2.5-1.3 4-2.9 4s-2.9-1.5-2.9-4c0-2 1-4 2.9-5.9z"/><path d="M5.6 9.2c2.4.7 3.9 2 4.5 3.7M18.4 9.2c-2.4.7-3.9 2-4.5 3.7"/><path d="M3.4 13.6c2.6 3.2 5.5 4.6 8.6 4.6s6-1.4 8.6-4.6"/></symbol>
+</svg>
+<div class="shell">
+  <aside class="toc">
+    <div class="toc-t">Contents</div>
+    <ul class="toc-list" id="toc"></ul>
+  </aside>
+  <main id="main">
+
+    <!-- ===== HERO ===== -->
+    <header class="hero">
+      <div class="hero-r">
+        <div class="seal"><svg class="i"><use href="#i-lotus"/></svg></div>
+        <div class="hero-t">
+          <h1>囤囤鼠大作战</h1>
+          <p class="hero-sub">CONTROL KIT · 控件样式示例</p>
+          <div class="hero-tags">
+            <span class="pill gold">圆润形制</span>
+            <span class="pill">明暗双主题</span>
+            <span class="pill red">28 类控件</span>
+          </div>
+        </div>
+        <div class="hero-acts">
+          <button class="btn sq out" id="themeBtn" title="切换明暗"><svg class="i"><use href="#i-sun" id="themeIco"/></svg></button>
+        </div>
+      </div>
+    </header>
+
+    <!-- ===== 01 按钮 ===== -->
+    <section class="sec" data-n="01" data-t="按钮 Button">
+      <div class="sec-h"><span class="num">01</span><h2>按钮 Button</h2><span class="note">圆角 14px · 阴影散而不贴</span></div>
+      <div class="stage">
+        <div class="grp">
+          <div class="lbl">类型</div>
+          <div class="row">
+            <button class="btn pri"><svg class="i"><use href="#i-gift"/></svg>领取奖励</button>
+            <button class="btn sec"><svg class="i"><use href="#i-star"/></svg>收藏</button>
+            <button class="btn out">描边按钮</button>
+            <button class="btn ghost">幽灵按钮</button>
+            <button class="btn dan"><svg class="i"><use href="#i-trash"/></svg>删除存档</button>
+          </div>
+        </div>
+        <hr class="hr">
+        <div class="grp">
+          <div class="lbl">尺寸</div>
+          <div class="row">
+            <button class="btn pri sm"><svg class="i"><use href="#i-plus"/></svg>小按钮</button>
+            <button class="btn pri">默认尺寸</button>
+            <button class="btn pri lg"><svg class="i"><use href="#i-flame"/></svg>大按钮</button>
+          </div>
+        </div>
+        <hr class="hr">
+        <div class="grp">
+          <div class="lbl">形态</div>
+          <div class="row">
+            <button class="btn pri cap">胶囊按钮</button>
+            <button class="btn sec cap">胶囊次按钮</button>
+            <button class="btn sq out"><svg class="i"><use href="#i-edit"/></svg></button>
+            <button class="btn sq sm ghost"><svg class="i"><use href="#i-more"/></svg></button>
+            <button class="btn sq lg out"><svg class="i"><use href="#i-set"/></svg></button>
+          </div>
+        </div>
+        <hr class="hr">
+        <div class="grp">
+          <div class="lbl">状态</div>
+          <div class="row">
+            <button class="btn pri"><span class="spin"></span>提交中…</button>
+            <button class="btn sec" disabled>已禁用</button>
+            <button class="btn out is-dis">不可用</button>
+          </div>
+        </div>
+        <hr class="hr">
+        <div class="grp">
+          <div class="lbl">按钮组 · 通栏</div>
+          <div class="row" style="align-items:flex-start;gap:18px">
+            <div class="btn-grp" data-toggle-grp>
+              <button class="is-on">日常</button><button>周常</button><button>活动</button>
+            </div>
+            <div style="max-width:230px;width:100%">
+              <button class="btn pri lg wide">通栏主按钮 · 立即开始委托</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== 02 输入框 ===== -->
+    <section class="sec" data-n="02" data-t="输入框 Input">
+      <div class="sec-h"><span class="num">02</span><h2>输入框 Input</h2><span class="note">外壳持边框 · 焦点环宽而淡</span></div>
+      <div class="stage">
+        <div class="grid2">
+          <div class="fld">
+            <div class="fld-l">委托名称<span class="req">*</span></div>
+            <div class="wt"><input value="御魂觉醒 · 十层" placeholder="给这个委托起个名字"></div>
+            <div class="fld-h">最多 24 个字</div>
+          </div>
+          <div class="fld">
+            <div class="fld-l">带前缀图标</div>
+            <div class="wt">
+              <svg class="i"><use href="#i-search"/></svg>
+              <input placeholder="搜索委托 / 式神 / 御魂">
+            </div>
+            <div class="fld-h">支持拼音首字母</div>
+          </div>
+          <div class="fld">
+            <div class="fld-l">带后缀单位</div>
+            <div class="wt">
+              <input value="120">
+              <span class="div"></span><span class="suf">体力</span>
+            </div>
+            <div class="fld-h">每日上限 300</div>
+          </div>
+          <div class="fld">
+            <div class="fld-l">一键清除</div>
+            <div class="wt">
+              <input value="输入后右侧出现清除" style="font-size:12px">
+              <button class="clr" type="button"><svg class="i"><use href="#i-x"/></svg></button>
+            </div>
+            <div class="fld-h">点击即清空</div>
+          </div>
+          <div class="fld">
+            <div class="fld-l">校验失败<span class="req">*</span></div>
+            <div class="wt is-err">
+              <svg class="i"><use href="#i-err-c"/></svg>
+              <input value="a" style="color:var(--s-err)">
+            </div>
+            <div class="fld-h err"><svg class="i"><use href="#i-warn"/></svg>名称至少 2 个字</div>
+          </div>
+          <div class="fld">
+            <div class="fld-l">校验通过</div>
+            <div class="wt is-ok">
+              <input value="yuhun-10">
+              <svg class="i"><use href="#i-ok-c"/></svg>
+            </div>
+            <div class="fld-h ok"><svg class="i"><use href="#i-check"/></svg>标识可用</div>
+          </div>
+          <div class="fld">
+            <div class="fld-l">只读</div>
+            <div class="wt is-ro"><input value="鼠鼠-40799" readonly></div>
+            <div class="fld-h">由系统分配</div>
+          </div>
+          <div class="fld">
+            <div class="fld-l">禁用</div>
+            <div class="wt is-dis"><input value="结算中，暂不可改" disabled></div>
+            <div class="fld-h">结算期间锁定</div>
+          </div>
+        </div>
+
+        <hr class="hr">
+
+        <div class="grp">
+          <div class="lbl">尺寸 · 胶囊 · 密码显隐</div>
+          <div class="row" style="align-items:flex-start;gap:14px">
+            <div class="wt sm" style="max-width:170px"><input placeholder="小尺寸 34"></div>
+            <div class="wt" style="max-width:200px"><input placeholder="默认 42"></div>
+            <div class="wt lg" style="max-width:230px"><input placeholder="大尺寸 50"></div>
+            <div class="wt cap" style="max-width:210px">
+              <svg class="i"><use href="#i-search"/></svg>
+              <input placeholder="胶囊搜索框">
+            </div>
+            <div class="wt" style="max-width:220px">
+              <svg class="i"><use href="#i-lock"/></svg>
+              <input type="password" value="sakuya1024">
+              <button class="clr" type="button" data-eye><svg class="i"><use href="#i-eye"/></svg></button>
+            </div>
+          </div>
+        </div>
+
+        <hr class="hr">
+
+        <div class="grid2">
+          <div class="fld">
+            <div class="fld-l">委托备注<span class="opt">多行</span></div>
+            <div class="wt area">
+              <textarea placeholder="写点备注，比如：优先刷御魂十层，出六星攻击加成就停">每周三、周六双倍掉落，优先清空体力。</textarea>
+            </div>
+            <div class="ta-foot"><span>支持换行</span><span class="cn">27 / 200</span></div>
+          </div>
+          <div class="fld">
+            <div class="lbl">数值步进器</div>
+            <div class="stp">
+              <button type="button" data-stp="-1"><svg class="i"><use href="#i-minus"/></svg></button>
+              <input value="6" readonly>
+              <button type="button" data-stp="1"><svg class="i"><use href="#i-plus"/></svg></button>
+            </div>
+            <div class="lbl">验证码 · 六位</div>
+            <div class="otp">
+              <span>4</span><span>7</span><span>2</span><span class="is-on"></span><span class="is-empty"></span><span class="is-empty"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <!-- ===== 03 下拉框 ===== -->
+    <section class="sec" data-n="03" data-t="下拉框 Select">
+      <div class="sec-h"><span class="num">03</span><h2>下拉框 Select</h2><span class="note">自绘 · 原生 select 在圆润风格里无法驯服</span></div>
+      <div class="stage">
+        <div class="grid2" style="overflow:visible">
+          <!-- 展开态：默认开着，方便直接看弹层 -->
+          <div class="fld">
+            <div class="fld-l">基础单选<span class="opt">展开态</span></div>
+            <div class="sel is-open" data-sel>
+              <button class="sel-b" type="button">
+                <svg class="i"><use href="#i-clock"/></svg>
+                <span class="cv">每日 04:00 刷新</span>
+                <svg class="i ar"><use href="#i-chev"/></svg>
+              </button>
+              <div class="sel-p">
+                <div class="sel-g">刷新周期</div>
+                <div class="sel-o is-on" data-v="每日 04:00 刷新"><svg class="i ck"><use href="#i-check"/></svg>每日 04:00 刷新</div>
+                <div class="sel-o" data-v="每日 00:00 刷新"><svg class="i ck"><use href="#i-check"/></svg>每日 00:00 刷新</div>
+                <div class="sel-o" data-v="每周一 04:00 刷新"><svg class="i ck"><use href="#i-check"/></svg>每周一 04:00 刷新</div>
+                <div class="sel-o" data-v="手动刷新"><svg class="i ck"><use href="#i-check"/></svg>手动刷新</div>
+              </div>
+            </div>
+            <div class="fld-h">点击选项即选中并收起</div>
+            <!-- 占位：让展开的弹层落在空白里，不遮挡下一行控件 -->
+            <div style="height:180px" aria-hidden="true"></div>
+          </div>
+
+          <!-- 长列表 + 滚动 -->
+          <div class="fld">
+            <div class="fld-l">长列表<span class="opt">max-height 238px</span></div>
+            <div class="sel" data-sel>
+              <button class="sel-b" type="button">
+                <svg class="i"><use href="#i-flame"/></svg>
+                <span class="cv">御魂 · 十层</span>
+                <svg class="i ar"><use href="#i-chev"/></svg>
+              </button>
+              <div class="sel-p max">
+                <div class="sel-o is-on"><svg class="i ck"><use href="#i-check"/></svg>御魂 · 十层<span class="sub">120/次</span></div>
+                <div class="sel-o"><svg class="i ck"><use href="#i-check"/></svg>御魂 · 十一层<span class="sub">150/次</span></div>
+                <div class="sel-o"><svg class="i ck"><use href="#i-check"/></svg>觉醒 · 风之章<span class="sub">90/次</span></div>
+                <div class="sel-o"><svg class="i ck"><use href="#i-check"/></svg>觉醒 · 雷之章<span class="sub">90/次</span></div>
+                <div class="sel-o"><svg class="i ck"><use href="#i-check"/></svg>御灵 · 三阶<span class="sub">130/次</span></div>
+                <div class="sel-o"><svg class="i ck"><use href="#i-check"/></svg>业原火 · 六星<span class="sub">200/次</span></div>
+                <div class="sel-o"><svg class="i ck"><use href="#i-check"/></svg>秘闻副本 · 天邪鬼王<span class="sub">240/次</span></div>
+                <div class="sel-o"><svg class="i ck"><use href="#i-check"/></svg>地域鬼王 · 鬼切<span class="sub">300/次</span></div>
+              </div>
+            </div>
+            <div class="fld-h">超出后弹层内部滚动，外部不撑破</div>
+          </div>
+
+          <!-- 多选 -->
+          <div class="fld">
+            <div class="fld-l">多选 · 标签回填</div>
+            <div class="sel" data-sel data-multi>
+              <button class="sel-b" type="button" style="height:auto;min-height:42px;padding:7px 14px">
+                <span class="tags">
+                  <em>御魂<svg class="i"><use href="#i-x"/></svg></em>
+                  <em>觉醒<svg class="i"><use href="#i-x"/></svg></em>
+                </span>
+                <svg class="i ar"><use href="#i-chev"/></svg>
+              </button>
+              <div class="sel-p">
+                <div class="sel-o is-on" data-v="御魂"><svg class="i ck"><use href="#i-check"/></svg>御魂</div>
+                <div class="sel-o is-on" data-v="觉醒"><svg class="i ck"><use href="#i-check"/></svg>觉醒</div>
+                <div class="sel-o" data-v="御灵"><svg class="i ck"><use href="#i-check"/></svg>御灵</div>
+                <div class="sel-o" data-v="秘闻"><svg class="i ck"><use href="#i-check"/></svg>秘闻副本</div>
+                <div class="sel-o" data-v="地域鬼王"><svg class="i ck"><use href="#i-check"/></svg>地域鬼王</div>
+              </div>
+            </div>
+            <div class="fld-h">已选 2 项</div>
+          </div>
+
+          <!-- 向上弹 + 禁用 + 胶囊 -->
+          <div class="fld">
+            <div class="fld-l">向前弹出<span class="opt">空间不足时</span></div>
+            <div class="sel down-up" data-sel>
+              <button class="sel-b" type="button">
+                <span class="cv">向上展开</span>
+                <svg class="i ar"><use href="#i-chev"/></svg>
+              </button>
+              <div class="sel-p">
+                <div class="sel-o is-on"><svg class="i ck"><use href="#i-check"/></svg>选项一</div>
+                <div class="sel-o"><svg class="i ck"><use href="#i-check"/></svg>选项二</div>
+                <div class="sel-o"><svg class="i ck"><use href="#i-check"/></svg>选项三</div>
+              </div>
+            </div>
+            <div class="fld-h">靠近视口底部时改向上弹</div>
+          </div>
+
+          <div class="fld">
+            <div class="fld-l">带操作页脚</div>
+            <div class="sel" data-sel>
+              <button class="sel-b" type="button">
+                <svg class="i"><use href="#i-user"/></svg>
+                <span class="cv">全部式神</span>
+                <svg class="i ar"><use href="#i-chev"/></svg>
+              </button>
+              <div class="sel-p">
+                <div class="sel-g">按稀有度</div>
+                <div class="sel-o is-on sw2"><span>全部式神</span><span class="sub">108</span></div>
+                <div class="sel-o sw2"><span>SP 阶</span><span class="sub">24</span></div>
+                <div class="sel-o sw2"><span>SSR 阶</span><span class="sub">41</span></div>
+                <div class="sel-o sw2"><span>SR 阶</span><span class="sub">43</span></div>
+                <div class="sel-foot">
+                  <button class="btn sm out" style="flex:1">重置</button>
+                  <button class="btn sm pri" style="flex:1">应用</button>
+                </div>
+              </div>
+            </div>
+            <div class="fld-h">弹层里可以放按钮</div>
+          </div>
+
+          <div class="fld">
+            <div class="fld-l">胶囊 · 禁用</div>
+            <div class="row" style="gap:12px">
+              <div class="sel cap" data-sel style="max-width:170px">
+                <button class="sel-b cap" type="button">
+                  <span class="cv">已选 3 项</span>
+                  <svg class="i ar"><use href="#i-chev"/></svg>
+                </button>
+                <div class="sel-p">
+                  <div class="sel-o is-on"><svg class="i ck"><use href="#i-check"/></svg>选项一</div>
+                  <div class="sel-o is-on"><svg class="i ck"><use href="#i-check"/></svg>选项二</div>
+                  <div class="sel-o is-on"><svg class="i ck"><use href="#i-check"/></svg>选项三</div>
+                </div>
+              </div>
+              <div class="sel is-dis" style="max-width:150px">
+                <button class="sel-b" type="button" disabled>
+                  <span class="cv">不可更改</span>
+                  <svg class="i ar"><use href="#i-chev"/></svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== 04 选择控件 ===== -->
+    <section class="sec" data-n="04" data-t="选择控件 Choice">
+      <div class="sec-h"><span class="num">04</span><h2>选择控件 Choice</h2><span class="note">开关 / 复选 / 单选 / 分段 / 滑块 / 标签</span></div>
+      <div class="stage">
+        <div class="grid2">
+          <div class="grp">
+            <div class="lbl">开关 Switch</div>
+            <div class="row">
+              <span class="sw is-on" role="switch" aria-checked="true" tabindex="0"></span>
+              <span class="sw" role="switch" aria-checked="false" tabindex="0"></span>
+              <span class="sw is-on is-dis" role="switch" aria-checked="true"></span>
+              <span class="sw lg is-on" role="switch" aria-checked="true" tabindex="0"></span>
+            </div>
+          </div>
+          <div class="grp">
+            <div class="lbl">复选框 Checkbox</div>
+            <div class="row">
+              <span class="cb is-on" role="checkbox" aria-checked="true" tabindex="0"><svg class="i"><use href="#i-check"/></svg></span>
+              <span class="cb" role="checkbox" aria-checked="false" tabindex="0"><svg class="i"><use href="#i-check"/></svg></span>
+              <span class="cb is-half"><svg class="i" style="opacity:1;transform:none;margin:0 -4px"><use href="#i-minus"/></svg></span>
+              <span class="cb is-dis"><svg class="i"><use href="#i-check"/></svg></span>
+            </div>
+          </div>
+          <div class="grp">
+            <div class="lbl">单选 Radio</div>
+            <div class="row">
+              <span class="rd is-on" role="radio" aria-checked="true" tabindex="0"></span>
+              <span class="rd" role="radio" aria-checked="false" tabindex="0"></span>
+              <span class="rd is-on" style="opacity:.42"></span>
+            </div>
+          </div>
+          <div class="grp">
+            <div class="lbl">分段控件 Segmented</div>
+            <div class="col" style="gap:9px">
+              <div class="seg" data-seg>
+                <button class="segi is-on">日常</button><button class="segi">周常</button><button class="segi">活动</button>
+              </div>
+              <div class="seg gold" data-seg>
+                <button class="segi is-on">列表</button><button class="segi">紧凑</button><button class="segi">卡片</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <hr class="hr">
+
+        <div class="grp">
+          <div class="lbl">选项卡片（可含说明 · 常与单选合用）</div>
+          <div class="grid2">
+            <label class="opt is-on">
+              <span class="rd is-on"></span>
+              <span class="ot"><b>标准演出</b><span>加载稍慢，动画完整</span></span>
+            </label>
+            <label class="opt">
+              <span class="rd"></span>
+              <span class="ot"><b>性能优先</b><span>跳过入场动效，省电</span></span>
+              <span class="badge mute">推荐</span>
+            </label>
+          </div>
+        </div>
+
+        <hr class="hr">
+
+        <div class="grp">
+          <div class="lbl">滑块 Slider</div>
+          <div class="col" style="max-width:340px;gap:14px">
+            <div class="rng"><input type="range" min="0" max="100" value="28" style="--p:28%"><span class="v">28%</span></div>
+            <div class="rng"><input type="range" min="0" max="100" value="64" style="--p:64%"><span class="v">64%</span></div>
+            <div class="rng"><input type="range" min="0" max="100" value="92" style="--p:92%"><span class="v">92%</span></div>
+          </div>
+        </div>
+
+        <hr class="hr">
+
+        <div class="grp">
+          <div class="lbl">标签选择 Chip · 普通标签 Tag</div>
+          <div class="row">
+            <span class="chip is-on" data-chip><svg class="i"><use href="#i-check"/></svg>御魂</span>
+            <span class="chip" data-chip>觉醒</span>
+            <span class="chip" data-chip>御灵</span>
+            <span class="chip" data-chip>秘闻</span>
+            <span class="chip red is-on" data-chip><svg class="i"><use href="#i-flame"/></svg>限时双倍</span>
+          </div>
+          <div class="row">
+            <span class="tag">默认标签</span>
+            <span class="tag gold"><svg class="i" style="width:11px;height:11px"><use href="#i-star"/></svg>稀有</span>
+            <span class="tag red">限时</span>
+            <span class="tag ok"><svg class="i" style="width:11px;height:11px"><use href="#i-check"/></svg>已完成</span>
+            <span class="tag">可关闭<svg class="i" style="width:11px;height:11px;opacity:.6;cursor:pointer"><use href="#i-x"/></svg></span>
+          </div>
+        </div>
+      </div>
+    </section>
+    <!-- ===== 05 弹窗浮层 ===== -->
+    <section class="sec" data-n="05" data-t="弹窗浮层 Modal">
+      <div class="sec-h"><span class="num">05</span><h2>弹窗浮层 Modal</h2><span class="note">圆角 30px · 遮罩不做透明度动画</span></div>
+      <div class="stage">
+        <div class="grp">
+          <div class="lbl">弹窗 · 点击试试（真能弹）</div>
+          <div class="row">
+            <button class="btn pri" data-open="md-form"><svg class="i"><use href="#i-edit"/></svg>标准弹窗</button>
+            <button class="btn dan" data-open="md-dan"><svg class="i"><use href="#i-warn"/></svg>危险确认</button>
+            <button class="btn out" data-open="md-long">长内容滚动</button>
+            <button class="btn sec" data-open="dw"><svg class="i"><use href="#i-set"/></svg>侧边抽屉</button>
+          </div>
+        </div>
+
+        <hr class="hr">
+
+        <div class="grp">
+          <div class="lbl">气泡确认 Popconfirm（就地确认，不打断）</div>
+          <div class="row" style="padding-top:180px;gap:250px">
+            <div class="pop">
+              <div class="pop-b anchor-l" style="--arw:44px">
+                <h4>放弃本次委托？</h4>
+                <p>已消耗的 60 体力不会返还，进度也会清空。</p>
+                <div class="r">
+                  <button class="btn sm ghost">再想想</button>
+                  <button class="btn sm dan">放弃</button>
+                </div>
+              </div>
+              <button class="btn out">放弃委托</button>
+            </div>
+            <div class="pop">
+              <div class="pop-b anchor-l" style="--arw:38px">
+                <h4>刷新每日任务？</h4>
+                <p>刷新后今日的完成记录将归零，限时活动不受影响。</p>
+                <div class="r">
+                  <button class="btn sm ghost">取消</button>
+                  <button class="btn sm pri">刷新</button>
+                </div>
+              </div>
+              <button class="btn ghost"><svg class="i"><use href="#i-refresh"/></svg>刷新</button>
+            </div>
+          </div>
+        </div>
+
+        <hr class="hr">
+
+        <div class="grp">
+          <div class="lbl">抽屉 Drawer · 悬浮式，四周留边四角全圆</div>
+          <div class="row">
+            <button class="btn out" data-open="dw"><svg class="i"><use href="#i-filter"/></svg>打开筛选抽屉</button>
+            <button class="btn ghost" data-toast="ok">Toast · 成功</button>
+            <button class="btn ghost" data-toast="err">Toast · 失败</button>
+            <button class="btn ghost" data-toast="warn">Toast · 警告</button>
+            <button class="btn ghost" data-toast="info">Toast · 提示</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== 06 反馈 ===== -->
+    <section class="sec" data-n="06" data-t="反馈 Feedback">
+      <div class="sec-h"><span class="num">06</span><h2>反馈 Feedback</h2><span class="note">提示条 / 徽章 / 进度 / 骨架 / 空态 / Tooltip</span></div>
+      <div class="stage">
+        <div class="grp">
+          <div class="lbl">提示条 Alert · 四种语义色</div>
+          <div class="col" style="max-width:100%;gap:10px">
+            <div class="alert info">
+              <svg class="i"><use href="#i-info"/></svg>
+              <div><b>每日刷新已调整。</b>新的刷新时刻为 04:00，旧记录会自动归档到历史。</div>
+            </div>
+            <div class="alert ok">
+              <svg class="i"><use href="#i-ok-c"/></svg>
+              <div><b>委托已提交。</b>奖励将在 3 分钟内发放到「临时物资」。</div>
+            </div>
+            <div class="alert warn">
+              <svg class="i"><use href="#i-warn"/></svg>
+              <div><b>体力不足。</b>还差 40 点，可先完成「结界突破」补充。</div>
+            </div>
+            <div class="alert err">
+              <svg class="i"><use href="#i-err-c"/></svg>
+              <div><b>提交失败。</b>与该委托的连线已断开，请检查网络后重试。</div>
+            </div>
+          </div>
+        </div>
+
+        <hr class="hr">
+
+        <div class="grid2">
+          <div class="grp">
+            <div class="lbl">徽章 Badge</div>
+            <div class="row">
+              <span class="badge">7</span>
+              <span class="badge">99+</span>
+              <span class="badge gold">3</span>
+              <span class="badge mute">0</span>
+              <span class="badge dot"></span>
+            </div>
+          </div>
+          <div class="grp">
+            <div class="lbl">头像组 Avatar</div>
+            <div class="avs">
+              <b class="c1">鼠</b><b class="c2">晴</b><b class="c3">神</b><b class="c4">源</b>
+              <b style="background:var(--fill-3);color:var(--ink-2)">+5</b>
+            </div>
+          </div>
+        </div>
+
+        <hr class="hr">
+
+        <div class="grp">
+          <div class="lbl">进度 Progress</div>
+          <div class="col" style="max-width:420px;gap:14px">
+            <div class="bar-strip"><div class="bar"><i style="width:38%"></i></div><span class="pct">38%</span></div>
+            <div class="bar-strip"><div class="bar gold"><i style="width:72%"></i></div><span class="pct">72%</span></div>
+            <div class="bar-strip"><div class="bar thin"><i style="width:12%"></i></div><span class="pct">12%</span></div>
+            <div class="row" style="gap:22px;align-items:center">
+              <div class="row" style="gap:10px">
+                <svg viewBox="0 0 44 44" style="width:46px;height:46px;transform:rotate(-90deg)">
+                  <circle cx="22" cy="22" r="18" fill="none" stroke="var(--fill-3)" stroke-width="4.5"/>
+                  <circle cx="22" cy="22" r="18" fill="none" stroke="var(--crimson)" stroke-width="4.5"
+                          stroke-linecap="round" stroke-dasharray="113" stroke-dashoffset="32"/>
+                </svg>
+                <div><div style="font-family:var(--mono);font-size:15px;color:var(--ink)">72%</div>
+                <div style="font-size:11px;color:var(--ink-mute)">今日进度</div></div>
+              </div>
+              <div class="row" style="gap:10px">
+                <svg viewBox="0 0 44 44" style="width:46px;height:46px;transform:rotate(-90deg)">
+                  <circle cx="22" cy="22" r="18" fill="none" stroke="var(--fill-3)" stroke-width="4.5"/>
+                  <circle cx="22" cy="22" r="18" fill="none" stroke="var(--gold)" stroke-width="4.5"
+                          stroke-linecap="round" stroke-dasharray="113" stroke-dashoffset="79"/>
+                </svg>
+                <div><div style="font-family:var(--mono);font-size:15px;color:var(--ink)">30%</div>
+                <div style="font-size:11px;color:var(--ink-mute)">周常进度</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <hr class="hr">
+
+        <div class="grp">
+          <div class="lbl">骨架屏 Skeleton</div>
+          <div class="col" style="max-width:420px;gap:14px">
+            <div class="row" style="gap:12px;flex-wrap:nowrap">
+              <div class="skel av"></div>
+              <div style="flex:1;display:flex;flex-direction:column;gap:8px">
+                <div class="skel ln" style="width:46%"></div>
+                <div class="skel ln" style="width:78%"></div>
+              </div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <div class="skel ln"></div>
+              <div class="skel ln" style="width:88%"></div>
+              <div class="skel ln" style="width:62%"></div>
+            </div>
+          </div>
+        </div>
+
+        <hr class="hr">
+
+        <div class="grid2">
+          <div class="grp">
+            <div class="lbl">空状态 Empty</div>
+            <div class="empty">
+              <div class="ic"><svg class="i"><use href="#i-box"/></svg></div>
+              <b>仓库空空如也</b>
+              <span>完成委托后掉落的御魂会堆在这里</span>
+              <button class="btn sm sec" style="margin-top:5px"><svg class="i"><use href="#i-plus"/></svg>去接委托</button>
+            </div>
+          </div>
+          <div class="grp">
+            <div class="lbl">气泡提示 Tooltip · 悬停查看</div>
+            <div class="row" style="gap:14px;padding-top:8px">
+              <span class="tip">
+                <button class="btn out"><svg class="i"><use href="#i-shield"/></svg>护盾</button>
+                <span class="tip-b">抵消一次致命伤，每场限一次</span>
+              </span>
+              <span class="tip">
+                <span class="tag gold" style="cursor:help"><svg class="i" style="width:11px;height:11px"><use href="#i-star"/></svg>暴击</span>
+                <span class="tip-b">暴击率 +15%，可与御魂叠加</span>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <!-- ===== 07 数据展示 ===== -->
+    <section class="sec" data-n="07" data-t="数据展示 Data">
+      <div class="sec-h"><span class="num">07</span><h2>数据展示 Data</h2><span class="note">表格 / 分页 / 折叠 / 步骤</span></div>
+      <div class="stage">
+        <div class="grp">
+          <div class="lbl">表格 Table</div>
+          <div class="tb-wrap">
+            <table class="tb">
+              <thead>
+                <tr><th>委托名称</th><th>类型</th><th>进度</th><th>奖励</th><th>状态</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><b>御魂觉醒 · 十层</b></td><td>日常</td>
+                  <td><span style="font-family:var(--mono)">3 / 5</span></td>
+                  <td><span class="tag gold">体力 ×60</span></td>
+                  <td><span class="tag ok">已完成</span></td>
+                </tr>
+                <tr>
+                  <td><b>结界突破 · 三次</b></td><td>日常</td>
+                  <td><span style="font-family:var(--mono)">1 / 3</span></td>
+                  <td><span class="tag gold">金币 ×8万</span></td>
+                  <td><span class="tag red">进行中</span></td>
+                </tr>
+                <tr>
+                  <td><b>地域鬼王 · 鬼切</b></td><td>周常</td>
+                  <td><span style="font-family:var(--mono)">0 / 1</span></td>
+                  <td><span class="tag gold">六星御魂</span></td>
+                  <td><span class="tag">未接取</span></td>
+                </tr>
+                <tr>
+                  <td><b>秘闻副本 · 天邪鬼王</b></td><td>活动</td>
+                  <td><span style="font-family:var(--mono)">7 / 7</span></td>
+                  <td><span class="tag gold">限定皮肤券</span></td>
+                  <td><span class="tag ok">已完成</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <hr class="hr">
+
+        <div class="grp">
+          <div class="lbl">分页 Pagination</div>
+          <div class="row" style="gap:16px">
+            <div class="pg">
+              <button><svg class="i" style="width:14px;height:14px"><use href="#i-ar-l"/></svg></button>
+              <button class="is-on">1</button><button>2</button><button>3</button>
+              <span class="gap">…</span><button>12</button>
+              <button><svg class="i" style="width:14px;height:14px"><use href="#i-ar-r"/></svg></button>
+            </div>
+            <div class="row" style="gap:8px;font-size:11.5px;color:var(--ink-mute)">
+              每页
+              <div class="seg" data-seg style="padding:2px">
+                <button class="segi is-on" style="height:24px;padding:0 11px;font-size:11px">10</button>
+                <button class="segi" style="height:24px;padding:0 11px;font-size:11px">20</button>
+                <button class="segi" style="height:24px;padding:0 11px;font-size:11px">50</button>
+              </div>
+              条
+            </div>
+          </div>
+        </div>
+
+        <hr class="hr">
+
+        <div class="grid2">
+          <div class="grp">
+            <div class="lbl">折叠面板 Accordion</div>
+            <div>
+              <div class="fl is-open" data-fold>
+                <div class="fl-h"><svg class="i"><use href="#i-shield"/></svg><b>御魂掉落规则</b>
+                  <svg class="i ar"><use href="#i-chev"/></svg></div>
+                <div class="fl-b">十层御魂固定掉落六星，主属性随位置分布；每周三、周六额外产出一次「贪吃鬼」加成。</div>
+              </div>
+              <div class="fl" data-fold>
+                <div class="fl-h"><svg class="i"><use href="#i-clock"/></svg><b>体力恢复速度</b>
+                  <svg class="i ar"><use href="#i-chev"/></svg></div>
+                <div class="fl-b">每 5 分钟恢复 1 点，上限 120 点；溢出部分进入「结界」暂存，上限 1000 点。</div>
+              </div>
+              <div class="fl" data-fold>
+                <div class="fl-h"><svg class="i"><use href="#i-flame"/></svg><b>限时双倍时段</b>
+                  <svg class="i ar"><use href="#i-chev"/></svg></div>
+                <div class="fl-b">活动期间每日 12:00–14:00、20:00–22:00，御魂掉落数量翻倍。</div>
+              </div>
+            </div>
+          </div>
+          <div class="grp">
+            <div class="lbl">步骤条 Steps</div>
+            <div style="display:flex;flex-direction:column;gap:18px">
+              <div class="steps">
+                <div class="s done"><span class="dot"><svg class="i"><use href="#i-check"/></svg></span><span class="lb">接取</span></div>
+                <span class="ln"></span>
+                <div class="s done"><span class="dot"><svg class="i"><use href="#i-check"/></svg></span><span class="lb">执行</span></div>
+                <span class="ln"></span>
+                <div class="s now"><span class="dot">3</span><span class="lb">领奖</span></div>
+                <span class="ln"></span>
+                <div class="s"><span class="dot">4</span><span class="lb">归档</span></div>
+              </div>
+              <div class="steps" style="font-size:11.5px">
+                <div class="s done"><span class="dot" style="width:20px;height:20px"><svg class="i" style="width:11px;height:11px"><use href="#i-check"/></svg></span><span class="lb">已选委托</span></div>
+                <span class="ln"></span>
+                <div class="s now"><span class="dot" style="width:20px;height:20px">2</span><span class="lb">确认消耗</span></div>
+                <span class="ln"></span>
+                <div class="s"><span class="dot" style="width:20px;height:20px">3</span><span class="lb">完成</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== 08 上传 ===== -->
+    <section class="sec" data-n="08" data-t="上传 Upload">
+      <div class="sec-h"><span class="num">08</span><h2>上传 Upload</h2><span class="note">虚线框也是圆润的</span></div>
+      <div class="stage">
+        <div class="grid2">
+          <div class="drop">
+            <div class="ic"><svg class="i"><use href="#i-up"/></svg></div>
+            <b>拖拽导入委托配置</b>
+            <span>支持 .json / .csv，单个不超过 2 MB</span>
+          </div>
+          <div class="col" style="max-width:100%;gap:10px">
+            <div class="file">
+              <div class="ic"><svg class="i"><use href="#i-file"/></svg></div>
+              <div class="nm"><b>日常委托_2026Q3.json</b><span>248 KB · 已解析 12 条</span></div>
+              <button class="btn sq sm ghost"><svg class="i"><use href="#i-x"/></svg></button>
+            </div>
+            <div class="file">
+              <div class="ic" style="background:var(--info-bg);color:var(--s-info)"><svg class="i"><use href="#i-file"/></svg></div>
+              <div class="nm" style="flex:1">
+                <b>活动排期_双倍.csv</b>
+                <span>36 KB · 上传中 62%</span>
+                <div class="bar thin" style="margin-top:6px"><i style="width:62%"></i></div>
+              </div>
+            </div>
+            <div class="file">
+              <div class="ic" style="background:var(--err-bg);color:var(--s-err)"><svg class="i"><use href="#i-err-c"/></svg></div>
+              <div class="nm"><b>旧存档_备份.dat</b><span style="color:var(--s-err)">格式不支持，已跳过</span></div>
+              <button class="btn sq sm ghost"><svg class="i"><use href="#i-refresh"/></svg></button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== 09 参数速查 ===== -->
+    <section class="sec" data-n="09" data-t="参数速查 Tokens">
+      <div class="sec-h"><span class="num">09</span><h2>参数速查 Tokens</h2><span class="note">换项目时照着抄这一页</span></div>
+      <div class="stage">
+        <div class="grp">
+          <div class="lbl">圆润四律</div>
+          <div class="tb-wrap">
+            <table class="tb">
+              <thead><tr><th>律条</th><th>直愣版</th><th>圆润版</th><th>为什么</th></tr></thead>
+              <tbody>
+                <tr><td><b>① 角越圆，线越淡</b></td>
+                    <td><span style="font-family:var(--mono);font-size:11px">line .42</span></td>
+                    <td><span style="font-family:var(--mono);font-size:11px;color:var(--gold)">line .18</span></td>
+                    <td>硬描边 + 大圆角 = 塑料感</td></tr>
+                <tr><td><b>② 阴影要散不要贴</b></td>
+                    <td><span style="font-family:var(--mono);font-size:11px">0 2px 0</span></td>
+                    <td><span style="font-family:var(--mono);font-size:11px;color:var(--gold)">大扩散低透明</span></td>
+                    <td>硬投影会把圆角"切"成方形观感</td></tr>
+                <tr><td><b>③ 留白跟着角走</b></td>
+                    <td><span style="font-family:var(--mono);font-size:11px">7 × 13</span></td>
+                    <td><span style="font-family:var(--mono);font-size:11px;color:var(--gold)">11 × 18</span></td>
+                    <td>角大了不加内距，内容会顶到弧线</td></tr>
+                <tr><td><b>④ 零件也得圆</b></td>
+                    <td><span style="font-family:var(--mono);font-size:11px">方头线 / 直角块</span></td>
+                    <td><span style="font-family:var(--mono);font-size:11px;color:var(--gold)">linecap:round</span></td>
+                    <td>一个直角零件混进去，整体立刻露馅</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <hr class="hr">
+
+        <div class="grp">
+          <div class="lbl">圆角阶 · 用途</div>
+          <div class="row" style="gap:12px">
+            <div style="text-align:center;width:80px"><div style="width:70px;height:70px;border-radius:var(--r-xs);background:var(--fill-2);border:1px solid var(--line-2)"></div>
+              <div style="font-family:var(--mono);font-size:10px;color:var(--ink-mute);margin-top:6px">--r-xs 8</div>
+              <div style="font-size:10.5px;color:var(--ink-mute)">窄标签</div></div>
+            <div style="text-align:center;width:80px"><div style="width:70px;height:70px;border-radius:var(--r-sm);background:var(--fill-2);border:1px solid var(--line-2)"></div>
+              <div style="font-family:var(--mono);font-size:10px;color:var(--ink-mute);margin-top:6px">--r-sm 11</div>
+              <div style="font-size:10.5px;color:var(--ink-mute)">小按钮 / 弹层项</div></div>
+            <div style="text-align:center;width:80px"><div style="width:70px;height:70px;border-radius:var(--r-md);background:var(--fill-2);border:1px solid var(--line-2)"></div>
+              <div style="font-family:var(--mono);font-size:10px;color:var(--ink-mute);margin-top:6px">--r-md 14</div>
+              <div style="font-size:10.5px;color:var(--ink-mute)">按钮 / 输入框</div></div>
+            <div style="text-align:center;width:80px"><div style="width:70px;height:70px;border-radius:var(--r-lg);background:var(--fill-2);border:1px solid var(--line-2)"></div>
+              <div style="font-family:var(--mono);font-size:10px;color:var(--ink-mute);margin-top:6px">--r-lg 18</div>
+              <div style="font-size:10.5px;color:var(--ink-mute)">卡片 / 弹层</div></div>
+            <div style="text-align:center;width:80px"><div style="width:70px;height:70px;border-radius:var(--r-xl);background:var(--fill-2);border:1px solid var(--line-2)"></div>
+              <div style="font-family:var(--mono);font-size:10px;color:var(--ink-mute);margin-top:6px">--r-xl 24</div>
+              <div style="font-size:10.5px;color:var(--ink-mute)">分组容器</div></div>
+            <div style="text-align:center;width:80px"><div style="width:70px;height:70px;border-radius:var(--r-2xl);background:var(--fill-2);border:1px solid var(--line-2)"></div>
+              <div style="font-family:var(--mono);font-size:10px;color:var(--ink-mute);margin-top:6px">--r-2xl 30</div>
+              <div style="font-size:10.5px;color:var(--ink-mute)">弹窗 / 抽屉</div></div>
+            <div style="text-align:center;width:80px"><div style="width:70px;height:70px;border-radius:var(--r-full);background:var(--fill-2);border:1px solid var(--line-2)"></div>
+              <div style="font-family:var(--mono);font-size:10px;color:var(--ink-mute);margin-top:6px">--r-full</div>
+              <div style="font-size:10.5px;color:var(--ink-mute)">胶囊 / 开关</div></div>
+          </div>
+        </div>
+
+        <hr class="hr">
+
+        <div class="grp">
+          <div class="lbl">阴影三级</div>
+          <div class="row" style="gap:16px">
+            <div style="flex:1;min-width:150px;padding:18px;border-radius:var(--r-lg);background:var(--card);box-shadow:var(--e1);border:1px solid var(--line);text-align:center">
+              <div style="font-family:var(--mono);font-size:11px;color:var(--gold)">--e1</div>
+              <div style="font-size:11px;color:var(--ink-mute);margin-top:3px">贴地 · 输入框 / 小按钮</div></div>
+            <div style="flex:1;min-width:150px;padding:18px;border-radius:var(--r-lg);background:var(--card);box-shadow:var(--e2);border:1px solid var(--line);text-align:center">
+              <div style="font-family:var(--mono);font-size:11px;color:var(--gold)">--e2</div>
+              <div style="font-size:11px;color:var(--ink-mute);margin-top:3px">浮起 · 卡片 / 面板</div></div>
+            <div style="flex:1;min-width:150px;padding:18px;border-radius:var(--r-lg);background:var(--card);box-shadow:var(--e3);border:1px solid var(--line);text-align:center">
+              <div style="font-family:var(--mono);font-size:11px;color:var(--gold)">--e3</div>
+              <div style="font-size:11px;color:var(--ink-mute);margin-top:3px">腾空 · 弹窗 / 弹层</div></div>
+          </div>
+        </div>
+
+        <hr class="hr">
+
+        <div class="grp">
+          <div class="lbl">色板 · 当前主题实时取值</div>
+          <div class="row" style="gap:12px">
+            <div style="text-align:center"><div style="width:74px;height:46px;border-radius:var(--r-md);background:var(--panel);border:1px solid var(--line-2)"></div>
+              <div style="font-family:var(--mono);font-size:10px;color:var(--ink-mute);margin-top:6px">--panel</div>
+              <div style="font-size:10.5px;color:var(--ink-mute)">面板底</div></div>
+            <div style="text-align:center"><div style="width:74px;height:46px;border-radius:var(--r-md);background:var(--card);border:1px solid var(--line-2)"></div>
+              <div style="font-family:var(--mono);font-size:10px;color:var(--ink-mute);margin-top:6px">--card</div>
+              <div style="font-size:10.5px;color:var(--ink-mute)">卡片</div></div>
+            <div style="text-align:center"><div style="width:74px;height:46px;border-radius:var(--r-md);background:linear-gradient(165deg,var(--crimson-hi),var(--crimson))"></div>
+              <div style="font-family:var(--mono);font-size:10px;color:var(--ink-mute);margin-top:6px">--crimson</div>
+              <div style="font-size:10.5px;color:var(--ink-mute)">朱红 · 主强调</div></div>
+            <div style="text-align:center"><div style="width:74px;height:46px;border-radius:var(--r-md);background:linear-gradient(165deg,var(--gold-hi),var(--gold))"></div>
+              <div style="font-family:var(--mono);font-size:10px;color:var(--ink-mute);margin-top:6px">--gold</div>
+              <div style="font-size:10.5px;color:var(--ink-mute)">金箔 · 次强调</div></div>
+            <div style="text-align:center"><div style="width:74px;height:46px;border-radius:var(--r-md);background:var(--s-ok)"></div>
+              <div style="font-family:var(--mono);font-size:10px;color:var(--ink-mute);margin-top:6px">--s-ok</div>
+              <div style="font-size:10.5px;color:var(--ink-mute)">语义 · 通过</div></div>
+            <div style="text-align:center"><div style="width:74px;height:46px;border-radius:var(--r-md);background:var(--s-warn)"></div>
+              <div style="font-family:var(--mono);font-size:10px;color:var(--ink-mute);margin-top:6px">--s-warn</div>
+              <div style="font-size:10.5px;color:var(--ink-mute)">语义 · 注意</div></div>
+            <div style="text-align:center"><div style="width:74px;height:46px;border-radius:var(--r-md);background:var(--s-err)"></div>
+              <div style="font-family:var(--mono);font-size:10px;color:var(--ink-mute);margin-top:6px">--s-err</div>
+              <div style="font-size:10.5px;color:var(--ink-mute)">语义 · 危险</div></div>
+            <div style="text-align:center"><div style="width:74px;height:46px;border-radius:var(--r-md);background:var(--s-info)"></div>
+              <div style="font-family:var(--mono);font-size:10px;color:var(--ink-mute);margin-top:6px">--s-info</div>
+              <div style="font-size:10.5px;color:var(--ink-mute)">语义 · 提示</div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <footer style="text-align:center;padding:38px 0 8px;font-size:11px;color:var(--ink-mute);letter-spacing:.08em">
+      囤囤鼠大作战 · 控件样式示例 · 明暗双主题 · 单文件零依赖
+    </footer>
+  </main>
+</div>
+<!-- ===== 弹窗 · 标准（带表单） ===== -->
+<div class="mk" data-mk="md-form">
+  <div class="md" role="dialog" aria-modal="true" aria-labelledby="t-form">
+    <button class="md-x" data-close><svg class="i"><use href="#i-x"/></svg></button>
+    <div class="md-h">
+      <div class="md-ic"><svg class="i"><use href="#i-edit"/></svg></div>
+      <div>
+        <h3 id="t-form">新建委托</h3>
+        <p>委托会在每日刷新时按周期重置</p>
+      </div>
+    </div>
+    <div class="md-b">
+      <div class="fld" style="max-width:100%">
+        <div class="fld-l">委托名称<span class="req">*</span></div>
+        <div class="wt"><input value="御魂觉醒 · 十层" placeholder="给这个委托起个名字"></div>
+      </div>
+      <div style="display:flex;gap:12px;margin-top:14px">
+        <div class="fld" style="max-width:100%">
+          <div class="fld-l">刷新周期</div>
+          <div class="sel" data-sel>
+            <button class="sel-b" type="button">
+              <span class="cv">每日 04:00</span>
+              <svg class="i ar"><use href="#i-chev"/></svg>
+            </button>
+            <div class="sel-p">
+              <div class="sel-o is-on"><svg class="i ck"><use href="#i-check"/></svg>每日 04:00</div>
+              <div class="sel-o"><svg class="i ck"><use href="#i-check"/></svg>每周一 04:00</div>
+              <div class="sel-o"><svg class="i ck"><use href="#i-check"/></svg>不重置</div>
+            </div>
+          </div>
+        </div>
+        <div class="fld" style="max-width:100%">
+          <div class="fld-l">体力消耗</div>
+          <div class="wt"><input value="120"><span class="div"></span><span class="suf">点</span></div>
+        </div>
+      </div>
+      <div class="row" style="margin-top:15px;gap:14px">
+        <label class="opt" style="flex:1">
+          <span class="sw is-on" role="switch" tabindex="0"></span>
+          <span class="ot"><b>开启提醒</b></span>
+        </label>
+        <label class="opt" style="flex:1">
+          <span class="sw" role="switch" tabindex="0"></span>
+          <span class="ot"><b>计入周常</b></span>
+        </label>
+      </div>
+    </div>
+    <div class="md-f">
+      <button class="btn ghost" data-close>取消</button>
+      <button class="btn pri" data-close data-toast="ok"><svg class="i"><use href="#i-check"/></svg>保存委托</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 弹窗 · 危险确认 ===== -->
+<div class="mk" data-mk="md-dan">
+  <div class="md sm" role="dialog" aria-modal="true" aria-labelledby="t-dan">
+    <button class="md-x" data-close><svg class="i"><use href="#i-x"/></svg></button>
+    <div class="md-h">
+      <div class="md-ic red"><svg class="i"><use href="#i-warn"/></svg></div>
+      <div>
+        <h3 id="t-dan">重置全部进度？</h3>
+        <p>此操作不可撤销</p>
+      </div>
+    </div>
+    <div class="md-b">
+      将清空 <b style="color:var(--ink)">今日 3 条日常</b> 与 <b style="color:var(--ink)">1 条周常</b> 的完成记录，
+      已领取的奖励不会收回，但进度会从零开始。
+      <div class="md-note">
+        <svg class="i" style="width:14px;height:14px"><use href="#i-warn"/></svg>
+        <span>建议先导出当前配置，避免手动重建。</span>
+      </div>
+    </div>
+    <div class="md-f">
+      <button class="btn ghost" data-close>取消</button>
+      <button class="btn dan" data-close data-toast="err"><svg class="i"><use href="#i-trash"/></svg>确认重置</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 弹窗 · 长内容滚动 ===== -->
+<div class="mk" data-mk="md-long">
+  <div class="md lg" role="dialog" aria-modal="true" aria-labelledby="t-long">
+    <button class="md-x" data-close><svg class="i"><use href="#i-x"/></svg></button>
+    <div class="md-h">
+      <div class="md-ic"><svg class="i"><use href="#i-file"/></svg></div>
+      <div>
+        <h3 id="t-long">本次更新说明</h3>
+        <p>v3.2.0 · 内容较长，可在框内滚动</p>
+      </div>
+    </div>
+    <div class="md-b" style="max-height:min(56vh,420px);overflow:auto">
+      <p style="margin:0 0 12px"><b style="color:var(--ink)">一、委托系统重做</b><br>
+      重新梳理了日常 / 周常 / 活动的边界。日常按自然日刷新，周常按周一 04:00 刷新，活动跟随活动周期，
+      三者互不干扰。旧的混合列表会在首次进入时自动迁移，历史记录保留在「归档」中。</p>
+      <p style="margin:0 0 12px"><b style="color:var(--ink)">二、进度计数独立</b><br>
+      带计数的委托现在支持分段推进。点一次菱形推进一步，满段自动进入「可提交」状态，
+      此时卡片会以金描边 + 淡金底高亮——全屏只有这一处使用高饱和强调色，避免视觉争夺。</p>
+      <p style="margin:0 0 12px"><b style="color:var(--ink)">三、完成态的处理</b><br>
+      完成不是消失，而是沉下去。卡片底色压暗、文字降饱和、印章位改为轻量标记，
+      让它退到视线的后排，但仍然可辨、可回溯。</p>
+      <p style="margin:0 0 12px"><b style="color:var(--ink)">四、提醒策略</b><br>
+      重置前 30 分钟提醒一次；存在可提交任务时，每日 20:00 提醒一次。两个提醒都可以在设置页单独关闭。</p>
+      <p style="margin:0 0 12px"><b style="color:var(--ink)">五、已知问题</b><br>
+      倒计时目前仍为演示循环，尚未与真实刷新时刻联动；「每日刷新时刻」设置项已预留，
+      接通后倒计时会按该时刻重新计算。</p>
+      <p style="margin:0"><b style="color:var(--ink)">六、后续计划</b><br>
+      下一步计划接入真实数据层，并把配置导出为可分享的片段，方便在多个设备间同步。</p>
+    </div>
+    <div class="md-f sb">
+      <button class="btn ghost" data-toast="info"><svg class="i"><use href="#i-copy"/></svg>复制更新日志</button>
+      <button class="btn pri" data-close>知道了</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 抽屉 ===== -->
+<div class="mk" data-mk="dw" style="background:rgba(8,7,11,.46)">
+  <aside class="dw" role="dialog" aria-modal="true" aria-labelledby="t-dw">
+    <div class="dw-h">
+      <div class="md-ic" style="width:34px;height:34px;border-radius:var(--r-sm);display:grid;place-items:center;background:var(--fill-2);color:var(--gold);border:1px solid var(--line)">
+        <svg class="i"><use href="#i-filter"/></svg>
+      </div>
+      <h3 id="t-dw">筛选委托</h3>
+      <button class="md-x" data-close><svg class="i"><use href="#i-x"/></svg></button>
+    </div>
+    <div class="dw-b">
+      <div class="grp" style="gap:9px">
+        <div class="lbl">类型</div>
+        <div class="row">
+          <span class="chip is-on" data-chip>日常</span>
+          <span class="chip" data-chip>周常</span>
+          <span class="chip" data-chip>活动</span>
+        </div>
+      </div>
+      <hr class="hr" style="margin:18px 0">
+      <div class="grp" style="gap:9px">
+        <div class="lbl">状态</div>
+        <label class="opt"><span class="cb is-on"><svg class="i"><use href="#i-check"/></svg></span>
+          <span class="ot"><b>进行中</b><span>3 条</span></span></label>
+        <label class="opt" style="margin-top:9px"><span class="cb is-on"><svg class="i"><use href="#i-check"/></svg></span>
+          <span class="ot"><b>可提交</b><span>1 条</span></span></label>
+        <label class="opt" style="margin-top:9px"><span class="cb"><svg class="i"><use href="#i-check"/></svg></span>
+          <span class="ot"><b>已完成</b><span>7 条</span></span></label>
+      </div>
+      <hr class="hr" style="margin:18px 0">
+      <div class="grp" style="gap:11px">
+        <div class="lbl">体力消耗上限</div>
+        <div class="rng"><input type="range" min="0" max="300" value="180" style="--p:60%"><span class="v">180</span></div>
+      </div>
+      <hr class="hr" style="margin:18px 0">
+      <div class="grp" style="gap:9px">
+        <div class="lbl">排序</div>
+        <div class="sel" data-sel>
+          <button class="sel-b" type="button">
+            <span class="cv">按剩余时间</span>
+            <svg class="i ar"><use href="#i-chev"/></svg>
+          </button>
+          <div class="sel-p">
+            <div class="sel-o is-on"><svg class="i ck"><use href="#i-check"/></svg>按剩余时间</div>
+            <div class="sel-o"><svg class="i ck"><use href="#i-check"/></svg>按体力消耗</div>
+            <div class="sel-o"><svg class="i ck"><use href="#i-check"/></svg>按手动顺序</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="dw-f">
+      <button class="btn ghost"><svg class="i"><use href="#i-refresh"/></svg>清空</button>
+      <button class="btn pri" data-close data-toast="ok">应用筛选</button>
+    </div>
+  </aside>
+</div>
+
+<!-- ===== Toast 容器 ===== -->
+<div class="toast-root" id="toastRoot"></div>
+
+<script>(function(){
+  var $  = function(s,r){ return (r||document).querySelector(s) };
+  var $$ = function(s,r){ return Array.prototype.slice.call((r||document).querySelectorAll(s)) };
+
+  /* ---------- 目录 TOC ---------- */
+  var toc = $('#toc');
+  $$('section.sec').forEach(function(s){
+    var id = 's' + s.dataset.n;
+    s.id = id;
+    var li = document.createElement('li');
+    var a  = document.createElement('a');
+    a.href = '#' + id;
+    var n = document.createElement('span');
+    n.className = 'n'; n.textContent = s.dataset.n;
+    a.appendChild(n);
+    a.appendChild(document.createTextNode(s.dataset.t));
+    li.appendChild(a); toc.appendChild(li);
+  });
+  var links = $$('#toc a');
+  if(window.IntersectionObserver){
+    var obs = new IntersectionObserver(function(es){
+      es.forEach(function(e){
+        if(!e.isIntersecting) return;
+        links.forEach(function(a){
+          a.classList.toggle('is-on', a.getAttribute('href') === '#' + e.target.id);
+        });
+      });
+    }, { rootMargin:'-12% 0px -72% 0px', threshold:0 });
+    $$('section.sec').forEach(function(s){ obs.observe(s) });
+  }
+
+  /* ---------- 主题 ---------- */
+  var html = document.documentElement;
+  var tb = $('#themeBtn'), ti = $('#themeIco');
+  function setTheme(t){
+    html.dataset.theme = t;
+    ti.setAttribute('href', t === 'dark' ? '#i-sun' : '#i-moon');
+    tb.title = t === 'dark' ? '切换到明版' : '切换到暗版';
+  }
+  setTheme(new URLSearchParams(location.search).get('theme') === 'light' ? 'light' : 'dark');
+  tb.addEventListener('click', function(){
+    var t = html.dataset.theme === 'dark' ? 'light' : 'dark';
+    setTheme(t);
+    try { history.replaceState(null, '', location.pathname + '?theme=' + t) } catch(e){}
+  });
+
+  /* ---------- 下拉 Select ---------- */
+  function closeAllSel(){ $$('.sel.is-open').forEach(function(s){ s.classList.remove('is-open') }) }
+  $$('.sel').forEach(function(sel){
+    var b = $('.sel-b', sel), cv = $('.cv', sel), tagBox = $('.tags', sel);
+    if(!b || b.disabled) return;
+
+    function syncTags(){
+      if(!tagBox) return;
+      var picked = $$('.sel-o.is-on', sel).map(function(x){ return x.dataset.v || x.textContent.trim() });
+      tagBox.innerHTML = '';
+      if(!picked.length){
+        var ph = document.createElement('span');
+        ph.style.color = 'var(--ink-mute)'; ph.textContent = '请选择类型';
+        tagBox.appendChild(ph); return;
+      }
+      picked.forEach(function(v){
+        var em  = document.createElement('em'); em.textContent = v;
+        var svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
+        svg.setAttribute('class','i');
+        var u = document.createElementNS('http://www.w3.org/2000/svg','use');
+        u.setAttribute('href','#i-x'); svg.appendChild(u); em.appendChild(svg);
+        tagBox.appendChild(em);
+      });
+    }
+
+    b.addEventListener('click', function(){
+      if(sel.classList.contains('is-dis')) return;
+      var was = sel.classList.contains('is-open');
+      closeAllSel();
+      if(!was) sel.classList.add('is-open');
+    });
+
+    $$('.sel-o', sel).forEach(function(o){
+      o.addEventListener('click', function(e){
+        e.stopPropagation();
+        if(sel.hasAttribute('data-multi')){
+          o.classList.toggle('is-on');
+          syncTags();
+        } else {
+          $$('.sel-o', sel).forEach(function(x){ x.classList.remove('is-on') });
+          o.classList.add('is-on');
+          if(cv){ cv.textContent = o.dataset.v || o.textContent.trim(); cv.classList.remove('ph') }
+          sel.classList.remove('is-open');
+        }
+      });
+    });
+  });
+  document.addEventListener('click', function(e){
+    if(!e.target.closest || !e.target.closest('.sel')) closeAllSel();
+  });
+
+  /* ---------- 开关 / 复选 / 单选 ---------- */
+  $$('.sw').forEach(function(el){
+    if(el.classList.contains('is-dis')) return;
+    function t(){
+      el.classList.toggle('is-on');
+      el.setAttribute('aria-checked', el.classList.contains('is-on'));
+    }
+    el.addEventListener('click', t);
+    el.addEventListener('keydown', function(e){
+      if(e.key === ' ' || e.key === 'Enter'){ e.preventDefault(); t() }
+    });
+  });
+  $$('.cb').forEach(function(el){
+    if(el.classList.contains('is-dis') || el.classList.contains('is-half')) return;
+    el.addEventListener('click', function(e){
+      e.stopPropagation();
+      el.classList.toggle('is-on');
+      el.setAttribute('aria-checked', el.classList.contains('is-on'));
+    });
+  });
+  $$('.rd').forEach(function(el){
+    el.addEventListener('click', function(e){
+      e.stopPropagation();
+      var scope = el.closest('.grid2, .row, .col') || document;
+      $$('.rd', scope).forEach(function(x){ x.classList.remove('is-on') });
+      el.classList.add('is-on');
+      $$('.opt', scope).forEach(function(o){
+        o.classList.toggle('is-on', !!$('.rd.is-on', o));
+      });
+    });
+  });
+  $$('.opt').forEach(function(o){
+    o.addEventListener('click', function(e){
+      if(e.target.closest('.rd')) return;
+      var r = $('.rd', o);
+      if(r){
+        var scope = o.parentNode;
+        $$('.rd', scope).forEach(function(x){ x.classList.remove('is-on') });
+        r.classList.add('is-on');
+        $$('.opt', scope).forEach(function(x){ x.classList.toggle('is-on', !!$('.rd.is-on', x)) });
+      } else {
+        var c = $('.cb', o);
+        if(c && !c.classList.contains('is-dis')) c.classList.toggle('is-on');
+      }
+    });
+  });
+
+  /* ---------- 分段 / 按钮组 / 标签 / 折叠 ---------- */
+  function singlePick(list, el){
+    list.forEach(function(x){ x.classList.remove('is-on') });
+    el.classList.add('is-on');
+  }
+  $$('[data-seg]').forEach(function(g){
+    var bs = $$('.segi', g);
+    bs.forEach(function(b){ b.addEventListener('click', function(){ singlePick(bs, b) }) });
+  });
+  $$('[data-toggle-grp]').forEach(function(g){
+    var bs = $$('button', g);
+    bs.forEach(function(b){ b.addEventListener('click', function(){ singlePick(bs, b) }) });
+  });
+  $$('.chip[data-chip]').forEach(function(c){
+    c.addEventListener('click', function(){ c.classList.toggle('is-on') });
+  });
+  $$('[data-fold]').forEach(function(f){
+    var h = $('.fl-h', f);
+    h && h.addEventListener('click', function(){ f.classList.toggle('is-open') });
+  });
+
+  /* ---------- 浮层 ---------- */
+  function closeMk(mk){
+    if(!mk) return;
+    mk.classList.remove('is-on');
+    var d = $('.dw', mk); if(d) d.classList.remove('is-on');
+  }
+  function openMk(name){
+    var mk = $('.mk[data-mk="' + name + '"]'); if(!mk) return;
+    mk.classList.add('is-on');
+    var d = $('.dw', mk); if(d) d.classList.add('is-on');
+  }
+  $$('[data-open]').forEach(function(b){
+    b.addEventListener('click', function(){ openMk(b.dataset.open) });
+  });
+  $$('.mk').forEach(function(mk){
+    mk.addEventListener('click', function(e){ if(e.target === mk) closeMk(mk) });
+  });
+  $$('[data-close]').forEach(function(b){
+    b.addEventListener('click', function(){ closeMk(b.closest('.mk')) });
+  });
+  document.addEventListener('keydown', function(e){
+    if(e.key === 'Escape'){ $$('.mk.is-on').forEach(closeMk); closeAllSel() }
+  });
+
+  /* ---------- Toast ---------- */
+  var tr = $('#toastRoot');
+  var ICON = { ok:'#i-ok-c', err:'#i-err-c', warn:'#i-warn', info:'#i-info' };
+  var TEXT = { ok:'委托已保存', err:'重置失败，请检查网络后重试',
+               warn:'体力不足，还差 40 点', info:'更新日志已复制到剪贴板' };
+  function toast(kind){
+    kind = ICON[kind] ? kind : 'info';
+    var d = document.createElement('div');
+    d.className = 'toast ' + kind;
+    d.innerHTML = '<svg class="i"><use href="' + ICON[kind] + '"/></svg><span>' + TEXT[kind] + '</span>';
+    tr.appendChild(d);
+    setTimeout(function(){
+      d.style.transition = 'transform .22s ease, opacity .22s ease';
+      d.style.opacity = '0'; d.style.transform = 'translateY(9px) scale(.97)';
+      setTimeout(function(){ d.remove() }, 240);
+    }, 2300);
+  }
+  $$('[data-toast]').forEach(function(b){
+    b.addEventListener('click', function(){ toast(b.dataset.toast) });
+  });
+
+  /* ---------- 滑块 ---------- */
+  $$('.rng input[type=range]').forEach(function(r){
+    var v = $('.v', r.parentNode);
+    function up(){
+      var min = +r.min || 0, max = +r.max || 100, cur = +r.value;
+      r.style.setProperty('--p', ((cur - min) / (max - min) * 100).toFixed(2) + '%');
+      if(v) v.textContent = cur;
+    }
+    r.addEventListener('input', up); up();
+  });
+
+  /* ---------- 步进器 ---------- */
+  $$('.stp').forEach(function(s){
+    var i = $('input', s);
+    $$('button', s).forEach(function(b){
+      b.addEventListener('click', function(){
+        var n = (+i.value || 0) + (+b.dataset.stp);
+        i.value = n < 0 ? 0 : n;
+      });
+    });
+  });
+
+  /* ---------- 密码显隐 / 一键清除 ---------- */
+  $$('[data-eye]').forEach(function(b){
+    b.addEventListener('click', function(){
+      var i = b.parentNode.querySelector('input'); if(!i) return;
+      var show = i.type === 'password';
+      i.type = show ? 'text' : 'password';
+      b.querySelector('use').setAttribute('href', show ? '#i-eye-off' : '#i-eye');
+    });
+  });
+  $$('.wt .clr').forEach(function(b){
+    if(b.hasAttribute('data-eye')) return;
+    b.addEventListener('click', function(){
+      var i = b.parentNode.querySelector('input');
+      if(i){ i.value = ''; i.focus() }
+    });
+  });
+})();</script>
+</body>
+</html>

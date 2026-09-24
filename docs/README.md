@@ -13,6 +13,7 @@
 | [`02-data-and-domain.md`](./02-data-and-domain.md) | 数据长什么样、从哪来、规则写在哪个函数 | 改数据、改规则、接后端 |
 | [`03-conventions-and-tests.md`](./03-conventions-and-tests.md) | 哪些约束被工具强制、口径纪律落在哪、怎么测、数据怎么录 | 所有提交代码变更的人 |
 | [`04-handover-guide.md`](./04-handover-guide.md) | 第一次跑起来做什么、常见改动怎么改、坏了怎么查 | 新接手者、日常迭代者 |
+| [`05-icon-inventory.md`](./05-icon-inventory.md) | 每个图标槽位对应什么中文、哪些名不副实、重设计时的分组与改动方式 | 改 / 重画图标的人 |
 | 根目录 [`CHANGELOG.md`](../CHANGELOG.md) | 改过什么、属于哪个版本、什么时候改的（改动流水唯一入口） | 想知道近期变动的任何人 |
 
 面向玩家的功能说明、玩法口径理由、FAQ、数据说明与免责声明在根目录 [`README.md`](../README.md)，本套文档不重复那部分内容。

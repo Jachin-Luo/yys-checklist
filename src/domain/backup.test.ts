@@ -33,7 +33,7 @@ const profile = (id: string, name: string, sort: number) => ({
 const row = (profileId: string, checked: Record<string, unknown> = {}) => ({
   profileId,
   state: { userId: 'u_local', profileId, checked, updatedAt: '2026-09-10T00:00:00.000Z' },
-  view: { profileId, sortBy: 'weight', showKinds: [], minWeight: 0, hideDone: false, pinned: [], updatedAt: '' },
+  view: { profileId, sortBy: 'weight', showKinds: [], minWeight: 0, pinned: [], updatedAt: '' },
   overrides: { profileId, custom: [], hidden: [], order: [], updatedAt: '' },
 });
 

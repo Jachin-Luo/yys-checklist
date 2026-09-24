@@ -11,48 +11,58 @@ import type { CSSProperties } from 'react';
  *   - 基准尺寸按参考稿：任务类型图标 17、分组头 16、导航 16、统计卡 14、微标记 12/10。
  */
 export type IconName =
-  /* 基础符号 */
+  /* A1 · 基础印记 */
   | 'seimei'
   | 'star5'
   | 'rhomb'
-  /* 和风器物 */
-  | 'torii'
-  | 'ofuda'
-  | 'chochin'
-  | 'shimenawa'
-  | 'sensu'
-  | 'daruma'
-  | 'suzu'
+  | 'grip'
+  /* A2 · 周期器物 */
+  | 'ema'
   | 'ougi'
   | 'koyomi'
+  | 'chochin'
+  | 'ofuda'
+  | 'nobori'
+  /* A3 · 页面导航 */
+  | 'chart'
   | 'kanazuchi'
-  /* 后补符号 */
-  | 'fumi'
-  | 'kasane'
+  | 'setting'
+  /* B1 · 字段 */
+  | 'torii'
   | 'joumae'
-  | 'hito'
-  | 'hako'
-  | 'trash'
-  | 'fude'
+  | 'fumi'
+  | 'tokei'
+  | 'makimono'
+  /* B2 · 状态 */
   | 'check'
   | 'alert'
-  | 'tokei'
+  | 'done'
   | 'sunabochi'
+  | 'daruma'
+  | 'pin'
+  /* C1 · 操作 */
+  | 'ascend'
+  | 'plus'
+  | 'trash'
+  | 'fude'
+  | 'hako'
+  | 'hito'
+  | 'kasane'
+  | 'suzu'
   | 'undo'
-  | 'refresh'
   | 'restore'
+  | 'refresh'
   | 'sougo'
   | 'search'
   | 'filter'
-  | 'plus'
   | 'close'
-  | 'grip'
   | 'chevron-down'
   | 'chevron-up'
   | 'chevron-right'
-  /* 明暗主题 */
   | 'sun'
-  | 'moon';
+  | 'moon'
+  /* C2 · 装饰 */
+  | 'shimenawa';
 
 interface Props {
   name: IconName;

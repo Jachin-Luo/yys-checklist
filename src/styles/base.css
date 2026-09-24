@@ -50,8 +50,16 @@ body {
   overflow: hidden;
 }
 
+/*
+ * 页面底色 = `deep`（最外纸底），**不是** `panel`。
+ *
+ * 2026-09-24 圆润版把明版卡片改成纯白浮起，于是画布必须比卡片暗得够多才浮得起来：
+ * 纯白卡压在同为米白的 panel 上几乎看不出边界。参考稿的页面底色也正好是最深那一档
+ * （`--bg:#E7DDC9`，其 `--panel:#FCF7ED` 是浮在它上面的）。壳层与卡片各自带底色，
+ * 所以这一层只在"卡片之间的留白"里露出来 —— 那里正是该看到纸底与纹样的地方。
+ */
 body {
-  @apply bg-surface-2 font-sans text-ink antialiased;
+  @apply bg-surface-deep font-sans text-ink antialiased;
   margin: 0;
 }
 
@@ -72,6 +80,12 @@ button {
  * 其中式神搜索框连 `focus:` 类都没有，键盘聚焦后完全没有视觉变化。
  * 用 `:focus-visible` 而非 `:focus`：鼠标点击不亮环，键盘 Tab 才亮，不干扰日常使用。
  * 参考稿 §5 的键盘规格即为「2px 金环」。
+ *
+ * 2026-09-24 圆润版复核：参考稿给控件配的是「宽而淡的 --ring 外扩」（其 `.btn:focus-visible`
+ * 是 `0 0 0 3px`）。**这里刻意没跟着换成那支淡环** —— 键盘焦点是可达性底线，而参考稿那支环
+ * 在明版是 16% 透明的朱红，压在纯白卡上几乎看不见。分工是：键盘焦点（本规则）用 2px 金环
+ * 保证可见；字段 / 选项聚焦与选中时的宽而淡外扩用 `shadow-ring` 在组件里表达
+ * （见 `components/common/controls.ts` 的输入框与选项行）。
  */
 :focus-visible {
   @apply outline outline-2 outline-offset-2 outline-gold;

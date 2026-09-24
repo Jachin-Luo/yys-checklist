@@ -65,7 +65,7 @@ export default function HubCard({ item }: { item: Item }) {
       }}
       className={`no-press-select relative mx-3.5 mt-2.5 grid cursor-pointer grid-cols-[1.25rem_minmax(0,1fr)_auto] items-start gap-x-2.5 overflow-hidden rounded-md bg-gold-soft px-3.5 pb-4 pt-3 shadow-card ring-1 transition-all duration-300 ease-genso ${
         pressing ? 'scale-[0.985] ring-gold-hi' : 'ring-gold-hi hover:shadow-ready'
-      } ${checked ? 'opacity-60' : ''}`}
+      }`}
     >
       {/* 长按进度：与 `ChecklistItem` 同一形态（常驻元素 + 条件宽度，
           动态挂载会让 width 过渡没有起点、一帧闪满），同样贴**底边** —— 按压反馈要在手指落点附近 */}
@@ -94,10 +94,10 @@ export default function HubCard({ item }: { item: Item }) {
       <div className="min-w-0">
         <h3
           className={`flex min-w-0 items-center gap-2.5 break-words font-serif text-lg leading-snug tracking-card ${
-            checked ? 'text-ink-4 line-through decoration-crimson decoration-1' : 'text-gold-hi'
+            checked ? 'text-ink-3 line-through decoration-crimson decoration-1' : 'text-gold-hi'
           }`}
         >
-          <Icon name="kanazuchi" size={17} className="mt-0.5" />
+          <Icon name="suzu" size={17} className="mt-0.5" />
           {item.name}
         </h3>
 

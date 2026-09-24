@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import type { Item } from '../api/types';
+import ChecklistEntry from '../components/common/ChecklistEntry';
 import ChecklistItem from '../components/common/ChecklistItem';
+import { groupChecklist } from '../domain/grouping';
 import { EmptyState, SectionTitle } from '../components/common/EmptyState';
 import HubCard from '../components/common/HubCard';
 import PageHead from '../components/common/PageHead';
@@ -75,7 +77,7 @@ export default function TodayPage({ variant }: { variant: 'mobile' | 'desktop' }
     `relative flex cursor-pointer items-center gap-1.5 rounded-t-sm border border-b-0 px-3 py-2 font-serif text-sm tracking-label transition-colors duration-120 ${
       on
         ? 'border-line bg-surface text-gold-hi'
-        : 'border-transparent text-ink-3 hover:bg-gold-soft hover:text-gold'
+        : 'border-transparent text-ink-3 hover:bg-gold-soft hover:text-gold-hi'
     }`;
 
   return (
@@ -108,7 +110,7 @@ export default function TodayPage({ variant }: { variant: 'mobile' | 'desktop' }
           {tab === 'resident' ? (
             <i className="absolute left-1/2 top-0 h-0.5 w-5 -translate-x-1/2 bg-crimson" />
           ) : null}
-          <Icon name="torii" size={15} className={tab === 'resident' ? '' : 'opacity-70'} />
+          <Icon name="ema" size={15} className={tab === 'resident' ? '' : 'opacity-70'} />
           常驻 · {pendingResident.length} 项
         </button>
         <button type="button" className={tabChip(tab === 'event')} onClick={() => setTab('event')}>
@@ -125,7 +127,7 @@ export default function TodayPage({ variant }: { variant: 'mobile' | 'desktop' }
           {hub && !hubDone ? <HubCard item={hub} /> : null}
 
           <SectionTitle
-            icon="torii"
+            icon="ema"
             count={pendingResident.length}
             progress={residentTotal ? residentDoneCount / residentTotal : undefined}
           >
@@ -133,8 +135,8 @@ export default function TodayPage({ variant }: { variant: 'mobile' | 'desktop' }
           </SectionTitle>
           {pendingResident.length ? (
             <div className={CHECKLIST_GRID}>
-              {pendingResident.map((item) => (
-                <ChecklistItem key={item.id} item={item} dimmed={isDimmed(item.id)} />
+              {groupChecklist(pendingResident, doneResident).pending.map((u) => (
+                <ChecklistEntry key={u.key} unit={u} dimmedOf={isDimmed} />
               ))}
             </div>
           ) : (
@@ -146,7 +148,7 @@ export default function TodayPage({ variant }: { variant: 'mobile' | 'desktop' }
 
           {residentDoneCount > 0 ? (
             <>
-              <SectionTitle icon="suzu" count={residentDoneCount}>
+              <SectionTitle icon="done" count={residentDoneCount}>
                 已完成
               </SectionTitle>
               <div className={CHECKLIST_GRID}>
@@ -159,8 +161,8 @@ export default function TodayPage({ variant }: { variant: 'mobile' | 'desktop' }
                     cascadeIds={[...coveredSet]}
                   />
                 ) : null}
-                {doneResident.map((item) => (
-                  <ChecklistItem key={item.id} item={item} dimmed={isDimmed(item.id)} />
+                {groupChecklist(pendingResident, doneResident).done.map((u) => (
+                  <ChecklistEntry key={u.key} unit={u} dimmedOf={isDimmed} />
                 ))}
               </div>
             </>
@@ -177,8 +179,8 @@ export default function TodayPage({ variant }: { variant: 'mobile' | 'desktop' }
           </SectionTitle>
           {pendingEvent.length ? (
             <div className={CHECKLIST_GRID}>
-              {pendingEvent.map((item) => (
-                <ChecklistItem key={item.id} item={item} dimmed={isDimmed(item.id)} />
+              {groupChecklist(pendingEvent, doneEvent).pending.map((u) => (
+                <ChecklistEntry key={u.key} unit={u} dimmedOf={isDimmed} />
               ))}
             </div>
           ) : (
@@ -190,12 +192,12 @@ export default function TodayPage({ variant }: { variant: 'mobile' | 'desktop' }
 
           {doneEvent.length > 0 ? (
             <>
-              <SectionTitle icon="suzu" count={doneEvent.length}>
+              <SectionTitle icon="done" count={doneEvent.length}>
                 已完成
               </SectionTitle>
               <div className={CHECKLIST_GRID}>
-                {doneEvent.map((item) => (
-                  <ChecklistItem key={item.id} item={item} dimmed={isDimmed(item.id)} />
+                {groupChecklist(pendingEvent, doneEvent).done.map((u) => (
+                  <ChecklistEntry key={u.key} unit={u} dimmedOf={isDimmed} />
                 ))}
               </div>
             </>

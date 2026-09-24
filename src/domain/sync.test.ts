@@ -16,7 +16,6 @@ const view = (patch: Partial<ViewPrefs> = {}): ViewPrefs => ({
   sortBy: 'weight',
   showKinds: [],
   minWeight: 0,
-  hideDone: false,
   pinned: [],
   updatedAt: '',
   ...patch,
@@ -34,7 +33,7 @@ const overrides = (patch: Partial<ItemOverrides> = {}): ItemOverrides => ({
 const source: SyncSource = {
   guildTime: { daily_daoguan: '20:00' },
   plans: [{ id: 'n_src', base: '08:00', hours: 12, delay: 0, started: true, createdAt: 1 }],
-  view: view({ showKinds: ['jade'], hideDone: true, pinned: ['daily_sign'], autoSet: ['daily_pet'], coverMode: 'hide' }),
+  view: view({ showKinds: ['jade'], pinned: ['daily_sign'], autoSet: ['daily_pet'], coverMode: 'hide' }),
   overrides: overrides({
     custom: [{ id: 'c1', name: '自建', cycle: 'daily', gainKind: [], origin: 'custom' }],
     order: ['c1', 'daily_sign'],
@@ -45,7 +44,7 @@ const source: SyncSource = {
 const target: SyncSource = {
   guildTime: { weekly_banquet: '21:00' },
   plans: [],
-  view: view({ showKinds: ['soul'], hideDone: false, pinned: ['daily_pet'], autoSet: [], coverMode: 'dim' }),
+  view: view({ showKinds: ['soul'], pinned: ['daily_pet'], autoSet: [], coverMode: 'dim' }),
   overrides: overrides({ hidden: ['daily_other'] }),
 };
 
@@ -78,13 +77,12 @@ describe('applyParts：整表接管 vs 字段级接管', () => {
     expect(patch.plans?.[0].id).toBe('n_src');
   });
 
-  it('只勾一键日常覆盖 → 目标的筛选 / 隐藏已完成 / 置顶**原样保留**', () => {
+  it('只勾一键日常覆盖 → 目标的筛选 / 置顶**原样保留**', () => {
     const patch = applyParts(source, target, ['autoDaily']);
     expect(patch.view?.autoSet).toEqual(['daily_pet']);
     expect(patch.view?.coverMode).toBe('hide');
-    /* 这三个字段没被勾，必须还是目标自己的值 */
+    /* 这两个字段没被勾，必须还是目标自己的值 */
     expect(patch.view?.showKinds).toEqual(['soul']);
-    expect(patch.view?.hideDone).toBe(false);
     expect(patch.view?.pinned).toEqual(['daily_pet']);
   });
 
