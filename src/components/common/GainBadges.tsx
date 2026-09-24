@@ -72,7 +72,12 @@ export function KindBadges({
       {rest.map((k) => (
         <b
           key={k}
-          className="rounded-full border border-dashed border-line px-2 py-0.5 font-normal text-ink-2"
+          /* ⚠️ `text-sm` 不能省（2026-09-24 用户反馈"奖励的字体大小太大了"）：
+             这里原先没有字号类，于是它继承**根字号 16px** —— 比同一行的标签（12px）、
+             比上一行「固定收益」的徽章（12px）、甚至比**任务名**（14.5px）都大，
+             读起来像奖励在喊。奖励块现在四个元素同属 12px 一族：两个标签 + 两类徽章。
+             这是本项目最容易复发的一类错：**漏写字号的元素不会报错，只会悄悄变成 16px**。 */
+          className="rounded-full border border-dashed border-line px-2 py-0.5 font-normal text-sm text-ink-2"
         >
           {labels.get(k) ?? k}
         </b>
