@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    />
+    <!--
+      地址栏配色：明暗各一条，交给系统偏好选择。
+      应用主题本身由 `stores/theme` 运行时切换（初始值也优先跟随系统），
+      这里只是让浏览器 UI 与首屏观感一致。
+    -->
+    <meta name="theme-color" content="#F5EFE3" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#17161A" media="(prefers-color-scheme: dark)" />
+    <meta
+      name="description"
+      content="囤囤鼠 · 阴阳师任务清单 —— 纯手动记录工具，不读取任何游戏数据。回答：此刻我还有什么奖励没拿。"
+    />
+
+    <!-- 普通网页图标（SVG，无二进制资源）。PWA 打包（manifest / Service Worker / 安装图标）暂缓 -->
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+
+    <title>囤囤鼠 · 阴阳师任务清单</title>
+    <script type="module" crossorigin src="/assets/index-BlD8TVq2.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-CEH7FL6K.css">
+  </head>
+  <body>
+    <div id="root"></div>
+  </body>
+</html>

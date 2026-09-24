@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="囤囤鼠 · 阴阳师任务清单">
+  <!-- 品牌色与 tailwind.config.ts 的 brand 一致；图形 = 三行「勾选框 + 文字条」 -->
+  <rect width="64" height="64" rx="14" fill="#534AB7" />
+  <g fill="#FCFBF9">
+    <rect x="14" y="16" width="9" height="9" rx="2.6" />
+    <rect x="29" y="18.5" width="21" height="4.5" rx="2.25" />
+    <rect x="14" y="27.5" width="9" height="9" rx="2.6" />
+    <rect x="29" y="30" width="21" height="4.5" rx="2.25" />
+    <rect x="14" y="39" width="9" height="9" rx="2.6" />
+    <rect x="29" y="41.5" width="21" height="4.5" rx="2.25" />
+  </g>
+</svg>
