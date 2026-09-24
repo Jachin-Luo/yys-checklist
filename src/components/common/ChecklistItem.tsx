@@ -3,6 +3,7 @@ import type { Item } from '../../api/types';
 import { DEFAULT_CARD_DISPLAY } from '../../domain/cardDisplay';
 import type { Cycle } from '../../domain/enums';
 import { LONG_PRESS_MS, useLongPress } from '../../hooks/useLongPress';
+import { useBreakpoint } from '../../hooks/useBreakpoint';
 import { useCheckStore } from '../../stores/check';
 import { dictIndexOf, useItemStore } from '../../stores/items';
 import { useUiStore } from '../../stores/ui';
@@ -151,21 +152,24 @@ function ChecklistItem({
      已接近"消失"，与既定口径「不消失、沉下去」相悖。沉下去由卡底色（`card-done`）
      + 朱红划线 + 菱形符三个通道承担，不需要再整卡调透明度。 */
   const opacity = dimmed ? 'opacity-70' : '';
+  /* 收益徽章的站位随断点（册页稿同一张 `.entry` 的两副面孔）：
+     桌面 = 右侧独立一列（`.pay`，所有行的收益徽章右对齐成一条竖线，一眼能扫总额）；
+     移动 = 留在正文流（标题下方换行 —— 窄屏再拆一列会把说明压得过早折行）。
+     断点判据与 `PageHead` 同源（`useBreakpoint`，全站唯一分流判据） */
+  const payColumn = useBreakpoint() === 'desktop';
   /* 高亮位只允许给"还没了结"的条目：已完成必须沉下去（参考稿铁律二） */
   const isHighlight = highlight && !checked;
-  const barColor = checked ? 'bg-crimson-soft' : 'bg-state-active';
 
   return (
     <article
       {...handlers}
       data-state={checked ? 'done' : 'open'}
       className={[
-        /* `no-press-select`：长按期间不让浏览器选中卡片文字（含连带选中相邻卡片），
-           见 `styles/base.css` 该类的说明 */
-        'group no-press-select relative grid cursor-pointer grid-cols-[1.25rem_minmax(0,1fr)_auto] items-start gap-x-2.5',
-        'overflow-hidden rounded-md px-3.5 pb-4 pt-3 shadow-card transition-all duration-300 ease-genso',
-        checked ? 'bg-card-done' : 'bg-surface hover:bg-surface-hi',
-        isHighlight ? 'bg-gold-soft ring-1 ring-gold-hi hover:shadow-ready' : '',
+        /* 账目行（册页稿 `.entry`）：不再是卡 —— 行直接铺在册页上，行间分隔线由
+           `CHECKLIST_GRID` 容器给（每行 `border-t`、首行豁免），hover 铺填充底 */
+        'group no-press-select relative flex cursor-pointer items-start gap-2.5 rounded-sm border-t border-line-soft px-3 py-2.5 transition-colors duration-150 ease-genso first:border-t-0',
+        checked ? 'bg-card-done' : 'hover:bg-fill',
+        isHighlight ? 'bg-gold-soft ring-1 ring-gold-line' : '',
         pressing ? 'scale-[0.985]' : '',
         opacity,
       ].join(' ')}
@@ -176,21 +180,13 @@ function ChecklistItem({
         handleToggle();
       }}
     >
-      {/* 左侧符纸条：圆润版去掉上下菱形挂角（菱形是方正语言的角饰，挂在 14px 圆角上会穿帮），
-          整条改圆头 + 卡片 `overflow-hidden`，两端自然收进圆角 */}
+      {/* 左缘朱线：进行中/已完成的行侧标记（参考稿 `.entry::before` 的 data-on 态） */}
       <span
         aria-hidden
-        className={`absolute bottom-4 left-0 top-3 w-[3px] rounded-full transition-colors duration-300 ${barColor}`}
+        className={`absolute bottom-2.5 left-0 top-2.5 w-0.5 rounded-r-full bg-crimson transition-opacity duration-150 ${
+          checked || pressing ? 'opacity-100' : 'opacity-0'
+        }`}
       />
-
-      {/* 卡片底轨 2px（硬约束：不得超过 2px，超过就变成第二根分隔线） */}
-      <span aria-hidden className="absolute bottom-0 left-0 h-0.5 w-full bg-track">
-        <i
-          className={`block h-full transition-[width,background-color] duration-350 ease-genso ${
-            checked ? 'w-full bg-crimson-soft' : 'w-0'
-          }`}
-        />
-      </span>
 
       {/* 长按进度贴**底边**、与 2px 底轨共用同一条边：两者都是 2px，叠在一起不会互相误读，
           而它渲染在底轨之后 → 压在上面。2026-09-23 修：上一版把它挪到了卡片顶部，
@@ -211,7 +207,7 @@ function ChecklistItem({
         label={`${checked ? '取消完成' : '标记完成'}：${item.name}`}
       />
 
-      <div className="min-w-0">
+      <div className="min-w-0 flex-1">
         <div className="flex min-w-0 items-start gap-2.5">
           {/* 任务类型符：按状态调色（未完成金 85% / 已完成降到 ink-4 50%） */}
           <Icon
@@ -224,7 +220,7 @@ function ChecklistItem({
           />
           {/* `break-words` 给超长不可断串兜底：名称里塞英文串 / UID 时，双列每列只有 ~390px */}
           <h3
-            className={`flex min-w-0 flex-wrap items-center gap-1.5 break-words font-serif text-lg leading-snug tracking-card ${
+            className={`flex min-w-0 flex-wrap items-center gap-1.5 break-words text-base font-semibold leading-snug tracking-card ${
               /* 已完成**任务名**同样提到 `ink-3`：它才是读者最需要看清的那行字，
                  裸 `ink-4` 在卡片上只有 3.56（暗版 3.14）。划线 + 卡底色已足够表达"已完成" */
               checked ? 'text-ink-3 line-through decoration-crimson decoration-1' : 'text-ink'
@@ -245,14 +241,32 @@ function ChecklistItem({
           </h3>
         </div>
 
-        {card.gain ? <GainBadges gain={item.gain} note={item.gainNote} /> : null}
-        {card.kinds ? <KindBadges kinds={item.gainKind} gain={item.gain} labels={labelMap} /> : null}
+        {/* 收益徽章：移动端留在正文流；桌面端挪到下面的右列（`.pay`） */}
+        {!payColumn ? (
+          <>
+            {card.gain ? <GainBadges gain={item.gain} note={item.gainNote} /> : null}
+            {card.kinds ? (
+              <KindBadges kinds={item.gainKind} gain={item.gain} labels={labelMap} />
+            ) : null}
+          </>
+        ) : null}
 
         {/* 这三行是卡片高度的主要来源，也是「只想打卡」时最不需要的内容 —— 逐项可关 */}
         {card.path && item.path ? <Field kind="path" value={item.path} /> : null}
         {card.condition && item.condition ? <Field kind="condition" value={item.condition} /> : null}
         {card.note && item.note ? <Field kind="note" value={item.note} /> : null}
       </div>
+
+      {/* 桌面右列（册页稿 `.entry .pay`）：标签在上、徽章右对齐 ——
+          不占正文宽度，说明文字不再因为徽章换行而提前折行 */}
+      {payColumn ? (
+        <div className="flex-none">
+          {card.gain ? <GainBadges gain={item.gain} note={item.gainNote} column /> : null}
+          {card.kinds ? (
+            <KindBadges kinds={item.gainKind} gain={item.gain} labels={labelMap} column />
+          ) : null}
+        </div>
+      ) : null}
 
       <button
         type="button"

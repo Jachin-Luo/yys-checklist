@@ -140,9 +140,11 @@ describe('groupChecklist（按"卡"切分待做 / 已完成）', () => {
   it('单条条目的待做 / 已完成归属不受影响', () => {
     const solo = item({ id: 'solo', name: '单独条目' });
     const fin = item({ id: 'fin', name: '已完成的单独条目' });
+    /* `demon(1)` 只有孤零零一步 —— 按"单成员退回单条"当普通单条处理；
+       它已勾选，所以与 `fin` 一起落在已完成（这里同时锁住"孤立的 k/N 也是单条"这条边） */
     const { pending, done } = groupChecklist([solo], [fin, demon(1)]);
-    expect(pending.map((u) => u.key)).toEqual(['solo', expect.stringContaining('group:地域鬼王')]);
-    expect(done.map((u) => u.key)).toEqual(['fin']);
+    expect(pending.map((u) => u.key)).toEqual(['solo']);
+    expect(done.map((u) => u.key)).toEqual(['fin', 'daily_demon_lord_1']);
   });
 });
 

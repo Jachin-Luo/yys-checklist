@@ -1,4 +1,4 @@
-import { useId, type ReactNode } from 'react';
+import { type ReactNode } from 'react';
 import Icon, { type IconName } from '../icons/Icon';
 
 /**
@@ -28,6 +28,22 @@ export function Texture({ dots = false, className = '' }: { dots?: boolean; clas
         dots ? 'genso-texture-dots' : 'genso-texture'
       } ${className}`}
     />
+  );
+}
+
+/**
+ * 品牌印章「囤」—— 朱红径向渐变 + 浅金衬线字（参考稿 `.sigil`，顶栏与应用栏共用）。
+ * 径向渐变与内圈高光走 CSS 类（`.genso-sigil`，见 theme.css）—— Tailwind 表达不了径向，
+ * 这是 AGENTS.md 样式约定里 `.genso-*` 那条豁免的第二处应用。
+ */
+export function Sigil({ className = '' }: { className?: string }) {
+  return (
+    <span
+      aria-hidden
+      className={`genso-sigil flex h-9 w-9 flex-none items-center justify-center rounded-sm font-serif text-xl font-bold text-on-crimson ${className}`}
+    >
+      囤
+    </span>
   );
 }
 
@@ -99,56 +115,43 @@ export function Gohei({ className = '' }: { className?: string }) {
 }
 
 /**
- * 桔梗纹带 —— 分区之间的收束横饰（34×12 循环：两侧横线 + 中央五瓣桔梗）。
- * 用 `useId()` 生成 pattern id：同一页会出现多条纹带，固定 id 会撞车。
+ * 墨线菱点（册页稿 `.rule`）—— 分区与分区之间的收束线：
+ * 两端渐隐的墨线 + 正中一枚 5px 菱点（册页底色填充 + 墨线描边，盖在断口上）。
+ * 与账目行的行间细线是两个层级：行线 1px 通长、这根**中间必须断开**——
+ * 断口 + 菱点是"一节结束"的句读，通长线反而像没画完。
  */
-export function KikyoBand({ className = '' }: { className?: string }) {
-  const uid = useId().replace(/[^a-zA-Z0-9]/g, '');
-  const patId = `genso-band-${uid}`;
-  const petal = 'M0,0 C0.2,-0.32 0.36,-0.66 0,-1 C-0.36,-0.66 -0.2,-0.32 0,0 Z';
-  /* 同 `Gohei`：外边距挂外层、`w-full` 留内层，否则横向溢出 2×margin */
+export function Rule({ className = '' }: { className?: string }) {
   return (
-    <div className={className}>
-      <svg aria-hidden viewBox="0 0 620 12" preserveAspectRatio="none" className="h-3 w-full">
-      <defs>
-        <pattern id={patId} x="0" y="0" width="34" height="12" patternUnits="userSpaceOnUse">
-          <line x1="0" y1="6" x2="10" y2="6" className="genso-band-line" strokeWidth="1" />
-          <line x1="24" y1="6" x2="34" y2="6" className="genso-band-line" strokeWidth="1" />
-          <g transform="translate(17,6) scale(4.6)" fill="rgb(var(--c-gold))" opacity="0.75">
-            <path d={petal} />
-            <path d={petal} transform="rotate(72)" />
-            <path d={petal} transform="rotate(144)" />
-            <path d={petal} transform="rotate(216)" />
-            <path d={petal} transform="rotate(288)" />
-          </g>
-        </pattern>
-      </defs>
-        <rect width="620" height="12" fill={`url(#${patId})`} />
-      </svg>
+    <div
+      aria-hidden
+      className={`relative h-px bg-gradient-to-r from-transparent via-line to-transparent ${className}`}
+    >
+      <i className="absolute left-1/2 top-1/2 h-1.5 w-1.5 -translate-x-1/2 -translate-y-1/2 rotate-45 border border-line bg-surface" />
     </div>
   );
 }
 
-/** 注连绳 —— 末组下方的收束横幅（连续绳体 + 11 条长短相间的纸垂）。 */
-export function Shimenawa({ className = '' }: { className?: string }) {
+/**
+ * 收束纹带（册页稿 `.closing`）—— 每页页脚的最后一笔：
+ * 94×15 波浪线 + 中央圆点，下面一行衬线小字（四字铭）。
+ * 四字铭由调用方给（今日"一日一愿" / 本周"七日一折" / 本月"一页一月" /
+ * 限时"到期即归档"）—— 它是页面的落款，不是通用的装饰文案。
+ */
+export function Closing({ text, className = '' }: { text: string; className?: string }) {
   return (
-    <div aria-hidden className={`pointer-events-none h-[26px] text-gold opacity-40 ${className}`}>
-      <svg viewBox="0 0 620 26" preserveAspectRatio="none" className="h-full w-full">
-        <g fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" strokeLinecap="round">
-          <path d="M0,9 C17,12 34,6 52,9 C70,12 87,6 104,9 C121,12 139,6 156,9 C173,12 190,6 207,9 C224,12 242,6 259,9 C276,12 293,6 310,9 C327,12 345,6 362,9 C379,12 396,6 413,9 C430,12 448,6 465,9 C482,12 499,6 516,9 C533,12 551,6 568,9 C585,12 603,6 620,9" />
-          <path d="M52,11.5 V18" />
-          <path d="M104,11 V20" />
-          <path d="M156,11.5 V18" />
-          <path d="M207,11 V20" />
-          <path d="M259,11.5 V18" />
-          <path d="M310,11 V20" />
-          <path d="M362,11.5 V18" />
-          <path d="M413,11 V20" />
-          <path d="M465,11.5 V18" />
-          <path d="M516,11 V20" />
-          <path d="M568,11.5 V18" />
-        </g>
+    <div aria-hidden className={`mt-8 flex flex-col items-center gap-2 ${className}`}>
+      <svg
+        viewBox="0 0 94 15"
+        className="h-[15px] w-[94px] opacity-60"
+        fill="none"
+        stroke="rgb(var(--c-gold-line))"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+      >
+        <path d="M2,8 C10,3 18,13 26,8 C34,3 42,13 50,8 C58,3 66,13 74,8 C81,3.6 88,11.4 92,8" />
+        <circle cx="47" cy="8" r="1.6" />
       </svg>
+      <span className="font-serif text-2xs tracking-title text-ink-3">{text}</span>
     </div>
   );
 }
@@ -232,25 +235,6 @@ export function Spine({
       <span>{title}</span>
       <i className="my-1 h-1 w-1 flex-none rotate-45 bg-gold opacity-80" />
       <span>{subtitle}</span>
-    </div>
-  );
-}
-
-/**
- * 面板右缘的御灵符 + 竖排「封印」小字（纯装饰，落在内容区右侧留白里）。
- * `z-30` 与 `pointer-events-none` 是必须的：低于卡片会被整片盖住、高于内框又会压住框线，
- * 而它本身不承载任何交互（参考稿陷阱六）。
- */
-export function OfudaDeco({ className = '' }: { className?: string }) {
-  return (
-    <div
-      aria-hidden
-      className={`pointer-events-none absolute right-4 top-28 z-30 flex w-[22px] flex-col items-center text-gold opacity-30 ${className}`}
-    >
-      <Icon name="ofuda" size={22} />
-      <div className="mt-2 font-serif text-2xs tracking-group text-crimson opacity-80 [writing-mode:vertical-rl]">
-        封印
-      </div>
     </div>
   );
 }

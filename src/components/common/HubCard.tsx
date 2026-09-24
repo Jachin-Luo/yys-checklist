@@ -63,8 +63,8 @@ export default function HubCard({ item }: { item: Item }) {
         if (swallowClick()) return;
         toggleHub();
       }}
-      className={`no-press-select relative mx-3.5 mt-2.5 grid cursor-pointer grid-cols-[1.25rem_minmax(0,1fr)_auto] items-start gap-x-2.5 overflow-hidden rounded-md bg-gold-soft px-3.5 pb-4 pt-3 shadow-card ring-1 transition-all duration-300 ease-genso ${
-        pressing ? 'scale-[0.985] ring-gold-hi' : 'ring-gold-hi hover:shadow-ready'
+      className={`no-press-select relative mx-3.5 mt-2.5 flex cursor-pointer items-start gap-x-2.5 rounded-sm border border-gold-line/40 bg-gradient-to-r from-gold-soft to-fill px-3.5 pb-4 pt-3 transition-all duration-300 ease-genso ${
+        pressing ? 'scale-[0.985]' : ''
       }`}
     >
       {/* 长按进度：与 `ChecklistItem` 同一形态（常驻元素 + 条件宽度，
@@ -76,12 +76,6 @@ export default function HubCard({ item }: { item: Item }) {
         }`}
       />
 
-      {/* 高亮位的左侧金条（普通卡片是靛蓝；这里换成金，与"唯一高亮"同一语义） */}
-      <span aria-hidden className="absolute bottom-4 left-0 top-3 w-[3px] rounded-sm bg-gold-hi">
-        <i className="absolute -left-[1.25px] -top-1 h-1.5 w-1.5 rotate-45 bg-gold-hi" />
-        <i className="absolute -bottom-1 -left-[1.25px] h-1.5 w-1.5 rotate-45 bg-gold-hi" />
-      </span>
-
       <CheckBox
         checked={checked}
         onToggle={() => {
@@ -91,9 +85,9 @@ export default function HubCard({ item }: { item: Item }) {
         label={label}
       />
 
-      <div className="min-w-0">
+      <div className="min-w-0 flex-1">
         <h3
-          className={`flex min-w-0 items-center gap-2.5 break-words font-serif text-lg leading-snug tracking-card ${
+          className={`flex min-w-0 items-center gap-2.5 break-words font-serif text-base leading-snug tracking-card ${
             checked ? 'text-ink-3 line-through decoration-crimson decoration-1' : 'text-gold-hi'
           }`}
         >

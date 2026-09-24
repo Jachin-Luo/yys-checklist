@@ -2,8 +2,9 @@ import ChecklistEntry from '../components/common/ChecklistEntry';
 import { groupChecklist } from '../domain/grouping';
 import { EmptyState, SectionTitle } from '../components/common/EmptyState';
 import PageHead from '../components/common/PageHead';
+import SummaryBar from '../components/common/SummaryBar';
 import ViewBar from '../components/common/ViewBar';
-import { KikyoBand } from '../components/ornament';
+import { Closing, Rule } from '../components/ornament';
 import { monthRangeLabel } from '../domain/dateLabel';
 import { useChecklist } from '../hooks/useChecklist';
 import { usePeriodCountdown } from '../hooks/usePeriodCountdown';
@@ -25,8 +26,6 @@ export default function MonthPage({ variant }: { variant: 'mobile' | 'desktop' }
   /* 距下月 1 日 0 点还有多久（与勾选重置同源） */
   const countdown = usePeriodCountdown('monthly');
 
-  const total = pending.length + done.length;
-
   return (
     <div className="pb-6">
       {/* 筛选 2026-09-23 起整体下线（`stores/view.SHOW_KIND_FILTER`）：此处 ViewBar 渲染空。
@@ -44,11 +43,10 @@ export default function MonthPage({ variant }: { variant: 'mobile' | 'desktop' }
         action={variant === 'mobile' ? <ViewBar mode="mobile" /> : null}
       />
 
-      <SectionTitle
-        icon="koyomi"
-        count={pending.length}
-        progress={total ? done.length / total : undefined}
-      >
+      {/* 汇总条（册页稿 `.summary`）：页级进度只在这一处 */}
+      <SummaryBar className="mx-3.5 mt-3" pending={pending.length} done={done.length} note="历札一页一月，翻页即结账" />
+
+      <SectionTitle icon="koyomi" count={pending.length}>
         本月待做
       </SectionTitle>
       {pending.length ? (
@@ -64,7 +62,7 @@ export default function MonthPage({ variant }: { variant: 'mobile' | 'desktop' }
       {done.length ? (
         <>
           <SectionTitle icon="done" count={done.length}>
-            已完成
+            本月已结
           </SectionTitle>
           <div className={CHECKLIST_GRID}>
             {groupChecklist(pending, done).done.map((u) => (
@@ -74,7 +72,9 @@ export default function MonthPage({ variant }: { variant: 'mobile' | 'desktop' }
         </>
       ) : null}
 
-      <KikyoBand className="mx-3.5 mt-6 opacity-90" />
+      {/* 收束：墨线菱点断句 + 四字铭落款 */}
+      <Rule className="mx-3.5 mt-6" />
+      <Closing text="一页一月" />
     </div>
   );
 }

@@ -22,8 +22,11 @@ interface Props {
 }
 
 export default function CheckBox({ checked, onToggle, label, size = 'md' }: Props) {
-  const box = size === 'md' ? 'h-5 w-5' : 'h-4 w-4';
-  const mark = size === 'md' ? 'h-3.5 w-3.5' : 'h-3 w-3';
+  /* 2026-09-24 册页重设计：md 档缩小一档（20 → 18px）—— 账目行密度上来之后，
+     行首的勾选框过大反而成了视觉锚点（用户反馈"菱形勾选框的大小可以变小一些"）；
+     触控热区由整行承担，符号格本身退成指示器 */
+  const box = size === 'md' ? 'h-4.5 w-4.5' : 'h-4 w-4';
+  const mark = size === 'md' ? 'h-3 w-3' : 'h-2.5 w-2.5';
   return (
     <button
       type="button"

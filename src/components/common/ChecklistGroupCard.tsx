@@ -4,6 +4,7 @@ import { DEFAULT_CARD_DISPLAY } from '../../domain/cardDisplay';
 import type { ItemUnit } from '../../domain/grouping';
 import { unitProgress } from '../../domain/grouping';
 import { LONG_PRESS_MS, useLongPress } from '../../hooks/useLongPress';
+import { useBreakpoint } from '../../hooks/useBreakpoint';
 import { useCheckStore } from '../../stores/check';
 import { dictIndexOf, useItemStore } from '../../stores/items';
 import { useUiStore } from '../../stores/ui';
@@ -136,6 +137,8 @@ function ChecklistGroupCard({
      卡底色 + 朱红划线 + 菱心三态已经足够表达"沉下去但仍在" */
   const opacity = dimmed ? 'opacity-70' : '';
   const isHighlight = highlight && !done;
+  /* 收益徽章的站位随断点 —— 与 `ChecklistItem` 同一条注释，不再重复 */
+  const payColumn = useBreakpoint() === 'desktop';
 
   /* 三态菱形推进器：未开始 = 金描边空心 / 进行中 = 朱红描边 + 内芯 / 满段 = 朱红实心 */
   const mark =
@@ -152,10 +155,11 @@ function ChecklistGroupCard({
       data-cur={cur}
       data-total={unit.total}
       className={[
-        'group no-press-select relative grid cursor-pointer grid-cols-[1.25rem_minmax(0,1fr)_auto] items-start gap-x-2.5',
-        'overflow-hidden rounded-md px-3.5 pb-4 pt-3 shadow-card transition-all duration-300 ease-genso',
-        done ? 'bg-card-done' : 'bg-surface hover:bg-surface-hi',
-        isHighlight ? 'bg-gold-soft ring-1 ring-gold-hi hover:shadow-ready' : '',
+        /* 账目行（册页稿 `.entry`）：与单条行同构；进度不再画底轨 —— 标题行里的
+           菱形进度格 + `cur/total` 已经把"走到第几步"说清了 */
+        'group no-press-select relative flex cursor-pointer items-start gap-2.5 rounded-sm border-t border-line-soft px-3 py-2.5 transition-colors duration-150 ease-genso first:border-t-0',
+        done ? 'bg-card-done' : 'hover:bg-fill',
+        isHighlight ? 'bg-gold-soft ring-1 ring-gold-line' : '',
         pressing ? 'scale-[0.985]' : '',
         opacity,
       ].join(' ')}
@@ -164,19 +168,13 @@ function ChecklistGroupCard({
         onMain();
       }}
     >
-      {/* 竖条与底轨与单条卡同构：颜色按"这一组"的状态走 */}
+      {/* 左缘朱线：进行中/已完成的行侧标记（参考稿 `.entry::before` 的 data-on 态） */}
       <span
         aria-hidden
-        className={`absolute bottom-4 left-0 top-3 w-[3px] rounded-full transition-colors duration-300 ${
-          done ? 'bg-crimson-soft' : 'bg-state-active'
+        className={`absolute bottom-2.5 left-0 top-2.5 w-0.5 rounded-r-full bg-crimson transition-opacity duration-150 ${
+          done || pressing ? 'opacity-100' : 'opacity-0'
         }`}
       />
-      <span aria-hidden className="absolute bottom-0 left-0 h-0.5 w-full bg-track">
-        <i
-          className="block h-full bg-crimson-soft transition-[width] duration-350 ease-genso"
-          style={{ width: `${Math.round((cur / unit.total) * 100)}%` }}
-        />
-      </span>
       <span
         aria-hidden
         className={`absolute bottom-0 left-0 h-0.5 bg-crimson ${
@@ -194,17 +192,17 @@ function ChecklistGroupCard({
           if (swallowClick()) return;
           onMain();
         }}
-        className="group/dia flex h-5 w-5 flex-none cursor-pointer items-center justify-center"
+        className="group/dia flex h-4.5 w-4.5 flex-none cursor-pointer items-center justify-center"
       >
         <i
-          className={`flex h-3.5 w-3.5 rotate-45 items-center justify-center border transition-colors duration-220 ease-genso ${mark} group-hover/dia:bg-crimson/15`}
+          className={`flex h-3 w-3 rotate-45 items-center justify-center border transition-colors duration-220 ease-genso ${mark} group-hover/dia:bg-crimson/15`}
         >
           {/* 进行中的内芯：不靠颜色深浅说谎，明确表示"走到一半" */}
-          {cur > 0 && !done ? <i className="block h-1.5 w-1.5 bg-crimson" /> : null}
+          {cur > 0 && !done ? <i className="block h-1 w-1 bg-crimson" /> : null}
         </i>
       </button>
 
-      <div className="min-w-0">
+      <div className="min-w-0 flex-1">
         <div className="flex min-w-0 items-start gap-2.5">
           {/* 组图标取当前步那条的周期符 —— 同组必然同周期（分组规则要求），所以它是稳定的 */}
           <Icon
@@ -213,7 +211,7 @@ function ChecklistGroupCard({
             className={`mt-0.5 ${done ? 'text-ink-3' : 'text-gold-hi'}`}
           />
           <h3
-            className={`flex min-w-0 flex-wrap items-center gap-1.5 break-words font-serif text-lg leading-snug tracking-card ${
+            className={`flex min-w-0 flex-wrap items-center gap-1.5 break-words text-base font-semibold leading-snug tracking-card ${
               done ? 'text-ink-3 line-through decoration-crimson decoration-1' : 'text-ink'
             }`}
           >
@@ -249,9 +247,11 @@ function ChecklistGroupCard({
 
         {/* 收益与类型同样"全组一致才显示" —— 逐次收益不同的组不显示，避免被读成合计。
             提示文案沿用数据里的 `gainNote`（如"每只 20 勾"，它本来就说明了这是**单次**收益），
-            全组口径不一致时不写 title，让徽章自己说话 */}
-        {card.gain && gain ? <GainBadges gain={gain} note={sameOf((it) => it.gainNote)} /> : null}
-        {card.kinds && kinds ? (
+            全组口径不一致时不写 title，让徽章自己说话。站位随断点（移动正文流 / 桌面右列） */}
+        {!payColumn && card.gain && gain ? (
+          <GainBadges gain={gain} note={sameOf((it) => it.gainNote)} />
+        ) : null}
+        {!payColumn && card.kinds && kinds ? (
           <KindBadges kinds={kinds} gain={gain} labels={kindLabels} />
         ) : null}
 
@@ -261,9 +261,15 @@ function ChecklistGroupCard({
         {card.note && step.note ? <Field kind="note" value={step.note} /> : null}
       </div>
 
-      {/* 占位：与单条卡的网格第三列对齐（聚合卡没有独立的置顶星标 —— 置顶的是"每条"，
-          组内成员各自置顶会在同一位置打架，故整组不提供） */}
-      <span className="mt-0.5 w-5 flex-none" aria-hidden />
+      {/* 桌面右列（册页稿 `.entry .pay`）—— 与单条卡同一站位 */}
+      {payColumn ? (
+        <div className="flex-none">
+          {card.gain && gain ? <GainBadges gain={gain} note={sameOf((it) => it.gainNote)} column /> : null}
+          {card.kinds && kinds ? (
+            <KindBadges kinds={kinds} gain={gain} labels={kindLabels} column />
+          ) : null}
+        </div>
+      ) : null}
     </article>
   );
 }

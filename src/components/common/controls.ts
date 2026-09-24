@@ -52,8 +52,10 @@ export const btn = {
   md: size.md,
   sm: size.sm,
   lg: size.lg,
-  /** 主按钮：朱红渐变实心。**同一屏最多一颗** */
-  pri: 'border border-crimson/55 bg-gradient-to-b from-crimson-hi via-crimson to-crimson-deep text-on-crimson shadow-cta hover:-translate-y-px active:translate-y-0 active:scale-95',
+  /** 主按钮：朱红渐变实心。**同一屏最多一颗**。
+      2026-09-24 册页稿：渐变两端换用 `crimson-btn(-hi)`（与主题朱红分家 ——
+      暗版主题朱红太亮，白字只有 2.86:1，按钮另取深一档），且不再描边 */
+  pri: 'border-0 bg-gradient-to-b from-crimson-btn-hi to-crimson-btn text-on-crimson shadow-cta hover:-translate-y-px active:translate-y-0 active:scale-95',
   /** 次级按钮：金描边 + 填充底 */
   sec: 'border border-line bg-fill text-gold-hi hover:bg-fill-2 hover:text-ink',
   /** 描边按钮：卡片底（弹层里的"取消"用它） */
@@ -61,7 +63,7 @@ export const btn = {
   /** 幽灵按钮 */
   ghost: 'text-ink-2 hover:bg-fill hover:text-ink',
   /** 不可逆动作（弹层里那颗确认）：朱红渐变，比主按钮浅一档 */
-  dan: 'border border-crimson/45 bg-gradient-to-b from-crimson-hi to-crimson text-on-crimson shadow-cta hover:-translate-y-px active:translate-y-0',
+  dan: 'border-0 bg-gradient-to-b from-crimson-btn-hi to-crimson-btn text-on-crimson shadow-cta hover:-translate-y-px active:translate-y-0',
   /** 次级危险动作（列表行内的删除）：细朱红描边，不抢注意力 */
   danger: 'border border-crimson-soft text-crimson hover:bg-crimson/10',
 } as const;

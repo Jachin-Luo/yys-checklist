@@ -4,8 +4,9 @@ import ChecklistEntry from '../components/common/ChecklistEntry';
 import { groupByCount, groupChecklist } from '../domain/grouping';
 import { EmptyState, SectionTitle } from '../components/common/EmptyState';
 import PageHead from '../components/common/PageHead';
+import SummaryBar from '../components/common/SummaryBar';
 import ViewBar from '../components/common/ViewBar';
-import { KikyoBand } from '../components/ornament';
+import { Closing, Rule } from '../components/ornament';
 import { daysLeft } from '../domain/countdown';
 import { buildComparator, isVisible } from '../domain/sort';
 import { useCheckStore } from '../stores/check';
@@ -101,11 +102,10 @@ export default function LimitedPage({ variant }: { variant: 'mobile' | 'desktop'
         </Alert>
       ) : null}
 
-      <SectionTitle
-        icon="chochin"
-        count={pending.length}
-        progress={pending.length + done.length ? done.length / (pending.length + done.length) : undefined}
-      >
+      {/* 汇总条（册页稿 `.summary`）：限时页也有自己的账 —— 在跑的与已结的 */}
+      <SummaryBar className="mx-3.5 mt-3" pending={pending.length} done={done.length} note="到期即归档" />
+
+      <SectionTitle icon="chochin" count={pending.length}>
         限时活动 · 进行中
       </SectionTitle>
       {pending.length ? (
@@ -129,7 +129,7 @@ export default function LimitedPage({ variant }: { variant: 'mobile' | 'desktop'
       {done.length ? (
         <>
           <SectionTitle icon="done" count={done.length}>
-            已完成
+            限时已结
           </SectionTitle>
           <div className={CHECKLIST_GRID}>
             {groupChecklist(pending, done).done.map((u) => (
@@ -184,7 +184,9 @@ export default function LimitedPage({ variant }: { variant: 'mobile' | 'desktop'
         没标截止的（如联动、待定档）按「截止未定」处理，以游戏内为准。
       </p>
 
-      <KikyoBand className="mx-3.5 mt-4 opacity-90" />
+      {/* 收束：墨线菱点断句 + 四字铭落款 */}
+      <Rule className="mx-3.5 mt-6" />
+      <Closing text="到期即归档" />
     </div>
   );
 }

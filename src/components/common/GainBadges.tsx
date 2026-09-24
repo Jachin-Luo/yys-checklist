@@ -25,20 +25,38 @@ const CURRENCY_STYLE: Record<string, string> = {
  * 标签就失去意义了）。与 `ChecklistItem` 的「入口 / 条件 / 备注」同一口径：
  * **标签用 ink-3、值才有颜色**；`ink-4` 只留给占位符与装饰。
  */
-export function GainBadges({ gain, note }: { gain?: Gain; note?: string }) {
+export function GainBadges({
+  gain,
+  note,
+  column = false,
+}: {
+  gain?: Gain;
+  note?: string;
+  /** 右列形态（参考稿 `.pay`）：标签在上、徽章右对齐向下排 —— 桌面账目行独占右侧一列时用 */
+  column?: boolean;
+}) {
   if (!gain) return null;
   const rows = Object.entries(gain).filter(([, v]) => typeof v === 'number' && v > 0);
   if (!rows.length) return null;
   return (
-    <div className="mt-1 flex flex-wrap items-center gap-1.5" title={note}>
-      <span className="text-sm text-ink-3">固定收益</span>
+    <div
+      title={note}
+      className={
+        column
+          ? 'flex flex-col items-end gap-1.5'
+          : 'mt-1 flex flex-wrap items-center gap-1.5'
+      }
+    >
+      <span className="text-2xs tracking-label text-ink-3">固定收益</span>
       {rows.map(([k, v]) => (
         <b
           key={k}
-          className={`rounded-full border px-2 py-0.5 font-mono text-sm font-medium ${
+          className={`flex items-center gap-1.5 rounded-full border px-2 py-0.5 font-mono text-xs font-medium ${
             CURRENCY_STYLE[k] ?? 'border-line bg-fill text-ink-2'
           }`}
         >
+          {/* 币种点（参考稿 `.chip::before`）：颜色即币种，三色在行内自成一条竖线 */}
+          <i aria-hidden className="h-1.5 w-1.5 flex-none rounded-full bg-current" />
           {CURRENCY_LABEL[k] ?? k} +{v}
         </b>
       ))}
@@ -54,10 +72,13 @@ export function KindBadges({
   kinds,
   gain,
   labels,
+  column = false,
 }: {
   kinds?: GainKind[];
   gain?: Gain;
   labels: Map<string, string>;
+  /** 右列形态（参考稿 `.pay`），见 `GainBadges` 同名参数 */
+  column?: boolean;
 }) {
   if (!kinds?.length) return null;
   const fixed = new Set(
@@ -67,22 +88,28 @@ export function KindBadges({
   if (!rest.length) return null;
   const hasFixed = fixed.size > 0;
   return (
-    <div className="mt-1 flex flex-wrap items-center gap-1.5">
-      <span className="text-sm text-ink-3">{hasFixed ? '另有' : '含'}</span>
+    <div
+      className={
+        column
+          ? 'flex flex-col items-end gap-1.5'
+          : 'mt-1 flex flex-wrap items-center gap-1.5'
+      }
+    >
+      <span className="text-2xs tracking-label text-ink-3">{hasFixed ? '另有' : '含'}</span>
       {rest.map((k) => (
         <b
           key={k}
-          /* ⚠️ `text-sm` 不能省（2026-09-24 用户反馈"奖励的字体大小太大了"）：
-             这里原先没有字号类，于是它继承**根字号 16px** —— 比同一行的标签（12px）、
-             比上一行「固定收益」的徽章（12px）、甚至比**任务名**（14.5px）都大，
-             读起来像奖励在喊。奖励块现在四个元素同属 12px 一族：两个标签 + 两类徽章。
-             这是本项目最容易复发的一类错：**漏写字号的元素不会报错，只会悄悄变成 16px**。 */
-          className="rounded-full border border-dashed border-line px-2 py-0.5 font-normal text-sm text-ink-2"
+          /* ⚠️ 字号类不能省（2026-09-24 用户反馈"奖励的字体大小太大了"）：
+             这里曾漏写字号，于是继承**根字号 16px** —— 比同一行的标签、
+             比上一行「固定收益」的徽章、甚至比任务名都大。教训见 CHANGELOG 同日条目：
+             **漏写字号的元素不会报错，只会悄悄变成 16px**。
+             册页稿后奖励块统一到 11px（`text-xs`）一族 */
+          className="rounded-full border border-dashed border-line px-2 py-0.5 font-normal text-xs text-ink-2"
         >
           {labels.get(k) ?? k}
         </b>
       ))}
-      <span className="text-sm text-ink-3">（数量不固定）</span>
+      <span className="text-xs text-ink-3">（数量不固定）</span>
     </div>
   );
 }

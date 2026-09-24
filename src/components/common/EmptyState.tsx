@@ -46,30 +46,30 @@ export function Skeleton({ rows = 4 }: { rows?: number }) {
 }
 
 /**
- * 分组头（原 `SectionTitle`）—— 朱印的分区语言：
- * 组名图标 + 衬线组名（金色、字距 .2em） + 一条虚线拉到右侧 + 计数 pill。
+ * 分组头（原 `SectionTitle`）—— 册页稿 `.grp-head`：
+ * 周期符（金）+ 衬线组名（**墨色**、字距 .14em）+ 渐隐线拉到右侧 + 等宽计数。
  *
- * 2026-09-23 重做：上一版是一行 12px 灰字"今天该做 · 3 项"，把"是什么组"
- * 和"有几项"揉在一句里；现在拆成 组名 / 计数 两个信息位，与参考稿一致。
- *
- * `progress` 是**真实进度**（已完成 / 总数），渲染为 2px 底轨。
- * 注意参考稿的硬约束：底轨**不得超过 2px**，超过就变成第二根分隔线。
- * 本项目数据是布尔勾选、没有 `cur/total`，所以进度只做在"分组"这一层，
- * 不伪造单条目的次数进度。
+ * 2026-09-24 册页重设计改排：
+ *   - 组名由"金字"改回**墨色** —— 分组头是结构不是强调，金只留给符与计数点；
+ *     参考稿的 `h2` 就是 `--ink`。
+ *   - 虚线 → **渐隐实线**（`.ln`：左实右虚），虚线是"未完成"的暗示，不该出现在结构线上。
+ *   - 计数 pill → **裸等宽计数**（`.ct`）：pill 是徽章语言，页面上已有任务名下的
+ *     菱形进度格与汇总条的等宽字，这层再包胶囊就过了。
+ *   - **进度底轨退场**：页级进度归 `SummaryBar`（参考稿：进度只出现一次）。
+ *     `progress` 参数保留但不再渲染，恢复点在 `SummaryBar`。
  */
 export function SectionTitle({
   icon,
   children,
   count,
-  progress,
   aside,
   flush = false,
 }: {
   icon?: IconName;
   children: ReactNode;
-  /** 右侧计数 pill（参考稿：金描边胶囊、等宽 10px） */
+  /** 右侧裸计数（参考稿 `.ct`：等宽 11px、弱化墨） */
   count?: number;
-  /** 0–1；给了才画 2px 底轨 */
+  /** 已不渲染（进度归 `SummaryBar`，见上）—— 参数保留以免调用点连锁改 */
   progress?: number;
   aside?: ReactNode;
   /**
@@ -83,23 +83,13 @@ export function SectionTitle({
     <div className={`${flush ? '' : 'px-3.5'} pb-1.5 pt-4`}>
       <div className="flex items-center gap-2.5">
         {icon ? <Icon name={icon} size={16} className="text-gold-hi" /> : null}
-        <span className="font-serif text-sm tracking-group text-gold-hi">{children}</span>
-        <i className="h-0 min-w-4 flex-1 border-t border-dashed border-line-soft" />
+        <span className="font-serif text-lg font-semibold tracking-group text-ink">{children}</span>
+        <i className="h-px min-w-4 flex-1 bg-gradient-to-r from-line to-transparent" />
         {typeof count === 'number' ? (
-          <span className="rounded-full border border-line px-2 py-0.5 text-center font-mono text-2xs tracking-wide text-gold-hi">
-            {String(count).padStart(2, '0')}
-          </span>
+          <span className="font-mono text-xs tabular-nums tracking-wide text-ink-3">{count}</span>
         ) : null}
         {aside}
       </div>
-      {typeof progress === 'number' ? (
-        <div className="mt-2 h-0.5 w-full overflow-hidden bg-track">
-          <i
-            className="block h-full bg-crimson transition-all duration-350 ease-genso"
-            style={{ width: `${Math.round(Math.min(1, Math.max(0, progress)) * 100)}%` }}
-          />
-        </div>
-      ) : null}
     </div>
   );
 }

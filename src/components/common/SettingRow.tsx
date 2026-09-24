@@ -1,20 +1,17 @@
 import type { ReactNode } from 'react';
 
-import { cardBox } from './controls';
-
 /**
- * 设置行 —— **复用任务卡的同一套材质**，不新造一种卡片。
+ * 设置行（册页稿 `.srow`）—— 设置页的"一行一事"：
+ * 左侧「标题 + 说明」、右侧控件，行与行之间用 8px 间隙（父级 `space-y-2`）。
  *
- * ```
- * background-color: var(--card)  →  bg-surface（纯白浮起）
- * box-shadow: var(--sh-card)     →  shadow-card
- * border-radius: var(--r-md)     →  rounded-md（2026-09-24 起 14px）
- * padding: 12px 16px             →  px-4 py-3
- * 行间距                          →  由父级 space-y-1.5 统一控制
- * ```
+ * ## 2026-09-24 册页重设计改排
  *
- * 左侧是「衬线标题 13px + 说明 12px 弱化色」，右侧控件 `flex:none` ——
- * 与清单卡是同一个"盒子"，只换了内部布局。这样设置页不需要第二套卡片语言。
+ *   - **卡片材质换底**：`cardBox.solid`（阴影浮起）→ `bg-surface + border-line-faint`
+ *     （描边平贴，参考稿 `.srow` 没有阴影 —— 设置行是"账本里的一行"，不是"浮起的一张卡"；
+ *     阴影留给清单页与弹层）。
+ *   - **标题回到正体**：衬线 → sans 13px 半粗（参考稿 `.srow .tx b` 是 sans 600）——
+ *     衬线在册页稿里只给页面题名、分组名与收益数字，设置项是操作入口不是展品。
+ *   - **说明压到 11px**（`.tx p`）：它是注脚不是正文。
  *
  * `children` 用于**挂在行下方的附属内容**（如数据版本的键值明细）：
  * 它们与标题同属一个信息单元，拆成两张卡反而会被误读成两件独立的事。
@@ -34,11 +31,11 @@ export default function SettingRow({
   children?: ReactNode;
 }) {
   return (
-    <div className={`px-4 py-3 ${cardBox.solid}`}>
+    <div className="rounded-sm border border-line-faint bg-surface px-4 py-3 transition-colors duration-150 ease-genso hover:border-line-soft">
       <div className="flex items-center justify-between gap-4">
         <div className="min-w-0 flex-1">
-          <p className="font-serif text-base tracking-card text-ink">{title}</p>
-          {desc ? <p className="mt-1 text-sm leading-relaxed text-ink-3">{desc}</p> : null}
+          <p className="text-base font-semibold tracking-wide text-ink">{title}</p>
+          {desc ? <p className="mt-1 text-xs leading-relaxed text-ink-3">{desc}</p> : null}
         </div>
         {control ? <div className="flex flex-none items-center gap-2">{control}</div> : null}
       </div>

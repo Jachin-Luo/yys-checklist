@@ -42,6 +42,9 @@ export type IconName =
   | 'pin'
   /* C1 · 操作 */
   | 'ascend'
+  | 'go'
+  | 'more'
+  | 'empty'
   | 'plus'
   | 'trash'
   | 'fude'

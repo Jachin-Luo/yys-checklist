@@ -68,11 +68,13 @@ export default {
           faint: c('line-faint'),
         },
 
-        /* 色·金箔：描边 / 纹样 / 序号 / 倒计时 / 次级主按钮 */
+        /* 色·金箔：描边 / 纹样 / 序号 / 倒计时 / 次级主按钮。
+           `line` 是册页稿新增的金线档（chip / 金券条 / 印章圈描边共用） */
         gold: {
           DEFAULT: c('gold'),
           hi: c('gold-hi'),
           soft: c('gold-soft'),
+          line: c('gold-line'),
         },
 
         /* 色·实心底上的前景字（参考稿 .btn.pri 的 #FFF6F0 / .badge.gold 的 #1A1509）。
@@ -80,13 +82,22 @@ export default {
         'on-crimson': c('on-crimson'),
         'on-gold': c('on-gold'),
 
-        /* 色·朱红：主按钮 / 印记 / 划除线 / 危险 / 完成 */
+        /* 色·朱红：主按钮 / 印记 / 划除线 / 危险 / 完成。
+           `btn(-hi)` 与主题朱红分家：暗版主色太亮（白字 2.86），按钮另取深一档（参考稿算过） */
         crimson: {
           DEFAULT: c('crimson'),
           hi: c('crimson-hi'), // 渐变浅端（明版压深、暗版提亮，方向相反）
           soft: c('crimson-soft'),
           deep: c('crimson-deep'),
           faint: c('crimson-faint'),
+          btn: c('crimson-btn'),
+          'btn-hi': c('crimson-btn-hi'),
+        },
+
+        /* 色·印章（品牌印 / 应用栏 sigil 的径向渐变两端） */
+        seal: {
+          DEFAULT: c('seal'),
+          hi: c('seal-hi'),
         },
 
         /* 色·语义。`danger` 与朱红同源（朱红一支两用），不另立门户 */
@@ -126,8 +137,8 @@ export default {
         ],
         /* 标题 / 任务名 / 分组名走衬线，是朱印语言的骨架 */
         serif: ['Source Han Serif SC', 'Noto Serif SC', 'Songti SC', 'SimSun', 'serif'],
-        /* 倒计时 / 计数 / 序号走等宽，数字不跳 */
-        mono: ['ui-monospace', 'Consolas', 'Roboto Mono', 'monospace'],
+        /* 倒计时 / 计数 / 序号走等宽，数字不跳（册页稿把 JetBrains Mono 提到首位） */
+        mono: ['JetBrains Mono', 'Cascadia Mono', 'ui-monospace', 'Consolas', 'Roboto Mono', 'monospace'],
       },
       /* 字号：原 14 级 → 4 级 →（2026-09-23）加两档，
          圆润版沿用：10px 的标签字与 19px 的数值字都在既有档位之外 */
@@ -139,6 +150,8 @@ export default {
         lg: ['14.5px', { lineHeight: '1.45' }],
         xl: ['16px', { lineHeight: '1.4' }],
         '2xl': ['19px', { lineHeight: '1.3' }],
+        /* 册页稿的桌面书眉大标题（29px，全页唯一）—— 在既有档位之外，为它单开一档 */
+        '3xl': ['29px', { lineHeight: '1.1' }],
       },
       /* 圆角：2026-09-23 由 6/8/10/14 收方到 2/4/6/10（符札感）；
          2026-09-24 圆润版**整体放大 3~5 倍**（参考稿 `--r-xs:8 / sm:11 / md:14 / lg:18 / xl:24 / 2xl:30`）。
@@ -175,8 +188,8 @@ export default {
       },
       transitionTimingFunction: {
         out: 'cubic-bezier(0.22, 1, 0.36, 1)',
-        /* 参考稿统一曲线（圆润版换成更"稳"的一支）：划除线 / 底轨增长 / 蛇目纹淡入全走它 */
-        genso: 'cubic-bezier(0.32, 0.72, 0.28, 1)',
+        /* 参考稿统一曲线（册页稿的 --ease）：全站过渡都走它 */
+        genso: 'cubic-bezier(0.22, 0.61, 0.36, 1)',
       },
       transitionDuration: {
         120: '120ms',

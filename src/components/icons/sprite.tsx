@@ -488,6 +488,45 @@ export default function IconSprite() {
           <path d="M4.8,20.6 C4.8,17.4 8.0,15.5 12,15.5 C16.0,15.5 19.2,17.4 19.2,20.6" />
         </symbol>
 
+        {/* 行尾箭头 · 进入二级页【新 · 2026-09-24】出自册页稿（设置行 `.srow .go`）。
+            与既有 `chevron-right` 的分工：chevron 表示"展开/折叠"（1.7 线宽、短臂），
+            这枚表示"跳去别的页"（1.9 线宽、张角更开），扫一眼分得开 */}
+        <symbol
+          id="g-go"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth={1.9}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="M9.4,5.6 L15.8,12 L9.4,18.4" />
+        </symbol>
+
+        {/* 三点 · 更多【新 · 2026-09-24】出自册页稿的应用栏（账号切换 / 次级页入口）。
+            三枚实心圆点是通用共识，不做和风化（图标集铁律：有明确动作含义的槽位
+            图形必须一眼读出动作） */}
+        <symbol id="g-more" viewBox="0 0 24 24">
+          <circle cx="5.4" cy="12" r="1.5" fill="currentColor" stroke="none" />
+          <circle cx="12" cy="12" r="1.5" fill="currentColor" stroke="none" />
+          <circle cx="18.6" cy="12" r="1.5" fill="currentColor" stroke="none" />
+        </symbol>
+
+        {/* 空匣 · 空态【新 · 2026-09-24】出自册页稿（`.blank`）。
+            一只空箱 + 一道横线："这里现在是空的"，与 `hako`（归档，有盖有拉手）分形 */}
+        <symbol
+          id="g-empty"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth={1.6}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="M4.6,5.4 H19.4 V18.6 H4.6 Z" />
+          <path d="M8,12 H16" />
+        </symbol>
+
         {/* 加号 · 新建 / 添加 */}
         <symbol
           id="g-plus"
@@ -737,8 +776,10 @@ export default function IconSprite() {
           <path d="M9.4,6.6 L14.8,12 L9.4,17.4" />
         </symbol>
 
-        {/* 日 / 月 · 明暗主题（移动端只用图标，见 `ThemeToggle` 的 `compact`）
-            日 = 圆 + 四道芒（只取四个正方向：八道芒在 14px 下会糊成一圈毛边，线条数也超限） */}
+        {/* 日 / 月 · 明暗主题（移动端只用图标，见 `ThemeToggle` 的 `compact`）。
+            2026-09-24 册页稿把日改为**八道芒**（圆 + 4 正方向 + 4 斜向，单条路径 8 段）：
+            册页稿实测它在 14px 仍分得清 —— 线宽不变的前提下，斜向芒与正方向芒的
+            间距足够；月也换成了稿子的双弧画法（两段 8.6 半径的弧拼合，闭合更利落） */}
         <symbol
           id="g-sun"
           viewBox="0 0 24 24"
@@ -747,15 +788,11 @@ export default function IconSprite() {
           strokeWidth={1.7}
           strokeLinecap="round"
         >
-          <circle cx="12" cy="12" r="4.4" />
-          <path d="M12,2.6 V5" />
-          <path d="M12,19 V21.4" />
-          <path d="M2.6,12 H5" />
-          <path d="M19,12 H21.4" />
+          <circle cx="12" cy="12" r="4.2" />
+          <path d="M12,2.6 V5 M12,19 v2.4 M2.6,12 H5 M19,12 h2.4 M5.4,5.4 L7.1,7.1 M16.9,16.9 l1.7,1.7 M18.6,5.4 L16.9,7.1 M7.1,16.9 L5.4,18.6" />
         </symbol>
 
-        {/* 月 = 弦月（外大弧 + 内小弧合成，单条路径）。半径取 8.2 而非 7.2：
-            两端点距离 15.56，半径小于一半会被浏览器强制放大，弧线形状就不受控了 */}
+        {/* 月 = 弦月（外大弧 + 内小弧合成，单条路径）。册页稿画法：两段 8.6 半径的弧 */}
         <symbol
           id="g-moon"
           viewBox="0 0 24 24"
@@ -765,7 +802,7 @@ export default function IconSprite() {
           strokeLinejoin="round"
           strokeLinecap="round"
         >
-          <path d="M20.4,14.6 A9,9 0 1 1 9.4,3.6 A8.2,8.2 0 0 0 20.4,14.6 Z" />
+          <path d="M20.2,14.6 A8.6,8.6 0 0 1 9.4,3.8 A8.6,8.6 0 1 0 20.2,14.6 Z" />
         </symbol>
 
         {/* ═══ C2 · 装饰 ═══ */}

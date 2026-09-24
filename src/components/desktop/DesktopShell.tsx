@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useRef, type KeyboardEvent } from 'react';
 import BackToTop from '../common/BackToTop';
 import NavContent from '../common/NavContent';
 import NurtureBadge from '../common/NurtureBadge';
@@ -6,22 +6,30 @@ import ProfileSwitcher from '../common/ProfileSwitcher';
 import ThemeToggle from '../common/ThemeToggle';
 import Icon from '../icons/Icon';
 import { NAV_ICON } from '../icons/navIcons';
-import { OfudaDeco, Texture } from '../ornament';
+import { Sigil, Texture } from '../ornament';
 import { NAV_ITEMS, useUiStore } from '../../stores/ui';
 
 /**
- * PC 端布局骨架（设计文档 §8.3）：左侧固定导航 + 右侧多列栅格。
- * 与手机端共享数据层、状态层、domain 与 common 原子件，只改排列方式。
+ * PC 端布局骨架 —— 2026-09-24 册页重设计（用户决议见 `uiRef/册页重设计_落地评估.md` §六）。
  *
- * 2026-09-23 换肤（**布局保持不变** —— 用户决策：左栏导航 + 双列网格照旧，
- * 参考稿那种 720px 居中单面板不落地）：
- *   - 根节点去掉不透明底色，让 `body` 的麻叶纹底纹透出来；
- *   - 侧栏铺自己的底纹 + 右缘金线，导航项改成"竖排符纸签"（选中 = 卡底 + 金描边 + 左缘朱红短线）；
- *   - 侧栏右缘挂御灵符装饰（`z-30` + `pointer-events-none`，落在留白里，不压内容）。
+ * **左侧常驻侧栏 → 顶部索引签**：正文拿到整幅宽度；选中签 `bg-surface` + `-mb-px`
+ * 盖住顶栏的分隔线，与下方册页**相连**（签顶一道朱红短线标当前页）。
+ * 结构：
  *
- * 2026-09-23 页头改为品牌锁定「囤囤鼠 / 阴阳师任务清单」（用户要求，与移动端顶栏同一句）：
- *   主标题 `text-2xl`(19px) + `tracking-title`，副标题 `text-2xs`(10px) + `tracking-label`。
- *   两者差 1.9 倍 —— 第一版是 14.5px / 12px，几乎看不出主次（详见 `MobileShell` 的同一段说明）。
+ *   顶栏（品牌印 + 索引签 ×7 + 右端：结界倒计时 · 账号切换 · 明暗）
+ *   └ 册页（max-w-6xl 通栏单列，bg-surface，无顶边框、只圆下角 —— 相连的另一半）
+ *
+ * 三个按用户决议锁死的点：
+ *   - **Tab 仍是 7 个**（移动端同样 7 格）——「更多」菜单不建，`NavKey` 契约不动；
+ *   - **账号切换器与结界倒计时常驻顶栏右端** —— 切错号会勾错号，是全产品风险最高的
+ *     操作，不收进任何菜单（参考稿顶栏没画它们，这是按决议追加的）；
+ *   - **双列网格退役**：正文是通栏单册页，密度由行式账目承担（`CHECKLIST_GRID` 已改单列）。
+ *
+ * 细节：
+ *   - 索引签支持 ←→ 键盘导航（参考稿自带）：在签之间走焦点并切页；
+ *   - `useBreakpoint` 仍是唯一分流判据，本组件只在 ≥768px 渲染；
+ *   - 御灵符装饰（`OfudaDeco`）随侧栏一起删除（用户决议 2）—— 页脚仪式感由
+ *     各页的收束纹带承担。
  */
 export default function DesktopShell() {
   const nav = useUiStore((s) => s.nav);
@@ -29,85 +37,85 @@ export default function DesktopShell() {
   /* 内容区的滚动容器 —— 回顶按钮监听它的 `scroll` 并由它执行回到顶部 */
   const scrollRef = useRef<HTMLElement>(null);
 
-  return (
-    <div className="flex h-full">
-      {/* ⚠️ **不要给这个 aside 加 `overflow-hidden`**（2026-09-23 踩过一次）：
-          底纹 `Texture` 是 `absolute inset-0`，本来就不会溢出，加裁剪只会把
-          `ProfileSwitcher` 的下拉（absolute + 向上弹）整片裁掉 —— 账号切换弹窗
-          "点开看不到"的根因就在这里。容器侧的安全做法是让纹样自己收敛，而不是裁剪父级。 */}
-      <aside className="relative flex w-56 flex-none flex-col border-r border-line bg-surface-3 px-3 py-4">
-        <Texture dots />
+  /* 索引签的键盘导航：←→ 在签之间循环，焦点跟着走（参考稿 `.idx` 的 keydown 同款） */
+  const onIdxKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
+    if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+    e.preventDefault();
+    const i = NAV_ITEMS.findIndex((n) => n.key === nav);
+    const step = e.key === 'ArrowRight' ? 1 : NAV_ITEMS.length - 1;
+    const next = NAV_ITEMS[(i + step) % NAV_ITEMS.length];
+    setNav(next.key);
+    e.currentTarget.querySelector<HTMLButtonElement>(`[data-nav="${next.key}"]`)?.focus();
+  };
 
-        <div className="relative z-10 flex min-h-0 flex-1 flex-col">
-          <div className="flex items-start justify-between gap-2 px-2">
-            <div className="min-w-0">
-              <div className="flex items-center gap-2">
-                <Icon name="seimei" size={16} className="flex-none text-crimson" />
-                <h1 className="truncate font-serif text-2xl tracking-title text-ink">囤囤鼠</h1>
-              </div>
-              {/* 副标题与移动端顶栏同一句（用户要求）：两端页头是同一套品牌锁定。
-                  原先这里写的是"纯手动记录 · 不读取游戏数据" —— 那句免责在 README、
-                  冷启动引导与「数据备份」说明里都有，页头不必重复第三遍 */}
-              <p className="mt-2 truncate text-2xs tracking-label text-ink-3">阴阳师任务清单</p>
-            </div>
-            <ThemeToggle />
+  return (
+    <div className="flex h-full flex-col">
+      {/* 顶栏：底纹铺在头里（与移动端顶栏同一手法）；索引签与册页之间只隔这条 border-b */}
+      <header className="relative z-20 flex-none border-b border-line-soft bg-panel/90 backdrop-blur-sm">
+        <Texture dots />
+        <div className="relative z-10 mx-auto flex h-16 w-full max-w-6xl items-end gap-5 px-5">
+          {/* 品牌：朱印 + 刊名（参考稿 `.masthead`） */}
+          <div className="flex flex-none items-center gap-2.5 pb-2.5">
+            <Sigil />
+            <span className="flex flex-col leading-tight">
+              <b className="font-serif text-base tracking-label text-ink">囤囤鼠大作战</b>
+              <i className="not-italic text-2xs tracking-label text-ink-3">阴阳师任务账</i>
+            </span>
           </div>
 
-          <nav className="mt-5 flex flex-col gap-1">
+          {/* 索引签：选中签 bg-surface + -mb-px 盖住分隔线，与册页连成一体 */}
+          <nav
+            role="tablist"
+            aria-label="页面导航"
+            onKeyDown={onIdxKeyDown}
+            className="ml-auto flex flex-none items-end gap-0.5 self-end overflow-x-auto"
+          >
             {NAV_ITEMS.map(({ key, label }) => {
               const active = nav === key;
               return (
                 <button
                   key={key}
                   type="button"
+                  role="tab"
+                  data-nav={key}
+                  aria-selected={active}
                   onClick={() => setNav(key)}
-                  aria-current={active ? 'page' : undefined}
-                  className={`relative flex cursor-pointer items-center gap-2 rounded-sm border px-2.5 py-2 text-base transition-colors duration-120 ${
+                  className={`relative -mb-px flex flex-none cursor-pointer items-center gap-1.5 whitespace-nowrap rounded-t-sm border border-b-0 px-3 pb-2.5 pt-2 text-sm transition-colors duration-150 ease-genso ${
                     active
-                      ? 'border-line bg-surface font-medium text-gold-hi shadow-card'
-                      : 'border-transparent text-ink-2 hover:border-line-soft hover:bg-surface/60'
+                      ? 'border-line-soft bg-surface text-ink'
+                      : 'border-transparent text-ink-3 hover:bg-surface/60 hover:text-ink'
                   }`}
                 >
-                  {/* 选中签的左缘朱红短线（参考稿顶部朱线的竖排变体） */}
+                  {/* 选中签的额束：签顶一道朱红短线（参考稿 `.idx button::before`） */}
                   {active ? (
-                    <i className="absolute -left-px top-1/2 h-3.5 w-0.5 -translate-y-1/2 bg-crimson" />
+                    <i className="absolute left-1/2 top-0 h-0.5 w-4.5 -translate-x-1/2 rounded-b-full bg-crimson" />
                   ) : null}
-                  <Icon name={NAV_ICON[key]} size={16} />
+                  <Icon name={NAV_ICON[key]} size={15} className={active ? 'text-gold-hi' : ''} />
                   {label}
                 </button>
               );
             })}
           </nav>
 
-          {/* 侧栏宽 224px：带区服的完整形态放不下（区服会被截断），
-              因此与移动端头部一致用 `compact` —— 只显示账号名，区服信息在「设置 · 账号」里看 */}
-          <div className="mt-auto rounded-md border border-line-soft bg-surface-2 px-2.5 py-2">
-            {/* label 与切换器**同一行**：竖排两行在 224px 宽的卡片里既空又多占一行高度 */}
-            <div className="flex items-center justify-between gap-2">
-              <p className="flex-none text-sm text-ink-3">当前账号</p>
-              <ProfileSwitcher direction="up" compact />
-            </div>
-            {/* 下一个结界卡收/续点；没有进行中的任务时组件自己返回 null，不留空隙 */}
-            <NurtureBadge className="mt-2" />
+          {/* 右端：结界倒计时 · 账号切换 · 明暗（用户决议 4：常驻，不进任何菜单） */}
+          <div className="flex flex-none items-center gap-2 pb-2.5">
+            <NurtureBadge compact />
+            <ProfileSwitcher compact />
+            <ThemeToggle />
           </div>
         </div>
+      </header>
 
-        <OfudaDeco />
-      </aside>
-
-      {/* 内容区 + 回顶按钮。按钮锚在**这一层**（`relative`）而不是视口：
-          它的右下就是内容区的右下，与侧栏宽度、窗口大小都无关（`right-7/bottom-7` 取自参考稿
-          的 `.rt-fixed`）。`min-w-0` 是行向 flex 的收缩许可 —— 没有它子项不肯缩。 */}
-      <div className="relative flex min-w-0 flex-1 flex-col">
-        {/* ⚠️ 这一层必须是 **flex**（不是普通块）：`main` 靠 `flex-1` 撑满可视高度，
-            普通块级子元素的高度是 auto —— 那会让 `main` 按内容高度长出去，
-            `overflow-y-auto` 就永远不触发（"整个页面跟着外面一起滚"的经典错法）。
-            `min-h-0` 同理：列向 flex 里不给收缩许可，子项不肯缩 */}
+      {/* 册页：通栏单列（用户决议 5，双列退役）。与顶栏相连 —— 无顶边框、只圆下角；
+          min-h-full 让短内容页也保持整册形态。回顶按钮锚在这一层 */}
+      <div className="relative flex min-h-0 flex-1 flex-col">
         <main ref={scrollRef} className="min-h-0 min-w-0 flex-1 overflow-y-auto">
-          {/* 内容区上限（1024）与整体框架在这里；窄页（统计 768 / 工具 896 / 设置 672）
-              各自 `mx-auto` 让内容在大屏居中，不由这一层替它们居中 */}
-          <div className="mx-auto max-w-5xl">
-            <NavContent variant="desktop" />
+          <div className="mx-auto flex min-h-full w-full max-w-6xl flex-col px-5">
+            <div className="flex flex-1 flex-col rounded-b-lg border-x border-b border-line-soft bg-surface shadow-pop">
+              <div className="flex-1 px-6 pb-12 pt-6 md:px-9">
+                <NavContent variant="desktop" />
+              </div>
+            </div>
           </div>
         </main>
         <BackToTop target={scrollRef} className="bottom-7 right-7" />

@@ -2,8 +2,9 @@ import ChecklistEntry from '../components/common/ChecklistEntry';
 import { groupChecklist } from '../domain/grouping';
 import { EmptyState, SectionTitle } from '../components/common/EmptyState';
 import PageHead from '../components/common/PageHead';
+import SummaryBar from '../components/common/SummaryBar';
 import ViewBar from '../components/common/ViewBar';
-import { KikyoBand } from '../components/ornament';
+import { Closing, Rule } from '../components/ornament';
 import { weekRangeLabel } from '../domain/dateLabel';
 import { useChecklist } from '../hooks/useChecklist';
 import { usePeriodCountdown } from '../hooks/usePeriodCountdown';
@@ -25,8 +26,6 @@ export default function WeekPage({ variant }: { variant: 'mobile' | 'desktop' })
   /* 距下周一 0 点还有多久（与勾选重置同源） */
   const countdown = usePeriodCountdown('weekly');
 
-  const total = pending.length + done.length;
-
   return (
     <div className="pb-6">
       {/* 筛选 2026-09-23 起整体下线（`stores/view.SHOW_KIND_FILTER`）：此处 ViewBar 渲染空。
@@ -43,13 +42,10 @@ export default function WeekPage({ variant }: { variant: 'mobile' | 'desktop' })
         action={variant === 'mobile' ? <ViewBar mode="mobile" /> : null}
       />
 
-      {/* 重置提示已移到限时页的「版本 / 赛季」分区（2026-09-14）：周常 0 点刷新是常识，
-          而"版本 / 赛季按锚点重置"只对那一类条目有意义 */}
-      <SectionTitle
-        icon="ougi"
-        count={pending.length}
-        progress={total ? done.length / total : undefined}
-      >
+      {/* 汇总条（册页稿 `.summary`）：页级进度只在这一处 */}
+      <SummaryBar className="mx-3.5 mt-3" pending={pending.length} done={done.length} note="每周一零点清空，逾期不补" />
+
+      <SectionTitle icon="ougi" count={pending.length}>
         本周待做
       </SectionTitle>
       {pending.length ? (
@@ -65,7 +61,7 @@ export default function WeekPage({ variant }: { variant: 'mobile' | 'desktop' })
       {done.length ? (
         <>
           <SectionTitle icon="done" count={done.length}>
-            已完成
+            本周已结
           </SectionTitle>
           <div className={CHECKLIST_GRID}>
             {groupChecklist(pending, done).done.map((u) => (
@@ -75,7 +71,9 @@ export default function WeekPage({ variant }: { variant: 'mobile' | 'desktop' })
         </>
       ) : null}
 
-      <KikyoBand className="mx-3.5 mt-6 opacity-90" />
+      {/* 收束：墨线菱点断句 + 四字铭落款 */}
+      <Rule className="mx-3.5 mt-6" />
+      <Closing text="七日一折" />
     </div>
   );
 }

@@ -49,22 +49,21 @@ export default function DataVersionSection() {
       desc={fresh.stale ? `${meta.dataVersion} · ${fresh.text}（可能已过期）` : `${meta.dataVersion} · ${fresh.text}`}
       control={<span className="text-sm text-ink-3">只读</span>}
     >
-      <dl className="border-t border-line-faint">
+      {/* 只读数据表（册页稿 `.dlist`）：键定宽在左（132px 档）、值等宽在右，
+          行间只有一条 faint 细线 —— 它不是可操作列表，不卡片化 */}
+      <dl>
         {rows.map((r) => (
-          <div
-            key={r.label}
-            className="flex items-start gap-3 border-b border-line-faint py-2 last:border-0"
-          >
-            <dt className="min-w-0 flex-1 text-base text-ink">
-              {r.label}
+          <div key={r.label} className="flex items-baseline gap-3.5 border-b border-line-faint py-2 last:border-0">
+            <dt className="w-32 flex-none text-sm tracking-wide text-ink-3">{r.label}</dt>
+            <dd className="min-w-0 flex-1">
+              {/* 版本号 / 日期 / 时刻一律等宽：同一份信息在不同行之间对齐才好核对 */}
+              <span className="block break-all font-mono text-xs text-ink-2">{r.value}</span>
               {r.hint ? (
-                <small className={`mt-0.5 block text-sm font-normal ${r.warn ? 'text-warn' : 'text-ink-3'}`}>
+                <small className={`mt-0.5 block text-xs ${r.warn ? 'text-warn' : 'text-ink-3'}`}>
                   {r.hint}
                 </small>
               ) : null}
-            </dt>
-            {/* 版本号 / 日期 / 时刻一律等宽：同一份信息在不同行之间对齐才好核对 */}
-            <dd className="flex-none text-right font-mono text-sm text-ink-2">{r.value}</dd>
+            </dd>
           </div>
         ))}
       </dl>

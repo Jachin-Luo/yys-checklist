@@ -6,9 +6,10 @@ import { groupChecklist } from '../domain/grouping';
 import { EmptyState, SectionTitle } from '../components/common/EmptyState';
 import HubCard from '../components/common/HubCard';
 import PageHead from '../components/common/PageHead';
+import SummaryBar from '../components/common/SummaryBar';
 import ViewBar from '../components/common/ViewBar';
 import Icon from '../components/icons/Icon';
-import { Daruma, KikyoBand, Shimenawa } from '../components/ornament';
+import { Closing, Daruma, Rule } from '../components/ornament';
 import { todayDateLabel } from '../domain/dateLabel';
 import { useAutoDaily } from '../hooks/useAutoDaily';
 import { useChecklist } from '../hooks/useChecklist';
@@ -105,6 +106,15 @@ export default function TodayPage({ variant }: { variant: 'mobile' | 'desktop' }
         }
       />
 
+      {/* 汇总条（册页稿 `.summary`）：页级"待办 / 已成 / 进度"只在这一处说，
+          分组头不再重复进度轨。两个 Tab 合并计数 —— 它是"今天"的账，不分常驻活动 */}
+      <SummaryBar
+        className="mx-3.5 mt-3"
+        pending={pendingResident.length + pendingEvent.length}
+        done={residentDoneCount + doneEvent.length}
+        note="投一档 = 记一笔，零点结账"
+      />
+
       <div className="mx-3.5 mt-4 flex items-end gap-1.5 border-b border-line-soft">
         <button type="button" className={tabChip(tab === 'resident')} onClick={() => setTab('resident')}>
           {tab === 'resident' ? (
@@ -126,11 +136,7 @@ export default function TodayPage({ variant }: { variant: 'mobile' | 'desktop' }
         <>
           {hub && !hubDone ? <HubCard item={hub} /> : null}
 
-          <SectionTitle
-            icon="ema"
-            count={pendingResident.length}
-            progress={residentTotal ? residentDoneCount / residentTotal : undefined}
-          >
+          <SectionTitle icon="ema" count={pendingResident.length}>
             今天该做
           </SectionTitle>
           {pendingResident.length ? (
@@ -149,7 +155,7 @@ export default function TodayPage({ variant }: { variant: 'mobile' | 'desktop' }
           {residentDoneCount > 0 ? (
             <>
               <SectionTitle icon="done" count={residentDoneCount}>
-                已完成
+                今天已结
               </SectionTitle>
               <div className={CHECKLIST_GRID}>
                 {hub && hubDone ? (
@@ -170,11 +176,7 @@ export default function TodayPage({ variant }: { variant: 'mobile' | 'desktop' }
         </>
       ) : (
         <>
-          <SectionTitle
-            icon="chochin"
-            count={pendingEvent.length}
-            progress={eventTotal ? doneEvent.length / eventTotal : undefined}
-          >
+          <SectionTitle icon="chochin" count={pendingEvent.length}>
             活动任务
           </SectionTitle>
           {pendingEvent.length ? (
@@ -193,7 +195,7 @@ export default function TodayPage({ variant }: { variant: 'mobile' | 'desktop' }
           {doneEvent.length > 0 ? (
             <>
               <SectionTitle icon="done" count={doneEvent.length}>
-                已完成
+                今天已结
               </SectionTitle>
               <div className={CHECKLIST_GRID}>
                 {groupChecklist(pendingEvent, doneEvent).done.map((u) => (
@@ -205,9 +207,9 @@ export default function TodayPage({ variant }: { variant: 'mobile' | 'desktop' }
         </>
       )}
 
-      {/* 收束横幅：末组下方一道注连绳，把整页"扎"住 */}
-      <Shimenawa className="mx-3.5 mt-6" />
-      <KikyoBand className="mx-3.5 opacity-90" />
+      {/* 收束：墨线菱点断句 + 四字铭落款（册页稿 `.rule` + `.closing`） */}
+      <Rule className="mx-3.5 mt-6" />
+      <Closing text="一日一愿" />
     </div>
   );
 }

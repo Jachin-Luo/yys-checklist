@@ -59,6 +59,9 @@ export default function MePage() {
   const theme = useThemeStore((s) => s.theme);
   const setTheme = useThemeStore((s) => s.setTheme);
 
+  /* 行距 8px（册页稿 `.srows` 的 gap）—— 设置行不再带阴影，靠间隙彼此分开 */
+  const rows = 'space-y-2';
+
   return (
     /* `mx-auto`：本页上限 672，桌面内容容器 1024 —— 不居中时设置分区整体贴左（与统计 / 工具两页同一口径） */
     <div className="mx-auto max-w-2xl px-3.5 pb-10 pt-1">
@@ -66,7 +69,7 @@ export default function MePage() {
       <SectionTitle icon="sun" flush>
         观感
       </SectionTitle>
-      <div className="space-y-1.5">
+      <div className={rows}>
         <SettingRow
           title="界面主题"
           /* 只留"跟随系统"这条不可自明的信息：明版 / 暗版是什么，分段控件的名字已经说了 */
@@ -82,7 +85,7 @@ export default function MePage() {
       <SectionTitle icon="torii" flush>
         委托
       </SectionTitle>
-      <div className="space-y-1.5">
+      <div className={rows}>
         <AutoDailySection />
         <ItemManagerSection />
       </div>
@@ -91,7 +94,7 @@ export default function MePage() {
       <SectionTitle icon="hito" flush>
         账号
       </SectionTitle>
-      <div className="space-y-1.5">
+      <div className={rows}>
         <ProfileSection />
         <ProfileSyncSection />
         <GuildTimeSection />
@@ -101,7 +104,7 @@ export default function MePage() {
       <SectionTitle icon="hako" flush>
         数据
       </SectionTitle>
-      <div className="space-y-1.5">
+      <div className={rows}>
         <DataVersionSection />
         <BackupSection />
         {/* 危险区排在组内最后（2026-09-24 用户要求新增）：本组其它分区都是只读或可逆操作，

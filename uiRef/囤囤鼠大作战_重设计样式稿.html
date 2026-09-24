@@ -1,0 +1,1503 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>囤囤鼠大作战 · 册页重设计样式稿</title>
+<style>
+/* ═══════════════════════════════════════════════════════════════
+   囤囤鼠大作战 · 册页重设计样式稿
+   ─────────────────────────────────────────────────────────────
+   方向：把「清单」当「账册」设计。
+     · 导航 = 账本边缘的索引签（横排，选中签向下与册页相连）
+     · 条目 = 账目行（一行一目，同组共用一张册页，不再一条一张卡）
+     · 分隔 = 墨线 + 菱点（不用边框）
+     · 状态 = 印泥点（四态四色）
+   仅样式与页面切换，不含任何业务功能。
+   ═══════════════════════════════════════════════════════════════ */
+
+*,*::before,*::after{box-sizing:border-box}
+html,body{margin:0;padding:0}
+
+:root{
+  --serif:"Source Han Serif SC","Songti SC","Noto Serif SC",SimSun,serif;
+  --sans:-apple-system,"Segoe UI","Microsoft YaHei","PingFang SC",sans-serif;
+  --mono:"JetBrains Mono","Cascadia Mono",Consolas,monospace;
+  --ease:cubic-bezier(.22,.61,.36,1);
+}
+
+/* ── 明版 · 宣纸 ─────────────────────────────────────────────── */
+[data-theme="light"]{
+  --deep:237 229 213;      /* 画布：宣纸本色 */
+  --panel:243 237 226;     /* 索引签未选中 / 底栏 */
+  --sheet:252 247 237;     /* 册页 */
+  --sheet-2:247 241 230;   /* 册页内嵌块 */
+  --fill:244 238 227;
+  --fill-2:239 232 219;
+
+  --ink:35 32 28;
+  --ink-2:74 68 60;
+  --ink-3:112 103 89;      /* 5.21:1 on 册页 */
+  --ink-4:138 130 116;
+
+  --line:214 204 186;
+  --line-soft:226 218 203;
+  --line-faint:236 230 218;
+
+  --gold:186 148 74;
+  --gold-hi:125 93 26;     /* 文字金 · 5.35:1 on 册页 */
+  --gold-soft:246 240 224;
+  --gold-line:206 178 116;
+
+  --crimson:193 39 45;
+  --crimson-hi:168 33 39;
+  --crimson-soft:250 238 235;
+
+  --jade:52 122 110;
+  --frag:124 83 144;
+  --ticket:58 98 160;
+
+  --sh-1:0 1px 2px rgba(74,60,34,.05);
+  --sh-2:0 2px 10px -2px rgba(74,60,34,.10),0 1px 2px rgba(74,60,34,.06);
+  --sh-3:0 12px 32px -10px rgba(74,60,34,.20),0 2px 6px rgba(74,60,34,.07);
+  --dot-ready:125 93 26;   /* 金点：金箔本色仅 2.65:1，不到图形 3:1 门槛，明版压深 */
+  --crimson-btn-hi:168 33 39;  --crimson-btn:193 39 45;   /* 按钮红 · 白字 5.35:1 */
+  --sh-sig:0 2px 8px -2px rgba(150,30,34,.35);
+  --tex:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='84' height='84'><g fill='none' stroke='%23000' stroke-opacity='0.055' stroke-width='1'><path d='M0 42h84M42 0v84M0 0l84 84M84 0L0 84'/></g></svg>");
+}
+
+/* ── 暗版 · 墨夜 ─────────────────────────────────────────────── */
+[data-theme="dark"]{
+  --deep:14 13 18;
+  --panel:22 21 28;
+  --sheet:35 34 47;
+  --sheet-2:30 29 40;
+  --fill:31 30 41;
+  --fill-2:27 26 36;
+
+  --ink:237 228 211;
+  --ink-2:200 191 174;
+  --ink-3:152 147 166;     /* 5.26:1 on 册页 */
+  --ink-4:112 107 122;
+
+  --line:56 54 68;
+  --line-soft:47 45 58;
+  --line-faint:40 38 49;
+
+  --gold:201 169 97;
+  --gold-hi:230 205 142;
+  --gold-soft:42 38 32;
+  --gold-line:120 100 58;
+
+  --crimson:217 74 80;
+  --crimson-hi:232 106 111;
+  --crimson-soft:48 28 30;
+
+  --jade:110 186 168;
+  --frag:184 146 210;
+  --ticket:126 166 226;
+
+  --sh-1:0 1px 2px rgba(0,0,0,.35);
+  --sh-2:0 2px 10px -2px rgba(0,0,0,.50),0 1px 2px rgba(0,0,0,.40);
+  --sh-3:0 14px 36px -12px rgba(0,0,0,.70),0 2px 8px rgba(0,0,0,.45);
+  --dot-ready:201 169 97;  /* 金点：暗版金箔本色已达 7.0:1 */
+  --crimson-btn-hi:142 47 53;  --crimson-btn:179 58 64;   /* 暗版 crimson 太亮（白字 2.86），按钮另取深一档 */
+  --sh-sig:0 2px 10px -2px rgba(217,74,80,.45);
+  --tex:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='84' height='84'><g fill='none' stroke='%23fff' stroke-opacity='0.045' stroke-width='1'><path d='M0 42h84M42 0v84M0 0l84 84M84 0L0 84'/></g></svg>");
+}
+
+body{
+  font-family:var(--sans);
+  background:rgb(var(--deep));
+  background-image:var(--tex);
+  color:rgb(var(--ink));
+  font-size:14px;line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+}
+/* 图标定义容器：零占位，不参与布局 */
+.defs{position:absolute;width:0;height:0;overflow:hidden}
+.defs defs{display:inline}
+
+/* ═══ 顶栏 + 索引签 ═══════════════════════════════════════════ */
+.topbar{
+  position:sticky;top:0;z-index:40;
+  background:rgb(var(--panel) / .88);
+  backdrop-filter:blur(12px) saturate(1.2);
+  border-bottom:1px solid rgb(var(--line-soft));
+}
+.topbar .tb-in{
+  max-width:1180px;margin:0 auto;padding:0 22px;
+  display:flex;align-items:flex-end;gap:22px;height:62px;
+}
+/* 品牌：朱印 + 刊名 */
+.masthead{display:flex;align-items:center;gap:11px;padding-bottom:11px}
+.sigil{
+  width:34px;height:34px;border-radius:9px;flex:none;
+  background:radial-gradient(120% 100% at 32% 18%,rgb(var(--crimson-hi)),rgb(var(--crimson)) 62%);
+  box-shadow:var(--sh-sig),inset 0 1px 0 rgba(255,255,255,.24),inset 0 0 0 1px rgba(255,240,214,.30);
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--serif);font-size:17px;font-weight:700;color:#F6E7C6;
+  text-shadow:0 1px 1px rgba(90,12,16,.45);
+}
+.masthead .tt{display:flex;flex-direction:column;line-height:1.18}
+.masthead .tt b{font-family:var(--serif);font-size:15px;letter-spacing:.18em;color:rgb(var(--ink))}
+.masthead .tt i{font-style:normal;font-size:9.5px;letter-spacing:.30em;color:rgb(var(--ink-3))}
+
+/* 索引签 */
+.idx{display:flex;align-items:flex-end;gap:2px;margin-left:auto}
+.idx button{
+  position:relative;appearance:none;cursor:pointer;
+  font-family:var(--sans);font-size:12.5px;letter-spacing:.06em;
+  padding:9px 15px 11px;border:1px solid transparent;border-bottom:0;
+  border-radius:9px 9px 0 0;
+  background:transparent;color:rgb(var(--ink-3));
+  transition:color .16s var(--ease),background .16s var(--ease);
+}
+.idx button:hover{color:rgb(var(--ink));background:rgb(var(--sheet) / .55)}
+.idx button[aria-selected="true"]{
+  background:rgb(var(--sheet));
+  border-color:rgb(var(--line-soft));
+  color:rgb(var(--ink));
+  box-shadow:0 -3px 10px -6px rgba(74,60,34,.30);
+}
+/* 选中签的额束：签顶一道朱红短线 */
+.idx button[aria-selected="true"]::before{
+  content:"";position:absolute;left:50%;top:0;transform:translateX(-50%);
+  width:18px;height:2px;border-radius:2px;background:rgb(var(--crimson));
+}
+/* 签上的器物图标 */
+.idx button svg{width:15px;height:15px;vertical-align:-2px;margin-right:6px;
+  stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.idx button[aria-selected="true"] svg{color:rgb(var(--gold-hi))}
+
+/* 主题拨钮 */
+.lamp{display:flex;align-items:center;gap:6px;padding-bottom:12px}
+.lamp button{
+  appearance:none;cursor:pointer;width:30px;height:30px;border-radius:50%;
+  border:1px solid rgb(var(--line));background:rgb(var(--sheet));color:rgb(var(--ink-3));
+  display:flex;align-items:center;justify-content:center;
+  transition:all .18s var(--ease);
+}
+.lamp button:hover{color:rgb(var(--ink));border-color:rgb(var(--gold-line))}
+.lamp button[aria-pressed="true"]{
+  background:rgb(var(--gold-soft));color:rgb(var(--gold-hi));border-color:rgb(var(--gold-line));
+}
+.lamp svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+
+/* ═══ 册页舞台 ═════════════════════════════════════════════════ */
+.stage{max-width:1180px;margin:0 auto;padding:0 22px 90px}
+.sheet{
+  display:none;
+  background:rgb(var(--sheet));
+  border:1px solid rgb(var(--line-soft));
+  border-top:0;
+  border-radius:0 0 16px 16px;
+  box-shadow:var(--sh-2);
+  padding:30px 34px 40px;
+  animation:sheetIn .30s var(--ease);
+}
+.sheet[data-on="true"]{display:block}
+/* 入场只做位移，绝不用 opacity 关键帧 —— 时间轴冻结时会永久停在 opacity:0 */
+@keyframes sheetIn{from{transform:translateY(7px)}to{transform:translateY(0)}}
+@media (prefers-reduced-motion: reduce){.sheet{animation:none}}
+
+/* ═══ 题头（每页书眉） ═══════════════════════════════════════ */
+.head{display:flex;align-items:flex-start;gap:16px;padding-bottom:20px;position:relative}
+.head .spine-mark{                    /* 左侧竖排的「刊头小字」 */
+  writing-mode:vertical-rl;text-orientation:upright;
+  font-family:var(--serif);font-size:10px;letter-spacing:.34em;
+  color:rgb(var(--ink-3));padding-top:3px;
+  border-right:1px solid rgb(var(--line));
+  padding-right:9px;height:74px;
+}
+.head .mid{flex:1;min-width:0}
+.head h1{
+  margin:0;font-family:var(--serif);font-weight:600;font-size:29px;
+  letter-spacing:.14em;color:rgb(var(--ink));line-height:1.1;
+}
+.head .sub{
+  margin-top:7px;font-size:12px;color:rgb(var(--ink-3));
+  display:flex;align-items:center;gap:8px;flex-wrap:wrap;
+}
+.head .sub .sep{width:3px;height:3px;background:rgb(var(--line));transform:rotate(45deg);flex:none}
+
+/* 倒计时块：全页唯一的等宽区 */
+.countdown{
+  flex:none;text-align:right;padding-left:22px;
+  border-left:1px solid rgb(var(--line-soft));
+}
+.countdown em{display:block;font-style:normal;font-size:10px;letter-spacing:.24em;color:rgb(var(--ink-3));margin-bottom:5px}
+.countdown b{
+  font-family:var(--mono);font-size:19px;font-weight:600;
+  letter-spacing:.06em;color:rgb(var(--gold-hi));font-variant-numeric:tabular-nums;
+}
+.countdown i{display:block;font-style:normal;font-size:10.5px;color:rgb(var(--ink-3));margin-top:3px}
+
+/* ═══ 汇总条 ═════════════════════════════════════════════════ */
+.summary{
+  display:flex;align-items:center;gap:18px;flex-wrap:wrap;
+  padding:13px 16px;margin-bottom:24px;
+  background:rgb(var(--fill));border:1px solid rgb(var(--line-faint));border-radius:12px;
+}
+.summary .num{display:flex;align-items:baseline;gap:5px}
+.summary .num b{font-family:var(--serif);font-size:20px;font-weight:600;color:rgb(var(--ink));font-variant-numeric:tabular-nums}
+.summary .num span{font-size:11px;color:rgb(var(--ink-3));letter-spacing:.10em}
+.summary .track{flex:1;min-width:120px;height:5px;border-radius:5px;background:rgb(var(--line-faint));overflow:hidden}
+.summary .track i{display:block;height:100%;border-radius:5px;background:linear-gradient(90deg,rgb(var(--gold-line)),rgb(var(--gold)))}
+.summary .note{font-size:11.5px;color:rgb(var(--ink-3))}
+
+/* ═══ 分割线：墨线 + 菱点 ════════════════════════════════════ */
+.rule{position:relative;height:1px;margin:26px 0;
+  background:linear-gradient(90deg,transparent,rgb(var(--line)) 14%,rgb(var(--line)) 86%,transparent)}
+.rule::after{
+  content:"";position:absolute;left:50%;top:50%;
+  width:5px;height:5px;margin:-2.5px 0 0 -2.5px;
+  background:rgb(var(--sheet));border:1px solid rgb(var(--line));
+  transform:rotate(45deg);
+}
+
+/* ═══ 分组 ═══════════════════════════════════════════════════ */
+.grp{margin-top:6px}
+.grp-head{display:flex;align-items:center;gap:10px;margin-bottom:2px}
+.grp-head .no{
+  font-family:var(--serif);font-size:12px;color:rgb(var(--gold-hi));
+  width:17px;text-align:center;flex:none;
+}
+.grp-head h2{
+  margin:0;font-family:var(--serif);font-size:15.5px;font-weight:600;
+  letter-spacing:.14em;color:rgb(var(--ink));
+}
+.grp-head svg{width:17px;height:17px;stroke:rgb(var(--gold-hi));fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.grp-head .ln{flex:1;height:1px;background:linear-gradient(90deg,rgb(var(--line)),transparent)}
+.grp-head .ct{font-size:11px;color:rgb(var(--ink-3));font-variant-numeric:tabular-nums;letter-spacing:.06em}
+
+/* ═══ 账目 ● 行式条目 ═══════════════════════════════════════ */
+.ledger{margin-top:9px}
+.entry{
+  position:relative;display:flex;align-items:flex-start;gap:13px;
+  padding:11px 12px 11px 15px;border-radius:10px;
+  transition:background .15s var(--ease);
+}
+.entry + .entry{border-top:1px solid rgb(var(--line-soft))}
+.entry:hover{background:rgb(var(--fill))}
+/* hover / 进行中：左侧浮出一道朱红竖线 */
+.entry::before{
+  content:"";position:absolute;left:0;top:11px;bottom:11px;width:2px;border-radius:2px;
+  background:rgb(var(--crimson));opacity:0;transition:opacity .18s var(--ease);
+}
+.entry:hover::before{opacity:.30}
+.entry[data-on="true"]::before{opacity:1}
+
+/* 状态印泥点 */
+.dot{width:7px;height:7px;border-radius:50%;flex:none;margin-top:7px;
+  box-shadow:0 0 0 3px rgb(var(--sheet))}
+.dot.d-active{background:rgb(var(--crimson));box-shadow:0 0 0 3px rgb(var(--crimson-soft))}
+.dot.d-ready{background:rgb(var(--dot-ready));box-shadow:0 0 0 3px rgb(var(--gold-soft))}
+.dot.d-locked{background:rgb(var(--ink-4));box-shadow:0 0 0 3px rgb(var(--line-faint))}
+.dot.d-done{background:rgb(var(--jade));box-shadow:0 0 0 3px rgb(var(--sheet-2))}
+
+.entry .glyph{width:19px;height:19px;flex:none;margin-top:2px;
+  stroke:rgb(var(--ink-3));fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.entry:hover .glyph{stroke:rgb(var(--gold-hi))}
+
+.entry .body{flex:1;min-width:0}
+.entry .t{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.entry .t b{font-size:13.5px;font-weight:600;color:rgb(var(--ink));letter-spacing:.02em}
+.entry .t .pin{width:12px;height:12px;stroke:rgb(var(--ink-4));fill:none;stroke-width:1.8;stroke-linecap:round}
+
+/* 元信息行：路径 / 条件 / 备注 */
+.entry .meta{margin-top:5px;display:flex;flex-direction:column;gap:3px}
+.entry .meta .ln{display:flex;align-items:flex-start;gap:6px;font-size:11.5px;color:rgb(var(--ink-3));line-height:1.55}
+.entry .meta .ln .k{flex:none;color:rgb(var(--ink-3));letter-spacing:.04em}
+.entry .meta .ln.cond{color:rgb(var(--ink-3))}
+.entry .meta .ln.cond .k{color:rgb(var(--gold-hi))}
+.entry .meta .ln .arr{color:rgb(var(--ink-4))}
+
+/* 右侧收益区 */
+.entry .pay{flex:none;display:flex;flex-direction:column;align-items:flex-end;gap:5px;padding-left:10px}
+.pay .lab{font-size:10px;letter-spacing:.16em;color:rgb(var(--ink-3))}
+.pay .chips{display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end}
+
+/* 币种徽章 */
+.chip{
+  display:inline-flex;align-items:center;gap:4px;
+  padding:2px 8px 2px 6px;border-radius:20px;
+  font-size:11px;font-weight:600;letter-spacing:.02em;
+  background:rgb(var(--gold-soft));color:rgb(var(--gold-hi));
+  border:1px solid rgb(var(--gold-line) / .45);
+  font-variant-numeric:tabular-nums;
+}
+.chip::before{content:"";width:5px;height:5px;border-radius:50%;background:currentColor;flex:none}
+.chip.v-jade{background:rgb(var(--jade) / .10);color:rgb(var(--jade));border-color:rgb(var(--jade) / .35)}
+.chip.v-frag{background:rgb(var(--frag) / .10);color:rgb(var(--frag));border-color:rgb(var(--frag) / .35)}
+.chip.v-ticket{background:rgb(var(--ticket) / .10);color:rgb(var(--ticket));border-color:rgb(var(--ticket) / .35)}
+.chip.v-plain{background:rgb(var(--fill-2));color:rgb(var(--ink-3));border-color:rgb(var(--line-soft))}
+
+/* 一键标签 / 剩余天数徽章 */
+.tag{display:inline-flex;align-items:center;gap:3px;padding:1.5px 7px;border-radius:5px;
+  font-size:10px;letter-spacing:.10em;font-weight:600;
+  background:rgb(var(--crimson-soft));color:rgb(var(--crimson-hi));
+  border:1px solid rgb(var(--crimson) / .25)}
+.tag.gold{background:rgb(var(--gold-soft));color:rgb(var(--gold-hi));border-color:rgb(var(--gold-line) / .45)}
+.tag.over{background:rgb(var(--fill-2));color:rgb(var(--ink-3));border-color:rgb(var(--line-soft))}
+.tag.plain{background:rgb(var(--fill-2));color:rgb(var(--ink-3));border-color:rgb(var(--line-soft))}
+
+/* 进度小计 */
+.prog{display:inline-flex;align-items:center;gap:5px;font-size:11px;color:rgb(var(--ink-3));font-variant-numeric:tabular-nums}
+.prog .bars{display:flex;gap:2px}
+.prog .bars i{width:3px;height:11px;border-radius:1px;background:rgb(var(--line))}
+.prog .bars i.on{background:rgb(var(--crimson))}
+
+/* ═══ 入口条（一键日常） ═════════════════════════════════════ */
+.gate{
+  display:flex;align-items:center;gap:14px;
+  padding:13px 16px;border-radius:12px;
+  background:linear-gradient(100deg,rgb(var(--gold-soft)),rgb(var(--fill)) 62%);
+  border:1px solid rgb(var(--gold-line) / .40);
+}
+.gate .seal{
+  width:30px;height:30px;flex:none;border-radius:50%;
+  background:rgb(var(--sheet));border:1px solid rgb(var(--gold-line) / .55);
+  display:flex;align-items:center;justify-content:center;
+}
+.gate .seal svg{width:16px;height:16px;stroke:rgb(var(--gold-hi));fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.gate .body{flex:1;min-width:0}
+.gate .body b{font-family:var(--serif);font-size:14px;letter-spacing:.10em;color:rgb(var(--ink))}
+.gate .body p{margin:3px 0 0;font-size:11.5px;color:rgb(var(--ink-3));line-height:1.55}
+.gbtn{
+  appearance:none;cursor:pointer;flex:none;
+  padding:6px 14px;border-radius:8px;font-size:12px;letter-spacing:.06em;
+  background:rgb(var(--sheet));color:rgb(var(--ink-2));
+  border:1px solid rgb(var(--line));transition:all .16s var(--ease);
+}
+.gbtn:hover{border-color:rgb(var(--gold-line));color:rgb(var(--gold-hi))}
+
+/* ═══ 收束纹带（页脚） ══════════════════════════════════════ */
+.closing{display:flex;flex-direction:column;align-items:center;gap:9px;margin-top:34px}
+.closing svg{width:94px;height:15px;stroke:rgb(var(--gold-line));fill:none;stroke-width:1.5;stroke-linecap:round;opacity:.60}
+.closing span{font-family:var(--serif);font-size:10px;letter-spacing:.44em;color:rgb(var(--ink-3))}
+
+/* ═══ 分段控件 ═══════════════════════════════════════════════ */
+.seg{display:inline-flex;gap:2px;padding:3px;border-radius:10px;
+  background:rgb(var(--fill));border:1px solid rgb(var(--line-faint))}
+.seg button{
+  appearance:none;cursor:pointer;border:0;background:transparent;
+  padding:5px 13px;border-radius:7px;font-size:12px;letter-spacing:.06em;
+  color:rgb(var(--ink-3));transition:all .16s var(--ease);
+}
+.seg button:hover{color:rgb(var(--ink))}
+.seg button[aria-pressed="true"]{
+  background:rgb(var(--crimson-btn));color:#FDF3EE;font-weight:600;
+  box-shadow:0 1px 4px -1px rgba(150,30,34,.40);
+}
+.seg.sm button{padding:3.5px 10px;font-size:11.5px}
+
+/* ═══ 日历热力 ═══════════════════════════════════════════════ */
+.panel{background:rgb(var(--fill));border:1px solid rgb(var(--line-faint));
+  border-radius:13px;padding:17px 19px}
+.panel-head{display:flex;align-items:baseline;gap:10px;margin-bottom:13px}
+.panel-head b{font-family:var(--serif);font-size:14.5px;letter-spacing:.12em;color:rgb(var(--ink))}
+.panel-head .ln{flex:1}
+.panel-head span{font-size:10.5px;color:rgb(var(--ink-3))}
+
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.cal .wd{text-align:center;font-size:10px;letter-spacing:.16em;color:rgb(var(--ink-3));padding-bottom:5px}
+.cal .d{
+  position:relative;height:42px;border-radius:8px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
+  font-size:11.5px;font-variant-numeric:tabular-nums;
+  background:rgb(var(--sheet));border:1px solid rgb(var(--line-faint));
+  color:rgb(var(--ink));
+}
+.cal .d.out{color:rgb(var(--ink-3));background:transparent;border-color:transparent}
+.cal .d .n{opacity:.55;font-size:9px}
+.cal .d.today{border-color:rgb(var(--crimson));color:rgb(var(--crimson-hi));font-weight:700}
+.cal .d.today::after{content:"";position:absolute;bottom:3px;width:12px;height:1.5px;border-radius:2px;background:rgb(var(--crimson))}
+
+/* ═══ 收益三卡 ═══════════════════════════════════════════════ */
+.gains{display:grid;grid-template-columns:repeat(3,1fr);gap:11px}
+.gain{background:rgb(var(--sheet));border:1px solid rgb(var(--line-soft));border-radius:12px;
+  padding:14px 16px;box-shadow:var(--sh-1)}
+.gain .lb{display:flex;align-items:center;gap:6px;font-size:11.5px;letter-spacing:.10em;color:var(--ac, rgb(var(--ink-3)))}
+.gain .lb i{width:6px;height:6px;border-radius:50%;background:currentColor;font-style:normal}
+.gain .vl{font-family:var(--serif);font-size:27px;font-weight:600;line-height:1.15;
+  color:rgb(var(--ink));font-variant-numeric:tabular-nums;margin-top:6px}
+.gain .fn{font-size:10.5px;color:rgb(var(--ink-3));margin-top:2px}
+.gain .spark{display:flex;align-items:flex-end;gap:2px;height:24px;margin-top:11px}
+.gain .spark i{flex:1;border-radius:1px;background:var(--ac, rgb(var(--line)));opacity:.26;min-height:2px}
+
+/* ═══ 提示条 / 脚注 ═════════════════════════════════════════ */
+.hint{display:flex;align-items:flex-start;gap:9px;padding:11px 14px;border-radius:10px;
+  background:rgb(var(--sheet-2));border:1px solid rgb(var(--line-faint));
+  font-size:11.5px;color:rgb(var(--ink-3));line-height:1.6}
+.hint .mk{flex:none;width:5px;height:5px;margin-top:7px;transform:rotate(45deg);
+  background:rgb(var(--gold-hi));opacity:.75}
+.foot{margin-top:16px;font-size:11px;color:rgb(var(--ink-3));line-height:1.75;
+  padding-left:13px;border-left:2px solid rgb(var(--line-soft))}
+.foot b{color:rgb(var(--ink-3));font-weight:600}
+
+/* ═══ 表单（工具页） ═════════════════════════════════════════ */
+.form{display:flex;flex-direction:column;gap:12px}
+.frow{display:flex;align-items:center;gap:12px}
+.frow > label{width:52px;flex:none;font-size:12.5px;color:rgb(var(--ink-2));letter-spacing:.08em}
+.inp{
+  flex:1;min-width:0;appearance:none;
+  padding:8px 12px;border-radius:9px;font-size:13px;
+  font-family:var(--mono);font-variant-numeric:tabular-nums;
+  background:rgb(var(--sheet));color:rgb(var(--ink));
+  border:1px solid rgb(var(--line));transition:all .16s var(--ease);
+}
+.inp:focus{outline:none;border-color:rgb(var(--gold-line));box-shadow:0 0 0 3px rgb(var(--gold) / .14)}
+.inp.num{max-width:104px;text-align:center}
+.frow .unit{font-size:11.5px;color:rgb(var(--ink-3));letter-spacing:.06em}
+.frow .ro{flex:1;font-size:12.5px;color:rgb(var(--ink-3));font-family:var(--mono)}
+.frow .ro em{font-style:normal;color:rgb(var(--ink-3));font-family:var(--sans);font-size:11px}
+.btn{
+  appearance:none;cursor:pointer;padding:7px 15px;border-radius:9px;font-size:12.5px;
+  letter-spacing:.06em;background:rgb(var(--sheet));color:rgb(var(--ink-2));
+  border:1px solid rgb(var(--line));transition:all .16s var(--ease);
+}
+.btn:hover{border-color:rgb(var(--gold-line));color:rgb(var(--gold-hi))}
+.btn-pri{
+  appearance:none;cursor:pointer;align-self:flex-start;
+  padding:9px 20px;border-radius:10px;font-size:13px;letter-spacing:.10em;font-weight:600;
+  background:linear-gradient(180deg,rgb(var(--crimson-btn-hi)),rgb(var(--crimson-btn)));
+  color:#FDF3EE;border:0;box-shadow:var(--sh-sig);
+  transition:transform .14s var(--ease),filter .14s var(--ease);
+}
+.btn-pri:hover{filter:brightness(1.06);transform:translateY(-1px)}
+.btn-pri:active{transform:translateY(0) scale(.985)}
+
+/* 空态 */
+.blank{display:flex;align-items:center;gap:10px;padding:16px 15px;border-radius:10px;
+  background:rgb(var(--sheet-2));border:1px dashed rgb(var(--line));
+  font-size:12px;color:rgb(var(--ink-3));line-height:1.6}
+.blank svg{width:17px;height:17px;flex:none;stroke:rgb(var(--ink-4));fill:none;
+  stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+
+/* ═══ 设置行 ═════════════════════════════════════════════════ */
+.srows{margin-top:9px;display:flex;flex-direction:column;gap:8px}
+.srow{
+  display:flex;align-items:center;gap:16px;
+  padding:12px 16px;border-radius:11px;
+  background:rgb(var(--sheet));border:1px solid rgb(var(--line-faint));
+  transition:border-color .16s var(--ease);
+}
+.srow:hover{border-color:rgb(var(--line-soft))}
+.srow .tx{flex:1;min-width:0}
+.srow .tx b{display:block;font-size:13px;font-weight:600;color:rgb(var(--ink));letter-spacing:.04em}
+.srow .tx p{margin:3px 0 0;font-size:11.5px;color:rgb(var(--ink-3));line-height:1.55}
+.srow .tx p .num{font-family:var(--mono);color:rgb(var(--ink-2));font-variant-numeric:tabular-nums}
+.srow .ctl{flex:none;display:flex;align-items:center;gap:9px}
+.srow .go{width:16px;height:16px;stroke:rgb(var(--ink-4));fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.srow.readonly{background:rgb(var(--sheet-2))}
+.srow.readonly .tx b{font-weight:500;color:rgb(var(--ink-2))}
+
+/* 只读数据表（设置页「数据」分区） */
+.dlist{display:flex;flex-direction:column}
+.dlist .dr{display:flex;align-items:baseline;gap:14px;padding:9px 2px;font-size:12px}
+.dlist .dr + .dr{border-top:1px solid rgb(var(--line-faint))}
+.dlist .dr .k{width:132px;flex:none;color:rgb(var(--ink-3));letter-spacing:.04em}
+.dlist .dr .v{flex:1;color:rgb(var(--ink-2));font-family:var(--mono);font-size:11.5px;
+  font-variant-numeric:tabular-nums}
+.dlist .dr .v em{font-style:normal;font-family:var(--sans);color:rgb(var(--ink-3));font-size:11px}
+.dlist .dr .tagm{flex:none;font-size:10px;letter-spacing:.14em;color:rgb(var(--ink-3))}
+
+/* ═══ 色板 / 元素规范段 ════════════════════════════════════ */
+.sw{display:grid;grid-template-columns:repeat(auto-fill,minmax(118px,1fr));gap:11px}
+.swi{border-radius:11px;overflow:hidden;border:1px solid rgb(var(--line-faint));background:rgb(var(--sheet))}
+.swi .cap{height:52px}
+.swi .mt{padding:8px 10px}
+.swi .mt b{display:block;font-size:11.5px;color:rgb(var(--ink));letter-spacing:.04em}
+.swi .mt span{font-size:10px;color:rgb(var(--ink-3));font-family:var(--mono)}
+.recipes{display:grid;grid-template-columns:repeat(auto-fit,minmax(232px,1fr));gap:11px;margin-top:4px}
+.recipe{padding:14px 16px;border-radius:11px;background:rgb(var(--sheet-2));
+  border:1px solid rgb(var(--line-faint))}
+.recipe b{display:block;font-size:12.5px;color:rgb(var(--ink));letter-spacing:.06em;margin-bottom:5px}
+.recipe p{margin:0;font-size:11.5px;color:rgb(var(--ink-3));line-height:1.65}
+.recipe code{font-family:var(--mono);font-size:10.5px;color:rgb(var(--gold-hi));
+  background:rgb(var(--gold-soft));padding:1px 5px;border-radius:4px}
+
+/* ═══ 窄屏（样式稿不追求完整移动端，只保证不倒） ═══════════ */
+@media (max-width:1080px){
+  .gains{grid-template-columns:1fr}
+  .idx button{padding:8px 10px 10px;font-size:11.5px}
+  .idx button svg{display:none}
+}
+@media (max-width:760px){
+  .tb-in{height:auto;padding:10px 14px;flex-wrap:wrap;gap:8px}
+  .masthead{padding-bottom:0}
+  .idx{margin-left:0;width:100%;overflow-x:auto}
+  .lamp{padding-bottom:0;margin-left:auto}
+  .stage{padding:0 14px 60px}
+  .sheet{padding:22px 16px 30px;border-radius:0 0 12px 12px}
+  .head{flex-direction:column;gap:12px}
+  .head .spine-mark{display:none}
+  .countdown{text-align:left;padding-left:0;border-left:0;border-top:1px solid rgb(var(--line-soft));padding-top:10px}
+  .entry .pay{align-items:flex-start}
+  .srow{flex-direction:column;align-items:flex-start;gap:10px}
+}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="tb-in">
+    <div class="masthead">
+      <span class="sigil">囤</span>
+      <span class="tt"><b>囤囤鼠大作战</b><i>阴阳师任务账</i></span>
+    </div>
+    <nav class="idx" id="idx" role="tablist"></nav>
+    <div class="lamp" id="lamp"></div>
+  </div>
+</header>
+
+<!-- 图标定义：symbol 必须待在 <svg> 内部，放进 <div> 会被当未知标签丢掉，<use> 静默引空 -->
+<svg class="defs" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"><defs>
+<symbol id="g-ema" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round"><path d="M12,2.8 V5.0"/><path d="M7,8.6 L12,5 L17,8.6 V19.8 A1.6,1.6 0 0 1 15.4,21.4 H8.6 A1.6,1.6 0 0 1 7,19.8 Z"/><path d="M12,12.6 L13.8,14.9 L12,17.2 L10.2,14.9 Z"/></symbol>
+<symbol id="g-ougi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M12,20.2 L2.5,8.9"/><path d="M12,20.2 L6.9,6.3"/><path d="M12,20.2 L12,5.4"/><path d="M12,20.2 L17.1,6.3"/><path d="M12,20.2 L21.5,8.9"/><path d="M2.5,8.9 A14.8,14.8 0 0 1 21.5,8.9"/></symbol>
+<symbol id="g-koyomi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round"><circle cx="12" cy="3.4" r="1.15"/><path d="M12,4.55 V6.2"/><path d="M5.6,6.2 H18.4 V20 A1.5,1.5 0 0 1 16.9,21.5 H7.1 A1.5,1.5 0 0 1 5.6,20 Z"/><path d="M5.6,9.6 H18.4"/><circle cx="9.4" cy="12.8" r="0.85" fill="currentColor" stroke="none"/><circle cx="14.6" cy="12.8" r="0.85" fill="currentColor" stroke="none"/><circle cx="9.4" cy="16.9" r="0.85" fill="currentColor" stroke="none"/><circle cx="14.6" cy="16.9" r="0.85" fill="currentColor" stroke="none"/></symbol>
+<symbol id="g-chochin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round"><path d="M8.4,2.7 H15.6"/><path d="M9.2,4.9 H14.8 L17.4,8.9 V14.9 L14.8,19.1 H9.2 L6.6,14.9 V8.9 Z"/><path d="M12,2.7 V4.9"/><path d="M7.4,11.9 H16.6"/><path d="M12,19.1 V21.5"/></symbol>
+<symbol id="g-chart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M4.4,19 H19.6"/><path d="M7.8,19 V12.2"/><path d="M12,19 V5.4"/><path d="M16.2,19 V9.2"/></symbol>
+<symbol id="g-kanazuchi" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round"><path d="M7.4,4.6 H16.6 A1.8,1.8 0 0 1 18.4,6.4 V9 A1.8,1.8 0 0 1 16.6,10.8 H7.4 A1.8,1.8 0 0 1 5.6,9 V6.4 A1.8,1.8 0 0 1 7.4,4.6 Z"/><path d="M12,10.8 V19.4"/></symbol>
+<symbol id="g-setting" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M7.4,5.4 V18.6"/><path d="M16.6,5.4 V18.6"/><path d="M5.5,7.9 H9.3 A1.7,1.7 0 0 1 9.3,11.3 H5.5 A1.7,1.7 0 0 1 5.5,7.9 Z" fill="currentColor" stroke="none"/><path d="M14.7,12.7 H18.5 A1.7,1.7 0 0 1 18.5,16.1 H14.7 A1.7,1.7 0 0 1 14.7,12.7 Z" fill="currentColor" stroke="none"/></symbol>
+<symbol id="g-suzu" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round"><circle cx="12" cy="5.6" r="1.45"/><path d="M12,7.05 V8.2"/><path d="M6.4,17.2 C6.4,12 8.8,8.2 12,8.2 C15.2,8.2 17.6,12 17.6,17.2 Z"/><path d="M4.4,17.2 H19.6"/><path d="M12,17.4 V19.8"/></symbol>
+<symbol id="g-fude" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round"><path d="M4.6,19.4 L4.9,15.7 L16.2,4.4 A1.7,1.7 0 0 1 18.6,4.4 L19.6,5.4 A1.7,1.7 0 0 1 19.6,7.8 L8.3,19.1 Z"/><path d="M4.6,19.4 L8.3,19.1"/><path d="M14.6,6 L18,9.4"/></symbol>
+<symbol id="g-hako" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round"><path d="M4.6,4.8 H19.4 V8.4 H4.6 Z"/><path d="M5.8,8.4 V18 A1.4,1.4 0 0 0 7.2,19.4 H16.8 A1.4,1.4 0 0 0 18.2,18 V8.4"/><path d="M10.2,12.4 H13.8"/></symbol>
+<symbol id="g-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M12,5.4 V18.6"/><path d="M5.4,12 H18.6"/></symbol>
+<symbol id="g-pin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round"><path d="M10.3,4 H13.7 A1.7,1.7 0 0 1 13.7,7.4 H10.3 A1.7,1.7 0 0 1 10.3,4 Z"/><path d="M12,7.4 V20.4"/></symbol>
+<symbol id="g-refresh" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round"><path d="M19.73,14.87 A8,8 0 1 1 15.38,5.55"/><path d="M13.98,3.13 L15.38,5.55 L12.62,6.04"/></symbol>
+<symbol id="g-seimei" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round"><path d="M12,3.8 L17.05,19.36 L3.82,9.74 L20.18,9.74 L6.95,19.36 Z"/></symbol>
+<symbol id="g-go" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M9.4,5.6 L15.8,12 L9.4,18.4"/></symbol>
+<symbol id="g-empty" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4.6,5.4 H19.4 V18.6 H4.6 Z"/><path d="M8,12 H16"/></symbol>
+</defs></svg>
+
+<main class="stage" id="stage">
+
+<!-- ═══════════ ① 今日 ═══════════ -->
+<section class="sheet" data-p="today" data-on="true">
+  <div class="head">
+    <div class="spine-mark">每日</div>
+    <div class="mid">
+      <h1>今日</h1>
+      <div class="sub"><span>9月24日 周四</span><i class="sep"></i><span>第 39 周</span><i class="sep"></i><span>昨日完成 21 / 33</span></div>
+    </div>
+    <div class="countdown"><em>每日重置</em><b>10:42:18</b><i>明天 00:00 刷新</i></div>
+  </div>
+
+  <div class="summary">
+    <div class="num"><b>12</b><span>待办</span></div>
+    <div class="num"><b>21</b><span>已成</span></div>
+    <div class="track"><i style="width:63.6%"></i></div>
+    <div class="note">投一档 = 记一笔，零点结账</div>
+  </div>
+
+  <div class="grp">
+    <div class="grp-head">
+      <span class="no">壹</span><h2>入口</h2><i class="ln"></i>
+    </div>
+    <div class="gate" style="margin-top:9px">
+      <span class="seal"><svg><use href="#g-suzu"/></svg></span>
+      <div class="body">
+        <b>庭院事务 · 一键日常</b>
+        <p>已配置覆盖 <b style="font-family:var(--mono)">14</b> 项 · 先点这个，再回来核对下面被覆盖的项。</p>
+      </div>
+      <button class="gbtn" type="button">去设置</button>
+    </div>
+  </div>
+
+  <div class="rule"></div>
+
+  <div class="grp">
+    <div class="grp-head">
+      <span class="no">贰</span><h2>今天该做</h2><i class="ln"></i><span class="ct">12</span>
+    </div>
+    <div class="ledger">
+
+      <div class="entry" data-on="true">
+        <span class="dot d-active"></span>
+        <svg class="glyph"><use href="#g-ougi"/></svg>
+        <div class="body">
+          <div class="t"><b>地域鬼王</b><span class="prog"><span class="bars"><i class="on"></i><i></i><i></i></span>0 / 3</span></div>
+          <div class="meta">
+            <div class="ln"><span class="k">路径</span><span>探索 <span class="arr">→</span> 地域鬼王</span></div>
+            <div class="ln"><span class="k">说明</span><span>难度拉 1 级就能拿，三次打完收工。</span></div>
+          </div>
+        </div>
+        <div class="pay"><span class="lab">固定收益</span><span class="chips"><span class="chip">勾玉 +20</span></span></div>
+      </div>
+
+      <div class="entry">
+        <span class="dot d-ready"></span>
+        <svg class="glyph"><use href="#g-koyomi"/></svg>
+        <div class="body">
+          <div class="t"><b>永久勾玉卡每日领</b></div>
+          <div class="meta">
+            <div class="ln"><span class="k">路径</span><span>商店 <span class="arr">→</span> 礼包屋 <span class="arr">→</span> 永久勾玉卡</span></div>
+            <div class="ln cond"><span class="k">条件</span><span>需先用 666 勾玉一次性购买。</span></div>
+            <div class="ln"><span class="k">备注</span><span>约 33 天回本；小纸人代存上限 30 勾，超过 36h 不领会溢出，每天上线顺手领取。</span></div>
+          </div>
+        </div>
+        <div class="pay"><span class="lab">固定收益</span><span class="chips"><span class="chip">勾玉 +20</span></span></div>
+      </div>
+
+      <div class="entry">
+        <span class="dot d-ready"></span>
+        <svg class="glyph"><use href="#g-hako"/></svg>
+        <div class="body">
+          <div class="t"><b>免费黑蛋礼包</b></div>
+          <div class="meta">
+            <div class="ln"><span class="k">路径</span><span>商店 <span class="arr">→</span> 推荐 <span class="arr">→</span> 免费礼包</span></div>
+            <div class="ln"><span class="k">备注</span><span>签到满 50 天给完整黑蛋，期间也出几片；零成本但不能断签。</span></div>
+          </div>
+        </div>
+        <div class="pay"><span class="lab">固定收益</span><span class="chips"><span class="chip">黑碎 +0.5</span></span></div>
+      </div>
+
+      <div class="entry">
+        <span class="dot d-ready"></span>
+        <svg class="glyph"><use href="#g-suzu"/></svg>
+        <div class="body">
+          <div class="t"><b>协战 50 次</b><span class="tag plain">需配合</span></div>
+          <div class="meta">
+            <div class="ln"><span class="k">路径</span><span>探索 <span class="arr">→</span> 组队协战</span></div>
+            <div class="ln"><span class="k">说明</span><span>没有固定队友可大小号互刷，够次数就退 15 次。</span></div>
+          </div>
+        </div>
+        <div class="pay"><span class="lab">固定收益</span><span class="chips"><span class="chip">勾玉 +50</span></span></div>
+      </div>
+
+      <div class="entry">
+        <span class="dot d-ready"></span>
+        <svg class="glyph"><use href="#g-chochin"/></svg>
+        <div class="body">
+          <div class="t"><b>花合战每日进度</b></div>
+          <div class="meta">
+            <div class="ln"><span class="k">路径</span><span>活动页 <span class="arr">→</span> 花合战</span></div>
+            <div class="ln"><span class="k">备注</span><span>战令需一天不掉一档；每日满 100 活跃领 20 勾，合计 140 勾 / 周。</span></div>
+          </div>
+        </div>
+        <div class="pay"><span class="lab">固定收益</span><span class="chips"><span class="chip">勾玉 +20</span></span></div>
+      </div>
+
+      <div class="entry">
+        <span class="dot d-ready"></span>
+        <svg class="glyph"><use href="#g-ema"/></svg>
+        <div class="body">
+          <div class="t"><b>每日签到</b><span class="tag">一键</span></div>
+          <div class="meta">
+            <div class="ln"><span class="k">路径</span><span>庭院 <span class="arr">→</span> 签到 / 小纸人</span></div>
+            <div class="ln"><span class="k">备注</span><span>月度累计另有奖励；累计签到 10 天另给 30 勾。</span></div>
+          </div>
+        </div>
+        <div class="pay"><span class="lab">含</span><span class="chips"><span class="chip v-plain">金币</span><span class="chip">勾玉</span><span class="chip v-frag">达摩</span></span></div>
+      </div>
+
+      <div class="entry">
+        <span class="dot d-ready"></span>
+        <svg class="glyph"><use href="#g-fude"/></svg>
+        <div class="body">
+          <div class="t"><b>每日免费一抽</b><span class="tag">一键</span></div>
+          <div class="meta"><div class="ln"><span class="k">路径</span><span>召唤 <span class="arr">→</span> 免费召唤</span></div></div>
+        </div>
+        <div class="pay"><span class="lab">含</span><span class="chips"><span class="chip v-plain">碎片</span></span></div>
+      </div>
+
+      <div class="entry">
+        <span class="dot d-ready"></span>
+        <svg class="glyph"><use href="#g-pin"/></svg>
+        <div class="body">
+          <div class="t"><b>好友互赠友情点</b><span class="tag">一键</span></div>
+          <div class="meta"><div class="ln"><span class="k">路径</span><span>好友 <span class="arr">→</span> 一键赠送</span></div></div>
+        </div>
+        <div class="pay"><span class="lab">含</span><span class="chips"><span class="chip v-plain">其他</span></span></div>
+      </div>
+
+      <div class="entry">
+        <span class="dot d-ready"></span>
+        <svg class="glyph"><use href="#g-fude"/></svg>
+        <div class="body">
+          <div class="t"><b>吉闻送祝福</b><span class="tag">一键</span></div>
+          <div class="meta"><div class="ln"><span class="k">路径</span><span>好友 <span class="arr">→</span> 吉闻</span></div></div>
+        </div>
+        <div class="pay"><span class="lab">含</span><span class="chips"><span class="chip v-plain">其他</span></span></div>
+      </div>
+
+      <div class="entry">
+        <span class="dot d-ready"></span>
+        <svg class="glyph"><use href="#g-ema"/></svg>
+        <div class="body">
+          <div class="t"><b>寮祈愿换片</b></div>
+          <div class="meta">
+            <div class="ln"><span class="k">路径</span><span>阴阳寮 <span class="arr">→</span> 祈愿</span></div>
+            <div class="ln"><span class="k">备注</span><span>给好友满赠可另得一片。</span></div>
+          </div>
+        </div>
+        <div class="pay"><span class="lab">含</span><span class="chips"><span class="chip v-plain">碎片</span></span></div>
+      </div>
+
+      <div class="entry">
+        <span class="dot d-ready"></span>
+        <svg class="glyph"><use href="#g-hako"/></svg>
+        <div class="body">
+          <div class="t"><b>寮资金领取</b><span class="tag">一键</span></div>
+          <div class="meta">
+            <div class="ln"><span class="k">路径</span><span>阴阳寮 <span class="arr">→</span> 资金</span></div>
+            <div class="ln"><span class="k">备注</span><span>寮资金和资包都可领；资包可随机开出勾玉，社区均摸约 50 勾 / 天，非保底。</span></div>
+          </div>
+        </div>
+        <div class="pay"><span class="lab">含</span><span class="chips"><span class="chip v-plain">功勋</span><span class="chip">勾玉</span><span class="chip v-plain">金币</span></span></div>
+      </div>
+
+      <div class="entry">
+        <span class="dot d-done"></span>
+        <svg class="glyph"><use href="#g-koyomi"/></svg>
+        <div class="body">
+          <div class="t"><b>寮集体任务（歼 30）</b><span class="tag">一键</span></div>
+          <div class="meta">
+            <div class="ln"><span class="k">路径</span><span>阴阳寮 <span class="arr">→</span> 集体任务</span></div>
+            <div class="ln"><span class="k">备注</span><span>未手动领取会在 24h 内进邮件。</span></div>
+          </div>
+        </div>
+        <div class="pay"><span class="lab">含</span><span class="chips"><span class="chip v-plain">功勋</span><span class="chip v-plain">其他</span></span></div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="rule"></div>
+
+  <div class="grp">
+    <div class="grp-head">
+      <span class="no">叁</span><h2>今天已结</h2><i class="ln"></i><span class="ct">21</span>
+    </div>
+    <div class="ledger">
+      <div class="entry">
+        <span class="dot d-done"></span>
+        <svg class="glyph"><use href="#g-fude"/></svg>
+        <div class="body"><div class="t"><b>花合战签到</b></div>
+          <div class="meta"><div class="ln"><span class="k">路径</span><span>活动页 <span class="arr">→</span> 花合战</span></div></div>
+        </div>
+        <div class="pay"><span class="lab">固定收益</span><span class="chips"><span class="chip">勾玉 +20</span></span></div>
+      </div>
+      <div class="entry">
+        <span class="dot d-done"></span>
+        <svg class="glyph"><use href="#g-hako"/></svg>
+        <div class="body"><div class="t"><b>逢魔之时</b></div>
+          <div class="meta"><div class="ln"><span class="k">路径</span><span>探索 <span class="arr">→</span> 逢魔之时</span></div></div>
+        </div>
+        <div class="pay"><span class="lab">含</span><span class="chips"><span class="chip v-ticket">蓝票</span></span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="closing">
+    <svg viewBox="0 0 94 15"><path d="M2,8 C10,3 18,13 26,8 C34,3 42,13 50,8 C58,3 66,13 74,8 C81,3.6 88,11.4 92,8"/><circle cx="47" cy="8" r="1.6" fill="none"/></svg>
+    <span>一日一愿</span>
+  </div>
+</section>
+
+<!-- ═══════════ ② 本周 ═══════════ -->
+<section class="sheet" data-p="week">
+  <div class="head">
+    <div class="spine-mark">每周</div>
+    <div class="mid">
+      <h1>本周</h1>
+      <div class="sub"><span>9月22日 – 9月28日</span><i class="sep"></i><span>周常 8 项</span><i class="sep"></i><span>扇骨七日一折</span></div>
+    </div>
+    <div class="countdown"><em>周常重置</em><b>3天 10:42</b><i>下周一 00:00 刷新</i></div>
+  </div>
+
+  <div class="summary">
+    <div class="num"><b>5</b><span>待办</span></div>
+    <div class="num"><b>3</b><span>已成</span></div>
+    <div class="track"><i style="width:37.5%"></i></div>
+    <div class="note">每周一零点清空，逾期不补</div>
+  </div>
+
+  <div class="grp">
+    <div class="grp-head"><span class="no">壹</span><h2>本周该做</h2><i class="ln"></i><span class="ct">5</span></div>
+    <div class="ledger">
+
+      <div class="entry" data-on="true">
+        <span class="dot d-active"></span>
+        <svg class="glyph"><use href="#g-ougi"/></svg>
+        <div class="body">
+          <div class="t"><b>结界突破</b><span class="prog"><span class="bars"><i class="on"></i><i class="on"></i><i></i><i></i><i></i></span>2 / 5</span></div>
+          <div class="meta">
+            <div class="ln"><span class="k">路径</span><span>结界 <span class="arr">→</span> 突破</span></div>
+            <div class="ln"><span class="k">说明</span><span>顺手清体力，五次打完不影响别的事。</span></div>
+          </div>
+        </div>
+        <div class="pay"><span class="lab">固定收益</span><span class="chips"><span class="chip">勾玉 +60</span></span></div>
+      </div>
+
+      <div class="entry">
+        <span class="dot d-ready"></span>
+        <svg class="glyph"><use href="#g-chart"/></svg>
+        <div class="body">
+          <div class="t"><b>斗技 10 场</b></div>
+          <div class="meta">
+            <div class="ln"><span class="k">路径</span><span>斗技 <span class="arr">→</span> 竞技场</span></div>
+            <div class="ln"><span class="k">备注</span><span>每周一结算段位；不追求胜场，出满 10 场即可拿满基础奖励。</span></div>
+          </div>
+        </div>
+        <div class="pay"><span class="lab">含</span><span class="chips"><span class="chip v-ticket">蓝票</span><span class="chip">勾玉</span></span></div>
+      </div>
+
+      <div class="entry">
+        <span class="dot d-ready"></span>
+        <svg class="glyph"><use href="#g-kanazuchi"/></svg>
+        <div class="body">
+          <div class="t"><b>周常副本 · 御魂</b><span class="tag plain">体力消耗</span></div>
+          <div class="meta"><div class="ln"><span class="k">路径</span><span>探索 <span class="arr">→</span> 御魂</span></div></div>
+        </div>
+        <div class="pay"><span class="lab">含</span><span class="chips"><span class="chip v-plain">御魂</span></span></div>
+      </div>
+
+      <div class="entry">
+        <span class="dot d-ready"></span>
+        <svg class="glyph"><use href="#g-hako"/></svg>
+        <div class="body">
+          <div class="t"><b>阴阳寮本周贡献</b></div>
+          <div class="meta">
+            <div class="ln"><span class="k">路径</span><span>阴阳寮 <span class="arr">→</span> 贡献</span></div>
+            <div class="ln"><span class="k">备注</span><span>与寮集体任务分开计，别漏。</span></div>
+          </div>
+        </div>
+        <div class="pay"><span class="lab">含</span><span class="chips"><span class="chip v-plain">功勋</span></span></div>
+      </div>
+
+      <div class="entry">
+        <span class="dot d-ready"></span>
+        <svg class="glyph"><use href="#g-chochin"/></svg>
+        <div class="body">
+          <div class="t"><b>花合战周任务</b></div>
+          <div class="meta"><div class="ln"><span class="k">路径</span><span>活动页 <span class="arr">→</span> 花合战</span></div></div>
+        </div>
+        <div class="pay"><span class="lab">固定收益</span><span class="chips"><span class="chip">勾玉 +40</span></span></div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="rule"></div>
+
+  <div class="grp">
+    <div class="grp-head"><span class="no">贰</span><h2>本周已结</h2><i class="ln"></i><span class="ct">3</span></div>
+    <div class="ledger">
+      <div class="entry">
+        <span class="dot d-done"></span>
+        <svg class="glyph"><use href="#g-fude"/></svg>
+        <div class="body"><div class="t"><b>协同斗技</b></div>
+          <div class="meta"><div class="ln"><span class="k">路径</span><span>斗技 <span class="arr">→</span> 协同</span></div></div>
+        </div>
+        <div class="pay"><span class="lab">含</span><span class="chips"><span class="chip v-ticket">蓝票</span></span></div>
+      </div>
+      <div class="entry">
+        <span class="dot d-done"></span>
+        <svg class="glyph"><use href="#g-hako"/></svg>
+        <div class="body"><div class="t"><b>秘闻副本</b></div>
+          <div class="meta"><div class="ln"><span class="k">路径</span><span>探索 <span class="arr">→</span> 秘闻副本</span></div></div>
+        </div>
+        <div class="pay"><span class="lab">含</span><span class="chips"><span class="chip v-plain">其他</span></span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="closing">
+    <svg viewBox="0 0 94 15"><path d="M2,8 C10,3 18,13 26,8 C34,3 42,13 50,8 C58,3 66,13 74,8 C81,3.6 88,11.4 92,8"/><circle cx="47" cy="8" r="1.6" fill="none"/></svg>
+    <span>七日一折</span>
+  </div>
+</section>
+
+<!-- ═══════════ ③ 本月 ═══════════ -->
+<section class="sheet" data-p="month">
+  <div class="head">
+    <div class="spine-mark">每月</div>
+    <div class="mid">
+      <h1>本月</h1>
+      <div class="sub"><span>9月1日 – 9月30日</span><i class="sep"></i><span>月常 5 项</span><i class="sep"></i><span>每月 1 日 0 点刷新</span></div>
+    </div>
+    <div class="countdown"><em>月常重置</em><b>6天 10:42</b><i>10 月 1 日 00:00 刷新</i></div>
+  </div>
+
+  <div class="summary">
+    <div class="num"><b>3</b><span>待办</span></div>
+    <div class="num"><b>2</b><span>已成</span></div>
+    <div class="track"><i style="width:40%"></i></div>
+    <div class="note">历札一页一月，翻页即结账</div>
+  </div>
+
+  <div class="grp">
+    <div class="grp-head"><span class="no">壹</span><h2>本月该做</h2><i class="ln"></i><span class="ct">3</span></div>
+    <div class="ledger">
+      <div class="entry" data-on="true">
+        <span class="dot d-active"></span>
+        <svg class="glyph"><use href="#g-koyomi"/></svg>
+        <div class="body">
+          <div class="t"><b>月度签到全勤</b><span class="prog"><span class="bars"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i><i></i></span>21 / 30</span></div>
+          <div class="meta"><div class="ln"><span class="k">路径</span><span>庭院 <span class="arr">→</span> 签到</span></div></div>
+        </div>
+        <div class="pay"><span class="lab">固定收益</span><span class="chips"><span class="chip">勾玉 +60</span></span></div>
+      </div>
+      <div class="entry">
+        <span class="dot d-ready"></span>
+        <svg class="glyph"><use href="#g-chochin"/></svg>
+        <div class="body">
+          <div class="t"><b>花合战月度任务</b></div>
+          <div class="meta">
+            <div class="ln"><span class="k">路径</span><span>活动页 <span class="arr">→</span> 花合战</span></div>
+            <div class="ln"><span class="k">备注</span><span>满 30 级才拿满；缺的活跃可在月末两天补。</span></div>
+          </div>
+        </div>
+        <div class="pay"><span class="lab">含</span><span class="chips"><span class="chip v-plain">花礼</span></span></div>
+      </div>
+      <div class="entry">
+        <span class="dot d-ready"></span>
+        <svg class="glyph"><use href="#g-hako"/></svg>
+        <div class="body">
+          <div class="t"><b>寮月度任务</b></div>
+          <div class="meta"><div class="ln"><span class="k">路径</span><span>阴阳寮 <span class="arr">→</span> 月度</span></div></div>
+        </div>
+        <div class="pay"><span class="lab">含</span><span class="chips"><span class="chip v-plain">功勋</span></span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="closing">
+    <svg viewBox="0 0 94 15"><path d="M2,8 C10,3 18,13 26,8 C34,3 42,13 50,8 C58,3 66,13 74,8 C81,3.6 88,11.4 92,8"/><circle cx="47" cy="8" r="1.6" fill="none"/></svg>
+    <span>一页一月</span>
+  </div>
+</section>
+
+<!-- ═══════════ ④ 限时 ═══════════ -->
+<section class="sheet" data-p="limited">
+  <div class="head">
+    <div class="spine-mark">限时</div>
+    <div class="mid">
+      <h1>限时</h1>
+      <div class="sub"><span>15 个活动在跑</span><i class="sep"></i><span>暂无临期</span><i class="sep"></i><span>到期即归档</span></div>
+    </div>
+    <div class="countdown"><em>最近截止</em><b>6天 08:17</b><i>9 月 29 日 23:59</i></div>
+  </div>
+
+  <div class="grp">
+    <div class="grp-head"><span class="no">壹</span><h2>限时活动 · 进行中</h2><i class="ln"></i><span class="ct">15</span></div>
+    <div class="ledger">
+
+      <div class="entry">
+        <span class="dot d-done"></span>
+        <svg class="glyph"><use href="#g-chochin"/></svg>
+        <div class="body">
+          <div class="t"><b>十周年庆典演出</b><span class="tag over">已结束 · 9/23 19:00</span></div>
+          <div class="meta">
+            <div class="ln"><span class="k">路径</span><span>活动页 <span class="arr">→</span> 庆典演出</span></div>
+            <div class="ln"><span class="k">备注</span><span>定点直播，错过无补。</span></div>
+          </div>
+        </div>
+        <div class="pay"><span class="lab">含</span><span class="chips"><span class="chip v-plain">皮肤外观</span><span class="chip v-plain">其他</span></span></div>
+      </div>
+
+      <div class="entry" data-on="true">
+        <span class="dot d-active"></span>
+        <svg class="glyph"><use href="#g-chochin"/></svg>
+        <div class="body">
+          <div class="t"><b>拾光永恒 · 版本活动</b><span class="tag gold">剩 6 天 · 9/29 23:59 止</span></div>
+          <div class="meta">
+            <div class="ln"><span class="k">路径</span><span>活动页 <span class="arr">→</span> 拾光永恒</span></div>
+            <div class="ln"><span class="k">重点</span><span>SP 少羽大天狗皮肤「时之忆」、SSR/SP 召唤券、契约书·奉行达摩、动态头像框；二阶段首领战「炼石成金」9/16–9/19；婚活商店兑换延至 10/13，金石札领奖延至 10/6。</span></div>
+          </div>
+        </div>
+        <div class="pay"><span class="lab">含</span><span class="chips"><span class="chip v-plain">皮肤外观</span><span class="chip v-ticket">蓝票</span><span class="chip v-frag">黑蛋</span></span></div>
+      </div>
+
+      <div class="entry">
+        <span class="dot d-ready"></span>
+        <svg class="glyph"><use href="#g-hako"/></svg>
+        <div class="body">
+          <div class="t"><b>福神宝船 · 拾光游宴</b><span class="tag gold">剩 6 天 · 9/29 23:59 止</span></div>
+          <div class="meta">
+            <div class="ln"><span class="k">路径</span><span>活动页 <span class="arr">→</span> 福神宝船</span></div>
+            <div class="ln"><span class="k">重点</span><span>外观；注意 9/23 19:00 庆典演出节点。</span></div>
+          </div>
+        </div>
+        <div class="pay"><span class="lab">含</span><span class="chips"><span class="chip v-plain">皮肤外观</span></span></div>
+      </div>
+
+      <div class="entry">
+        <span class="dot d-ready"></span>
+        <svg class="glyph"><use href="#g-fude"/></svg>
+        <div class="body">
+          <div class="t"><b>今忆召唤 · 概率 UP</b><span class="tag gold">剩 6 天 · 9/29 23:59 止</span></div>
+          <div class="meta">
+            <div class="ln"><span class="k">路径</span><span>召唤 <span class="arr">→</span> 今忆召唤</span></div>
+            <div class="ln"><span class="k">UP</span><span>鬼影闪刀姬、云间不见岳、小鹿男、鬼童丸、缘结神、不见岳；礼包屋同步上架推荐礼包。</span></div>
+          </div>
+        </div>
+        <div class="pay"><span class="lab">含</span><span class="chips"><span class="chip v-plain">SSR / SP</span></span></div>
+      </div>
+
+      <div class="entry">
+        <span class="dot d-ready"></span>
+        <svg class="glyph"><use href="#g-plus"/></svg>
+        <div class="body">
+          <div class="t"><b>SSR / SP 重临神龛</b><span class="tag gold">剩 9 天 · 10/2 23:59 止</span></div>
+          <div class="meta">
+            <div class="ln"><span class="k">路径</span><span>商店 <span class="arr">→</span> 神龛</span></div>
+            <div class="ln"><span class="k">重点</span><span>御札 × 6000 兑换，2023-10-01 前 SSR/SP（不含联动与两面佛），每人限 1 位。</span></div>
+          </div>
+        </div>
+        <div class="pay"><span class="lab">含</span><span class="chips"><span class="chip v-plain">SSR / SP</span></span></div>
+      </div>
+
+      <div class="entry">
+        <span class="dot d-ready"></span>
+        <svg class="glyph"><use href="#g-ema"/></svg>
+        <div class="body">
+          <div class="t"><b>石长姬登录即领</b><span class="tag plain">剩 13 天 · 10/6 23:59 止</span></div>
+          <div class="meta">
+            <div class="ln"><span class="k">路径</span><span>庭院 <span class="arr">→</span> 石长姬小纸人</span></div>
+            <div class="ln"><span class="k">说明</span><span>等级 ≥ 5 即可，无门槛免费领。</span></div>
+          </div>
+        </div>
+        <div class="pay"><span class="lab">含</span><span class="chips"><span class="chip v-plain">SSR / SP</span></span></div>
+      </div>
+
+      <div class="entry">
+        <span class="dot d-ready"></span>
+        <svg class="glyph"><use href="#g-hako"/></svg>
+        <div class="body">
+          <div class="t"><b>神秘商人的秘密</b><span class="tag plain">剩 13 天 · 10/6 23:59 止</span></div>
+          <div class="meta">
+            <div class="ln"><span class="k">路径</span><span>庭院小纸人 / 商店 <span class="arr">→</span> 神龛达摩</span></div>
+            <div class="ln"><span class="k">重点</span><span>消耗皮肤券占卜，猫爪币充能限定返场：童女·秋间篱、虫师·色彩鹤舞、迦楼罗·金翎铄羽。</span></div>
+          </div>
+        </div>
+        <div class="pay"><span class="lab">含</span><span class="chips"><span class="chip v-plain">皮肤外观</span><span class="chip v-plain">皮肤券</span></span></div>
+      </div>
+
+      <div class="entry">
+        <span class="dot d-ready"></span>
+        <svg class="glyph"><use href="#g-chochin"/></svg>
+        <div class="body">
+          <div class="t"><b>纪念服护肝活动</b><span class="tag plain">剩 25 天 · 10/18 23:59 止</span></div>
+          <div class="meta"><div class="ln"><span class="k">路径</span><span>活动页 <span class="arr">→</span> 护肝</span></div></div>
+        </div>
+        <div class="pay"><span class="lab">含</span><span class="chips"><span class="chip v-plain">其他</span></span></div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="closing">
+    <svg viewBox="0 0 94 15"><path d="M2,8 C10,3 18,13 26,8 C34,3 42,13 50,8 C58,3 66,13 74,8 C81,3.6 88,11.4 92,8"/><circle cx="47" cy="8" r="1.6" fill="none"/></svg>
+    <span>挂起即开场</span>
+  </div>
+</section>
+
+<!-- ═══════════ ⑤ 统计 ═══════════ -->
+<section class="sheet" data-p="stats">
+  <div class="head">
+    <div class="spine-mark">统计</div>
+    <div class="mid">
+      <h1>统计</h1>
+      <div class="sub"><span>9月18日 – 9月24日</span><i class="sep"></i><span>近 7 天</span><i class="sep"></i><span>只记固定收益</span></div>
+    </div>
+    <div class="countdown"><em>记账天数</em><b>7</b><i>连续未断</i></div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-head">
+      <b>2026 年 9 月</b><i class="ln"></i>
+      <span>颜色越深 = 当天勾选越多 · 点某天可只看那天</span>
+    </div>
+    <div class="cal">
+      <div class="wd">一</div><div class="wd">二</div><div class="wd">三</div><div class="wd">四</div><div class="wd">五</div><div class="wd">六</div><div class="wd">日</div>
+
+      <div class="d out">31</div>
+      <div class="d" style="background:rgb(var(--gold) / .06)">1</div>
+      <div class="d" style="background:rgb(var(--gold) / .09)">2</div>
+      <div class="d" style="background:rgb(var(--gold) / .18)">3</div>
+      <div class="d" style="background:rgb(var(--gold) / .13)">4</div>
+      <div class="d" style="background:rgb(var(--gold) / .23)">5</div>
+      <div class="d" style="background:rgb(var(--gold) / .10)">6</div>
+
+      <div class="d" style="background:rgb(var(--gold) / .25)">7</div>
+      <div class="d" style="background:rgb(var(--gold) / .28)">8</div>
+      <div class="d" style="background:rgb(var(--gold) / .16)">9</div>
+      <div class="d" style="background:rgb(var(--gold) / .31)">10</div>
+      <div class="d" style="background:rgb(var(--gold) / .21)">11</div>
+      <div class="d" style="background:rgb(var(--gold) / .36)">12</div>
+      <div class="d" style="background:rgb(var(--gold) / .15)">13</div>
+
+      <div class="d" style="background:rgb(var(--gold) / .33)">14</div>
+      <div class="d" style="background:rgb(var(--gold) / .19)">15</div>
+      <div class="d" style="background:rgb(var(--gold) / .38)">16</div>
+      <div class="d" style="background:rgb(var(--gold) / .26)">17</div>
+      <div class="d" style="background:rgb(var(--gold) / .43)">18</div>
+      <div class="d" style="background:rgb(var(--gold) / .30)">19</div>
+      <div class="d" style="background:rgb(var(--gold) / .23)">20</div>
+
+      <div class="d" style="background:rgb(var(--gold) / .41)">21</div>
+      <div class="d" style="background:rgb(var(--gold) / .35)">22</div>
+      <div class="d" style="background:rgb(var(--gold) / .45)">23</div>
+      <div class="d today">24</div>
+      <div class="d out">25</div>
+      <div class="d out">26</div>
+      <div class="d out">27</div>
+
+      <div class="d out">28</div>
+      <div class="d out">29</div>
+      <div class="d out">30</div>
+      <div class="d out">1</div>
+      <div class="d out">2</div>
+      <div class="d out">3</div>
+      <div class="d out">4</div>
+    </div>
+  </div>
+
+  <div style="display:flex;align-items:center;gap:12px;margin:20px 0 14px;flex-wrap:wrap">
+    <div class="seg">
+      <button type="button" aria-pressed="true">近 7 天</button>
+      <button type="button" aria-pressed="false">近 30 天</button>
+      <button type="button" aria-pressed="false">本月</button>
+    </div>
+    <span style="font-size:12px;color:rgb(var(--ink-3));font-variant-numeric:tabular-nums">9月18日 – 9月24日 · 完成 <b style="font-family:var(--mono)">0</b> 条</span>
+  </div>
+
+  <div class="gains">
+    <div class="gain" style="--ac:rgb(var(--gold-hi))">
+      <span class="lb"><i></i>勾玉</span>
+      <div class="vl">0</div>
+      <div class="fn">固定奖励</div>
+      <div class="spark"><i style="height:22%"></i><i style="height:38%"></i><i style="height:30%"></i><i style="height:52%"></i><i style="height:44%"></i><i style="height:64%"></i><i style="height:28%"></i></div>
+    </div>
+    <div class="gain" style="--ac:rgb(var(--frag))">
+      <span class="lb"><i></i>黑碎</span>
+      <div class="vl">0</div>
+      <div class="fn">1 黑蛋 = 25 片</div>
+      <div class="spark"><i style="height:14%"></i><i style="height:26%"></i><i style="height:20%"></i><i style="height:34%"></i><i style="height:30%"></i><i style="height:42%"></i><i style="height:18%"></i></div>
+    </div>
+    <div class="gain" style="--ac:rgb(var(--ticket))">
+      <span class="lb"><i></i>蓝票</span>
+      <div class="vl">0</div>
+      <div class="fn">神秘的符咒</div>
+      <div class="spark"><i style="height:10%"></i><i style="height:18%"></i><i style="height:24%"></i><i style="height:16%"></i><i style="height:28%"></i><i style="height:20%"></i><i style="height:12%"></i></div>
+    </div>
+  </div>
+
+  <div class="hint" style="margin-top:14px">
+    <span class="mk"></span>
+    <span>这段时间还没有勾选记录。在清单里勾一条，当天就会在日历上留下颜色，收益也按天累计。</span>
+  </div>
+
+  <div class="foot">
+    只统计<b>固定数量</b>（勾玉 / 黑碎 / 蓝票）；数量浮动的收益不折算、不估算——把「看运气填几个」当保底算，比不算更误导。
+    同一条目多天各完成一次就累计多次（每日签到 7 天就是 7 份）；日历颜色按当天的勾选条数分布，与收益数值无关。
+  </div>
+
+  <div class="closing">
+    <svg viewBox="0 0 94 15"><path d="M2,8 C10,3 18,13 26,8 C34,3 42,13 50,8 C58,3 66,13 74,8 C81,3.6 88,11.4 92,8"/><circle cx="47" cy="8" r="1.6" fill="none"/></svg>
+    <span>日拱一卒</span>
+  </div>
+</section>
+
+<!-- ═══════════ ⑥ 工具 ═══════════ -->
+<section class="sheet" data-p="tools">
+  <div class="head">
+    <div class="spine-mark">工具</div>
+    <div class="mid">
+      <h1>工具</h1>
+      <div class="sub"><span>三件套</span><i class="sep"></i><span>结界养养 / 御魂 / 悬赏</span><i class="sep"></i><span>算好时间点再动手</span></div>
+    </div>
+    <div class="countdown"><em>进行中</em><b>0</b><i>无待收点</i></div>
+  </div>
+
+  <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:16px">
+    <div class="seg">
+      <button type="button" aria-pressed="true">结界养养</button>
+      <button type="button" aria-pressed="false">御魂</button>
+      <button type="button" aria-pressed="false">悬赏</button>
+    </div>
+    <span style="font-size:11.5px;color:rgb(var(--ink-3))">每次 6 小时，每点 = 前一点 + 6 小时 ÷ 延迟；上卡时刻也作为一个点。</span>
+  </div>
+
+  <div class="panel">
+    <div class="panel-head"><b>记一次结界养养</b><i class="ln"></i></div>
+    <div class="form">
+      <div class="frow">
+        <label>上卡</label>
+        <input class="inp" value="13:52" readonly>
+        <button class="btn" type="button">用现在</button>
+      </div>
+      <div class="frow">
+        <label>持续</label>
+        <input class="inp num" value="24" readonly>
+        <span class="unit">小时</span>
+        <label style="width:auto;margin-left:10px">延迟</label>
+        <input class="inp num" value="0" readonly>
+        <span class="unit">分钟 · 将排 4 个收 / 续点</span>
+      </div>
+      <div class="frow">
+        <label>结束</label>
+        <span class="ro">明天 13:52 <em>（由上卡与持续时间推算，不可修改）</em></span>
+      </div>
+      <button class="btn-pri" type="button">+ 下一步：确认添加</button>
+    </div>
+  </div>
+
+  <div class="rule"></div>
+
+  <div class="grp">
+    <div class="grp-head"><span class="no">壹</span><h2>进行中的任务</h2><i class="ln"></i>
+      <span class="ct">0 条 · ✓ = 已完成，点时间点可记完成</span></div>
+    <div class="blank" style="margin-top:9px">
+      <svg><use href="#g-empty"/></svg>
+      <span>没有进行中的任务 —— 表填好时间点，选［立即开始］后这里才开始记录完成情况。</span>
+    </div>
+  </div>
+
+  <div class="grp" style="margin-top:20px">
+    <div class="grp-head"><span class="no">贰</span><h2>计划清单</h2><i class="ln"></i>
+      <span class="ct">0 条 · 未开始不记状态，可点［开始］转正</span></div>
+    <div class="blank" style="margin-top:9px">
+      <svg><use href="#g-empty"/></svg>
+      <span>计划清单为空。「仅存计划」的条目放这里：纯查看不记状态，决定开刷时点［开始］转成任务。</span>
+    </div>
+  </div>
+
+  <div class="closing">
+    <svg viewBox="0 0 94 15"><path d="M2,8 C10,3 18,13 26,8 C34,3 42,13 50,8 C58,3 66,13 74,8 C81,3.6 88,11.4 92,8"/><circle cx="47" cy="8" r="1.6" fill="none"/></svg>
+    <span>器物在手</span>
+  </div>
+</section>
+
+<!-- ═══════════ ⑦ 设置 ═══════════ -->
+<section class="sheet" data-p="me">
+  <div class="head">
+    <div class="spine-mark">设置</div>
+    <div class="mid">
+      <h1>设置</h1>
+      <div class="sub"><span>四个分区</span><i class="sep"></i><span>观感 / 委托 / 账号 / 数据</span><i class="sep"></i><span>改动即时生效</span></div>
+    </div>
+    <div class="countdown"><em>当前账号</em><b>A 大号</b><i>随附本地存储</i></div>
+  </div>
+
+  <div class="grp">
+    <div class="grp-head"><span class="no">壹</span><h2>观感</h2><i class="ln"></i></div>
+    <div class="srows">
+      <div class="srow">
+        <div class="tx"><b>界面主题</b><p>未手动选择时跟随系统设置。</p></div>
+        <div class="ctl"><div class="seg sm"><button type="button" aria-pressed="true">明版</button><button type="button" aria-pressed="false">暗版</button></div></div>
+      </div>
+      <div class="srow">
+        <div class="tx"><b>卡片显示字段</b><p>全部信息（默认）—— 不确定某条要怎么做时看得最明白。</p></div>
+        <div class="ctl"><div class="seg sm"><button type="button" aria-pressed="false">极简</button><button type="button" aria-pressed="false">简要</button><button type="button" aria-pressed="true">完整</button></div></div>
+      </div>
+      <div class="srow">
+        <div class="tx"><b>逐项调整与预览</b><p>当前「完整」，可再逐项微调。</p></div>
+        <div class="ctl"><svg class="go"><use href="#g-go"/></svg></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="rule"></div>
+
+  <div class="grp">
+    <div class="grp-head"><span class="no">贰</span><h2>委托</h2><i class="ln"></i></div>
+    <div class="srows">
+      <div class="srow">
+        <div class="tx"><b>一键日常覆盖</b><p>已覆盖 <span class="num">14</span> 项 · 数据默认 <span class="num">14</span> 项。</p></div>
+        <div class="ctl"><button class="btn" type="button">恢复数据默认</button></div>
+      </div>
+      <div class="srow">
+        <div class="tx"><b>条目管理</b><p>共 <span class="num">98</span> 条 · 自建 <span class="num">0</span> · 隐藏 <span class="num">0</span>。</p></div>
+        <div class="ctl"><button class="btn" type="button">恢复默认</button></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="rule"></div>
+
+  <div class="grp">
+    <div class="grp-head"><span class="no">叁</span><h2>账号</h2><i class="ln"></i></div>
+    <div class="srows">
+      <div class="srow">
+        <div class="tx"><b>游戏账号</b><p>存活 <span class="num">1</span> 个。</p></div>
+        <div class="ctl"><button class="btn" type="button">+ 新建账号</button></div>
+      </div>
+      <div class="srow">
+        <div class="tx"><b>同步到其他账号</b><p>把本账号的配置复制给其他号 · 可选内容与目标。</p></div>
+        <div class="ctl"><svg class="go"><use href="#g-go"/></svg></div>
+      </div>
+      <div class="srow">
+        <div class="tx"><b>寮时间</b><p>已配置 <span class="num">0 / 6</span> 项 · 集体活动需要各自自定。</p></div>
+        <div class="ctl"><button class="btn" type="button">清空配置</button></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="rule"></div>
+
+  <div class="grp">
+    <div class="grp-head"><span class="no">肆</span><h2>数据</h2><i class="ln"></i><span class="ct">只读</span></div>
+    <div class="panel" style="margin-top:9px">
+      <div class="dlist">
+        <div class="dr"><span class="k">数据版本</span><span class="v">2026.09.20 · 常驻条目按次数拆分<em>（快照更新于 9/20，4 天前）</em></span></div>
+        <div class="dr"><span class="k">数据结构版本</span><span class="v">1.4.0<em>（备份文件的 schemaVersion 与它比对）</em></span></div>
+        <div class="dr"><span class="k">快照更新日</span><span class="v">2026-09-20</span></div>
+        <div class="dr"><span class="k">周期重置</span><span class="v">每日与周常在 0 点刷新（周常为周一 0 点）<em>；版本 / 赛季按上线维护完成的锚点重置</em></span></div>
+        <div class="dr"><span class="k">版本锚点</span><span class="v">2026.09.09<em>（十周年版本开服）· 惯例 09:00</em></span></div>
+        <div class="dr"><span class="k">赛季锚点</span><span class="v">寻光迷英 · 2026-07-06 06:00</span></div>
+      </div>
+    </div>
+    <div class="srows">
+      <div class="srow">
+        <div class="tx"><b>数据备份</b><p>JSON 文本 · 导出 / 导入 · 不出网。</p></div>
+        <div class="ctl"><svg class="go"><use href="#g-go"/></svg></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="closing">
+    <svg viewBox="0 0 94 15"><path d="M2,8 C10,3 18,13 26,8 C34,3 42,13 50,8 C58,3 66,13 74,8 C81,3.6 88,11.4 92,8"/><circle cx="47" cy="8" r="1.6" fill="none"/></svg>
+    <span>双滑杆</span>
+  </div>
+</section>
+
+<!-- ═══════════ ⑧ 设计规范 ═══════════ -->
+<section class="sheet" data-p="spec">
+  <div class="head">
+    <div class="spine-mark">规范</div>
+    <div class="mid">
+      <h1>设计规范</h1>
+      <div class="sub"><span>色板</span><i class="sep"></i><span>元素配方</span><i class="sep"></i><span>本次重设计的取舍</span></div>
+    </div>
+    <div class="countdown"><em>主题</em><b>明 / 暗</b><i>两版都过 WCAG</i></div>
+  </div>
+
+  <div class="grp">
+    <div class="grp-head"><span class="no">壹</span><h2>色板</h2><i class="ln"></i><span class="ct">墨底 · 朱红 · 金箔 · 宣纸</span></div>
+    <div class="sw" style="margin-top:11px">
+      <div class="swi"><div class="cap" style="background:rgb(var(--deep))"></div><div class="mt"><b>画布</b><span>--deep</span></div></div>
+      <div class="swi"><div class="cap" style="background:rgb(var(--sheet))"></div><div class="mt"><b>册页</b><span>--sheet</span></div></div>
+      <div class="swi"><div class="cap" style="background:rgb(var(--ink))"></div><div class="mt"><b>正文墨</b><span>--ink</span></div></div>
+      <div class="swi"><div class="cap" style="background:rgb(var(--ink-3))"></div><div class="mt"><b>次级字</b><span>--ink-3</span></div></div>
+      <div class="swi"><div class="cap" style="background:rgb(var(--crimson))"></div><div class="mt"><b>朱红</b><span>--crimson</span></div></div>
+      <div class="swi"><div class="cap" style="background:rgb(var(--gold))"></div><div class="mt"><b>金箔</b><span>--gold</span></div></div>
+      <div class="swi"><div class="cap" style="background:rgb(var(--gold-hi))"></div><div class="mt"><b>文字金</b><span>--gold-hi</span></div></div>
+      <div class="swi"><div class="cap" style="background:rgb(var(--jade))"></div><div class="mt"><b>已成</b><span>--jade</span></div></div>
+      <div class="swi"><div class="cap" style="background:rgb(var(--frag))"></div><div class="mt"><b>碎片</b><span>--frag</span></div></div>
+      <div class="swi"><div class="cap" style="background:rgb(var(--ticket))"></div><div class="mt"><b>蓝票</b><span>--ticket</span></div></div>
+    </div>
+  </div>
+
+  <div class="rule"></div>
+
+  <div class="grp">
+    <div class="grp-head"><span class="no">贰</span><h2>元素配方</h2><i class="ln"></i></div>
+    <div class="recipes" style="margin-top:11px">
+      <div class="recipe"><b>册页</b><p>底色 <code>--sheet</code>，1px <code>--line-soft</code> 边框，圆角 16px，只留下方两角（与索引签相接的一侧不封边）。</p></div>
+      <div class="recipe"><b>索引签</b><p>未选中透明；选中与册页同色同边，并把下边框去掉 —— 签与页连成一体。签顶一道 18×2 朱红额束标出当前页。</p></div>
+      <div class="recipe"><b>账目行</b><p>同组共用一张册页，行间只用 1px <code>--line-faint</code> 分隔，不用卡片边框。悬停时左侧浮出一道朱红竖线（透明度 .30）。</p></div>
+      <div class="recipe"><b>四态印泥点</b><p>7px 圆点 + 3px 同色晕环：进行中朱红、可做金、未解锁灰、已成青。状态不进措辞，只进颜色。</p></div>
+      <div class="recipe"><b>币种徽章</b><p>胶囊 + 左侧 5px 色点；底色为该币种色 10% 透明度，描边 35%。数量用等宽数字，右对齐成列。</p></div>
+      <div class="recipe"><b>墨线菱点</b><p>分隔线两端渐隐至透明，中线处叠一枚 5px 旋转 45° 的方点（内填册页色、描 1px 边）—— 断口比实线更「印」。</p></div>
+      <div class="recipe"><b>倒计时</b><p>全页唯一的等宽数字区，右对齐、贴右栏；上方 10px 小字标用途（如「每日重置」），下方一行标绝对时刻。</p></div>
+      <div class="recipe"><b>入场动效</b><p>只做 <code>translateY(7px → 0)</code>，<b>绝不在关键帧里动 opacity</b> —— 时间轴一旦冻结，元素会永久停在透明态。已接 <code>prefers-reduced-motion</code>。</p></div>
+    </div>
+  </div>
+
+  <div class="rule"></div>
+
+  <div class="grp">
+    <div class="grp-head"><span class="no">叁</span><h2>这次改了什么</h2><i class="ln"></i><span class="ct">四处结构级取舍</span></div>
+    <div class="recipes" style="margin-top:11px">
+      <div class="recipe"><b>① 卡片 → 账目行</b><p>原设计一条一张卡，98 条条目铺开是 98 个框，读起来像「一堆待办」而不是「一册账」。改为同组共用一张册页、行内分栏后，密度提高约 2.4 倍，右列收益对齐成一条竖线，扫一眼就能比。</p></div>
+      <div class="recipe"><b>② 侧栏 → 索引签</b><p>原为左侧常驻栏目，占了 200px 却不承载内容。改为顶部索引签后，正文拿到整幅宽度；签与册页相连的形态本身就说明「这是同一本账的第几页」。</p></div>
+      <div class="recipe"><b>③ 边框 → 墨线菱点</b><p>原来靠圆角卡片堆叠分层，层级一多就成「盒子里套盒子」。改用断口墨线 + 菱点做分隔，层级靠留白与字号承担，页面安静下来。</p></div>
+      <div class="recipe"><b>④ 状态色 → 印泥点</b><p>原来四态各有一套文字徽章，同屏出现时像四种并列的信息。收敛成同一形状的圆点后，颜色即状态，形状不再抢注意力。</p></div>
+    </div>
+  </div>
+
+  <div class="closing">
+    <svg viewBox="0 0 94 15"><path d="M2,8 C10,3 18,13 26,8 C34,3 42,13 50,8 C58,3 66,13 74,8 C81,3.6 88,11.4 92,8"/><circle cx="47" cy="8" r="1.6" fill="none"/></svg>
+    <span>法度自在</span>
+  </div>
+</section>
+
+</main>
+
+<script>
+/* ═══ 导航定义：图标沿用项目已定稿的和风器物，一物一义 ═══ */
+const NAV = [
+  { k:'today',   t:'今日', icon:'ema'       },
+  { k:'week',    t:'本周', icon:'ougi'      },
+  { k:'month',   t:'本月', icon:'koyomi'    },
+  { k:'limited', t:'限时', icon:'chochin'   },
+  { k:'stats',   t:'统计', icon:'chart'     },
+  { k:'tools',   t:'工具', icon:'kanazuchi' },
+  { k:'me',      t:'设置', icon:'setting'   },
+  { k:'spec',    t:'规范', icon:'seimei'    }
+];
+
+const idx = document.getElementById('idx');
+idx.innerHTML = NAV.map(n =>
+  `<button type="button" role="tab" data-k="${n.k}" aria-selected="false">` +
+  `<svg viewBox="0 0 24 24"><use href="#g-${n.icon}"/></svg>${n.t}</button>`
+).join('');
+
+const sheets = [...document.querySelectorAll('.sheet')];
+let cur = 'today';
+
+function go(k){
+  if (!NAV.some(n => n.k === k)) k = 'today';
+  cur = k;
+  [...idx.children].forEach(b => b.setAttribute('aria-selected', String(b.dataset.k === k)));
+  sheets.forEach(s => s.dataset.on = String(s.dataset.p === k));
+  window.scrollTo({ top: 0, behavior: 'auto' });
+}
+
+idx.addEventListener('click', e => {
+  const b = e.target.closest('button[data-k]');
+  if (b) go(b.dataset.k);
+});
+/* 键盘：左右方向键在索引签之间走，Enter/Space 由按钮原生接管 */
+idx.addEventListener('keydown', e => {
+  const i = NAV.findIndex(n => n.k === cur);
+  if (e.key === 'ArrowRight'){ e.preventDefault(); const n = NAV[(i + 1) % NAV.length]; go(n.k); idx.children[(i+1)%NAV.length].focus(); }
+  if (e.key === 'ArrowLeft'){ e.preventDefault(); const n = NAV[(i - 1 + NAV.length) % NAV.length]; go(n.k); idx.children[(i-1+NAV.length)%NAV.length].focus(); }
+});
+
+/* ═══ 明暗拨钮：只切样式变量，不动结构 ═══ */
+const lamp = document.getElementById('lamp');
+const SUN = '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.2"/><path d="M12,2.6V5M12,19v2.4M2.6,12H5M19,12h2.4M5.4,5.4L7.1,7.1M16.9,16.9l1.7,1.7M18.6,5.4L16.9,7.1M7.1,16.9L5.4,18.6"/></svg>';
+const MOON = '<svg viewBox="0 0 24 24"><path d="M20.2,14.6A8.6,8.6 0 0 1 9.4,3.8A8.6,8.6 0 1 0 20.2,14.6Z"/></svg>';
+lamp.innerHTML =
+  '<button type="button" data-th="light" title="宣纸" aria-pressed="false">' + SUN + '</button>' +
+  '<button type="button" data-th="dark" title="墨夜" aria-pressed="true">' + MOON + '</button>';
+
+function setTheme(t){
+  document.documentElement.dataset.theme = t;
+  [...lamp.children].forEach(b => b.setAttribute('aria-pressed', String(b.dataset.th === t)));
+}
+lamp.addEventListener('click', e => {
+  const b = e.target.closest('button[data-th]');
+  if (b) setTheme(b.dataset.th);
+});
+
+/* ═══ 分段控件：纯样式演示，点一下换选中项 ═══ */
+document.addEventListener('click', e => {
+  const b = e.target.closest('.seg button');
+  if (!b) return;
+  [...b.parentElement.children].forEach(x => x.setAttribute('aria-pressed', 'false'));
+  b.setAttribute('aria-pressed', 'true');
+});
+
+setTheme('dark');
+go('today');
+</script>
+
+</body>
+</html>

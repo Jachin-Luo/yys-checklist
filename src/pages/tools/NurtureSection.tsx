@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { btn } from '../../components/common/controls';
 import Icon from '../../components/icons/Icon';
 import {
   endLabelOf,
@@ -387,22 +388,24 @@ export default function NurtureSection() {
         每次 6 小时 · 每点 = 前一点 + 6 小时 + 延迟；上卡时刻也作为一个点
       </p>
 
-      <div className="mx-3.5 mt-3 rounded-md border border-line-soft bg-surface px-3 py-2.5">
-        <p className="text-lg text-ink">记一次结界寄养</p>
+      {/* 表单（册页稿 `.form` / `.frow` / `.inp`）：填充底外壳 + 纸底输入框 +
+          52px 定宽行标签；数值框等宽、结束时刻只读。仅换皮，提交流程与校验一行未动 */}
+      <div className="mx-3.5 mt-3 rounded-sm border border-line-faint bg-fill px-3.5 py-3">
+        <p className="text-base font-semibold tracking-wide text-ink">记一次结界寄养</p>
 
-        <div className="mt-2 flex items-center gap-2">
-          <span className="w-12 flex-none text-sm text-ink-3">上卡</span>
+        <div className="mt-2.5 flex items-center gap-3">
+          <span className="w-12 flex-none text-sm tracking-wide text-ink-2">上卡</span>
           <input
             value={timeValue}
             onChange={(e) => setTime(e.target.value)}
             placeholder="如 21:00"
             aria-label="上卡时间"
-            className="min-w-0 flex-1 rounded-sm border border-line bg-surface px-2 py-1.5 text-lg text-ink transition-colors duration-120 focus:border-gold-hi"
+            className="min-w-0 flex-1 rounded-xs border border-line bg-surface px-2.5 py-1.5 font-mono text-base text-ink transition-colors duration-120 focus:border-gold-line"
           />
           <button
             type="button"
             onClick={() => setTime(null)}
-            className="flex-none cursor-pointer rounded-sm border border-line px-2 py-1.5 text-sm text-ink-2 transition-colors duration-120 hover:border-line"
+            className="flex-none cursor-pointer rounded-xs border border-line bg-surface px-2.5 py-1.5 text-sm text-ink-2 transition-colors duration-120 hover:border-gold-line hover:text-gold-hi"
           >
             用现在
           </button>
@@ -410,8 +413,8 @@ export default function NurtureSection() {
 
         {/* 持续时间（2026-09-20 取代原来的「推点数」按钮组）：用户手里的事实是"这张卡能撑多久"，
             "排几个点"是寄养机制的内部换算，不该让人心算 22/6 */}
-        <div className="mt-2 flex flex-wrap items-center gap-2">
-          <span className="w-12 flex-none text-sm text-ink-3">持续</span>
+        <div className="mt-2.5 flex flex-wrap items-center gap-3">
+          <span className="w-12 flex-none text-sm tracking-wide text-ink-2">持续</span>
           <input
             type="number"
             min={1}
@@ -419,11 +422,11 @@ export default function NurtureSection() {
             value={hours}
             onChange={(e) => setHours(Number(e.target.value))}
             aria-label="结界卡持续时间（小时）"
-            className="w-20 rounded-sm border border-line bg-surface px-2 py-1.5 text-lg text-ink transition-colors duration-120 focus:border-gold-hi"
+            className="w-20 rounded-xs border border-line bg-surface px-2.5 py-1.5 text-center font-mono text-base text-ink transition-colors duration-120 focus:border-gold-line"
           />
           {/* 延迟（2026-09-20 新增）：每次收/续往后推几分钟。它逐点累积，
               所以点数提示必须带上它 —— 24h 的卡配 5 分钟延迟会从 4 个点变成 3 个 */}
-          <span className="w-12 flex-none text-sm text-ink-3">延迟</span>
+          <span className="w-12 flex-none text-sm tracking-wide text-ink-2">延迟</span>
           <input
             type="number"
             min={0}
@@ -431,34 +434,32 @@ export default function NurtureSection() {
             value={delay}
             onChange={(e) => setDelay(Number(e.target.value))}
             aria-label="每次收续延迟（分钟）"
-            className="w-20 rounded-sm border border-line bg-surface px-2 py-1.5 text-lg text-ink transition-colors duration-120 focus:border-gold-hi"
+            className="w-20 rounded-xs border border-line bg-surface px-2.5 py-1.5 text-center font-mono text-base text-ink transition-colors duration-120 focus:border-gold-line"
           />
-          <span className="text-sm text-ink-3">
-            分钟 · 将排 <b className="font-medium text-ink-2">{pointCountOf(hours, delay)}</b> 个收/续点
+          <span className="text-xs tracking-wide text-ink-3">
+            分钟 · 将排 <b className="font-mono font-medium text-ink-2">{pointCountOf(hours, delay)}</b> 个收/续点
           </span>
         </div>
 
         {/* 结束时间**只读**（2026-09-20 用户要求）：由「上卡 + 持续」推算，不给编辑入口。
             用 `endLabelOf` 而不是自己拼日期，是为了与点 chip 共用同一套日标签口径 */}
-        <div className="mt-2 flex flex-wrap items-center gap-2">
-          <span className="w-12 flex-none text-sm text-ink-3">结束</span>
+        <div className="mt-2.5 flex flex-wrap items-center gap-3">
+          <span className="w-12 flex-none text-sm tracking-wide text-ink-2">结束</span>
           <span
-            className="rounded-sm bg-surface-3 px-2 py-1.5 text-lg text-ink-2"
+            className="rounded-xs bg-panel-2 px-2.5 py-1.5 font-mono text-base text-ink-2"
             title="结束时间 = 上卡时间 + 持续时间，不可单独修改"
           >
             {endLabelOf({ base: timeValue, hours }, now)}
           </span>
-          <span className="text-sm text-ink-3">（由上卡与持续时间推算，不可修改）</span>
+          <span className="text-xs tracking-wide text-ink-3">（由上卡与持续时间推算，不可修改）</span>
         </div>
 
         {draftError ? <p className="mt-2 text-sm text-danger">{draftError}</p> : null}
 
-        <div className="mt-2">
-          <button
-            type="button"
-            onClick={submit}
-            className="inline-flex cursor-pointer items-center gap-1 rounded-sm border border-line bg-gold-soft px-2.5 py-1.5 text-sm text-gold-hi transition-colors duration-120 hover:border-gold-hi"
-          >
+        <div className="mt-3">
+          {/* 提交走控件配方的次级金按钮（`controls.btn.sec`）—— 这页不是全站唯一的行动点，
+              不占"同一屏最多一颗"的主按钮名额 */}
+          <button type="button" onClick={submit} className={`${btn.base} ${btn.md} ${btn.sec}`}>
             <Icon name="plus" size={12} />
             下一步：确认添加
           </button>
