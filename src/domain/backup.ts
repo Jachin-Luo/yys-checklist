@@ -14,6 +14,7 @@
  */
 import type { CheckLog, GuildTimePrefs, UserDataBundle } from '../api/types';
 import { isValidHm } from './guildTime';
+import { sanitizePatches } from './itemPatch';
 import { sanitizePlans } from './nurture';
 
 /** 粘贴内容长度上限：正常备份 < 100 KB，超过这个量级八成是粘错了东西 */
@@ -178,6 +179,9 @@ export function validateBundle(raw: unknown, currentSchemaVersion: string): Vali
           : [],
         hidden: strArray(ovRaw.hidden),
         order: strArray(ovRaw.order),
+        /* 预设改写（2026-09-28 起纳入备份）：旧备份没有这一项 → 缺席即"没有改写"，
+           与 `mergeItems` 的读取归一同一口径。同样过净化（备份文件是外部输入） */
+        patches: sanitizePatches(ovRaw.patches),
         updatedAt: str(ovRaw.updatedAt),
       },
       log: {

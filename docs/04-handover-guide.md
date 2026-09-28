@@ -1,6 +1,6 @@
 # 04 · 接手上手与改动任务手册
 
-> 对应数据版本：`2026.09.20-常驻条目按次数拆分` ｜ 事实核对日期：2026-09-20
+> 对应数据版本：`2026.09.28-周期收口为四类` ｜ 事实核对日期：2026-09-20
 > 本文回答：**第一次跑起来要做什么、常见改动怎么改、坏了怎么查**。
 > 每步都给出「触点文件 / 需要同步改的位置 / 必须跑的命令 / 怎么验证」。
 
@@ -44,7 +44,7 @@ npm run dev          # http://localhost:5173/
 
 | 项 | 内容 |
 | --- | --- |
-| 触点文件 | `src/db/items.db.json`（真正的常驻：每日 / 每周 / 每月）、`src/db/limited.db.json`（非常驻：活动期 / 限时 / 版本 / 赛季）、`src/db/dataVersion.db.json`（版本行）、`src/db/meta.db.json`（`meta.dataVersion`） |
+| 触点文件 | `src/db/items.db.json`（真正的常驻：每日 / 每周 / 每月）、`src/db/limited.db.json`（非常驻：活动期每日 / 限时活动，含版本活动）、`src/db/dataVersion.db.json`（版本行）、`src/db/meta.db.json`（`meta.dataVersion`） |
 | 需要同步 | 若新增字段 → `tools/build.js` 的字段白名单 + `schema/item.schema.json`；若引入新枚举 code → `src/domain/enums.ts` 与 `meta.db.json` 的 `dicts` 两侧同步；若带固定收益 → 填 `gain` 的 `jade` / `blackFrag` / `blueTicket` 数值（`gainKind` 是奖励类型枚举，与 `GAIN_KIND` 对齐；不写 `gain` 即视为浮动、不进统计） |
 | 必须跑 | `npm run db:check` → `npm test` → `node tools/verify.js` |
 | 验证 | 开发服务里能在对应页面看到条目；痛感分排序与 `weightOf` 预期一致；带 `gain` 的条目会让统计页对应进度条变化 |
@@ -92,14 +92,14 @@ npm run dev          # http://localhost:5173/
 | 硬约束 | 不 import `api` / `stores` / `services` / `localStorage`；时间相关函数把「当前时间」作为参数传入（便于测试，不 mock 系统时钟） |
 | 若涉及枚举 | `src/domain/enums.ts` 与 `src/db/meta.db.json` 的 `dicts` 双向同步 |
 | 必须跑 | `npm test`（新增模块必须有测试）→ `npm run db:check`（若动枚举） |
-| 验证 | 单测覆盖跨天 / 跨周 / 跨月 / 跨版本 / 跨赛季边界（参考 `src/domain/domain.test.ts`） |
+| 验证 | 单测覆盖跨天 / 跨周 / 跨月边界与"限时永不自动重置"（参考 `src/domain/domain.test.ts`） |
 
 ### 任务 5 · 接入真实后端（替换 HttpApi 空壳）
 
 | 项 | 内容 |
 | --- | --- |
 | 触点文件 | `src/api/http/adapter.ts`（当前所有方法 `this.fail()` 抛 `NOT_IMPLEMENTED`，文件头有端点映射参考与 `TODO(S2 之后 / M2)`） |
-| 需要保持 | ① 契约形状不变（`ApiClient` 31 个方法）；② `DataScope` 显式传 `userId` + `profileId`，服务端据此校验越权；③ 错误统一用 `ApiError`（带 `code`）；④ `listProfiles` 返回**含归档的全部账号**，归档过滤留在 UI |
+| 需要保持 | ① 契约形状不变（`ApiClient` 32 个方法）；② `DataScope` 显式传 `userId` + `profileId`，服务端据此校验越权；③ 错误统一用 `ApiError`（带 `code`）；④ `listProfiles` 返回**含归档的全部账号**，归档过滤留在 UI |
 | 不改的地方 | 页面、store、domain、hooks 一律不动 —— 契约是唯一边界，切换靠 `VITE_API_MODE=http` + `VITE_API_BASE_URL` |
 | 必须跑 | `npm test`（`api/mock/contract.test.ts` 是 Mock 的行为基准，可对照着验证 Http 实现语义一致）；`npm run build` |
 | 验证 | 关掉 Mock（设 `VITE_API_MODE=http`）后七个页面功能等价；离线 / 报错时 `SaveErrorNotice` 与 `ErrorScreen` 有正确表现 |

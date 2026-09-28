@@ -54,6 +54,17 @@ interface ViewState {
    */
   setMinWeight: (minWeight: number) => Promise<void>;
   togglePin: (itemId: string) => Promise<void>;
+  /**
+   * 批量置顶 / 取消置顶（2026-09-28，聚合卡用）。
+   *
+   * 为什么不在组件里循环调 `togglePin`：那是**一次调用一次落盘**（`persist` 会写整个 view），
+   * 三个成员就是三次写盘 —— 既慢，又让"哪一次失败才回滚"变得难判（`writeSeq` 只认最后一次）。
+   * 这里把整组一次算完、一次写。
+   *
+   * `on = true` 时新 id 追加在既有置顶之后（`Set` 保序）；`on = false` 时只删给定的 id，
+   * 不碰其它置顶项。
+   */
+  setPinned: (itemIds: string[], on: boolean) => Promise<void>;
   /** 被覆盖项的显示方式：dim 弱化 / hide 隐藏（只影响列表，不影响统计口径） */
   setCoverMode: (coverMode: CoverMode) => Promise<void>;
   /**
@@ -121,6 +132,15 @@ export const useViewStore = create<ViewState>((set, get) => {
         ? pinned.filter((id) => id !== itemId)
         : [...pinned, itemId];
       return persist({ ...get().view, pinned: next });
+    },
+
+    setPinned: (itemIds, on) => {
+      const set = new Set(get().view.pinned);
+      for (const id of itemIds) {
+        if (on) set.add(id);
+        else set.delete(id);
+      }
+      return persist({ ...get().view, pinned: [...set] });
     },
 
     setCoverMode: (coverMode) => persist({ ...get().view, coverMode }),

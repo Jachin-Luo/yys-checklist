@@ -1,14 +1,20 @@
 import { useMemo } from 'react';
 import Icon from '../../components/icons/Icon';
 import CollapsibleSection from '../../components/common/CollapsibleSection';
+import { btn, input, tx } from '../../components/common/controls';
 import { isValidHm, guildTimeTargets, configuredCount } from '../../domain/guildTime';
 import { useDevicePrefs } from '../../hooks/useDevicePrefs';
 import { useGuildTimeStore } from '../../stores/guildTime';
 import { useItemStore } from '../../stores/items';
 
-/* 去掉 `outline-none`，焦点环交给 `styles/base.css` 的全局 `:focus-visible` */
-const inputCls =
-  'w-28 flex-none rounded-sm border border-line bg-surface px-2 py-1 text-lg text-ink transition-colors duration-120 focus:border-gold-hi';
+/* 时间输入框：走配方（`controls.input`）+ 等宽变体（时刻用等宽，位数才对得齐）。
+   ⚠️ 宽度由**外面那层 `w-28` 的 span** 给，不能写在这个元素上 —— `input.base` 自带 `w-full`，
+   两个宽度类同属性、由 Tailwind 的生成顺序决胜，写在后面也不一定赢（见调用点注释） */
+const inputCls = `${input.base} ${input.md} ${input.num}`;
+
+/* 行内小按钮：走 `btn` 配方的小号档（原先本文件自己拼 `px-2 py-1 text-sm`，
+   与「清空记录」「关于」里走配方的同款差着一档字号 —— 见 `controls.tx` 的说明） */
+const smallBtn = `${btn.base} ${btn.sm} ${btn.out}`;
 
 /**
  * 「设置 · 寮时间」分区（需求 §5-D3 / D3 难点）。
@@ -42,7 +48,7 @@ export default function GuildTimeSection() {
           type="button"
           disabled={done === 0}
           onClick={() => void clearGuildTime()}
-          className="flex cursor-pointer items-center gap-1 rounded-sm border border-line px-2 py-1 text-sm text-ink-2 transition-colors duration-120 hover:border-line disabled:cursor-not-allowed disabled:opacity-50"
+          className={smallBtn}
         >
           <Icon name="trash" size={12} />
           清空配置
@@ -61,28 +67,31 @@ export default function GuildTimeSection() {
             >
               <div className="flex min-w-0 items-start gap-2 py-1">
                 <Icon name="tokei" size={13} className="mt-1 flex-none text-ink-4" />
-                <span className="min-w-0 break-words text-lg text-ink">{it.name}</span>
+                <span className={`min-w-0 break-words ${tx.rowName} text-ink`}>{it.name}</span>
               </div>
               <div className="flex flex-col items-end gap-1">
-                <input
-                  type="time"
-                  aria-label={`${it.name} 的寮时间`}
-                  value={value}
-                  onChange={(e) => void setGuildTime(it.id, e.target.value)}
-                  className={inputCls}
-                />
+                {/* 定宽给外壳：`input.base` 自带 `w-full` */}
+                <span className="w-28 flex-none">
+                  <input
+                    type="time"
+                    aria-label={`${it.name} 的寮时间`}
+                    value={value}
+                    onChange={(e) => void setGuildTime(it.id, e.target.value)}
+                    className={inputCls}
+                  />
+                </span>
                 {value ? (
                   <button
                     type="button"
                     onClick={() => void setGuildTime(it.id, '')}
-                    className="cursor-pointer rounded-sm border border-line px-2 py-1 text-sm text-ink-2 transition-colors duration-120 hover:border-line"
+                    className={smallBtn}
                   >
                     清除
                   </button>
                 ) : null}
-                {invalid ? <span className="text-sm text-danger">格式应为 HH:mm</span> : null}
+                {invalid ? <span className={`${tx.message} text-danger`}>格式应为 HH:mm</span> : null}
               </div>
-              <span className="col-span-2 min-w-0 break-words text-sm leading-relaxed text-ink-3">
+              <span className={`col-span-2 min-w-0 break-words ${tx.note} text-ink-3`}>
                 参考 {it.time ?? '—'}
                 {it.timeNote ? ` · ${it.timeNote}` : ''}
               </span>
@@ -93,7 +102,7 @@ export default function GuildTimeSection() {
         <button
           type="button"
           onClick={() => resetOnboarding()}
-          className="mt-2 cursor-pointer rounded-sm border border-line px-2 py-1 text-sm text-ink-2 transition-colors duration-120 hover:border-line"
+          className={`mt-2 ${smallBtn}`}
         >
           重看冷启动引导
         </button>

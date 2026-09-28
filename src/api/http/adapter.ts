@@ -61,6 +61,7 @@ export class HttpApi implements ApiClient {
   getPlans = async () => this.fail();
   savePlans = async () => this.fail();
   addCustomItem = async () => this.fail();
+  updateItem = async () => this.fail();
   removeCustomItem = async () => this.fail();
   hideItem = async () => this.fail();
   restoreItem = async () => this.fail();

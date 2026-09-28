@@ -8,7 +8,7 @@ import { installMemoryStorage } from '../test/memoryStorage';
 import { refreshPeriodState } from './usePeriodRefresh';
 
 const storage = installMemoryStorage();
-const cycles: Item['cycle'][] = ['daily', 'weekly', 'monthly', 'version', 'season', 'once', 'limited'];
+const cycles: Item['cycle'][] = ['daily', 'weekly', 'monthly', 'limited'];
 const items: Item[] = cycles.map((cycle) => ({ id: cycle, name: cycle, cycle, origin: 'preset' }));
 
 function checkAll(at: Date) {
@@ -51,7 +51,7 @@ describe('refreshPeriodState', () => {
     expect(checked.daily).toBeUndefined();
     expect(checked.weekly).toBeUndefined();
     expect(checked.monthly).toBe(at.getTime());
-    expect(checked.once).toBe(at.getTime());
+    expect(checked.limited).toBe(at.getTime());
   });
 
   it('resets monthly checks on day one at 00:00', () => {
@@ -65,7 +65,7 @@ describe('refreshPeriodState', () => {
     const { checked } = useCheckStore.getState();
     expect(checked.monthly).toBeUndefined();
     expect(checked.weekly).toBe(at.getTime());
-    expect(checked.once).toBe(at.getTime());
+    expect(checked.limited).toBe(at.getTime());
   });
 
   it('removes expired items and their checks at midnight', () => {
@@ -107,20 +107,15 @@ describe('refreshPeriodState', () => {
     expect(useItemStore.getState().items).toBe(items);
   });
 
-  it('uses the latest version anchor without resetting once or limited checks', () => {
+  it('不自动重置的周期（limited，含并入的版本 / 赛季活动）跨任何边界都不被清', () => {
     const at = new Date(2026, 8, 14, 12);
     checkAll(at);
-    const meta = useItemStore.getState().meta!;
-    useItemStore.setState({
-      meta: { ...meta, periods: { ...meta.periods, version: { key: 'next', startAt: '2026-09-15T09:00' } } },
-    });
 
-    refreshPeriodState(new Date(2026, 8, 15, 9, 1));
+    /* 跨天 → 跨周 → 跨月，三次刷新都不该动它 */
+    refreshPeriodState(new Date(2026, 8, 15, 0, 0));
+    refreshPeriodState(new Date(2026, 8, 21, 0, 0));
+    refreshPeriodState(new Date(2026, 9, 1, 0, 0));
 
-    const { checked } = useCheckStore.getState();
-    expect(checked.version).toBeUndefined();
-    expect(checked.season).toBe(at.getTime());
-    expect(checked.once).toBe(at.getTime());
-    expect(checked.limited).toBe(at.getTime());
+    expect(useCheckStore.getState().checked.limited).toBe(at.getTime());
   });
 });

@@ -1,6 +1,9 @@
 import Segmented from '../components/common/Segmented';
 import SettingRow from '../components/common/SettingRow';
+import { tx } from '../components/common/controls';
 import { SectionTitle } from '../components/common/EmptyState';
+import { sectionNo } from '../components/common/sectionNo';
+import AboutSection from '../components/settings/AboutSection';
 import BackupSection from '../components/settings/BackupSection';
 import DataVersionSection from '../components/settings/DataVersionSection';
 import { useItemStore } from '../stores/items';
@@ -61,12 +64,14 @@ export default function MePage() {
 
   /* 行距 8px（册页稿 `.srows` 的 gap）—— 设置行不再带阴影，靠间隙彼此分开 */
   const rows = 'space-y-2';
+  /* 分组序号（壹/贰/叁/肆…）：按渲染顺序发号 —— 见 `sectionNo` 的说明 */
+  const no = sectionNo();
 
   return (
     /* `mx-auto`：本页上限 672，桌面内容容器 1024 —— 不居中时设置分区整体贴左（与统计 / 工具两页同一口径） */
     <div className="mx-auto max-w-2xl px-3.5 pb-10 pt-1">
       {/* ── 观感 ── */}
-      <SectionTitle icon="sun" flush>
+      <SectionTitle no={no()} icon="sun" flush>
         观感
       </SectionTitle>
       <div className={rows}>
@@ -82,7 +87,7 @@ export default function MePage() {
       </div>
 
       {/* ── 委托 ── */}
-      <SectionTitle icon="torii" flush>
+      <SectionTitle no={no()} icon="torii" flush>
         委托
       </SectionTitle>
       <div className={rows}>
@@ -91,7 +96,7 @@ export default function MePage() {
       </div>
 
       {/* ── 账号 ── */}
-      <SectionTitle icon="hito" flush>
+      <SectionTitle no={no()} icon="hito" flush>
         账号
       </SectionTitle>
       <div className={rows}>
@@ -101,7 +106,7 @@ export default function MePage() {
       </div>
 
       {/* ── 数据 ── */}
-      <SectionTitle icon="hako" flush>
+      <SectionTitle no={no()} icon="hako" flush>
         数据
       </SectionTitle>
       <div className={rows}>
@@ -112,7 +117,19 @@ export default function MePage() {
         <ClearDataSection />
       </div>
 
-      <p className="mt-5 text-sm leading-relaxed text-ink-3">{meta?.disclaimer}</p>
+      {/* ── 关于（2026-09-28 用户要求）──
+          独立成组而不是塞进「数据」：它不是可操作的数据分区，而是**作者 / 反馈渠道**，
+          放在全页最后也符合"越往下越少动"的顺序。
+          组名「关于」保持两字节奏（观感 / 委托 / 账号 / 数据），卡名另起「联系方式」——
+          组名与卡名说同一句话是这一页最容易犯的重复（其它组都不这样） */}
+      <SectionTitle no={no()} icon="makimono" flush>
+        关于
+      </SectionTitle>
+      <div className={rows}>
+        <AboutSection />
+      </div>
+
+      <p className={`mt-5 ${tx.note} text-ink-3`}>{meta?.disclaimer}</p>
     </div>
   );
 }

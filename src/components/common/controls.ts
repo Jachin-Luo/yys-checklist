@@ -83,6 +83,32 @@ export const field = {
   icon: 'flex-none text-ink-4',
 } as const;
 
+/**
+ * 单元素输入框（册页稿 `.inp`）—— 表单行里的裸 `<input>` / `<select>` / `<textarea>`。
+ *
+ * 与 `field` 的分工：`field` 是「外壳 + 内层 input」的双层结构（前后缀 / 图标 / 焦点环走外壳），
+ * 给弹层与搜索框用；表单行里的单个控件用这一支，不必为每个输入框多套一层 DOM。
+ * 规格取册页稿 `.inp`：纸底 + 细描边 + `rounded-xs`(8px) + 13px 正文，聚焦时描边转金。
+ *
+ * ⚠️ 为什么要有它（2026-09-28）：此前各处表单自己拼 `rounded-sm … text-lg …
+ * focus:border-gold-hi` —— 而 `rounded-sm` 现在是 **11px**、`text-lg` 是 **14.5px**，
+ * 于是小方块被塞进大字与大圆角，同一排里还比旁边的按钮高一截（用户反馈"输入框感觉很奇怪"）。
+ * 规格收进配方后，改一处即全站一致，也免得下一个人再凭手感拼一遍。
+ */
+export const input = {
+  base: 'w-full rounded-xs border border-line bg-surface text-base text-ink transition-colors duration-120 placeholder:text-ink-4 focus:border-gold-line disabled:opacity-50',
+  /** 常规档：与 `btn.md` 同高（`h-9` = 36px）—— 同一排里不会一高一矮 */
+  md: 'h-9 px-2.5',
+  /** 紧凑档：列表行内的小输入（如删除前的确认词） */
+  sm: 'h-7 px-2 text-sm',
+  /** 多行文本域（`.inp` 的 area 形态）：不固定高度、可纵向拉伸、内容顶对齐 */
+  area: 'resize-y px-2.5 py-2 leading-relaxed',
+  /** 代码 / JSON 文本块：填充底 + 等宽（备份分区用） */
+  code: 'bg-surface-3 font-mono',
+  /** 数值 / 日期 / 时刻：等宽，位数对齐 */
+  num: 'font-mono',
+} as const;
+
 /** 筛选 chip（参考稿 §10 `.chip`：胶囊形） */
 export const chip = {
   base: 'inline-flex flex-none cursor-pointer items-center gap-1.5 rounded-full border text-sm transition-colors duration-150 ease-genso',
@@ -98,7 +124,18 @@ export const chip = {
 
 /** 小号文本标签（参考稿 §10 `.tag`）：中文短标记用这一支，不要用 `badge`（那是等宽数字的） */
 export const tag = {
-  base: 'inline-flex flex-none items-center gap-1 rounded-xs border px-2 text-xs',
+  /**
+   * 规格：`h-5`（20px）+ `px-2` + `rounded-xs` + 11px 字 + 字距 .02em。
+   *
+   * ⚠️ 2026-09-28 之前这一档**少了高度与纵向内缩** —— 那时全站没有任何调用点
+   * （「自建 / 默认 / 已改写 / 日常覆盖」这些徽章都在分区里各拼一份），
+   * 于是没人发现：没有 `h-*` 也没有 `py-*` 的标签会缩成"一行字高"，比旁边的行名还矮。
+   * 设置页排版统一时它第一次被真正用上，缺的这两样才暴露出来。
+   *
+   * 高度取 **20px** 而不是参考稿 `.tag` 的 23px（用户 2026-09-28 定）：徽章挂在条目行的行尾，
+   * 比行名（14.5px）高一截会把整行顶起来 —— 取与行名同量级的一档，行高不因此变化。
+   */
+  base: 'inline-flex h-5 flex-none items-center gap-1 rounded-xs border px-2 text-xs tracking-wide',
   /** 中性 */
   mute: 'border-line bg-fill-2 text-ink-2',
   /** 金（自建 / 默认 / 高亮标记） */
@@ -134,4 +171,79 @@ export const badge = {
   red: 'bg-crimson text-on-crimson shadow-cta',
   gold: 'bg-gradient-to-b from-gold-hi to-gold text-on-gold',
   mute: 'bg-fill-3 text-ink-2',
+} as const;
+
+/**
+ * 设置页（含全部折叠分区）的**文字阶梯** —— 2026-09-28 新增，与上面的控件配方同一条纪律：
+ * **同一角色只有一条出口**，分区组件里不许再现拼 `text-sm` / `text-lg` / `text-xs`。
+ *
+ * ## 为什么要立它
+ *
+ * 设置页的文字是逐轮手写攒起来的，同一个角色漂成了好几种写法：
+ *   - 「说明」：`SettingRow` 是 11px、多数分区是 12px、条目表单是 **10px**（CJK 在 10px 下笔画会糊，
+ *     `uiRef/囤囤鼠大作战_UI审查意见.md` 记过一笔，项目此前已把字号整档上抬过）；
+ *   - 「字段名」：卡片显示分区是衬线 13px、条目表单是正体 12px —— 同一页两张卡两种写法；
+ *   - 「小节标题」一半 `ink-2` 一半 `ink-3`；「行名下沉态」两处各写一套。
+ *
+ * ## 口径取自哪
+ *
+ * `SettingRow` 2026-09-24 的那次改排（**正体 13px 半粗 + 说明 11px**）是全页最新、也覆盖最广的一套，
+ * 且与参考稿的方向一致（`.sd` 说明 10.5px → 本项目抬到 11px 作地板）。
+ * 折叠卡标题则保留参考稿的**衬线**（与分组头同一套语言）—— 两个形态两档是**用户 2026-09-28 定的**，
+ * 不是漏改：见 `cardTitle` 的注释。
+ *
+ * ## ⚠️ 颜色**不烧进配方**
+ *
+ * 每个角色只给字号 / 字重 / 字距 / 行高，颜色由调用点补（`text-ink`、下沉态 `text-ink-3`、
+ * 提示态 `text-warn` / `text-danger`…）。原因是同属性类名相撞时**由 Tailwind 的生成顺序决胜、
+ * 不由 className 里的书写顺序决胜** —— 本仓库已经栽过两次（`input` 的 `w-full` 对 `w-28`、
+ * `focus:border-danger` 对 `focus:border-gold-line`，两处都有注释记着）。配方里带一个颜色，
+ * 调用点再补一个想覆盖它，就会得到一个"看着写对了、其实没生效"的静默失效。
+ */
+export const tx = {
+  /**
+   * **折叠卡**标题（`CollapsibleSection`）：衬线 13px + 字距放宽，与分组头（`SectionTitle`）同一套语言。
+   * 色补 `text-ink`（危险卡用 `text-crimson`）。
+   *
+   * ⚠️ 与下面的 `settingTitle` **故意不同档**（衬线 / 正体）。2026-09-28 统一排版时曾把两者并成一档，
+   * 用户否掉并明确要"衬线卡名"：折叠卡是要展开看的**分区入口**，与平铺的设置行不是同一种东西。
+   * 两者仍同**层级**（都是 13px），差的是字族 —— **别再"顺手统一"它们**。
+   */
+  cardTitle: 'font-serif text-base tracking-card',
+  /**
+   * **设置行**标题（`SettingRow`，平铺的"一行一事"）：正体 13px 半粗 + 字距放宽。
+   * 参考稿 `.srow .tx b` 是 sans 600 —— 设置项是操作入口不是展品（衬线留给页面题名、分组名与收益数字）。
+   */
+  settingTitle: 'text-base font-semibold tracking-wide',
+  /**
+   * 卡内小节标题（「效果预览」「已隐藏 · 3 条」）、表单字段名、只读键值表的键。
+   * 12px 中粗 + 字距放宽；色通常 `text-ink-2`（只读键值表的键压一档也行，但**字号字重必须走这里**）。
+   */
+  label: 'text-sm font-medium tracking-wide',
+  /**
+   * 卡内列表行名（条目 / 账号 / 可勾选项 / 字段名）。**13px**；
+   * 色 `text-ink`，**下线态**（已隐藏 / 已归档 / 关掉的字段）降一档 `text-ink-3`。
+   *
+   * ⚠️ 2026-09-28 由 14.5px（`text-lg`）降到 13px，用户反馈"条目管理和一键日常覆盖中的条目文本
+   * 字体怎么这么大"。降到 13px 有三个依据，不是单纯调小：
+   *   - **清单卡的任务名就是 13px**（`ChecklistItem` 的 `text-base font-semibold tracking-card`，
+   *     衬线半粗）—— 设置页的"行名"比真正的任务名还大，主次是反的；
+   *   - 参考稿的任务名是 **13~13.5px**（`uiRef/册页重设计_落地评估.md` 的"决策点 F"里
+   *     还留着"任务名要不要降到 13px"这个未决项，本页先按 13px 走）；
+   *   - 与页内两个标题档（`cardTitle` / `settingTitle`）齐平，靠**字重与字族**分层
+   *     （标题半粗或衬线，行名是正体常规），不必靠"更大一号"来区分。
+   */
+  rowName: 'text-base',
+  /**
+   * 说明 / 注脚 / 空态文案。11px + 行高放宽 —— 这是**中文的地板**，
+   * 任何说明类文字都不许再用 `text-2xs`（10px）。色通常 `text-ink-3`。
+   */
+  note: 'text-xs leading-relaxed',
+  /** 等宽小字（版本号 / 日期 / 时刻 / 计数）。11px；色 `text-ink-2`（弱化用 `text-ink-4`）。 */
+  mono: 'font-mono text-xs',
+  /**
+   * 结果 / 校验提示（成功 / 警告 / 错误共用一档）。12px + 行高放宽 ——
+   * 比 `note` 大一档是**故意的**：这些字要让人看见，注脚可以小、报错不行。色由调用点给。
+   */
+  message: 'text-sm leading-relaxed',
 } as const;

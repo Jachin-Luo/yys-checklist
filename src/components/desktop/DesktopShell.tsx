@@ -53,9 +53,31 @@ export default function DesktopShell() {
       {/* 顶栏：底纹铺在头里（与移动端顶栏同一手法）；索引签与册页之间只隔这条 border-b */}
       <header className="relative z-20 flex-none border-b border-line-soft bg-panel/90 backdrop-blur-sm">
         <Texture dots />
+        {/*
+          ⚠️ 顶栏三组件的**中线必须落在同一条线上**（2026-09-28 用户反馈"签与右端不在同一水平线"）。
+          基准线取**索引签的标签行**（用户口径：签身高度以原版为准、签内文字必须居中）：
+            索引签 中线 = 65 - pb(10) - 17.4/2 = **46.3**  ← 基准（签底压线 1px + `-mb-px`，
+                                                              内距 `py-2.5` 对称故标签居中）
+            三件套 中线 = 64 - pb(4)  - 27.4/2 = **46.3**  ✓ 精确（账号切换器 27.4px：
+                                                              行盒 17.4 + py 8 + 边框 2）
+            品牌   中线 = 64 - pb(4)  - 36/2   = **42.0**  —— 差 4.3px，见下方 ②
+          三组都是 `items-end` 底部对齐 + 各自的 pb 托起内容，所以**改 pb 就是改中线**，不动结构。
+          两条几何约束（都试过，别重复踩）：
+            ① **签的内距必须对称**，否则标签在签内不居中（6/14 那版就被指出"文字不居中"）；
+               而内距一对称，标签行就锁死在 `56.3 - py` —— 想抬高它只能加大内距，
+               那会把签身撑长（20px 那版被指出"很奇怪"）。所以基准就定在这里。
+            ② **品牌不可能与这条线共线**：标签行离底边只有 `py + 8.7 ≈ 18.7px`，
+               而朱印半高 18px —— 品牌要居中到这条线，朱印下缘就得贴住（甚至越过）底边线。
+               现取 `pb-1`：**下缘**与三件套齐平（都距底边 4px），中线差 4.3px。
+               要真的共线只有两条路：把朱印从 36 缩到 ≤28px（连同刊名两行压到 27.4px 以内），
+               或接受朱印压在底边线上（品牌改 `pb-0`，中线 46.0）。
+          参考稿自己没对齐：它的签比右端拨钮低约 8px（`.idx button` pb 11px vs `.lamp` pb 12px）。
+        */}
         <div className="relative z-10 mx-auto flex h-16 w-full max-w-6xl items-end gap-5 px-5">
-          {/* 品牌：朱印 + 刊名（参考稿 `.masthead`） */}
-          <div className="flex flex-none items-center gap-2.5 pb-2.5">
+          {/* 品牌：朱印 + 刊名（参考稿 `.masthead`）。`pb-1` 让它的**下缘**与三件套齐平
+              （都距底边 4px）；中线 42.0 比签的标签行（46.3）高 4.3px，是朱印 36px
+              比账号切换器 27.4px 高出来的必然结果 —— 见顶栏上方那段算式 */}
+          <div className="flex flex-none items-center gap-2.5 pb-1">
             <Sigil />
             <span className="flex flex-col leading-tight">
               <b className="font-serif text-base tracking-label text-ink">囤囤鼠大作战</b>
@@ -86,7 +108,10 @@ export default function DesktopShell() {
                   aria-selected={active}
                   aria-label={label}
                   onClick={() => setNav(key)}
-                  className={`relative -mb-px flex flex-none cursor-pointer items-center gap-1.5 whitespace-nowrap rounded-t-sm border border-b-0 px-3 pb-2.5 pt-2 text-sm transition-colors duration-150 ease-genso ${
+                  /* `py-2.5` **必须对称**：签内的标签要垂直居中，6/14 那种不对称内距
+                     （用户反馈"tab内部文字不居中也很奇怪"）会把标签顶到签的上半截。
+                     对称之后签身 37.4px（原版 35.4px），标签行 46.3px —— 三件套以此共线 */
+                  className={`relative -mb-px flex flex-none cursor-pointer items-center gap-1.5 whitespace-nowrap rounded-t-sm border border-b-0 px-3 py-2.5 text-sm transition-colors duration-150 ease-genso ${
                     active
                       ? 'border-line-soft bg-surface text-ink'
                       : 'border-transparent text-ink-3 hover:bg-surface/60 hover:text-ink'
@@ -103,8 +128,9 @@ export default function DesktopShell() {
             })}
           </nav>
 
-          {/* 右端：结界倒计时 · 账号切换 · 明暗（用户决议 4：常驻，不进任何菜单） */}
-          <div className="flex flex-none items-center gap-2 pb-2.5">
+          {/* 右端：结界倒计时 · 账号切换 · 明暗（用户决议 4：常驻，不进任何菜单）。
+              `pb-1`(4px) 让它与签的标签行共线（46.3）—— 见顶栏上方那段算式 */}
+          <div className="flex flex-none items-center gap-2 pb-1">
             <NurtureBadge compact />
             <ProfileSwitcher compact />
             <ThemeToggle />

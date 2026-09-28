@@ -100,7 +100,7 @@ function applyMutation(
 /** 计算周期起点所需的上下文（与 `currentPeriod` 同一份来源） */
 function resetCtx(): ResetCtx {
   const { meta } = useItemStore.getState();
-  return { resetHour: meta?.resetHour ?? 0, periods: meta?.periods ?? {} };
+  return { resetHour: meta?.resetHour ?? 0 };
 }
 
 /**

@@ -1,6 +1,7 @@
 import ChecklistEntry from '../components/common/ChecklistEntry';
 import { groupChecklist } from '../domain/grouping';
 import { EmptyState, SectionTitle } from '../components/common/EmptyState';
+import { sectionNo } from '../components/common/sectionNo';
 import PageHead from '../components/common/PageHead';
 import SummaryBar from '../components/common/SummaryBar';
 import ViewBar from '../components/common/ViewBar';
@@ -15,7 +16,7 @@ import { CHECKLIST_GRID } from '../styles/layout';
  *
  * 此前月常与周常同在本周页（设计文档 §9 S4b-1），但两者刷新口径不同 ——
  * 周常周一 0 点、月常每月 1 日 0 点，混在一起时"哪几条下周才会翻篇"看不出来。
- * 版本 / 赛季条目仍留在限时页的专属分区：它们随 `meta.periods` 锚点滚动、无固定截止，
+ * 版本 / 赛季条目已并入限时（`limited`）：它们无固定截止、随活动到期归档，
  * 与月常不是一回事（统计口径不受影响，`domain/stats` 的 month 仍覆盖这三个周期）。
  *
  * 2026-09-23 换肤：同本周页（`PageHead` + 朱印分组头 + 收束纹带）。
@@ -25,6 +26,8 @@ export default function MonthPage({ variant }: { variant: 'mobile' | 'desktop' }
   const isDimmed = (id: string) => coverMode === 'dim' && coveredSet.has(id);
   /* 距下月 1 日 0 点还有多久（与勾选重置同源） */
   const countdown = usePeriodCountdown('monthly');
+  /* 分组序号（壹/贰…）：按渲染顺序发号 —— 见 `sectionNo` 的说明 */
+  const no = sectionNo();
 
   return (
     <div className="pb-6">
@@ -46,7 +49,7 @@ export default function MonthPage({ variant }: { variant: 'mobile' | 'desktop' }
       {/* 汇总条（册页稿 `.summary`）：页级进度只在这一处 */}
       <SummaryBar className="mx-3.5 mt-3" pending={pending.length} done={done.length} note="历札一页一月，翻页即结账" />
 
-      <SectionTitle icon="koyomi" count={pending.length}>
+      <SectionTitle no={no()} icon="koyomi" count={pending.length}>
         本月待做
       </SectionTitle>
       {pending.length ? (
@@ -61,7 +64,7 @@ export default function MonthPage({ variant }: { variant: 'mobile' | 'desktop' }
 
       {done.length ? (
         <>
-          <SectionTitle icon="done" count={done.length}>
+          <SectionTitle no={no()} icon="done" count={done.length}>
             本月已结
           </SectionTitle>
           <div className={CHECKLIST_GRID}>

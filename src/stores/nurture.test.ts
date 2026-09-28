@@ -104,3 +104,45 @@ describe('nurture store（账号级）', () => {
     expect(savePlans).not.toHaveBeenCalled();
   });
 });
+
+/**
+ * 「同时只允许一条进行中的任务」（2026-09-28 用户要求）。
+ * 两条纪律：① 开始新任务 = 结束旧任务（**不删**，点列表要能回看）；
+ *           ② 「仅存计划」不碰任何既有记录（计划不等于开始）。
+ */
+describe('进行中的任务只能有一条', () => {
+  it('开始新任务时给上一条盖 `endedAt`，记录本身保留', async () => {
+    await useNurtureStore.getState().add('10:00', 24, 0, true);
+    const first = useNurtureStore.getState().records[0];
+
+    await useNurtureStore.getState().add('20:00', 24, 0, true);
+    const [second, closed] = useNurtureStore.getState().records;
+
+    expect(second.id).not.toBe(first.id);
+    expect(second.endedAt).toBeUndefined();
+    expect(closed.id).toBe(first.id);
+    expect(typeof closed.endedAt).toBe('number');
+    expect(closed.base).toBe('10:00');
+  });
+
+  it('「仅存计划」不碰既有任务', async () => {
+    await useNurtureStore.getState().add('10:00', 24, 0, true);
+    await useNurtureStore.getState().add('20:00', 24, 0, false);
+    expect(useNurtureStore.getState().records.every((r) => r.endedAt === undefined)).toBe(true);
+  });
+
+  it('promote 补记起始日期，并结束其它进行中的任务', async () => {
+    await useNurtureStore.getState().add('10:00', 24, 0, true);
+    await useNurtureStore.getState().add('21:00', 12, 0, false);
+    const plan = useNurtureStore.getState().records.find((r) => !r.started);
+    expect(plan).toBeTruthy();
+
+    await useNurtureStore.getState().promote(plan!.id);
+
+    const list = useNurtureStore.getState().records;
+    const promoted = list.find((r) => r.id === plan!.id)!;
+    expect(promoted.started).toBe(true);
+    expect(promoted.baseDate).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+    expect(typeof list.find((r) => r.id !== plan!.id)!.endedAt).toBe('number');
+  });
+});

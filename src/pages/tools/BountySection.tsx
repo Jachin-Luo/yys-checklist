@@ -26,6 +26,18 @@ import { bountyUnion, buildBountyEntries, fullCoverage, pinMatches } from '../..
  *
  * 并集区解决的是另一个高频问题：一次接了好几个悬赏，想知道"哪个副本能一把刷完"——
  * 能全收的出处置顶并高亮，一眼可判。
+ *
+ * ## 2026-09-28：搜索命中后有**结果区**（用户要求）
+ *
+ * 原先命中项只是被置顶 + 高亮，线索与出处收在 `title` 里（悬停 / 长按可见）——
+ * 但"搜到了哪几个、各自什么线索、在哪刷"正是搜索要回答的问题。搜「翅膀」命中的
+ * 4 个妖怪（大天狗「大翅膀」/ 童女 / 童男 / 鸦天狗）本就是一屏能看完的信息，
+ * 藏进悬停提示等于让人逐个去摸。
+ *
+ * 现在命中项在上方铺成结果卡：**名字（可点选）+ 全部线索词 + 逐条出处（含需击杀数）**，
+ * 命中的线索词加实（判定与 `domain/bounty.hitToken` 同源的双向包含）。
+ * 它是一块**结果区，不是过滤器** —— 标签云仍原样保留，那条"搜索只置顶 + 高亮、
+ * 一行都不删"的规则没变（见上）。
  */
 export default function BountySection({ bounty }: { bounty: BountyDb }) {
   const [query, setQuery] = useState('');
@@ -38,6 +50,9 @@ export default function BountySection({ bounty }: { bounty: BountyDb }) {
   const rows = useMemo(() => pinMatches(entries, query), [entries, query]);
 
   const hitCount = searching ? rows.filter((r) => r.hit).length : 0;
+
+  /** 命中项（供"搜索命中详情"用）——`pinMatches` 已经算好 `hit`，这里只是取出来 */
+  const hits = useMemo(() => (searching ? rows.filter((r) => r.hit) : []), [rows, searching]);
 
   const union = useMemo(() => bountyUnion(entries, selected), [entries, selected]);
   const fulls = fullCoverage(union);
@@ -75,6 +90,75 @@ export default function BountySection({ bounty }: { bounty: BountyDb }) {
         </span>
       </div>
 
+
+      {/* ── 搜索命中详情（2026-09-28 用户要求）──
+          此前命中的式神只在标签云里被置顶 + 高亮，线索与出处收在 `title`（悬停 / 长按可见）——
+          而"搜到了哪几个、分别是什么线索、在哪刷"正是搜索要回答的问题（例：搜"翅膀"，
+          应当直接看到那几个妖怪**各自的线索与出处**）。
+          它是一块**结果区**，不是过滤器：标签云仍原样保留（搜索只置顶 + 高亮，那条规则没变），
+          名字可点，勾选行为与标签云一致 */}
+      {searching && hits.length ? (
+        <section className="mx-3 mt-2 space-y-1.5">
+          {hits.map((e) => {
+            const on = selected.includes(e.id);
+            const tokens = query.trim().split(/\s+/).filter(Boolean);
+            return (
+              <div key={e.id} className="rounded-sm border border-line-faint bg-fill px-3 py-2">
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    aria-pressed={on}
+                    aria-label={`${on ? '取消勾选' : '勾选'}：${e.name}`}
+                    onClick={() => toggle(e.id)}
+                    className={`cursor-pointer font-serif text-lg tracking-card transition-colors duration-120 ${
+                      on ? 'font-semibold text-gold-hi' : 'text-ink hover:text-gold-hi'
+                    }`}
+                  >
+                    {e.name}
+                  </button>
+                  {on ? <span className="text-xs tracking-label text-gold-hi">已选</span> : null}
+                  <i aria-hidden className="h-px min-w-4 flex-1 bg-gradient-to-r from-line to-transparent" />
+                  <span className="flex-none text-xs text-ink-3">{e.spots.length} 处</span>
+                </div>
+
+                {e.clues.length ? (
+                  <p className="mt-1.5 flex flex-wrap items-baseline gap-1.5">
+                    <span className="text-sm text-ink-3">线索</span>
+                    {e.clues.map((c) => {
+                      /* 命中的那个线索词加实：搜索词与线索是双向包含判定的（见 domain/bounty），
+                         所以这里的判定要与它同源，否则会出现"高亮的不是搜到的那个词" */
+                      const hot = tokens.some((t) => c.includes(t) || t.includes(c));
+                      return (
+                        <b
+                          key={c}
+                          className={`rounded-xs border px-1.5 py-0.5 text-sm font-normal ${
+                            hot
+                              ? 'border-gold-line bg-gold-soft text-gold-hi'
+                              : 'border-line bg-surface text-ink-2'
+                          }`}
+                        >
+                          {c}
+                        </b>
+                      );
+                    })}
+                  </p>
+                ) : null}
+
+                {/* 出处逐条列出（含需击杀数）：这块是"在哪刷"的答案，不再收进 title */}
+                <p className="mt-1 flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+                  <span className="text-sm text-ink-3">出处</span>
+                  {e.spots.map((s) => (
+                    <span key={s.spotId} className="text-sm text-ink-2">
+                      {s.name}
+                      <b className="ml-0.5 font-mono font-normal text-ink-3">×{s.count}</b>
+                    </span>
+                  ))}
+                </p>
+              </div>
+            );
+          })}
+        </section>
+      ) : null}
 
       <section className="mt-2">
         {searching && hitCount === 0 ? (

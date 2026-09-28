@@ -1,8 +1,9 @@
 import { useMemo } from 'react';
 import Alert from '../components/common/Alert';
 import ChecklistEntry from '../components/common/ChecklistEntry';
-import { groupByCount, groupChecklist } from '../domain/grouping';
+import { groupChecklist } from '../domain/grouping';
 import { EmptyState, SectionTitle } from '../components/common/EmptyState';
+import { sectionNo } from '../components/common/sectionNo';
 import PageHead from '../components/common/PageHead';
 import SummaryBar from '../components/common/SummaryBar';
 import ViewBar from '../components/common/ViewBar';
@@ -21,9 +22,10 @@ import { CHECKLIST_GRID } from '../styles/layout';
  * 因此不提供排序控件 —— 给一个点了不生效的控件会误导。
  * `until` 到期的条目已由 `activeItems()` 在 bootstrap 阶段过滤掉，此处不再判。
  *
- * 「版本 / 赛季」分区（2026-09-11 用户决策）：version / season 条目从周页挪到这里单独成区 ——
- * 它们随周期滚动、没有 deadline，混进倒计时列表只会永远垫底、还会稀释临期预警。
- * 仅视图归属变化：cycle 字段、重置锚点与统计口径（本月含这两类）均不变。
+ * 2026-09-28 起本页只有两个分区（进行中 / 已结）：`version` / `season` 两个周期已并入
+ * `limited`（见 `domain/enums` 的收口说明），原先那个「版本 / 赛季」分区连同它的锚点提示
+ * 一起退场 —— 版本活动与限时活动在同一张列表里按剩余天数排，
+ * **没有截止日期的（版本活动、联动、待定档）一律沉底**，与「截止未定」同待遇。
  *
  * 2026-09-23 换肤：本页的「唯一高亮位」给**临期条目**（≤3 天）——
  * 这一屏最需要行动的就是"马上要过期的那几个"，其余条目走常规卡面。
@@ -35,7 +37,7 @@ export default function LimitedPage({ variant }: { variant: 'mobile' | 'desktop'
   const checked = useCheckStore((s) => s.checked);
   const view = useViewStore((s) => s.view);
 
-  const { pending, done, urgentIds, extraPending, extraDone, oncePending, onceDone } = useMemo(() => {
+  const { pending, done, urgentIds } = useMemo(() => {
     const now = new Date();
     const visibility = {
       /* 同 `hooks/useChecklist`：筛选总开关关着时传空数组（见 `stores/view.SHOW_KIND_FILTER`） */
@@ -49,21 +51,6 @@ export default function LimitedPage({ variant }: { variant: 'mobile' | 'desktop'
         buildComparator({ sortBy: 'deadline', pinned: view.pinned, order: overrides?.order ?? [] }),
       );
 
-    /* 版本 / 赛季条目单独成区：无 deadline，不参与"剩余天数升序"与临期预警（理由见组件注释） */
-    const extra = items
-      .filter((it) => it.cycle === 'version' || it.cycle === 'season')
-      .filter((it) => isVisible(it, visibility))
-      .sort(
-        buildComparator({ sortBy: 'deadline', pinned: view.pinned, order: overrides?.order ?? [] }),
-      );
-
-    const once = items
-      .filter((it) => it.cycle === 'once')
-      .filter((it) => isVisible(it, visibility))
-      .sort(
-        buildComparator({ sortBy: 'deadline', pinned: view.pinned, order: overrides?.order ?? [] }),
-      );
-
     const undone = list.filter((it) => checked[it.id] === undefined);
     const isUrgent = (it: { deadline?: string }) => {
       const d = daysLeft(it.deadline, now);
@@ -72,15 +59,14 @@ export default function LimitedPage({ variant }: { variant: 'mobile' | 'desktop'
     return {
       pending: undone,
       done: list.filter((it) => checked[it.id] !== undefined),
-      extraPending: extra.filter((it) => checked[it.id] === undefined),
-      extraDone: extra.filter((it) => checked[it.id] !== undefined),
-      oncePending: once.filter((it) => checked[it.id] === undefined),
-      onceDone: once.filter((it) => checked[it.id] !== undefined),
       urgentIds: new Set(undone.filter(isUrgent).map((it) => it.id)),
     };
   }, [items, checked, view, overrides]);
 
   const urgent = urgentIds.size;
+  /* 分组序号（壹/贰…）：按渲染顺序发号 —— 本页两个分区都可能整块不渲染（无进行中的、无已结），
+     写死序号必然跳号，见 `sectionNo` 的说明 */
+  const no = sectionNo();
 
   return (
     <div className="pb-6">
@@ -105,7 +91,7 @@ export default function LimitedPage({ variant }: { variant: 'mobile' | 'desktop'
       {/* 汇总条（册页稿 `.summary`）：限时页也有自己的账 —— 在跑的与已结的 */}
       <SummaryBar className="mx-3.5 mt-3" pending={pending.length} done={done.length} note="到期即归档" />
 
-      <SectionTitle icon="chochin" count={pending.length}>
+      <SectionTitle no={no()} icon="chochin" count={pending.length}>
         限时活动 · 进行中
       </SectionTitle>
       {pending.length ? (
@@ -128,52 +114,12 @@ export default function LimitedPage({ variant }: { variant: 'mobile' | 'desktop'
 
       {done.length ? (
         <>
-          <SectionTitle icon="done" count={done.length}>
+          <SectionTitle no={no()} icon="done" count={done.length}>
             限时已结
           </SectionTitle>
           <div className={CHECKLIST_GRID}>
             {groupChecklist(pending, done).done.map((u) => (
               <ChecklistEntry key={u.key} unit={u} showDeadline />
-            ))}
-          </div>
-        </>
-      ) : null}
-
-      {/* 版本 / 赛季分区：随周期滚动、无固定截止，与倒计时型限时活动分开渲染 */}
-      {extraPending.length || extraDone.length ? (
-        <>
-          {/* 重置提示（2026-09-14 从本周页移来）：版本活动在上线当日维护完成后才计入，
-              锚点是维护完成那一刻（通常 9:00），不是当天 0 点 —— 所以维护期间不会提前翻篇 */}
-          <Alert tone="warn">
-            版本 / 赛季按开服锚点重置 · 版本活动于上线当日维护完成后（通常 9:00）才计入
-          </Alert>
-          <SectionTitle
-            icon="nobori"
-            count={extraPending.length}
-            aside={<span className="text-sm text-ink-3">已完成 {extraDone.length}</span>}
-          >
-            版本 / 赛季
-          </SectionTitle>
-          <div className={CHECKLIST_GRID}>
-            {groupByCount([...extraPending, ...extraDone]).map((u) => (
-              <ChecklistEntry key={u.key} unit={u} showDeadline />
-            ))}
-          </div>
-        </>
-      ) : null}
-
-      {oncePending.length || onceDone.length ? (
-        <>
-          <SectionTitle
-            icon="ofuda"
-            count={oncePending.length}
-            aside={<span className="text-sm text-ink-3">已完成 {onceDone.length}</span>}
-          >
-            一次性
-          </SectionTitle>
-          <div className={CHECKLIST_GRID}>
-            {groupByCount([...oncePending, ...onceDone]).map((u) => (
-              <ChecklistEntry key={u.key} unit={u} showDeadline={(it) => Boolean(it.deadline)} />
             ))}
           </div>
         </>

@@ -59,12 +59,15 @@ export function Skeleton({ rows = 4 }: { rows?: number }) {
  *     `progress` 参数保留但不再渲染，恢复点在 `SummaryBar`。
  */
 export function SectionTitle({
+  no,
   icon,
   children,
   count,
   aside,
   flush = false,
 }: {
+  /** 分组序号（参考稿 `.grp-head .no`：衬线、金、定宽居中）—— 用 `sectionNo()` 按渲染顺序取号 */
+  no?: string;
   icon?: IconName;
   children: ReactNode;
   /** 右侧裸计数（参考稿 `.ct`：等宽 11px、弱化墨） */
@@ -82,6 +85,11 @@ export function SectionTitle({
   return (
     <div className={`${flush ? '' : 'px-3.5'} pb-1.5 pt-4`}>
       <div className="flex items-center gap-2.5">
+        {/* 序号在最前（参考稿：`.no` → 图标 → 组名 → 渐隐线 → 计数）。
+            定宽 `w-4.5` + 居中：组的序号是一列，不该跟着字宽抖 */}
+        {no ? (
+          <span className="w-4.5 flex-none text-center font-serif text-sm text-gold-hi">{no}</span>
+        ) : null}
         {icon ? <Icon name={icon} size={16} className="text-gold-hi" /> : null}
         <span className="font-serif text-lg font-semibold tracking-group text-ink">{children}</span>
         <i className="h-px min-w-4 flex-1 bg-gradient-to-r from-line to-transparent" />

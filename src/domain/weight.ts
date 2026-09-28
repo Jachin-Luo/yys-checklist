@@ -5,7 +5,7 @@
  * 需求原句「漏一次月度黑蛋 ≫ 漏一次每日金币」的真实依据就是这两个客观维度。
  *
  * 三个维度：
- *   周期    once/limited/version/season 40 > monthly 30 > weekly 20 > daily 10
+ *   周期    limited 40 > monthly 30 > weekly 20 > daily 10
  *   稀缺性  有 deadline 或 until → +15
  *   固定收益 有 gain → +10
  *
@@ -17,10 +17,7 @@ import type { Item } from '../api/types';
 import type { Cycle } from './enums';
 
 const CYCLE_WEIGHT: Record<Cycle, number> = {
-  once: 40,
   limited: 40,
-  version: 40,
-  season: 40,
   monthly: 30,
   weekly: 20,
   daily: 10,
@@ -35,7 +32,7 @@ export function weightOf(it: Item): number {
 
 /** 周期排序权重（同分兜底用；越小越靠前） */
 export function cycleRank(it: Item): number {
-  const order: Cycle[] = ['once', 'limited', 'version', 'season', 'monthly', 'weekly', 'daily'];
+  const order: Cycle[] = ['limited', 'monthly', 'weekly', 'daily'];
   const idx = order.indexOf(it.cycle);
   return idx < 0 ? order.length : idx;
 }

@@ -1,5 +1,6 @@
 import { useState, type ReactNode } from 'react';
 import Icon from '../icons/Icon';
+import { tx } from './controls';
 
 /**
  * 「设置」页的可折叠分区卡片（所有设置分区的统一外壳）。
@@ -19,6 +20,12 @@ import Icon from '../icons/Icon';
  *    代价是 CSS 隐藏的元素仍在 DOM 里，这些分区都很轻，可以接受。
  *
   * 2026-09-23 换肤：展开箭头换成和风折角、标题改衬线（与分组头同一套语言）。
+ * 2026-09-28 文字改从 `controls.tx` 取（本文件不再写字号类）：标题 = `tx.cardTitle`（**保留衬线**），
+ * `summary` 收进 `tx.note`（11px）。
+ *
+ * ⚠️ 统一过程中曾把标题并到 `SettingRow` 那一档（正体半粗），**用户否掉了并明确要衬线卡名** ——
+ * 折叠卡是"要展开看的分区入口"，与平铺的设置行不是同一种东西。两档并列写在 `tx` 里，
+ * 别再把它们"顺手统一"。
  *
  * ## 与 `SettingRow` 的关系（2026-09-23 设置页重构）
  *
@@ -77,14 +84,10 @@ export default function CollapsibleSection({
             }`}
           />
           <span className="min-w-0 flex-1">
-            <span
-              className={`block font-serif text-base tracking-card ${
-                danger ? 'text-crimson' : 'text-ink'
-              }`}
-            >
+            <span className={`block ${tx.cardTitle} ${danger ? 'text-crimson' : 'text-ink'}`}>
               {title}
             </span>
-            {summary ? <span className="mt-1 block text-sm text-ink-3">{summary}</span> : null}
+            {summary ? <span className={`mt-1 block ${tx.note} text-ink-3`}>{summary}</span> : null}
           </span>
         </button>
         {aside ? <span className="flex flex-none items-center gap-2">{aside}</span> : null}

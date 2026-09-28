@@ -4,6 +4,7 @@ import ChecklistItem from '../../components/common/ChecklistItem';
 import CollapsibleSection from '../../components/common/CollapsibleSection';
 import Segmented from '../../components/common/Segmented';
 import SettingRow from '../../components/common/SettingRow';
+import { tx } from '../../components/common/controls';
 import {
   CARD_FIELDS,
   CARD_PRESETS,
@@ -83,7 +84,7 @@ export default function CardDisplaySection() {
             : `当前为自定义组合 · 已隐藏 ${hidden} 项`
         }
       >
-                <div className="px-3 py-3">
+        <div className="px-3 py-3">
           <div>
             {CARD_FIELDS.map((f) => {
               const on = card[f.key];
@@ -103,12 +104,14 @@ export default function CardDisplaySection() {
                     {on ? <Icon name="check" size={11} /> : null}
                   </span>
                   <span className="min-w-0 flex-1">
-                    <span className={`block font-serif text-base tracking-card ${on ? 'text-ink' : 'text-ink-3'}`}>
+                    {/* 字段名与「条目管理 / 账号 / 一键日常」的行名同一档（`tx.rowName`）——
+                        此前它是衬线 13px，是设置页里唯一一处衬线行名（2026-09-28 收口） */}
+                    <span className={`block ${tx.rowName} ${on ? 'text-ink' : 'text-ink-3'}`}>
                       {f.label}
                     </span>
-                    <span className="mt-0.5 block text-sm leading-relaxed text-ink-3">{f.desc}</span>
+                    <span className={`mt-0.5 block ${tx.note} text-ink-3`}>{f.desc}</span>
                   </span>
-                  <span className="flex-none text-sm text-ink-3">{on ? '显示' : '隐藏'}</span>
+                  <span className={`flex-none ${tx.note} text-ink-3`}>{on ? '显示' : '隐藏'}</span>
                 </button>
               );
             })}
@@ -116,7 +119,7 @@ export default function CardDisplaySection() {
 
           {sample ? (
             <div className="mt-3.5">
-              <p className="text-sm text-ink-2">效果预览（示例条目，点不动）</p>
+              <p className={`${tx.label} text-ink-2`}>效果预览（示例条目，点不动）</p>
               {/* `pointer-events-none`：预览用真实卡片组件，但它不该能被勾选 / 置顶 ——
                   设置页里点一下就把某条标成已完成，是最让人意外的一类副作用 */}
               <div className="pointer-events-none mt-1.5" aria-hidden="true">

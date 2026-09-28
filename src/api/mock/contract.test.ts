@@ -10,6 +10,7 @@ import { resetStoreForTest } from './userStore';
 import { KEY } from './persist';
 import type { DataScope } from '../contract';
 import { activeItems } from '../../domain/reset';
+import { draftFromItem } from '../../domain/itemDraft';
 import { installMemoryStorage } from '../../test/memoryStorage';
 
 /* ---------- localStorage 垫片（记录每一次 setItem，用于验证分片写入） ---------- */
@@ -41,10 +42,12 @@ describe('getBootstrap：首屏聚合（§3.3）', () => {
     expect(storage.written).toEqual([]);
   });
 
-  it('版本 / 赛季条目不受每日 0 点刷新影响（D2）', async () => {
+  it('周期字典收口为四类，条目侧不再出现已删除的周期（2026-09-28）', async () => {
     const b = await api.getBootstrap(scope);
-    expect(b.meta.periods.version?.startAt).toBe('2026-09-09T09:00');
-    expect(b.items.filter((i) => i.cycle === 'version').length).toBe(5);
+    const cycles = b.meta.dicts.filter((d) => d.type === 'cycle').map((d) => d.code);
+    expect(cycles).toEqual(['daily', 'weekly', 'monthly', 'limited']);
+    /* `version` / `season` / `once` 都已从枚举删除：条目里不该再有任何一条带着它们 */
+    for (const it of b.items) expect(cycles).toContain(it.cycle);
   });
 });
 
@@ -125,6 +128,71 @@ describe('视图 / 覆盖层：各自独立分片（D3）', () => {
     await api.removeCustomItem(scope, custom.id);
     ov = await api.getOverrides(scope);
     expect(ov.custom).toEqual([]);
+  });
+
+  it('自建条目可改写字段（2026-09-28 新增）：id / origin 不变，勾选与顺序不受影响', async () => {
+    const at = Date.now();
+    const custom = await api.addCustomItem(scope, {
+      name: '旧名字', cycle: 'daily', gainKind: ['jade'], deadline: '2026-10-06', note: '旧备注',
+    });
+    await api.setChecked(scope, custom.id, at);
+
+    const updated = await api.updateItem(scope, custom.id, {
+      name: '新名字', cycle: 'monthly', gainKind: [],
+      /* 刻意不给 deadline / note：**整体覆盖**语义下，草稿没给的字段就是清掉 */
+    });
+    expect(updated.id).toBe(custom.id);
+    expect(updated.origin).toBe('custom');
+    expect(updated.name).toBe('新名字');
+    expect(updated.cycle).toBe('monthly');
+    expect(updated.deadline).toBeUndefined();
+    expect(updated.note).toBeUndefined();
+    /* 空 gainKind 归 undefined（不是空数组）—— 见 `domain/itemDraft` */
+    expect(updated.gainKind).toBeUndefined();
+
+    const ov = await api.getOverrides(scope);
+    expect(ov.custom).toHaveLength(1);
+    expect(ov.custom[0].name).toBe('新名字');
+    /* 编辑不该动"做没做过" */
+    expect((await api.getState(scope)).checked[custom.id]).toBe(at);
+  });
+
+  it('预设条目可编辑：写一层字段改写，种子不动、清空生效（2026-09-28）', async () => {
+    const seed = (await api.listItems()).find((i) => i.id === 'daily_sign')!;
+
+    const updated = await api.updateItem(scope, 'daily_sign', {
+      name: '我的签到', cycle: 'daily', gainKind: [],
+      /* 种子里有 note 而这里不给 → 改写里落成 `null`（显式清空） */
+    });
+    expect(updated.id).toBe('daily_sign');
+    expect(updated.origin).toBe('preset');
+    expect(updated.name).toBe('我的签到');
+    expect(updated.note).toBeUndefined();
+
+    /* 覆盖层里记的是**差异**，不是整条：只出现变了的字段
+       （seed 里 name / note / path / gainKind 都有值，草稿一个都没给 → 四个都落成 null） */
+    const patch = (await api.getOverrides(scope)).patches?.daily_sign;
+    expect(Object.keys(patch ?? {}).sort()).toEqual(['gainKind', 'name', 'note', 'path']);
+    expect(patch?.note).toBeNull();
+    /* 种子本身没被改（`listItems` 返回的是纯种子） */
+    expect((await api.listItems()).find((i) => i.id === 'daily_sign')!.name).toBe(seed.name);
+
+    /* 生效数据：改写的字段按改写走，**没动到的字段沿用种子**（`autoDaily` 就属于没动到的） */
+    const live = (await api.getBootstrap(scope)).items.find((i) => i.id === 'daily_sign')!;
+    expect(live.name).toBe('我的签到');
+    expect(live.cycle).toBe(seed.cycle);
+    expect(live.autoDaily).toBe(true);
+
+    /* 改回原样 → 差异为空 → 改写被删掉（"编辑回原样 = 没改过"）。
+       走 `draftFromItem(seed)`，与 UI 的「还原默认」同一路径 */
+    await api.updateItem(scope, 'daily_sign', draftFromItem(seed));
+    expect((await api.getOverrides(scope)).patches?.daily_sign).toBeUndefined();
+  });
+
+  it('改写不存在的 id 报 E_NOT_ITEM', async () => {
+    await expect(
+      api.updateItem(scope, 'no_such_item', { name: '幽灵条目', cycle: 'daily', gainKind: [] }),
+    ).rejects.toMatchObject({ code: 'E_NOT_ITEM' });
   });
 
   it('resetItemLibrary 清空自建与删除记录，但不动勾选状态', async () => {

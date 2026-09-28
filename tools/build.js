@@ -81,7 +81,7 @@ const ALLOWED = new Set(['id', 'name', 'cycle', 'days', 'path',
   'gainKind', 'gain', 'gainNote', 'condition', 'time', 'timeEnd', 'timeNote', 'isGuildTime',
   'start', 'deadline', 'until', 'since', 'autoDaily', 'isAutoHub', 'premium', 'note', 'origin']);
 /* 条目双文件（2026-09-11；2026-09-15 收紧常驻口径）：items = 真正的常驻（每日/每周/每月），
-   limited = 非常驻（活动期每日 / 限时 / 版本 / 赛季；带 until 的到期即删）。
+   limited = 非常驻（活动期每日 / 限时活动，含 2026-09-28 并入的版本 / 赛季活动；带 until 的到期即删）。
    校验一律作用在**合并集**上 —— id 查重 / isAutoHub 全局恰 1 / 字典约束都跨文件生效 */
 const items = [...itemsDb.items, ...limitedDb.items];
 const fileOf = new Map([
@@ -153,18 +153,9 @@ for (const it of items) {
 }
 if (hubCount !== 1) err(`isAutoHub 条目应恰好 1 条，当前 ${hubCount} 条`);
 
-/* ---------- 4. periods（S1 要求：缺锚点改 error） ---------- */
-const periods = metaDb.meta.periods || {};
-for (const c of ['version', 'season']) {
-  const list = items.filter((it) => it.cycle === c);
-  if (!list.length) continue;
-  const anchor = periods[c];
-  if (!anchor || !anchor.startAt) {
-    err(`[meta.periods] 有 ${list.length} 条 ${c} 周期条目，但未填 periods.${c}.startAt —— 这些条目的勾选状态会误套每日 05:00 重置`);
-  } else if (!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(anchor.startAt)) {
-    err(`[meta.periods.${c}] startAt 格式应为 YYYY-MM-DDTHH:mm`);
-  }
-}
+/* ---------- 4.（已废弃）版本 / 赛季锚点校验 ----------
+   2026-09-28 那两个周期并入 `limited`，`meta.periods` 随锚点机制整体删除，
+   因此不再有"有条目却缺锚点"这种情况可查。留此注释是为了让编号不跳、也标出去向。 */
 if (metaDb.meta.version !== '1.4.0') warn(`[meta] version=${metaDb.meta.version}，设计文档口径为 1.4.0`);
 
 /* ---------- 5. viewDefaults / sortOptions ---------- */
@@ -316,7 +307,6 @@ const report = [
   `| 限时项缺 until（漏标） | ${noUntilUnmarked.length}${noUntilUnmarked.length ? ` —— ${noUntilUnmarked.map((i) => i.id).join('、')}` : ''} |`,
   `| 限时项缺 until（已标注待定） | ${noUntilPending.length}${noUntilPending.length ? ` —— ${noUntilPending.map((i) => i.id).join('、')}` : ''} |`,
   `| 带时间窗条目 | ${timeWindow.length}（来源：NGA 整理 + 官方公告，待全面核对） |`,
-  `| 版本/赛季锚点 | ${Object.entries(periods).map(([k, v]) => `${k}=${v.key || '?'}@${v.startAt || '?'}`).join(' · ') || '未填'} |`,
   ``,
   `## 人工待核清单（S1.5 ①）`,
   ``,

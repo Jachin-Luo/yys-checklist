@@ -20,11 +20,18 @@ import type { Cycle } from './enums';
 
 export type StatPeriod = 'day' | 'week' | 'month';
 
-/** 各统计口径覆盖的周期：本日 = 日常；本周 = 周常；本月·版本 = 每月 / 版本 / 赛季 */
+/**
+ * 各统计口径覆盖的周期：本日 = 日常；本周 = 周常；本月 = 每月。
+ *
+ * 2026-09-28 收窄：此前本月口径还含 `version` / `season`，因为那两类有锚点（有周期起点，
+ * "本周期完成了几成"才成立）。两者并入 `limited` 之后，`periodStartOf('limited')` 恒为 0 ——
+ * **没有周期起点就没有"本期进度"**，硬塞进本月口径会算出一个没有分母含义的百分比，
+ * 故不再计入（限时/版本活动的收益仍照旧进统计页的**区间收益**：那条路径按勾选日志算，与周期无关）。
+ */
 const PERIOD_CYCLES: Record<StatPeriod, Cycle[]> = {
   day: ['daily'],
   week: ['weekly'],
-  month: ['monthly', 'version', 'season'],
+  month: ['monthly'],
 };
 
 export interface GainSummary {
@@ -101,7 +108,7 @@ export function summarizeGain(
 export const PERIOD_META: Record<StatPeriod, { label: string; note: string }> = {
   day: { label: '本日', note: '每日 0 点刷新' },
   week: { label: '本周', note: '周一 0 点刷新' },
-  month: { label: '本月 · 版本', note: '版本 / 赛季按上线锚点重置，活动结束清零' },
+  month: { label: '本月', note: '每月 1 日 0 点刷新' },
 };
 
 /* ───────────────────────── 按日期区间的收益（2026-09-15） ───────────────────────── */

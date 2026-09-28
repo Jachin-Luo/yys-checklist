@@ -6,7 +6,7 @@ import { useCheckStore } from '../../stores/check';
 import { useUiStore } from '../../stores/ui';
 import { useViewStore } from '../../stores/view';
 import CheckBox from './CheckBox';
-import { FieldIcon } from './ItemField';
+import { FieldBlock, FieldIcon } from './ItemField';
 import Icon from '../icons/Icon';
 
 /**
@@ -63,18 +63,31 @@ export default function HubCard({ item }: { item: Item }) {
         if (swallowClick()) return;
         toggleHub();
       }}
-      className={`no-press-select relative mx-3.5 mt-2.5 flex cursor-pointer items-start gap-x-2.5 rounded-sm border border-gold-line/40 bg-gradient-to-r from-gold-soft to-fill px-3.5 pb-4 pt-3 transition-all duration-300 ease-genso ${
+      className={`group no-press-select relative mx-3.5 mt-2.5 flex cursor-pointer items-start gap-x-2.5 rounded-sm border border-gold-line/40 bg-gradient-to-r from-gold-soft to-fill px-3.5 pb-4 pt-3 transition-all duration-300 ease-genso ${
         pressing ? 'scale-[0.985]' : ''
       }`}
     >
-      {/* 长按进度：与 `ChecklistItem` 同一形态（常驻元素 + 条件宽度，
-          动态挂载会让 width 过渡没有起点、一帧闪满），同样贴**底边** —— 按压反馈要在手指落点附近 */}
+      {/* 左缘竖线：**常驻**，与账目行同一口径（2026-09-28）—— 入口卡也是清单里的一行，
+          没有它时它在这列里是唯一"缺一道边"的（未完成=淡墨、悬停预告=朱红、已完成=朱红） */}
       <span
         aria-hidden
-        className={`absolute bottom-0 left-0 h-0.5 bg-crimson ${
-          pressing ? 'w-full transition-[width] duration-500 ease-linear' : 'w-0 transition-none'
+        className={`absolute bottom-3 left-0 top-3 w-0.5 rounded-r-full transition-colors duration-150 ${
+          checked ? 'bg-crimson' : 'bg-line group-hover:bg-crimson/40'
         }`}
       />
+      {/* 长按进度：与 `ChecklistItem` 同一形态（常驻元素 + 条件宽度，
+          动态挂载会让 width 过渡没有起点、一帧闪满），同样贴**底边** —— 按压反馈要在手指落点附近。
+          两端内缩的圆角轨道同理：这张卡也是圆角，整宽方头条会伸出圆角之外 */}
+      <span
+        aria-hidden
+        className="absolute bottom-0 left-2.5 right-2.5 h-0.5 overflow-hidden rounded-full"
+      >
+        <i
+          className={`block h-full rounded-full bg-crimson ${
+            pressing ? 'w-full transition-[width] duration-500 ease-linear' : 'w-0 transition-none'
+          }`}
+        />
+      </span>
 
       <CheckBox
         checked={checked}
@@ -85,33 +98,46 @@ export default function HubCard({ item }: { item: Item }) {
         label={label}
       />
 
+      {/* 周期符独占一列（与 `ChecklistItem` / `ChecklistGroupCard` 同站位）——
+          **这是"错行"的根因**：此前它塞在 h3 里，标题被图标顶右，而下面的「路径 + 覆盖计数」
+          与「备注」从 body 左缘起，两行比标题靠左半个图标宽。图标挪出来后三行同左缘。
+          配色也随之显式给出（原先是继承 h3 的文字色） */}
+      <Icon
+        name="suzu"
+        size={17}
+        className={`flex-none ${checked ? 'text-ink-3' : 'text-gold-hi'}`}
+      />
+
       <div className="min-w-0 flex-1">
         <h3
           className={`flex min-w-0 items-center gap-2.5 break-words font-serif text-base leading-snug tracking-card ${
             checked ? 'text-ink-3 line-through decoration-crimson decoration-1' : 'text-gold-hi'
           }`}
         >
-          <Icon name="suzu" size={17} className="mt-0.5" />
           {item.name}
         </h3>
 
-        {/* 这一行是"入口路径 + 覆盖计数"的混合内容：`path` 关闭时只隐藏路径部分，
+        {/* 标题之下的两行共用一个 `FieldBlock`（缩进引线）—— 与账目行的「路径 / 条件 / 备注」
+            同一处理：这两行是标题的补充，缩进后不会与下一张卡串行。
+            第一行是"入口路径 + 覆盖计数"的混合内容：`path` 关闭时只隐藏路径部分，
             **覆盖计数始终显示** —— 它才是入口卡要传达的核心（点它会连带勾上多少项） */}
-        <p className="mt-1 flex items-start gap-2 text-sm leading-relaxed">
-          {card.path && item.path ? <FieldIcon kind="path" /> : null}
-          <span className="min-w-0 flex-1 break-words text-ink-2">
-            {card.path && item.path ? <span className="text-ticket">{item.path}</span> : null}
-            {card.path && item.path ? ' · ' : ''}
-            已配置覆盖 <b className="font-mono font-medium text-gold-hi">{coveredCount}</b> 项
-          </span>
-        </p>
-
-        {card.note && item.note ? (
+        <FieldBlock>
           <p className="mt-1 flex items-start gap-2 text-sm leading-relaxed">
-            <FieldIcon kind="note" />
-            <span className="min-w-0 flex-1 break-words text-ink-2">{item.note}</span>
+            {card.path && item.path ? <FieldIcon kind="path" /> : null}
+            <span className="min-w-0 flex-1 break-words text-ink-2">
+              {card.path && item.path ? <span className="text-ticket">{item.path}</span> : null}
+              {card.path && item.path ? ' · ' : ''}
+              已配置覆盖 <b className="font-mono font-medium text-gold-hi">{coveredCount}</b> 项
+            </span>
           </p>
-        ) : null}
+
+          {card.note && item.note ? (
+            <p className="mt-1 flex items-start gap-2 text-sm leading-relaxed">
+              <FieldIcon kind="note" />
+              <span className="min-w-0 flex-1 break-words text-ink-2">{item.note}</span>
+            </p>
+          ) : null}
+        </FieldBlock>
       </div>
 
       <button

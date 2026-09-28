@@ -18,6 +18,8 @@
  * 于是给某个点记完成，只把它**之后**的点往后挪，之前的点原样不动 ——
  * 早先那版「记一次完成就把整条任务重新推一遍」会让用户觉得任务被初始化了（2026-09-15 用户反馈）。
  */
+import { dayKey, dayKeyOf, keyToTs } from './checkLog';
+
 /** 寄养间隔（小时）。写成常量而不是散落的 6 —— 官方若调整，只改这一处 */
 export const NURTURE_HOURS = 6;
 /** 收/续点数上限（5 个 ≈ 30h，够覆盖一张 6 星卡） */
@@ -35,6 +37,27 @@ export interface NurtureRecord {
   id: string;
   /** 上卡时间 `HH:mm` */
   base: string;
+  /**
+   * 上卡**日期**（`YYYY-MM-DD`，2026-09-28 新增）。
+   *
+   * 为什么必须记：`base` 只有 `HH:mm`，而 `baseTsOf` 原先一律把它解释成**今天** ——
+   * 几天前上的卡每次渲染都重新锚定到今天，点永远落在未来，于是任务"永远进行中"
+   * （用户反馈："明明已经到了几天后了，任务还在进行中"）。记下日期后，点、结束时刻、
+   * 徽章才落在真实的那一天上。
+   *
+   * 计划（`started: false`）**不带**它 —— 计划本就是"打算今晚寄"，按今天解释才对
+   * （预先登记今晚 18:00 上卡是合法用法）。
+   */
+  baseDate?: string;
+  /**
+   * 任务结束时刻（2026-09-28 新增）—— 同一时刻**只允许一个进行中的任务**：
+   * 新任务开始时（`add(started)` / `promote`）自动给此前还在进行中的那条盖上它，
+   * 那条转入「已结束」（记录与点列表都留着，只是不再提醒、不再算进行中）。
+   *
+   * 卡**自然到期**（`now >= 上卡 + 持续`）不写入这个字段，由 `isRunning` 派生 ——
+   * 到期是时间推移的必然结果，不需要（也不该有）任何定时任务去改数据。
+   */
+  endedAt?: number;
   /**
    * 结界卡的**持续时间**（小时，1 – `MAX_NURTURE_HOURS`）。
    *
@@ -130,18 +153,54 @@ export function hmToDate(v: string, now: Date): Date | null {
 }
 
 /**
- * 上卡时刻（绝对时间戳）：把 `base`（`HH:mm`）按**今天**解释。
- * 不做"昨天"推断 —— 保留「预先登记今晚 18:00 上卡」这种用法。
+ * 「上卡锚点」—— 推点只需要这几个字段。
+ * `baseDate` / `started` / `createdAt` 都是可选的：调用方可能只给 `{ base }`
+ * （表单预览、`endLabelOf` 的草稿），此时按"今天"解释。
  */
-export function baseTsOf(record: Pick<NurtureRecord, 'base'>, now: Date): number {
+export type NurtureAnchor = Pick<NurtureRecord, 'base'> &
+  Partial<Pick<NurtureRecord, 'baseDate' | 'started' | 'createdAt'>>;
+
+/**
+ * 上卡时刻（绝对时间戳）。锚定日期按三级回落：
+ *
+ *   1. **`baseDate`**（本轮新增，任务在上卡那一刻记下）；
+ *   2. 老记录（本轮之前创建的任务）**回落到 `createdAt` 那一天** —— 不回落的话，
+ *      那些"几天前就上卡"的任务会继续漂到今天（就是用户反馈的那个 bug）；
+ *   3. 其余（计划、无 `createdAt` 的记录）仍按**今天** —— 保留「预先登记今晚 18:00 上卡」
+ *      这种用法，也是 `base` 只有 `HH:mm` 时的原语义。
+ *
+ * 不做"昨天"推断：`base` 是用户手填的时刻，只有 `baseDate` 才能说明它在哪一天。
+ */
+export function baseTsOf(record: NurtureAnchor, now: Date): number {
   const norm = normalizeHM(record.base) ?? nowHM(now);
   const [h, m] = norm.split(':').map(Number);
-  return new Date(now.getFullYear(), now.getMonth(), now.getDate(), h, m, 0, 0).getTime();
+  const key = record.baseDate ?? (record.started && record.createdAt ? dayKeyOf(record.createdAt) : null);
+  const dayTs = key ? keyToTs(key) : null;
+  const day = dayTs !== null ? new Date(dayTs) : new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  return new Date(day.getFullYear(), day.getMonth(), day.getDate(), h, m, 0, 0).getTime();
 }
 
-/** 卡到期时刻 = 上卡 + 持续时间。**只读**：由 `base` 与 `hours` 决定，不接受单独改写 */
-export const endTsOf = (record: Pick<NurtureRecord, 'base' | 'hours'>, now: Date): number =>
+/** 卡到期时刻 = 上卡 + 持续时间。**只读**：由 `base`（含锚定日期）与 `hours` 决定，不接受单独改写 */
+export const endTsOf = (record: NurtureAnchor & Pick<NurtureRecord, 'hours'>, now: Date): number =>
   baseTsOf(record, now) + record.hours * 3600000;
+
+/**
+ * 是否「进行中」= 任务 且 未被显式结束 且 **卡还没到期**（2026-09-28 新增）。
+ *
+ * 三个消费点：列表分组（进行中 / 已结束）、壳层徽章（`nextDue`）、
+ * 以及"同时只允许一个进行中任务"的判定（新任务开始时据此决定给谁盖 `endedAt`）。
+ *
+ * 到期是**派生**的，不写入 —— 见 `NurtureRecord.endedAt` 的说明。
+ */
+export function isRunning(record: NurtureRecord, now: Date): boolean {
+  if (!record.started) return false;
+  if (record.endedAt !== undefined) return false;
+  return now.getTime() < endTsOf(record, now);
+}
+
+/** 结束一条任务（盖 `endedAt`）。计划没有"进行中"可言，原样返回；已结束的不重复盖 */
+export const endRecord = (record: NurtureRecord, at: Date): NurtureRecord =>
+  record.started && record.endedAt === undefined ? { ...record, endedAt: at.getTime() } : record;
 
 /** 点的展示字段（不含完成状态，由调用方补 `doneAt`） */
 function shapePoint(ts: number, index: number, now: Date): NurturePoint {
@@ -153,7 +212,20 @@ function shapePoint(ts: number, index: number, now: Date): NurturePoint {
     index,
     ts,
     hm: `${pad2(t.getHours())}:${pad2(t.getMinutes())}`,
-    dayLabel: gap <= 0 ? '今天' : gap === 1 ? '明天' : gap === 2 ? '后天' : `${t.getMonth() + 1}/${t.getDate()}`,
+    /* ⚠️ 过去的日子**不能也算"今天"**（2026-09-28 修）：点一旦按真实 `baseDate` 锚定，
+       昨天/几天前的记录每个点都会走到这里 —— 若仍按 `gap <= 0` 归"今天"，一条旧任务
+       会显示成一排「今天 10:00 / 今天 16:00…」，看不出是哪天的事（正是那个 bug 的表象）。
+       现在：昨天 / 今天 / 明天 / 后天 / `M/D`，与点 chip、结束标签共用这一处口径 */
+    dayLabel:
+      gap === 0
+        ? '今天'
+        : gap === -1
+          ? '昨天'
+          : gap === 1
+            ? '明天'
+            : gap === 2
+              ? '后天'
+              : `${t.getMonth() + 1}/${t.getDate()}`,
     past: ts < now.getTime(),
   };
 }
@@ -272,14 +344,23 @@ export function sanitizePlans(value: unknown): NurtureRecord[] {
     const delay = typeof row.delay === 'number' && Number.isFinite(row.delay)
       ? clampDelay(row.delay)
       : 0;
+    /* 起始日期 / 结束时刻（2026-09-28）都是**可选**字段：格式不对一律当没记，
+       不丢整条 —— 缺 `baseDate` 有明确语义（回落 `createdAt` / 今天，见 `baseTsOf`），
+       为它丢掉一条寄养记录太重。`endedAt` 只认有限数（非数当"未结束"，不会误判成已结束）。 */
+    const rawDate = typeof row.baseDate === 'string' ? row.baseDate.trim() : '';
+    const baseDate = /^\d{4}-\d{2}-\d{2}$/.test(rawDate) ? rawDate : undefined;
+    const endedAt =
+      typeof row.endedAt === 'number' && Number.isFinite(row.endedAt) ? row.endedAt : undefined;
     const dones = sanitizeDones(row.dones);
     out.push({
       id,
       base,
+      ...(baseDate ? { baseDate } : {}),
       hours,
       delay,
       started: row.started === true,
       createdAt: typeof row.createdAt === 'number' && Number.isFinite(row.createdAt) ? row.createdAt : 0,
+      ...(endedAt !== undefined ? { endedAt } : {}),
       ...(dones ? { dones } : {}),
     });
   }
@@ -299,7 +380,9 @@ export interface NurtureDue {
 export function nextDue(records: NurtureRecord[], now: Date): NurtureDue | null {
   let best: NurtureDue | null = null;
   for (const record of records) {
-    if (!record.started) continue;
+    /* 只认**进行中**（含"卡已到期"与"已被新任务结束"两种终结态都被排除在这之外）——
+        见 `isRunning`。2026-09-28 前这里只判 `started`，于是几天前的旧任务会一直占着徽章 */
+    if (!isRunning(record, now)) continue;
     const point = nextPendingPoint(record, now);
     if (!point) continue;
     if (!best || point.ts < best.point.ts) best = { record, point };
@@ -345,6 +428,8 @@ export function makeNurture(
   return {
     id: nurtureId(now),
     base: normalizeHM(base) ?? nowHM(now),
+    /* 上卡日期只给任务记：计划是"打算今晚寄"，不该被钉在某一天（见 `baseDate` 的说明） */
+    ...(started ? { baseDate: dayKey(now) } : {}),
     hours: clampHours(hours),
     delay: clampDelay(delay),
     started,
@@ -361,12 +446,12 @@ export function makeNurture(
  * 因此它天然不会被 `active.index` 选中、也不会被当成可点 chip。
  */
 export const endPointOf = (
-  record: Pick<NurtureRecord, 'base' | 'hours'>,
+  record: NurtureAnchor & Pick<NurtureRecord, 'hours'>,
   now: Date,
 ): NurturePoint => shapePoint(endTsOf(record, now), -1, now);
 
 /** 卡到期时刻的可读文案（`明天 12:00` / `9/21 12:00`）—— 与点 chip 共用同一套日标签口径 */
-export function endLabelOf(record: Pick<NurtureRecord, 'base' | 'hours'>, now: Date): string {
+export function endLabelOf(record: NurtureAnchor & Pick<NurtureRecord, 'hours'>, now: Date): string {
   const p = endPointOf(record, now);
   return `${p.dayLabel} ${p.hm}`;
 }

@@ -1,10 +1,12 @@
 import { useEffect, useMemo, useState } from 'react';
-import { btn } from '../../components/common/controls';
+import { btn, input } from '../../components/common/controls';
+import { sectionNo } from '../../components/common/sectionNo';
 import Icon from '../../components/icons/Icon';
 import {
   endLabelOf,
   endPointOf,
   hmToDate,
+  isRunning,
   MAX_NURTURE_DELAY,
   MAX_NURTURE_HOURS,
   nextPendingPoint,
@@ -186,10 +188,26 @@ export default function NurtureSection() {
     return () => window.clearInterval(timer);
   }, []);
 
-  const { tasks, plans } = useMemo(() => {
+  /**
+   * 三个分组（2026-09-28）：**进行中 / 已结束 / 计划**。
+   *
+   * 「已结束」此前不存在 —— 那时只要 `started` 就算进行中，于是几天前上的卡会一直
+   * 挂在"进行中"里（`base` 只有 `HH:mm`，每次渲染都锚定到今天）。现在按 `isRunning`
+   * 判定：卡到期（派生）或被下一条任务顶掉（`endedAt`）都算结束。
+   * 单列一区而不是并进「计划」：它确实开过，点列表值得回看。
+   */
+  /* 分组序号（壹/贰…）：本页的分区头是自定义行（左右两栏），不走 `SectionTitle`，
+     但序号口径一致 —— 按渲染顺序发号，三个分区都可以不渲染。见 `sectionNo` */
+  const no = sectionNo();
+
+  const { tasks, ended, plans } = useMemo(() => {
     const sorted = sortNurture(records);
-    return { tasks: sorted.filter((r) => r.started), plans: sorted.filter((r) => !r.started) };
-  }, [records]);
+    return {
+      tasks: sorted.filter((r) => isRunning(r, now)),
+      ended: sorted.filter((r) => r.started && !isRunning(r, now)),
+      plans: sorted.filter((r) => !r.started),
+    };
+  }, [records, now]);
 
   /** 输入框里此刻该显示的值：用户动过就用他的，没动过就是"现在" */
   const timeValue = time ?? nowHM(now);
@@ -251,9 +269,15 @@ export default function NurtureSection() {
 
   const row = (r: NurtureRecord) => {
     const points = recordPoints(r, now);
+    const running = isRunning(r, now);
     const stats = r.started ? pointStats(points) : null;
-    const target = r.started ? targetOf(r) : null;
+    /* 只有进行中的行才给"操作对象"：已结束的行不再接受记完成（时间线仍可回看） */
+    const target = running ? targetOf(r) : null;
     const pickedIndex = active?.id === r.id ? active.index : null;
+    /* 上卡点的 `dayLabel` 已按**锚定日期**算（今天 / 昨天 / 9/25）：非今天时把它写进概述，
+       否则几天前上的卡会显示成"21:00 上卡"，看不出是哪天开的 —— 这正是那个 bug 的表象 */
+    const start = points[0];
+    const startLabel = start.dayLabel === '今天' ? start.hm : `${start.dayLabel} ${start.hm}`;
 
     /*
      * 操作区抽成一份 JSX，供两处渲染（桌面 / 移动）—— 见下方布局注记。
@@ -268,6 +292,10 @@ export default function NurtureSection() {
       >
         开始
       </button>
+    ) : !running ? (
+      /* 已结束（卡到期 or 被下一条顶掉）：不再给"记完成" —— 它已经不是进行中的任务了，
+         留一个能点的按钮会让人以为还该继续收卡。要删有删除键，要重开就再记一条 */
+      <span className="flex-none text-sm text-ink-3">已结束</span>
     ) : target ? (
       /* 操作条只作用于 `target`（选中点，或下一个待办点）—— 记完成只影响它之后的点 */
       <>
@@ -332,7 +360,9 @@ export default function NurtureSection() {
         {/* ── 第一排：概述 + 操作条 + 删除 ── */}
         <div className="flex flex-wrap items-center gap-x-2 gap-y-1.5">
           <span className="flex flex-none items-baseline gap-1.5">
-            <b className="text-lg font-medium text-ink">{r.base} 上卡</b>
+            <b className={`text-lg font-medium ${running ? 'text-ink' : 'text-ink-3'}`}>
+              {startLabel} 上卡
+            </b>
             <span className="text-sm text-ink-3">
               持续 {r.hours}h · {pointCountOf(r.hours, r.delay)} 个点
               {/* 延迟为 0 时不显示 —— 它是最常见的情况，写出来只会占地方 */}
@@ -400,7 +430,8 @@ export default function NurtureSection() {
             onChange={(e) => setTime(e.target.value)}
             placeholder="如 21:00"
             aria-label="上卡时间"
-            className="min-w-0 flex-1 rounded-xs border border-line bg-surface px-2.5 py-1.5 font-mono text-base text-ink transition-colors duration-120 focus:border-gold-line"
+            /* `flex-1` 与配方自带的 `w-full` 不冲突：flex 布局里 `flex-basis` 压过 `width` */
+            className={`${input.base} ${input.md} ${input.num} min-w-0 flex-1`}
           />
           <button
             type="button"
@@ -415,27 +446,32 @@ export default function NurtureSection() {
             "排几个点"是寄养机制的内部换算，不该让人心算 22/6 */}
         <div className="mt-2.5 flex flex-wrap items-center gap-3">
           <span className="w-12 flex-none text-sm tracking-wide text-ink-2">持续</span>
-          <input
-            type="number"
-            min={1}
-            max={MAX_NURTURE_HOURS}
-            value={hours}
-            onChange={(e) => setHours(Number(e.target.value))}
-            aria-label="结界卡持续时间（小时）"
-            className="w-20 rounded-xs border border-line bg-surface px-2.5 py-1.5 text-center font-mono text-base text-ink transition-colors duration-120 focus:border-gold-line"
-          />
+          {/* 定宽给外壳：配方自带 `w-full`，两个宽度类同属性、由生成顺序决胜 */}
+          <span className="w-20 flex-none">
+            <input
+              type="number"
+              min={1}
+              max={MAX_NURTURE_HOURS}
+              value={hours}
+              onChange={(e) => setHours(Number(e.target.value))}
+              aria-label="结界卡持续时间（小时）"
+              className={`${input.base} ${input.md} ${input.num} text-center`}
+            />
+          </span>
           {/* 延迟（2026-09-20 新增）：每次收/续往后推几分钟。它逐点累积，
               所以点数提示必须带上它 —— 24h 的卡配 5 分钟延迟会从 4 个点变成 3 个 */}
           <span className="w-12 flex-none text-sm tracking-wide text-ink-2">延迟</span>
-          <input
-            type="number"
-            min={0}
-            max={MAX_NURTURE_DELAY}
-            value={delay}
-            onChange={(e) => setDelay(Number(e.target.value))}
-            aria-label="每次收续延迟（分钟）"
-            className="w-20 rounded-xs border border-line bg-surface px-2.5 py-1.5 text-center font-mono text-base text-ink transition-colors duration-120 focus:border-gold-line"
-          />
+          <span className="w-20 flex-none">
+            <input
+              type="number"
+              min={0}
+              max={MAX_NURTURE_DELAY}
+              value={delay}
+              onChange={(e) => setDelay(Number(e.target.value))}
+              aria-label="每次收续延迟（分钟）"
+              className={`${input.base} ${input.md} ${input.num} text-center`}
+            />
+          </span>
           <span className="text-xs tracking-wide text-ink-3">
             分钟 · 将排 <b className="font-mono font-medium text-ink-2">{pointCountOf(hours, delay)}</b> 个收/续点
           </span>
@@ -473,6 +509,10 @@ export default function NurtureSection() {
             {ask.delay ? <> · 延迟 <b>{ask.delay}</b> 分</> : null} ·{' '}
             <b>{pointCountOf(ask.hours, ask.delay)}</b> 个收/续点 · 结束 <b>{endLabelOf(ask, now)}</b>
             {' —— '}现在就开始记状态，还是先存为计划？
+            {/* 同时只允许一条进行中：先说清"立即开始"的副作用，别让用户事后发现上一条被结束 */}
+            {tasks.length ? (
+              <span className="text-ink-3">（立即开始会结束当前那条进行中的）</span>
+            ) : null}
           </p>
           <button
             type="button"
@@ -499,8 +539,11 @@ export default function NurtureSection() {
       ) : null}
 
       <div className="flex items-baseline justify-between px-3.5 pb-1 pt-4">
-        <span className="text-sm text-ink-3">进行中的任务 · {tasks.length} 条</span>
-        <span className="text-sm text-ink-3">✓=已完成 · 点时间点可记完成</span>
+        <span className="flex items-baseline gap-1.5 text-sm text-ink-3">
+          <span className="w-4.5 flex-none text-center font-serif text-sm text-gold-hi">{no()}</span>
+          进行中的任务 · {tasks.length} 条
+        </span>
+        <span className="text-sm text-ink-3">同时只记一条 · ✓=已完成 · 点时间点可记完成</span>
       </div>
       {tasks.length ? (
         <div className="mx-3.5 overflow-hidden rounded-md border border-line-soft bg-surface">{tasks.map(row)}</div>
@@ -510,8 +553,28 @@ export default function NurtureSection() {
         </p>
       )}
 
+      {/* 已结束（2026-09-28 新增）：卡到期（派生）或被下一条任务顶掉（`endedAt`）。
+          记录与点列表都留着 —— 它是"这张卡什么时候上的、收了几次"的凭据，只是不再提醒 */}
+      {ended.length ? (
+        <>
+          <div className="flex items-baseline justify-between px-3.5 pb-1 pt-4">
+            <span className="flex items-baseline gap-1.5 text-sm text-ink-3">
+              <span className="w-4.5 flex-none text-center font-serif text-sm text-gold-hi">
+                {no()}
+              </span>
+              已结束 · {ended.length} 条
+            </span>
+            <span className="text-sm text-ink-3">不再提醒 · 可删除</span>
+          </div>
+          <div className="mx-3.5 overflow-hidden rounded-md border border-line-soft bg-surface">{ended.map(row)}</div>
+        </>
+      ) : null}
+
       <div className="flex items-baseline justify-between px-3.5 pb-1 pt-4">
-        <span className="text-sm text-ink-3">计划清单 · {plans.length} 条</span>
+        <span className="flex items-baseline gap-1.5 text-sm text-ink-3">
+          <span className="w-4.5 flex-none text-center font-serif text-sm text-gold-hi">{no()}</span>
+          计划清单 · {plans.length} 条
+        </span>
         <span className="text-sm text-ink-3">未开始不记状态 · 可点「开始」转正</span>
       </div>
       {plans.length ? (

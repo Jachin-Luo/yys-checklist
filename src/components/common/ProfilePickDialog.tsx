@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import Icon from '../icons/Icon';
 import { btn, option } from './controls';
-import { useModalFocus } from '../../hooks/useModalFocus';
+import Modal from './Modal';
 import { aliveProfiles, useSessionStore } from '../../stores/session';
 import { useUiStore } from '../../stores/ui';
 
@@ -54,9 +54,6 @@ export default function ProfilePickDialog() {
     [profiles, session?.profileId],
   );
 
-  /* 未打开时组件 `return null`，所以"是否可见"必须显式传进去，否则 effect 不会重跑 */
-  const ref = useModalFocus(Boolean(pickState), () => answerPick(null));
-
   useEffect(() => {
     if (!pickState) return;
     const available = new Set(others.map((p) => p.id));
@@ -75,31 +72,35 @@ export default function ProfilePickDialog() {
 
   const action = pickState.checked ? '取消' : '勾选';
 
+  /* 骨架在 `Modal`（2026-09-28 抽出）；这里只提供标题、主体与页脚。
+     主体那道分隔线用 `-mx-4` 出血到面板边（`Modal` 的主体自带 `px-4`）—— 与抽出前一致 */
   return (
-    <div
-      className="fixed inset-0 z-[60] flex items-center justify-center bg-scrim/60 px-4 backdrop-blur-sm"
-      onClick={() => answerPick(null)}
+    <Modal
+      title={`同时${action}到其他账号`}
+      desc={<span title={pickState.itemName}>「{pickState.itemName}」</span>}
+      icon="kasane"
+      onClose={() => answerPick(null)}
+      footer={
+        <>
+          <button
+            type="button"
+            onClick={() => answerPick(null)}
+            className={`${btn.base} ${btn.md} ${btn.out}`}
+          >
+            取消
+          </button>
+          <button
+            type="button"
+            disabled={!selected.length}
+            onClick={confirm}
+            className={`${btn.base} ${btn.md} ${btn.pri}`}
+          >
+            {selected.length ? `${action}到 ${selected.length} 个账号` : `请选择账号`}
+          </button>
+        </>
+      }
     >
-      <div
-        ref={ref}
-        tabIndex={-1}
-        role="dialog"
-        aria-modal="true"
-        aria-label={`${action}其他账号的完成状态`}
-        onClick={(e) => e.stopPropagation()}
-        className="w-full max-w-sm overflow-hidden rounded-2xl border border-line bg-surface-3 shadow-panel"
-      >
-        <div className="flex items-start gap-2 px-4 py-3.5">
-          <Icon name="kasane" size={16} className="mt-0.5 flex-none text-gold-hi" />
-          <div className="min-w-0 flex-1">
-            <h2 className="font-serif text-lg tracking-card text-ink">同时{action}到其他账号</h2>
-            <p className="mt-1 truncate text-sm text-ink-2" title={pickState.itemName}>
-              「{pickState.itemName}」
-            </p>
-          </div>
-        </div>
-
-        <div className="border-t border-line-faint px-4 py-2.5">
+        <div className="-mx-4 border-t border-line-faint px-4 pt-2.5">
           {/* 当前账号做成一条「压上来的纸片」（`bg-surface` 浮在面板底上）：
               它与下方可选的账号行在**材质上就分出"只读 / 可点"两档**，
               不需要靠一行小字去解释"它为什么不能点"。 */}
@@ -151,27 +152,6 @@ export default function ProfilePickDialog() {
             </p>
           )}
         </div>
-
-        <footer className="flex justify-end gap-2 border-t border-line-faint px-4 py-2.5">
-          <button
-            type="button"
-            onClick={() => answerPick(null)}
-            className={`${btn.base} ${btn.md} ${btn.out}`}
-          >
-            取消
-          </button>
-          <button
-            type="button"
-            disabled={!selected.length}
-            onClick={confirm}
-            className={`${btn.base} ${btn.md} ${btn.pri}`}
-          >
-            {selected.length
-              ? `${action}到 ${selected.length} 个账号`
-              : `请选择账号`}
-          </button>
-        </footer>
-      </div>
-    </div>
+    </Modal>
   );
 }

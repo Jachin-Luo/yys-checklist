@@ -1,7 +1,15 @@
 import { create } from 'zustand';
 import { api } from '../api';
 import type { NurturePlans } from '../api/types';
-import { clearPointDone, makeNurture, markPointDone, type NurtureRecord } from '../domain/nurture';
+import {
+  clearPointDone,
+  endRecord,
+  isRunning,
+  makeNurture,
+  markPointDone,
+  type NurtureRecord,
+} from '../domain/nurture';
+import { dayKey } from '../domain/checkLog';
 import { useSessionStore } from './session';
 
 /**
@@ -78,11 +86,35 @@ export const useNurtureStore = create<NurtureState>((set, get) => {
 
     applyPlans: (records) => set({ records, error: null }),
 
-    add: (base, hours, delay, started) =>
-      persist([makeNurture(base, hours, started, new Date(), delay), ...get().records]),
+    /**
+     * 开始一条新记录（2026-09-28 起带"同时只能有一个进行中任务"的约束）。
+     *
+     * **开始新任务 = 结束旧的**：把此前还在进行中的那条盖上 `endedAt`（转入「已结束」——
+     * 记录与点列表都留着，只是不再提醒、不再算进行中）。判定用 `isRunning`，所以
+     * "卡早就到期的旧任务"本来就是已结束，不会被重复盖章、也不会多写一次盘。
+     * 「仅存计划」（`started = false`）不碰任何既有记录。
+     */
+    add: (base, hours, delay, started) => {
+      const now = new Date();
+      const next = makeNurture(base, hours, started, now, delay);
+      const rest = started
+        ? get().records.map((r) => (isRunning(r, now) ? endRecord(r, now) : r))
+        : get().records;
+      return persist([next, ...rest]);
+    },
 
-    promote: (id) =>
-      persist(get().records.map((r) => (r.id === id ? { ...r, started: true } : r))),
+    /** 计划 → 任务。转正那一刻就是"上卡那一刻"：补记起始日期，并结束其它进行中的任务 */
+    promote: (id) => {
+      const now = new Date();
+      return persist(
+        get().records.map((r) => {
+          if (r.id === id) {
+            return { ...r, started: true, endedAt: undefined, baseDate: r.baseDate ?? dayKey(now) };
+          }
+          return isRunning(r, now) ? endRecord(r, now) : r;
+        }),
+      );
+    },
 
     markPoint: (id, index, at = new Date()) =>
       persist(get().records.map((r) => (r.id === id ? markPointDone(r, index, at) : r))),

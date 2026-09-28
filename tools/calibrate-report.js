@@ -29,7 +29,6 @@ const groups = {
   gain: [],      // 收益数值待核
   deadline: [],  // 截止日 / 下线日待核
   timeWindow: [],// 时间窗待核（来源 NGA，未全面核对）
-  anchor: [],    // 版本 / 赛季锚点待确认
 };
 
 for (const it of items) {
@@ -49,12 +48,6 @@ for (const it of items) {
     groups.timeWindow.push({
       id: it.id, name: it.name, window: it.time + (it.timeEnd ? `–${it.timeEnd}` : ''), detail: it.timeNote || '',
     });
-  }
-}
-for (const key of ['version', 'season']) {
-  const anchor = (metaDb.meta.periods || {})[key];
-  if (anchor) {
-    groups.anchor.push({ cycle: key, key: anchor.key, startAt: anchor.startAt, detail: anchor.note || '' });
   }
 }
 
@@ -87,18 +80,12 @@ const md = [
     ? groups.timeWindow.map((g) => `- [ ] \`${g.id}\` ${g.name} —— ${g.window}｜${g.detail}`).join('\n')
     : '_无_',
   '',
-  '## 四、版本 / 赛季锚点待确认',
-  '',
-  groups.anchor.length
-    ? groups.anchor.map((g) => `- [ ] \`${g.cycle}\` ${g.key} @ ${g.startAt} —— ${g.detail}`).join('\n')
-    : '_无_',
-  '',
   '---',
   '',
   '### 核对流程',
   '',
   '1. 逐项查证（优先官方公告 / 游戏内截图，AI 水文站不采信）；',
-  '2. 改 `src/db/items.db.json`（条目）或 `src/db/meta.db.json`（版本锚点）；',
+  '2. 改 `src/db/items.db.json`（条目）或 `src/db/limited.db.json`（限时 / 版本活动条目）；',
   '3. `npm run db:check` 必须 0 错误；',
   '4. 本清单对应项勾选后，重跑本脚本确认已移出。',
   '',
@@ -124,7 +111,6 @@ writeFile('reports/calibration.md', [
   `| 收益数值 | ${groups.gain.length} |`,
   `| 截止日 / 下线日 | ${groups.deadline.length} |`,
   `| 时间窗 | ${groups.timeWindow.length} |`,
-  `| 版本 / 赛季锚点 | ${groups.anchor.length} |`,
   `| **合计** | **${total}** |`,
   '',
   '## 数据核对报告（tools/build.js 产出）',
@@ -158,10 +144,8 @@ writeFile('tools/templates/version-intake.md', [
   '',
   '## 0. 前置',
   '',
-  '1. 更新 `src/db/meta.db.json` 的 `meta.periods.version`（`key` = 版本号，`startAt` = 开服时刻，惯例 09:00）；',
-  '2. 赛季同步更新 `meta.periods.season`。',
-  '',
-  '> 改这一处，全部 `cycle` 为 `version` / `season` 的条目勾选状态**自动失效**（这正是期望行为）。',
+  '1. 更新 `src/db/limited.db.json` 里当期版本的条目（2026-09-28 起版本活动与限时活动同属 `limited`，没有单独的版本周期）；',
+  '2. 活动结束的条目填 `until`（到期自动归档下线）—— 合并后**不再有"随版本锚点自动翻篇"**这回事，翻篇只能靠 `until`。',
   '',
   '## 1. 录入清单',
   '',

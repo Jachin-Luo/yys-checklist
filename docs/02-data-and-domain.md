@@ -1,6 +1,6 @@
 # 02 · 数据层与领域逻辑
 
-> 对应数据版本：`2026.09.20-常驻条目按次数拆分` ｜ 事实核对日期：2026-09-20
+> 对应数据版本：`2026.09.28-周期收口为四类` ｜ 事实核对日期：2026-09-28
 > 本文回答：**数据长什么样、从哪来、到哪去、规则写在哪个函数里**。
 > 本文只描述结构与规模，不逐条罗列条目明细 —— 明细以 `src/db/*.db.json` 为唯一真值。
 
@@ -11,12 +11,12 @@
 只定义形状，不含实现。两个导出：
 
 - `DataScope`：`{ userId, profileId }` —— **显式双参数**，所有用户数据方法都要求它，Mock 用 `assertScope` 做越权校验。
-- `ApiClient`：31 个方法，分五组（2026-09-15 新增 `saveCheckLog`）：
+- `ApiClient`：32 个方法，分五组（2026-09-15 新增 `saveCheckLog`；2026-09-28 新增 `updateItem`）：
 
 | 组 | 方法 |
 | --- | --- |
 | 系统 / 元数据 | `getMeta`、`getBootstrap` |
-| 条目 | `listItems`、`getItem`、`addCustomItem`、`removeCustomItem`、`hideItem`、`restoreItem`、`resetItemLibrary`、`saveOrder` |
+| 条目 | `listItems`、`getItem`、`addCustomItem`、`updateItem`（自建整体覆盖 / 预设写字段改写）、`removeCustomItem`、`hideItem`、`restoreItem`、`resetItemLibrary`、`saveOrder` |
 | 工具资料 | `getYuhun`、`getBounty`、`getSouls` |
 | 用户与账号 | `getSession`、`updateUser`、`listProfiles`、`createProfile`、`updateProfile`、`deleteProfile`、`switchProfile` |
 | 用户数据（勾选 / 视图 / 覆盖） | `getState`、`setChecked`、`clearChecked`、`clearAllChecked`、`getView`、`saveView`、`getOverrides`、`saveOverrides` |
@@ -30,10 +30,10 @@
 | --- | --- |
 | `Item` | 条目实体（周期、痛感来源字段、`gain`、时间窗、`isAutoHub` 等）。**注意：字段 `reward` / `entry` / `action` 已被有意删除**，文件内有长注释说明原因 |
 | `Gain` | 固定（保底）收益，三个可选数值字段：`jade`（勾玉）、`blackFrag`（黑碎）、`blueTicket`（蓝票）。**缺省 = 收益浮动，不进统计** |
-| `Meta` | 元数据：`version`、`dataVersion`、`resetHour`（= 0）、`periods` 锚点、`dicts` 等 |
+| `Meta` | 元数据：`version`、`dataVersion`、`resetHour`（= 0）、`dicts` 等 |
 | `DictEntry` / `SortOption` / `ViewDefaults` | 字典行、排序选项、视图默认值 |
 | `User` / `Profile` / `Session` | 用户、账号、会话 |
-| `CheckState` / `ViewPrefs` / `ItemOverrides` | 用户数据三件套 |
+| `CheckState` / `ViewPrefs` / `ItemOverrides` | 用户数据三件套。`ItemOverrides` = `custom`（自建条目）+ `hidden`（隐藏的预设 id）+ `order`（自定义顺序）+ `patches`（**预设字段改写**，稀疏表：键不存在 = 不改、`null` = 清空该字段，见 `domain/itemPatch`） |
 | `BootstrapPayload` | 首屏聚合载荷（meta + items + session + state + view + overrides + **log**） |
 | `ItemDraft` / `ProfileDraft` | 新增/编辑入参 |
 | `UserDataBundle` | 备份载体（导入导出用）：每个账号含 state / view / overrides / **log**（勾选日志） |
@@ -107,18 +107,19 @@ VITE_API_MODE === 'http' ? new HttpApi(baseURL) : new MockApi()
 
 | 文件 | 顶层 key | 规模 |
 | --- | --- | --- |
-| `items.db.json` | `items: Item[]` | **69 条**真正的常驻（每日 36 / 每周 29 / 每月 4） |
-| `limited.db.json` | `items: Item[]` | **34 条**非常驻（活动期每日 4 / 限时活动 24 / 版本 5 / 赛季 1；带 `until` 的到期自动下线，版本与赛季条目随版本维护） |
+| `items.db.json` | `items: Item[]` | **73 条**真正的常驻（每日 38 / 每周 31 / 每月 4） |
+| `limited.db.json` | `items: Item[]` | **34 条**非常驻（活动期每日 4 / 限时活动 30 —— 含 2026-09-28 并入的版本 / 赛季活动 6 条；带 `until` 的到期自动下线） |
 | `yuhun.db.json` | `dungeons[]`、`dayTips[]`、`excluded[]` | 副本 **11**、日提示 **10**、排除项 **8** |
 | `souls.db.json` | `rows: SoulRow[]` | **70** 种御魂（`effect2` 70 条；`effect4` 57 条，13 种首领御魂无四件套） |
 | `bounty.db.json` | `shikigami[]`、`spots[]`、`shikigamiSpots[]`、`shikigamiClues[]` | 式神 **39**、地点 **64**、出处关系 **148**、线索词 **116** |
-| `meta.db.json` | `meta`、`dicts[]`、`sortOptions[]`、`viewDefaults` | 字典 **50** 行（cycle 7 + gainKind 18 + weekday 7 + yuhunSection 5 + spotKind 6 + soulCategory 7）、排序选项 5 |
+| `meta.db.json` | `meta`、`dicts[]`、`sortOptions[]`、`viewDefaults` | 字典 **47** 行（cycle 4 + gainKind 18 + weekday 7 + yuhunSection 5 + spotKind 6 + soulCategory 7）、排序选项 5 |
 | `users.db.json` | `users`、`profiles`、`states`、`viewPrefs`、`itemOverrides`、`sessions` | 各 1 条（`u_local` / `p_main`） |
 | `dataVersion.db.json` | `versions: VersionRow[]` | **7** 条（对应 meta / items / limited / yuhun / bounty / souls / users） |
 
-常驻 + 活动总计 **103 条**条目。
+常驻 + 活动总计 **107 条**条目。
 
-`meta` 关键字段：`version`（应用版本，如 `1.4.0`）、`dataVersion`（如 `2026.09.17-十周年二阶段`）、`resetHour`（= 0）、`periods`（版本 / 赛季锚点）。
+`meta` 关键字段：`version`（应用版本，如 `1.4.0`）、`dataVersion`（如 `2026.09.28-周期收口为四类`）、`resetHour`（= 0）。
+（`periods` 版本 / 赛季锚点已于 2026-09-28 随周期合并删除，见 §7.1。）
 
 ### 4.2 条目字段规格
 
@@ -156,7 +157,8 @@ src/domain/enums.ts 的字面量联合类型  ←── 双向校验 ──→  
 | --- | --- | --- |
 | `enums.ts` | `CYCLE` / `Cycle`、`EVENT_CYCLE`、`GAIN_KIND` / `GainKind`、`TOP_GAIN_KIND`、`SORT_BY` / `SortBy`、`DICT_TYPE` / `DictType`、`ORIGIN` / `Origin`、`GAIN_CURRENCY` / `GainCurrency`、`DictRow` | 编译期唯一的枚举真相 |
 | `reset.ts` | `ResetCtx`、`periodStartOf`、`mergeChecked`、`isArchived`、`activeItems`、`daysUntilExit` | 周期重置（**时间戳比对，不用定时器**）与到期过滤 |
-| `merge.ts` | `mergeItems`、`effectiveView`、`emptyOverrides`、`buildMeta`；再导出 `mergeChecked`、`ResetCtx` | 种子 + 覆盖层合并规则（全项目唯一） |
+| `merge.ts` | `mergeItems`、`effectiveView`、`emptyOverrides`、`buildMeta`；再导出 `mergeChecked`、`ResetCtx` | 种子 + 覆盖层合并规则（全项目唯一）：隐藏 → 盖预设改写 → 追加自建 |
+| `itemDraft.ts` / `itemPatch.ts` | `applyDraft` / `draftFromItem` / `cleanGain`；`applyPatch` / `diffPatch` / `sanitizePatches` / `hasPatch` | 录入草稿与预设改写的**数据规则**（空值语义、改写求差、外部字节净化），Mock 与备份导入共用 |
 | `weight.ts` | `weightOf`、`cycleRank`、`WEIGHT_LEGEND` | 痛感分计算与图例 |
 | `sort.ts` | `SortContext`、`effectiveSortBy`、`seedOrder`、`moveBefore`、`moveAfter`、`moveWithinGroup`、`buildComparator`、`VisibilityContext`、`isVisible` | 排序、置顶、自定义顺序、可见性 |
 | `countdown.ts` | `parseTs`、`daysLeft`、`DeadlineLevel`、`DeadlineBadge`、`deadlineBadge`、`TimeWindowState`、`TimeWindow`、`timeWindow`、`appliesToday` | 截止倒计时与时间窗状态（**只提示，不限制勾选**） |
@@ -178,7 +180,7 @@ src/domain/enums.ts 的字面量联合类型  ←── 双向校验 ──→  
 
 ### 7.1 周期重置：0 点口径 + 时间戳比对
 
-- 每日与周常都在 0 点刷新（周常落在周一 0 点；`meta.resetHour` = 0，`resetNote` 里有说明）；版本 / 赛季按开服锚点重置，锚点就是**版本上线当日维护完成的时刻**（通常 9:00）—— 当前版本 `2026-09-09 09:00`、赛年「寻龙逐英」`2026-07-06 06:00`（值在 `src/db/meta.db.json` 的 `meta.periods`）。
+- 每日与周常都在 0 点刷新（周常落在周一 0 点；`meta.resetHour` = 0，`resetNote` 里有说明）；**限时（含版本活动）不自动重置** —— `periodStartOf('limited')` 恒为 0，条目靠 `until` 到期归档下线（2026-09-28 起 `version` / `season` 两个周期并入 `limited`，原来那套 `meta.periods` 锚点机制随之删除）。
 - 实现方式：`domain/reset.periodStartOf` 计算周期起点，`mergeChecked` 在读取时把「上一个周期的勾选」归零 —— **不是靠定时器清数据**。
 - 前台刷新由 `hooks/usePeriodRefresh.ts` 在分钟边界 / 窗口聚焦 / 可见性变化时触发，只重算内存态、不写盘。
 - 结论：**不要在页面里判周期**，也不要在 store 里存「今天是否重置过」。
@@ -187,7 +189,7 @@ src/domain/enums.ts 的字面量联合类型  ←── 双向校验 ──→  
 
 ```text
 痛感分 = 周期权重 + 稀缺性加成 + 固定收益加成
-周期：一次性 / 限时 / 版本 / 赛季 40  >  每月 30  >  每周 20  >  每日 10
+周期：限时 40  >  每月 30  >  每周 20  >  每日 10
 稀缺性：有 deadline 或 until  +15
 固定收益：标注了 gain（具体数值）  +10
 ```

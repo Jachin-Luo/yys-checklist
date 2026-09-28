@@ -4,6 +4,7 @@ import ChecklistEntry from '../components/common/ChecklistEntry';
 import ChecklistItem from '../components/common/ChecklistItem';
 import { groupChecklist } from '../domain/grouping';
 import { EmptyState, SectionTitle } from '../components/common/EmptyState';
+import { sectionNo } from '../components/common/sectionNo';
 import HubCard from '../components/common/HubCard';
 import PageHead from '../components/common/PageHead';
 import SummaryBar from '../components/common/SummaryBar';
@@ -55,6 +56,9 @@ export default function TodayPage({ variant }: { variant: 'mobile' | 'desktop' }
   /* 距明天 0 点（下一次重置）还有多久 —— 结束点与勾选重置同源，见 domain/reset.periodEndOf */
   const countdown = usePeriodCountdown('daily');
   const [tab, setTab] = useState<'resident' | 'event'>('resident');
+  /* 分组序号（壹/贰/叁…）：按**实际渲染顺序**发号，所以两个 Tab 的编号各自从壹起，
+     条件渲染的"已结"分区也不会留下空号 —— 见 `sectionNo` 的说明 */
+  const no = sectionNo();
 
   const isEvent = (it: Item) => Boolean(it.until || it.deadline);
 
@@ -136,7 +140,7 @@ export default function TodayPage({ variant }: { variant: 'mobile' | 'desktop' }
         <>
           {hub && !hubDone ? <HubCard item={hub} /> : null}
 
-          <SectionTitle icon="ema" count={pendingResident.length}>
+          <SectionTitle no={no()} icon="ema" count={pendingResident.length}>
             今天该做
           </SectionTitle>
           {pendingResident.length ? (
@@ -154,7 +158,7 @@ export default function TodayPage({ variant }: { variant: 'mobile' | 'desktop' }
 
           {residentDoneCount > 0 ? (
             <>
-              <SectionTitle icon="done" count={residentDoneCount}>
+              <SectionTitle no={no()} icon="done" count={residentDoneCount}>
                 今天已结
               </SectionTitle>
               <div className={CHECKLIST_GRID}>
@@ -176,7 +180,7 @@ export default function TodayPage({ variant }: { variant: 'mobile' | 'desktop' }
         </>
       ) : (
         <>
-          <SectionTitle icon="chochin" count={pendingEvent.length}>
+          <SectionTitle no={no()} icon="chochin" count={pendingEvent.length}>
             活动任务
           </SectionTitle>
           {pendingEvent.length ? (
@@ -194,7 +198,7 @@ export default function TodayPage({ variant }: { variant: 'mobile' | 'desktop' }
 
           {doneEvent.length > 0 ? (
             <>
-              <SectionTitle icon="done" count={doneEvent.length}>
+              <SectionTitle no={no()} icon="done" count={doneEvent.length}>
                 今天已结
               </SectionTitle>
               <div className={CHECKLIST_GRID}>

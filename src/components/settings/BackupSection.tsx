@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import Icon from '../icons/Icon';
 import CollapsibleSection from '../common/CollapsibleSection';
+import { btn, input, tx } from '../common/controls';
 import type { BundleSummary } from '../../domain/backup';
 import { copyText } from '../../services/clipboard';
 import { applyImportText, exportBackupText, prepareImportText } from '../../services/backupService';
@@ -31,12 +32,14 @@ interface Pending {
 
 const CONFIRM_WORD = '导入';
 
-const btn =
-  'inline-flex cursor-pointer items-center gap-1 rounded-sm border border-line px-2 py-1 text-sm text-ink-2 transition-colors duration-120 hover:border-line disabled:cursor-not-allowed disabled:opacity-50';
+/* 行内小按钮走 `btn` 配方的小号档 —— 原先本文件自己拼了一份（`px-2 py-1 text-sm`），
+   与同页走配方的同款小按钮差着一档字号；`btn.out` 是"描边按钮"那一支 */
+const rowBtn = `${btn.base} ${btn.sm} ${btn.out}`;
 
-/* 去掉 `outline-none`，焦点环交给 `styles/base.css` 的全局 `:focus-visible` */
-const area =
-  'mt-1.5 w-full resize-y rounded-sm border border-line bg-surface-3 px-2 py-1.5 font-mono text-base leading-relaxed text-ink transition-colors duration-120 focus:border-gold-hi';
+/* 文本域走配方（`controls.input` 的 `area` + `code` 形态）：可拉伸、等宽、填充底 ——
+   备份正文是 JSON，代码块的底与字体要与普通输入框区分开（`code` 里的 `bg-surface-3`
+   与 `base` 的 `bg-surface` 同属性，靠它在色板里更靠后而生效） */
+const area = `mt-1.5 ${input.base} ${input.area} ${input.code}`;
 
 function SummaryChips({ summary }: { summary: BundleSummary }) {
   const cells: Array<[string, number]> = [
@@ -53,7 +56,7 @@ function SummaryChips({ summary }: { summary: BundleSummary }) {
   return (
     <div className="mt-1.5 flex flex-wrap gap-1">
       {cells.map(([label, value]) => (
-        <span key={label} className="rounded-sm bg-surface px-1.5 py-0.5 text-sm text-ink-2">
+        <span key={label} className={`rounded-sm bg-surface px-1.5 py-0.5 ${tx.label} text-ink-2`}>
           {label} <b className="font-medium text-ink">{value}</b>
         </span>
       ))}
@@ -64,7 +67,7 @@ function SummaryChips({ summary }: { summary: BundleSummary }) {
 function Message({ msg }: { msg: { tone: Tone; text: string } }) {
   const color = msg.tone === 'ok' ? 'text-success-deep' : msg.tone === 'warn' ? 'text-warn' : 'text-danger';
   return (
-    <p className={`flex items-start gap-1.5 text-sm leading-relaxed ${color}`}>
+    <p className={`flex items-start gap-1.5 ${tx.message} ${color}`}>
       {msg.tone === 'ok' ? (
         <Icon name="check" size={12} className="mt-0.5 flex-none" />
       ) : (
@@ -150,7 +153,7 @@ export default function BackupSection() {
 
   const exportPanel = (
     <>
-      <p className="text-sm leading-relaxed text-ink-3">
+      <p className={`${tx.note} text-ink-3`}>
         备份文本包含<b className="text-ink-2">全部账号的全部配置</b>：勾选记录、勾选日志、
         视图偏好、自建条目与排序、<b className="text-ink-2">寮时间、结界寄养任务</b>。
         复制后自行保存（发给自己 / 存备忘录都行），换设备或清理浏览器数据时粘回来即可恢复。
@@ -169,12 +172,12 @@ export default function BackupSection() {
           type="button"
           disabled={!exportText}
           onClick={() => void onCopy()}
-          className="inline-flex cursor-pointer items-center gap-1 rounded-sm border border-line bg-gold-soft px-2 py-1 text-sm text-gold-hi transition-colors duration-120 hover:border-gold-hi disabled:cursor-not-allowed disabled:opacity-40"
+          className={`${btn.base} ${btn.sm} ${btn.sec}`}
         >
           <Icon name="kasane" size={11} />
           复制全部
         </button>
-        <button type="button" disabled={busy} onClick={() => void onExport()} className={btn}>
+        <button type="button" disabled={busy} onClick={() => void onExport()} className={rowBtn}>
           <Icon name="refresh" size={11} />
           重新生成
         </button>
@@ -184,7 +187,7 @@ export default function BackupSection() {
 
   const importPanel = (
     <>
-      <p className="text-sm leading-relaxed text-ink-3">
+      <p className={`${tx.note} text-ink-3`}>
         把之前保存的备份文本<b className="text-ink-2">整段粘贴</b>到下面，点「校验内容」。
         校验通过后会先给你看这份备份里有什么，确认后才会写入。
       </p>
@@ -206,7 +209,7 @@ export default function BackupSection() {
           type="button"
           disabled={busy || !importText.trim()}
           onClick={() => void onValidate()}
-          className="inline-flex cursor-pointer items-center gap-1 rounded-sm border border-line px-2 py-1 text-sm text-ink-2 transition-colors duration-120 hover:border-line disabled:cursor-not-allowed disabled:opacity-40"
+          className={rowBtn}
         >
           校验内容
         </button>
@@ -218,7 +221,7 @@ export default function BackupSection() {
             setPending(null);
             setMsg(null);
           }}
-          className={btn}
+          className={rowBtn}
         >
           清空
         </button>
@@ -243,6 +246,8 @@ export default function BackupSection() {
                 setMode(key);
                 setMsg(null);
               }}
+              /* 页签走 `Segmented` 的同档字号（12px = `text-sm`）但铺满整行 ——
+                 `Segmented` 的胶囊轨道是 `flex-none` 单行，在这里会缩成一小截 */
               className={`flex-1 cursor-pointer rounded-sm px-2 py-1.5 text-sm transition-colors duration-120 ${
                 mode === key ? 'bg-surface text-ink shadow-sm' : 'text-ink-2 hover:text-ink'
               }`}
@@ -263,7 +268,7 @@ export default function BackupSection() {
 
         {pending ? (
           <div className="mt-2 rounded-md border border-danger-line bg-danger-soft px-3 py-2">
-            <p className="text-sm leading-relaxed text-danger">
+            <p className={`${tx.message} text-danger`}>
               导入会<b>覆盖</b>当前全部账号的勾选记录、视图偏好、自建条目、寮时间与寄养任务，
               且不可撤销 —— 建议先切到「导出」留一份当前的。
             </p>
@@ -272,7 +277,7 @@ export default function BackupSection() {
             {pending.warnings.length ? (
               <ul className="mt-2 space-y-0.5">
                 {pending.warnings.map((w) => (
-                  <li key={w} className="text-sm leading-relaxed text-warn">
+                  <li key={w} className={`${tx.message} text-warn`}>
                     · {w}
                   </li>
                 ))}
@@ -280,19 +285,26 @@ export default function BackupSection() {
             ) : null}
 
             <div className="mt-2 flex flex-wrap items-center gap-2">
-              <span className="text-sm text-ink-2">输入「{CONFIRM_WORD}」以确认</span>
+              <span className={`${tx.label} text-ink-2`}>输入「{CONFIRM_WORD}」以确认</span>
               <input
                 value={typed}
                 onChange={(e) => setTyped(e.target.value)}
                 aria-label={`输入${CONFIRM_WORD}以确认`}
                 placeholder={CONFIRM_WORD}
-                className="w-20 rounded-sm border border-line bg-surface px-2 py-1 text-lg text-ink transition-colors duration-120 focus:border-danger"
+                /* 这一处**不套 `input` 配方**：它是危险动作的入口，聚焦要转朱红，而配方的
+                   `focus:border-gold-line` 与 `focus:border-danger` 是**同属性、同变体**的两个类，
+                   胜负由 Tailwind 的生成顺序定，不由 className 里的书写顺序定 ——
+                   实测产物里 `.focus\:border-danger:focus`(偏移 32529) **早于**
+                   `.focus\:border-gold-line:focus`(32758)，所以哪怕写在后面也赢不了，
+                   反而会得到一个"看着像生效了、其实一直是金边"的静默失效。
+                   规格（8px 圆角 / 紧凑档高度 / ink-4 占位色）与配方保持一致 */
+                className="h-7 w-20 rounded-xs border border-line bg-surface px-2 text-sm text-ink transition-colors duration-120 placeholder:text-ink-4 focus:border-danger"
               />
               <button
                 type="button"
                 disabled={typed.trim() !== CONFIRM_WORD || busy}
                 onClick={() => void onConfirm()}
-                className="cursor-pointer rounded-sm border border-crimson-soft px-2 py-1 text-sm text-crimson transition-colors duration-120 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+                className={`${btn.base} ${btn.sm} ${btn.danger}`}
               >
                 覆盖导入
               </button>
@@ -302,7 +314,7 @@ export default function BackupSection() {
                   setPending(null);
                   setTyped('');
                 }}
-                className={`${btn} bg-surface`}
+                className={rowBtn}
               >
                 取消
               </button>
@@ -310,7 +322,7 @@ export default function BackupSection() {
           </div>
         ) : null}
 
-        <p className={`text-sm leading-relaxed text-ink-3 ${msg || exportSummary || pending ? 'mt-2' : ''}`}>
+        <p className={`${tx.note} text-ink-3 ${msg || exportSummary || pending ? 'mt-2' : ''}`}>
           备份文本里也包含账号信息（名称 / 区服 / UID）。请妥善保管，不要随意分享。
           唯一的例外是<b className="text-ink-2">冷启动引导标记</b> —— 它属于"这台设备看过引导没有"的状态，
           不是配置，因此不随备份迁移：换设备后重看一次引导是正常的。

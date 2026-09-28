@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import Icon from '../../components/icons/Icon';
 import CollapsibleSection from '../../components/common/CollapsibleSection';
+import { btn, input, tag, tx } from '../../components/common/controls';
 import type { Profile } from '../../api/types';
 import { aliveProfiles, useSessionStore } from '../../stores/session';
 import { useUiStore } from '../../stores/ui';
@@ -15,13 +16,15 @@ interface FormState {
 
 const EMPTY: FormState = { name: '', server: '', channel: '', uid: '', level: '' };
 
-/* 去掉 `outline-none`：它把浏览器默认焦点环一起去掉了，只剩 1px 边框变色。
-   焦点环现在由 `styles/base.css` 的全局 `:focus-visible` 统一提供 */
-const inputCls =
-  'w-full rounded-sm border border-line bg-surface px-2 py-1.5 text-lg text-ink transition-colors duration-120 focus:border-gold-hi disabled:opacity-50';
+/* 输入框走配方（`controls.input`）—— 不在这里拼圆角与字号（2026-09-28 全站统一，
+   理由见该配方的注释）。焦点环仍由 `styles/base.css` 的全局 `:focus-visible` 提供 */
+const inputCls = `${input.base} ${input.md}`;
 
-const btn =
-  'cursor-pointer rounded-sm border border-line px-2 py-1 text-sm text-ink-2 transition-colors duration-120 hover:border-line disabled:cursor-not-allowed disabled:opacity-50';
+/* 行内小按钮统一取 `btn` 配方的**小号**档（`btn.base + btn.sm`）——
+   2026-09-28 前这里是本文件自己拼的一份（`px-2 py-1 text-sm`），
+   与「清空记录」「关于」里走配方的同款小按钮差着一档字号（12px / 11px）。
+   `btn.sm` 是 11px，与设置页的注脚同档；`btn.md`（12px）留给弹层与主行动。 */
+const rowBtn = `${btn.base} ${btn.sm} ${btn.out}`;
 
 /**
  * 「设置 · 账号」分区（大号 / 小号，设计文档 §6.4）。
@@ -130,7 +133,7 @@ export default function ProfileSection() {
 
   const form_ = editing ? (
     <div className="border-b border-line-faint bg-surface-3 px-3 py-3">
-      <p className="text-sm text-ink-3">{editing === 'new' ? '新建账号' : '编辑账号'}</p>
+      <p className={`${tx.label} text-ink-2`}>{editing === 'new' ? '新建账号' : '编辑账号'}</p>
       <div className="mt-2 grid grid-cols-1 gap-2 md:grid-cols-2">
         <input
           value={form.name}
@@ -168,17 +171,17 @@ export default function ProfileSection() {
           className={inputCls}
         />
       </div>
-      {formError ? <p className="mt-2 text-sm text-danger">{formError}</p> : null}
+      {formError ? <p className={`mt-2 ${tx.message} text-danger`}>{formError}</p> : null}
       <div className="mt-2 flex gap-2">
         <button
           type="button"
           disabled={saving}
           onClick={() => void submit()}
-          className="cursor-pointer rounded-sm border border-line bg-gold-soft px-3 py-1.5 text-sm text-gold-hi transition-colors duration-120 hover:border-gold-hi disabled:opacity-50"
+          className={`${btn.base} ${btn.sm} ${btn.sec}`}
         >
           {editing === 'new' ? '创建' : '保存'}
         </button>
-        <button type="button" onClick={() => setEditing(null)} className={btn}>
+        <button type="button" onClick={() => setEditing(null)} className={rowBtn}>
           取消
         </button>
       </div>
@@ -194,21 +197,24 @@ export default function ProfileSection() {
       <div key={p.id} className="flex flex-wrap items-center gap-2 border-b border-line-faint px-3 py-2.5 last:border-0">
         <span className="min-w-0 flex-1">
           <span className="flex items-center gap-1.5">
-            <span className={`truncate text-lg ${active ? 'font-medium text-ink' : 'text-ink'}`}>{p.name}</span>
+            <span className={`truncate ${tx.rowName} ${active ? 'font-medium text-ink' : 'text-ink'}`}>{p.name}</span>
             {active ? <Icon name="check" size={13} className="flex-none text-gold-hi" /> : null}
             {p.isDefault ? (
-              <span className="flex-none rounded-sm bg-surface-3 px-1.5 py-0.5 text-xs text-ink-3">默认</span>
+              /* 短标记走 `tag` 配方（同一页「自建 / 已改写 / 日常覆盖」也用它）——
+                 原先这是本文件自己拼的一颗（`rounded-sm bg-surface-3 text-xs`），
+                 与「条目管理」里同类的徽章差着圆角与描边 */
+              <span className={`${tag.base} ${tag.mute} text-ink-3`}>默认</span>
             ) : null}
           </span>
-          <span className="mt-0.5 block truncate text-sm text-ink-3">{meta || '未填区服'}</span>
+          <span className={`mt-0.5 block truncate ${tx.note} text-ink-3`}>{meta || '未填区服'}</span>
         </span>
 
         {isAlive && !active ? (
-          <button type="button" onClick={() => void switchProfile(p.id)} className={btn}>
+          <button type="button" onClick={() => void switchProfile(p.id)} className={rowBtn}>
             切换
           </button>
         ) : null}
-        <button type="button" onClick={() => startEdit(p)} className={`flex items-center gap-1 ${btn}`}>
+        <button type="button" onClick={() => startEdit(p)} className={rowBtn}>
           <Icon name="fude" size={12} />
           编辑
         </button>
@@ -218,7 +224,7 @@ export default function ProfileSection() {
             disabled={!canRemove}
             onClick={() => void onArchive(p)}
             title={canRemove ? '归档（可恢复）' : '至少要保留一个账号'}
-            className={`flex items-center gap-1 ${btn}`}
+            className={rowBtn}
           >
             <Icon name="hako" size={12} />
             归档
@@ -227,7 +233,7 @@ export default function ProfileSection() {
           <button
             type="button"
             onClick={() => void restoreProfile(p.id)}
-            className={`flex items-center gap-1 ${btn}`}
+            className={rowBtn}
           >
             <Icon name="restore" size={12} />
             恢复
@@ -238,7 +244,7 @@ export default function ProfileSection() {
           disabled={isAlive && !canRemove}
           onClick={() => void onDelete(p)}
           title={isAlive && !canRemove ? '至少要保留一个账号' : '永久删除'}
-          className="flex cursor-pointer items-center gap-1 rounded-sm border border-danger-line px-2 py-1 text-sm text-danger transition-colors duration-120 hover:bg-danger-soft disabled:cursor-not-allowed disabled:opacity-40"
+          className={`${btn.base} ${btn.sm} ${btn.danger}`}
         >
           <Icon name="trash" size={12} />
           删除
@@ -256,7 +262,7 @@ export default function ProfileSection() {
           type="button"
           disabled={saving}
           onClick={startCreate}
-          className="flex cursor-pointer items-center gap-1 rounded-sm border border-line px-2 py-1 text-sm text-ink-2 transition-colors duration-120 hover:border-line disabled:opacity-50"
+          className={rowBtn}
         >
           <Icon name="plus" size={12} />
           新建账号
@@ -270,7 +276,7 @@ export default function ProfileSection() {
         {archived.map((p) => row(p, false))}
       </div>
 
-      {error ? <p className="bg-surface-3 px-3 pb-2 text-sm text-danger">{error.message}</p> : null}
+      {error ? <p className={`bg-surface-3 px-3 pb-2 ${tx.message} text-danger`}>{error.message}</p> : null}
     </CollapsibleSection>
   );
 }

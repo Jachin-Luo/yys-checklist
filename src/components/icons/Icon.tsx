@@ -21,8 +21,6 @@ export type IconName =
   | 'ougi'
   | 'koyomi'
   | 'chochin'
-  | 'ofuda'
-  | 'nobori'
   /* A3 · 页面导航 */
   | 'chart'
   | 'kanazuchi'

@@ -4,18 +4,16 @@
  * 核心：**靠时间戳比对，不靠定时器**。
  * 定时器在跨天那一刻用户没开应用时根本不执行，跨时区还会错。
  *
- * 7 档周期不是同一种时间模型：
+ * 4 档周期分两种时间模型：
  *   - daily / weekly / monthly：时基周期，按 `meta.resetHour`（阴阳师为 0 点）推算
- *   - version / season：事件驱动周期，锚点取 `meta.periods[cycle].startAt`
- *     —— 版本活动在上线当日维护完成后（通常 9:00）才计入，锚点就是那一刻
- *   - once / limited：不自动重置，只靠 `until` 归档
+ *   - limited：不自动重置，只靠 `until` 归档 —— 版本 / 赛季活动并入这一类后同样如此
+ *     （原 version / season 走 `meta.periods` 锚点，2026-09-28 随周期合并整体退场）
  */
-import type { Item, Meta } from '../api/types';
+import type { Item } from '../api/types';
 import type { Cycle } from './enums';
 
 export interface ResetCtx {
   resetHour: number;
-  periods: Meta['periods'];
 }
 
 const DAY_MS = 86400000;
@@ -52,24 +50,15 @@ export function periodStartOf(it: Item, now: Date, ctx: ResetCtx): number {
       return lastMondayHour(now, ctx.resetHour);
     case 'monthly':
       return firstDayHour(now, ctx.resetHour);
-    case 'version': {
-      const anchor = ctx.periods.version;
-      return anchor ? Date.parse(anchor.startAt) : 0;
-    }
-    case 'season': {
-      const anchor = ctx.periods.season;
-      return anchor ? Date.parse(anchor.startAt) : 0;
-    }
-    case 'once':
     case 'limited':
-      return 0; // 一次性 / 限时：不自动重置，只靠 until 归档
+      return 0; // 限时（含版本活动、"只做一次"的任务）：不自动重置，只靠 until 归档
     default:
       return 0;
   }
 }
 
 /**
- * 该周期**下一次重置的时刻**（即当前周期的结束点）。不自动重置的周期（once / limited）→ null。
+ * 该周期**下一次重置的时刻**（即当前周期的结束点）。不自动重置的周期（limited）→ null。
  *
  * 2026-09-20 新增（用户要求：今日 / 本周 / 本月都显示倒计时）。
  * 它刻意与 `periodStartOf` **共用同一组锚点函数**（`lastHour` / `lastMondayHour` / `firstDayHour`）：

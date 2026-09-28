@@ -1,6 +1,6 @@
 # 03 · 约定、测试与工具链
 
-> 对应数据版本：`2026.09.20-常驻条目按次数拆分` ｜ 事实核对日期：2026-09-20
+> 对应数据版本：`2026.09.28-周期收口为四类` ｜ 事实核对日期：2026-09-28
 > 本文回答：**哪些约束是被工具强制的、口径纪律落在哪个函数、怎么跑测试、数据怎么录入**。
 
 ## 1. 分层铁律与强制手段
@@ -26,6 +26,28 @@
 
 TypeScript 为严格模式（`tsconfig.app.json`），`npm run build` 会先跑 `tsc -b`，类型错误直接中断构建。
 
+### 1.1 类串只有一个出口：控件配方与文字阶梯
+
+`src/components/common/controls.ts` 是全站**样式类串的唯一来源**，两支各管一段：
+
+| 出口 | 管什么 | 档位 |
+| --- | --- | --- |
+| `btn` / `field` / `input` / `chip` / `tag` / `option` / `popover` / `cardBox` / `badge` | **控件**：按钮 / 输入框 / 标签 / 选项行 / 浮层 / 卡片 / 徽章 | 对参考稿 `uiRef/囤囤鼠大作战_控件样式示例.html`，见该文件头部的对应表 |
+| `tx` | **设置页（含全部折叠分区）的文字**：字号 / 字重 / 字距 / 行高 | `cardTitle` 折叠卡标题 13px 衬线 · `settingTitle` 设置行标题 13px 半粗正体 · `label` 12px 中粗 · `rowName` 13px · `note` 11px · `mono` 11px 等宽 · `message` 12px |
+
+> 两个"标题"档**故意不同字族**（折叠卡衬线 / 设置行正体）—— 用户 2026-09-28 定的，别顺手统一。
+
+两条纪律：
+
+1. 组件里**不再拼**控件的圆角 / 高度 / 字号，分区组件里**不再写** `text-sm` / `text-lg` / `text-xs`。
+   需要新形态先在这两支里加一档 —— 参考稿换代两次踩过的坑（同一颗主按钮散在 40 个文件、改参考稿必漏）就是这条的由来。
+2. `tx` **只给字形、不给颜色**：同属性类名相撞时按 Tailwind 的生成顺序决胜，不由 className 的书写顺序定
+   —— 本仓库已栽过两次（`w-full` 对 `w-28`、`focus:border-danger` 对 `focus:border-gold-line`），
+   配方里带一个颜色、调用点再补一个想覆盖它，就是一个"看着写对了、其实没生效"的静默失效。
+
+另有一条下限：**11px 是中文的地板**，说明类文字不许用 `text-2xs`（10px）——
+`uiRef/囤囤鼠大作战_UI审查意见.md` 记过「CJK 在 10px 下笔画会糊」，项目此前已把字号整档上抬过一次。
+
 ## 2. 口径纪律的代码落点
 
 改动统计 / 勾选 / 显示相关代码前，先确认没有破坏以下五条：
@@ -48,8 +70,7 @@ TypeScript 为严格模式（`tsconfig.app.json`），`npm run build` 会先跑 
 | 每日 | 0 点刷新 | `meta.resetHour` = 0 |
 | 每周 | 周一 0 点刷新 | 同上 |
 | 每月 | 自然月（1 日 0 点起算） | 同上 |
-| 版本 | 开服锚点 = 上线当日维护完成时刻（通常 9:00）`2026-09-09 09:00` | `meta.periods.version` |
-| 赛季 | 赛年「寻龙逐英」锚点 `2026-07-06 06:00` | `meta.periods.season` |
+| 限时 | **不自动重置**（`periodStartOf` 恒 0）：条目靠 `until` 到期归档下线 | —— |
 
 - 重置**靠时间戳比对**（`domain/reset.periodStartOf` + `mergeChecked`），不靠定时器清数据。
 - 页面顶部的自然日期（`domain/dateLabel.ts`）纯展示，与勾选重置口径无关 —— 这是刻意分离的，别去「修」它。
@@ -64,32 +85,38 @@ TypeScript 为严格模式（`tsconfig.app.json`），`npm run build` 会先跑 
 | 运行器 | Vitest 2，`environment: 'node'`，`include: ['src/**/*.test.ts']` |
 | 位置约定 | **测试与被测代码同目录**（无独立 `tests/` 目录） |
 | localStorage 垫片 | `src/test/memoryStorage.ts`（`MemoryStorage` 记录每次 `setItem`；`installMemoryStorage()` 注入 `window.localStorage`） |
-| 总量 | **21 个测试文件 / 302 个用例** |
+| 总量 | **27 个测试文件 / 407 个用例**（2026-09-28 按 `npm test` 实测重算） |
 
 ### 4.2 分布
 
 | 测试文件 | 用例数 |
 | --- | --- |
-| `api/mock/contract.test.ts` | 21 |
+| `api/mock/contract.test.ts` | 31（含 2026-09-28 新增的 `updateItem` 三条：改写自建 / 改写预设并清除改写 / 未知 id 报错） |
 | `api/mock/persistence.test.ts` | 7 |
 | `domain/autoDaily.test.ts` | 22 |
-| `domain/backup.test.ts` | 27 |
+| `domain/backup.test.ts` | 30 |
 | `domain/bounty.test.ts` | 21 |
 | `domain/calendar.test.ts` | 7 |
-| `domain/checkLog.test.ts` | 15 |
+| `domain/cardDisplay.test.ts` | 10 |
+| `domain/checkLog.test.ts` | 17 |
 | `domain/dateLabel.test.ts` | 10 |
-| `domain/domain.test.ts` | 26（reset / sort / weight / merge / countdown 跨天跨周跨月跨版本跨赛季边界） |
+| `domain/domain.test.ts` | 33（reset / sort / weight / merge / countdown 跨天跨周跨月边界 + 限时永不自动重置 + 预设改写合并） |
+| `domain/itemPatch.test.ts` | 8（稀疏覆盖：键不存在 / `null` / 有值三态；对着种子求差；外部脏值净化） |
+| `domain/grouping.test.ts` | 16 |
 | `domain/guildTime.test.ts` | 10 |
-| `domain/nurture.test.ts` | 24 |
+| `domain/itemDraft.test.ts` | 4（草稿 → 条目的字段映射与归一：空白串、空 `gainKind`、整体覆盖、收益清洗） |
+| `domain/nurture.test.ts` | 41 |
 | `domain/sort.test.ts` | 18 |
-| `domain/stats.test.ts` | 12 |
+| `domain/stats.test.ts` | 13 |
+| `domain/sync.test.ts` | 12 |
 | `domain/yuhun.test.ts` | 15 |
 | `hooks/usePeriodRefresh.test.ts` | 8 |
 | `services/localStore.test.ts` | 6 |
-| `stores/check.test.ts` | 23 |
-| `stores/device.test.ts` | 7 |
+| `stores/check.test.ts` | 28 |
+| `stores/device.test.ts` | 4 |
+| `stores/guildTime.test.ts` | 7 |
 | `stores/items.test.ts` | 7 |
-| `stores/nurture.test.ts` | 5 |
+| `stores/nurture.test.ts` | 11 |
 | `stores/session.test.ts` | 11 |
 
 ### 4.3 各层怎么写测试

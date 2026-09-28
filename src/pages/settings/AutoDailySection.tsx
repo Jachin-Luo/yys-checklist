@@ -2,10 +2,13 @@ import { useEffect } from 'react';
 import Icon from '../../components/icons/Icon';
 import CheckBox from '../../components/common/CheckBox';
 import CollapsibleSection from '../../components/common/CollapsibleSection';
+import Segmented from '../../components/common/Segmented';
+import { btn, tx } from '../../components/common/controls';
 import { dataDefaultAutoSet, isAutoDailyCandidate } from '../../domain/autoDaily';
 import { useAutoDaily } from '../../hooks/useAutoDaily';
 import { useItemStore } from '../../stores/items';
 import { useUiStore } from '../../stores/ui';
+import type { CoverMode } from '../../stores/view';
 
 /**
  * 「设置 · 一键日常」分区。
@@ -22,6 +25,11 @@ import { useUiStore } from '../../stores/ui';
  * 卡内分割（两部分底色不同，一眼分清改的是"怎么显示"还是"覆盖哪些"）：
  *   上半 = 显示方式（配置），下半 = 覆盖集合（清单）。
  */
+const COVER_MODES: ReadonlyArray<{ value: CoverMode; label: string }> = [
+  { value: 'dim', label: '弱化保留' },
+  { value: 'hide', label: '从列表隐藏' },
+];
+
 export default function AutoDailySection() {
   const items = useItemStore((s) => s.items);
   const { coveredSet, coveredCount, coverMode, setCovered, setCoverMode, resetAutoSet } =
@@ -55,7 +63,7 @@ export default function AutoDailySection() {
         <button
           type="button"
           onClick={() => void resetAutoSet()}
-          className="flex cursor-pointer items-center gap-1 rounded-sm border border-line px-2 py-1 text-sm text-ink-2 transition-colors duration-120 hover:border-line"
+          className={`${btn.base} ${btn.sm} ${btn.out}`}
         >
           <Icon name="restore" size={12} />
           恢复数据默认
@@ -64,28 +72,18 @@ export default function AutoDailySection() {
     >
       {/* ── 显示方式（配置） ── */}
       <div className="bg-surface-3 px-3 py-3">
-        <p className="text-sm text-ink-3">被覆盖项的显示方式 · 只影响列表</p>
-        <div className="mt-2 flex gap-1.5">
-          {([['dim', '弱化保留'], ['hide', '从列表隐藏']] as const).map(([mode, label]) => (
-            <button
-              key={mode}
-              type="button"
-              onClick={() => void setCoverMode(mode)}
-              className={`cursor-pointer rounded-sm border px-2.5 py-1 text-sm transition-colors duration-120 ${
-                coverMode === mode
-                  ? 'border-line bg-gold-soft text-gold-hi'
-                  : 'border-line bg-surface text-ink-2 hover:border-line'
-              }`}
-            >
-              {label}
-            </button>
-          ))}
+        <p className={`${tx.note} text-ink-3`}>被覆盖项的显示方式 · 只影响列表</p>
+        {/* 两档一选，走 `Segmented`（与「界面主题」「卡片显示字段」同一套控件语言）——
+            2026-09-28 前这里是两颗手写的 <button>，字号虽然同是 12px，但圆角/内缩/选中态
+            都是本地一份，正是"同一页多套控件"的来源 */}
+        <div className="mt-2">
+          <Segmented label="被覆盖项的显示方式" options={COVER_MODES} value={coverMode} onChange={(m) => void setCoverMode(m)} />
         </div>
       </div>
 
       {/* ── 覆盖集合（清单） ── */}
       <div className="px-3 py-3">
-        <p className="text-sm text-ink-3">
+        <p className={`${tx.note} text-ink-3`}>
           覆盖集合 · 含官方一键日常会覆盖的 {candidates.length} 条（斗技 / 逢魔 / 寮活动等不代做，故不在列）
         </p>
 
@@ -107,7 +105,7 @@ export default function AutoDailySection() {
                   type="button"
                   onClick={() => setCovered(it.id, !covered)}
                   title={it.name}
-                  className="min-w-0 flex-1 cursor-pointer truncate text-left text-lg text-ink"
+                  className={`min-w-0 flex-1 cursor-pointer truncate text-left ${tx.rowName} text-ink`}
                 >
                   {it.name}
                 </button>

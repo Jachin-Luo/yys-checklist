@@ -1,6 +1,7 @@
 import ChecklistEntry from '../components/common/ChecklistEntry';
 import { groupChecklist } from '../domain/grouping';
 import { EmptyState, SectionTitle } from '../components/common/EmptyState';
+import { sectionNo } from '../components/common/sectionNo';
 import PageHead from '../components/common/PageHead';
 import SummaryBar from '../components/common/SummaryBar';
 import ViewBar from '../components/common/ViewBar';
@@ -14,8 +15,8 @@ import { CHECKLIST_GRID } from '../styles/layout';
  * 本周页（设计文档 §9 S4b-1）：周常条目。
  *
  * 月常已于 2026-09-15 拆到「本月」页 —— 两者刷新口径不同（周一 0 点 vs 每月 1 日 0 点），
- * 混在一页时"哪几条下周才会翻篇"看不出来。版本 / 赛季条目在限时页的专属分区
- * （随 `meta.periods` 锚点滚动，与"周"无关）。
+ * 混在一页时"哪几条下周才会翻篇"看不出来。版本 / 赛季条目已并入限时（`limited`），
+ * 与"周"无关，全部落在限时页。
  *
  * 2026-09-23 换肤：日期行升格为 `PageHead`（衬线标题 + 唯一的等宽倒计时），
  * 分组头换成朱印分组头（图标 + 计数 pill + 真实完成比例底轨）。
@@ -25,6 +26,8 @@ export default function WeekPage({ variant }: { variant: 'mobile' | 'desktop' })
   const isDimmed = (id: string) => coverMode === 'dim' && coveredSet.has(id);
   /* 距下周一 0 点还有多久（与勾选重置同源） */
   const countdown = usePeriodCountdown('weekly');
+  /* 分组序号（壹/贰…）：按渲染顺序发号 —— 见 `sectionNo` 的说明 */
+  const no = sectionNo();
 
   return (
     <div className="pb-6">
@@ -45,7 +48,7 @@ export default function WeekPage({ variant }: { variant: 'mobile' | 'desktop' })
       {/* 汇总条（册页稿 `.summary`）：页级进度只在这一处 */}
       <SummaryBar className="mx-3.5 mt-3" pending={pending.length} done={done.length} note="每周一零点清空，逾期不补" />
 
-      <SectionTitle icon="ougi" count={pending.length}>
+      <SectionTitle no={no()} icon="ougi" count={pending.length}>
         本周待做
       </SectionTitle>
       {pending.length ? (
@@ -60,7 +63,7 @@ export default function WeekPage({ variant }: { variant: 'mobile' | 'desktop' })
 
       {done.length ? (
         <>
-          <SectionTitle icon="done" count={done.length}>
+          <SectionTitle no={no()} icon="done" count={done.length}>
             本周已结
           </SectionTitle>
           <div className={CHECKLIST_GRID}>

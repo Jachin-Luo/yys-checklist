@@ -106,8 +106,24 @@ export interface ApiClient {
   getPlans(scope: DataScope): Promise<NurturePlans>;
   savePlans(scope: DataScope, plans: NurturePlans): Promise<void>;
 
-  /* 条目增删（语义封装，内部改写 overrides） */
+  /* 条目增删改（语义封装，内部改写 overrides） */
   addCustomItem(scope: DataScope, draft: ItemDraft): Promise<Item>;
+  /**
+   * 改写条目的字段（2026-09-28 新增）。**自建与预设走同一个入口**，
+   * 存储差别的处理留在这一层，调用方（条目管理那一行表单）不必先分叉：
+   *
+   * - id ∈ `overrides.custom` → **整体覆盖**那一条（它就是用户自己的数据）；
+   * - id ∈ 种子（预设） → 写一层 `overrides.patches[id]` 字段改写，种子本身不动
+   *   （预设是随包发布的只读主数据，就地改会让下一次数据升级变成无法对账的合并）；
+   * - 都不在 → `E_NOT_ITEM`。
+   *
+   * 返回改写后的**有效条目**（含 id / origin）：调用方不必自己拼 Item，
+   * 也不必猜"这条到底落到哪一层去了"。
+   *
+   * 预设那一支的差异是**对着种子求**的（见 `domain/itemPatch.diffPatch`）：
+   * 改回原样 → 改写消失，等于没改过。
+   */
+  updateItem(scope: DataScope, itemId: string, draft: ItemDraft): Promise<Item>;
   removeCustomItem(scope: DataScope, itemId: string): Promise<void>;
   hideItem(scope: DataScope, itemId: string): Promise<void>;
   restoreItem(scope: DataScope, itemId: string): Promise<void>;

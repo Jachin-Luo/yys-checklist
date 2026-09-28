@@ -64,8 +64,8 @@ export const SYNC_PARTS: readonly SyncPart[] = [
   },
   {
     key: 'customItems',
-    label: '自建条目与排序',
-    desc: '自己新建的条目，以及清单的自定义顺序。',
+    label: '自建与改写条目',
+    desc: '自己新建的条目、对预设条目的字段改写，以及清单的自定义顺序。',
     byDefault: false,
   },
   {
@@ -154,6 +154,11 @@ export function applyParts(
     const ov = { ...(patch.overrides ?? target.overrides) };
     if (pick.has('customItems')) {
       ov.custom = source.overrides.custom.map((it) => ({ ...it }));
+      /* 预设改写与自建条目同属"我的条目长什么样"：只同步一半会出现
+         "条目改过来了、改写没过来"的错位（同一个名字下内容却不同） */
+      ov.patches = source.overrides.patches
+        ? Object.fromEntries(Object.entries(source.overrides.patches).map(([id, p]) => [id, { ...p }]))
+        : undefined;
       /* `order` 与 `custom` 是同一件事（"我的条目长什么样"）的两半：
          只复制条目不复制顺序，用户会看到新条目全被排到末尾 */
       ov.order = [...source.overrides.order];

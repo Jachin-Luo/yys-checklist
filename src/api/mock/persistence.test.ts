@@ -68,7 +68,7 @@ describe('persist before committing cached data', () => {
     const before = await api.getOverrides(scope);
     rejectWrites();
 
-    await expect(api.addCustomItem(scope, { name: 'Not saved', cycle: 'once', gainKind: [] })).rejects.toThrow(Error);
+    await expect(api.addCustomItem(scope, { name: 'Not saved', cycle: 'limited', gainKind: [] })).rejects.toThrow(Error);
 
     expect(await api.getOverrides(scope)).toEqual(before);
     expect(storage.getItem(KEY.ovr(scope.profileId))).toBeNull();

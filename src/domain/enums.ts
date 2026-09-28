@@ -9,20 +9,22 @@
  * 因此「表少一张」与「类型安全」不必二选一。
  */
 
-/** 周期：周期是 item 的字段，不是分表依据（设计文档 §3.1） */
-export const CYCLE = [
-  'once',
-  'daily',
-  'weekly',
-  'monthly',
-  'version',
-  'limited',
-  'season',
-] as const;
+/**
+ * 周期：周期是 item 的字段，不是分表依据（设计文档 §3.1）。
+ *
+ * 2026-09-28 两次收口，六个周期收敛到四个（用户决定）：
+ *   - 删 `once`（一次性）—— 条目库里早已无此类条目；"只做一次"由 **`limited` + `until`** 承担
+ *     （两者在 `reset.ts` 里本来就是同一个分支：不自动重置、只靠 `until` 归档）；
+ *   - 删 `season`（赛季）并**把 `version` 并进 `limited`** —— 版本活动与限时活动在用户眼里
+ *     是同一类东西（"当期有就去弄，过期就没了"），分成两个周期换不来任何区别。
+ *
+ * 合并且**记下代价**：版本条目原先靠 `meta.periods.version` 锚点**随版本自动翻篇**，
+ * 合并后不再自动翻篇（勾上就一直是勾的）—— 要翻篇得给条目填 `until`，靠归档下线。
+ * 随之整体退场的是整套锚点机制（`meta.periods` / `ResetCtx.periods` / `EVENT_CYCLE` /
+ * 「数据版本」面板的两行锚点）：没有周期再消费它，留着就是死符号。
+ */
+export const CYCLE = ['daily', 'weekly', 'monthly', 'limited'] as const;
 export type Cycle = (typeof CYCLE)[number];
-
-/** 非时基周期：重置锚点取 `meta.periods[cycle].startAt`，不套 resetHour（§7 / D2） */
-export const EVENT_CYCLE = ['version', 'season'] as const satisfies readonly Cycle[];
 
 /** 奖励类型（18 类）：数量可能浮动，但类型固定（需求 F21 / 设计 §4.2） */
 export const GAIN_KIND = [

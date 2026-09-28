@@ -29,11 +29,11 @@ export const seedMetaDb = metaDbRaw as unknown as MetaDbFile;
 
 /** 条目库（2026-09-11 拆双文件；2026-09-15 收紧"常驻"口径）：
  *  `items.db.json` = **真正的常驻**（每日 / 每周 / 每月 —— 长期有效、每期都在）；
- *  `limited.db.json` = **非常驻条目**（活动期每日 / 限时活动 / 版本 / 赛季 —— 并非每期都有，
+ *  `limited.db.json` = **非常驻条目**（活动期每日 / 限时活动 —— 含 2026-09-28 并入的版本 / 赛季活动，并非每期都有，
  *  需随版本或活动增删；其中带 `until` 的到期即删）。
  *  两文件在**此处合并**为一份条目集 —— 下游（store / domain / UI / 用户数据）对拆分无感知，
  *  页面归属与重置口径一律按 `Item.cycle` 判断，与文件归属无关。
- *  日常维护去向：加限时活动 / 版本 / 赛季条目 → limited.db.json；改常驻玩法 → items.db.json。
+ *  日常维护去向：加限时活动（含版本活动）条目 → limited.db.json；改常驻玩法 → items.db.json。
  *  历史注记：迁移脚本是一次性工具已删除（重跑会回退后续模型演进），维护直接改 JSON。 */
 export const seedItems = [...itemsDbRaw.items, ...limitedDbRaw.items] as unknown as Item[];
 

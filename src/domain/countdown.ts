@@ -11,7 +11,7 @@ const HOUR_MS = 3600000;
  * 时间串 → 时间戳（本地时区）。
  *   'YYYY-MM-DD'        视为当天 23:59:59
  *   'YYYY-MM-DD HH:mm'  按字面解析
- *   'YYYY-MM-DDTHH:mm'  同上（`meta.periods.startAt` 用此格式）
+ *   'YYYY-MM-DDTHH:mm'  同上（带 T 的 ISO 风格：`deadline` / `until` / `start` 都有这种写法）
  */
 export function parseTs(s?: string): number | null {
   if (!s) return null;

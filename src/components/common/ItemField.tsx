@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import Icon, { type IconName } from '../icons/Icon';
 
 /**
@@ -61,4 +62,21 @@ export function Field({ kind, value }: { kind: FieldKind; value: string }) {
       <span className={`min-w-0 flex-1 break-words ${FIELD[kind].cls}`}>{value}</span>
     </p>
   );
+}
+
+/**
+ * 字段块（2026-09-28）—— 路径 / 条件 / 备注三行共用一个容器，左侧一道引线。
+ *
+ * 出处是**移动端样式稿** `.entry.open .meta{ padding-left:9px; border-left:2px solid var(--line-soft) }`：
+ * 一行说明在窄屏上容易与相邻条目连成一片，缩进 + 引线把"这是上一条的补充"说清楚。
+ * 参考稿只在**展开态**给这条线（默认折叠只显示路径），本项目字段是常显的（不点行展开，
+ * 显隐走疏密度设置），所以常态就画。
+ *
+ * **两端一致**（2026-09-28 用户要求"pc 端也加上"）：桌面稿的 `.meta` 原本没有这道线，
+ * 现在按用户口径两端都画 —— 账目行在两端是同一套语言，为一条引线分叉不值得。
+ *
+ * 调用方负责"整块全关时不渲染"（否则会留下一条没有内容的空引线）。
+ */
+export function FieldBlock({ children }: { children: ReactNode }) {
+  return <div className="mt-2 border-l-2 border-line-soft pl-2.5">{children}</div>;
 }

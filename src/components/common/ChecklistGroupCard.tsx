@@ -10,7 +10,7 @@ import { dictIndexOf, useItemStore } from '../../stores/items';
 import { useUiStore } from '../../stores/ui';
 import { useViewStore } from '../../stores/view';
 import { CoveredTag, GainBadges, KindBadges, PremiumTag } from './GainBadges';
-import { Field } from './ItemField';
+import { Field, FieldBlock } from './ItemField';
 import { DeadlineTag, TimeTag } from './Tags';
 import Icon, { type IconName } from '../icons/Icon';
 import { SnakeEye } from '../ornament';
@@ -78,6 +78,8 @@ function ChecklistGroupCard({
   const toggleInProfiles = useCheckStore((s) => s.toggleInProfiles);
   const meta = useItemStore((s) => s.meta);
   const card = useViewStore((s) => s.view.card) ?? DEFAULT_CARD_DISPLAY;
+  const pinnedIds = useViewStore((s) => s.view.pinned);
+  const setPinned = useViewStore((s) => s.setPinned);
   const askPick = useUiStore((s) => s.askPick);
 
   const isDone = (id: string) => checked[id] !== undefined;
@@ -139,6 +141,9 @@ function ChecklistGroupCard({
   const isHighlight = highlight && !done;
   /* 收益徽章的站位随断点 —— 与 `ChecklistItem` 同一条注释，不再重复 */
   const payColumn = useBreakpoint() === 'desktop';
+  /* 置顶状态取"**全组成员都已置顶**"（与其它"全组一致才显示"的口径同一枚尺子）：
+     只有部分成员在置顶表里时，卡片显示未置顶 —— 排序会把它拉散，那时显示"已置顶"是撒谎 */
+  const allPinned = unit.items.every((it) => pinnedIds.includes(it.id));
 
   /* 三态菱形推进器：未开始 = 金描边空心 / 进行中 = 朱红描边 + 内芯 / 满段 = 朱红实心 */
   const mark =
@@ -176,12 +181,17 @@ function ChecklistGroupCard({
           done ? 'bg-crimson' : 'bg-line group-hover:bg-crimson/40'
         }`}
       />
+      {/* 长按进度：与单条卡同款 —— 两端内缩的圆角轨道，进度条不会伸出行的圆角之外 */}
       <span
         aria-hidden
-        className={`absolute bottom-0 left-0 h-0.5 bg-crimson ${
-          pressing ? 'w-full transition-[width] duration-500 ease-linear' : 'w-0 transition-none'
-        }`}
-      />
+        className="absolute bottom-0 left-2.5 right-2.5 h-0.5 overflow-hidden rounded-full"
+      >
+        <i
+          className={`block h-full rounded-full bg-crimson ${
+            pressing ? 'w-full transition-[width] duration-500 ease-linear' : 'w-0 transition-none'
+          }`}
+        />
+      </span>
 
       {/* 推进器：语义控件仍是 button（可聚焦、可键盘操作），点它 = 推进一步 */}
       <button
@@ -203,11 +213,12 @@ function ChecklistGroupCard({
         </i>
       </button>
 
-      {/* 组图标独占一列 —— 与单条卡同站位（参考稿 `.entry .glyph`），标题与下各行左对齐 */}
+      {/* 组图标独占一列 —— 与单条卡同站位（参考稿 `.entry .glyph`），标题与下各行左对齐。
+          同样**不加 mt**：行首三件顶对齐、各自居中，中线才落在一条线上（见 `ChecklistItem`） */}
       <Icon
         name={CYCLE_ICON[step.cycle]}
         size={17}
-        className={`mt-0.5 flex-none ${done ? 'text-ink-3' : 'text-gold-hi'}`}
+        className={`flex-none ${done ? 'text-ink-3' : 'text-gold-hi'}`}
       />
 
       <div className="min-w-0 flex-1">
@@ -255,10 +266,15 @@ function ChecklistGroupCard({
           <KindBadges kinds={kinds} gain={gain} labels={kindLabels} />
         ) : null}
 
-        {/* 逐次说明用**当前步**的原文：走一步换一条，这正是"分段推进"的用处 */}
-        {card.path && samePath ? <Field kind="path" value={samePath} /> : null}
-        {card.condition && step.condition ? <Field kind="condition" value={step.condition} /> : null}
-        {card.note && step.note ? <Field kind="note" value={step.note} /> : null}
+        {/* 逐次说明用**当前步**的原文：走一步换一条，这正是"分段推进"的用处。
+            与单条卡同口径：三行共用一个 `FieldBlock`（缩进引线），全关时不渲染 */}
+        {(card.path && samePath) || (card.condition && step.condition) || (card.note && step.note) ? (
+          <FieldBlock>
+            {card.path && samePath ? <Field kind="path" value={samePath} /> : null}
+            {card.condition && step.condition ? <Field kind="condition" value={step.condition} /> : null}
+            {card.note && step.note ? <Field kind="note" value={step.note} /> : null}
+          </FieldBlock>
+        ) : null}
       </div>
 
       {/* 桌面右列（册页稿 `.entry .pay`）—— 与单条卡同一站位 */}
@@ -270,6 +286,30 @@ function ChecklistGroupCard({
           ) : null}
         </div>
       ) : null}
+
+      {/* 置顶（2026-09-28 用户反馈补上：聚合卡此前没有这颗钮）。
+          **整组一次写入** —— 只置顶一个成员会让该组在排序里散架（成员分处榜首与榜尾），
+          所以走 store 的 `setPinned` 批量 action，而不是循环 `togglePin`（那是每个成员一次落盘）。
+          与单条卡同款：按下即 `stopPropagation`，否则在它身上按住会触发整卡的长按选择器，
+          而整卡点击是"推进一步" */}
+      <button
+        type="button"
+        aria-label={allPinned ? `取消置顶：${unit.label}` : `置顶：${unit.label}`}
+        title={allPinned ? '取消置顶' : '置顶这一组'}
+        onPointerDown={(e) => e.stopPropagation()}
+        onClick={(e) => {
+          e.stopPropagation();
+          void setPinned(
+            unit.items.map((it) => it.id),
+            !allPinned,
+          );
+        }}
+        className={`mt-0.5 flex-none cursor-pointer rounded-full p-1 transition-colors duration-150 ease-genso hover:bg-fill ${
+          allPinned ? 'text-gold-hi' : 'text-ink-4 hover:text-gold-hi'
+        }`}
+      >
+        <Icon name="pin" size={13} className={allPinned ? '' : 'opacity-60'} />
+      </button>
     </article>
   );
 }
@@ -280,13 +320,10 @@ function ChecklistGroupCard({
  * 抽到 domain 会让 domain 反向依赖图标名。
  */
 const CYCLE_ICON: Record<Item['cycle'], IconName> = {
-  once: 'ofuda',
   daily: 'ema',
   weekly: 'ougi',
   monthly: 'koyomi',
   limited: 'chochin',
-  version: 'nobori',
-  season: 'nobori',
 };
 
 export default memo(ChecklistGroupCard);

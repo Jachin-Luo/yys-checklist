@@ -1,20 +1,13 @@
 import { useMemo, useState } from 'react';
 import Icon from '../../components/icons/Icon';
 import CollapsibleSection from '../../components/common/CollapsibleSection';
+import { btn, chip, tx } from '../../components/common/controls';
 import { SYNC_PARTS, defaultSyncKeys, describeKeys, type SyncPartKey } from '../../domain/sync';
 import { syncToProfiles } from '../../services/profileSync';
 import { aliveProfiles, useSessionStore } from '../../stores/session';
 import { useUiStore } from '../../stores/ui';
 
 type Tone = 'ok' | 'warn' | 'err';
-
-/** 与 `ViewBar` 的筛选 chip 同一视觉语言，避免这页多出一套控件样式 */
-const chip = (on: boolean) =>
-  `cursor-pointer rounded-sm border px-2.5 py-1 text-sm transition-colors duration-120 ${
-    on
-      ? 'border-line bg-gold-soft font-medium text-gold-hi'
-      : 'border-line bg-surface text-ink-2 hover:border-line'
-  }`;
 
 /**
  * 「设置 · 同步到其他账号」（2026-09-16 用户需求）。
@@ -91,7 +84,7 @@ export default function ProfileSyncSection() {
       <div className="px-3 py-3">
         {others.length ? (
           <>
-            <p className="text-sm text-ink-2">
+            <p className={`${tx.label} text-ink-2`}>
               同步到（当前账号：<b className="font-medium">{nameOf(session?.profileId ?? '')}</b>）
             </p>
             <div className="mt-1.5 flex flex-wrap gap-1.5">
@@ -101,21 +94,25 @@ export default function ProfileSyncSection() {
                   type="button"
                   aria-pressed={targets.includes(p.id)}
                   onClick={() => toggleTarget(p.id)}
-                  className={chip(targets.includes(p.id))}
+                  className={`${chip.base} ${chip.md} ${
+                    targets.includes(p.id) ? chip.on : chip.off
+                  }`}
                 >
                   {p.name}
                 </button>
               ))}
+              {/* 「全选 / 全不选」是同一排里的操作，不是筛选档 —— 用未选态的 chip 造型
+                  保持一排的节奏，但**不参与 aria-pressed**（它不是开关） */}
               <button
                 type="button"
                 onClick={() => setTargets(targets.length === others.length ? [] : others.map((p) => p.id))}
-                className="cursor-pointer rounded-sm border border-line bg-surface px-2.5 py-1 text-sm text-ink-3 transition-colors duration-120 hover:border-line"
+                className={`${chip.base} ${chip.md} ${chip.off}`}
               >
                 {targets.length === others.length ? '全不选' : '全选'}
               </button>
             </div>
 
-            <p className="mt-3.5 text-sm text-ink-2">同步内容</p>
+            <p className={`mt-3.5 ${tx.label} text-ink-2`}>同步内容</p>
             <div className="mt-1.5 space-y-1">
               {SYNC_PARTS.map((part) => {
                 const on = keys.includes(part.key);
@@ -137,8 +134,8 @@ export default function ProfileSyncSection() {
                       {on ? <Icon name="check" size={11} /> : null}
                     </span>
                     <span className="min-w-0 flex-1">
-                      <span className="block text-lg text-ink">{part.label}</span>
-                      <span className="block text-sm leading-relaxed text-ink-3">{part.desc}</span>
+                      <span className={`block ${tx.rowName} text-ink`}>{part.label}</span>
+                      <span className={`block ${tx.note} text-ink-3`}>{part.desc}</span>
                     </span>
                   </button>
                 );
@@ -150,17 +147,17 @@ export default function ProfileSyncSection() {
                 type="button"
                 disabled={busy || !targets.length || !keys.length}
                 onClick={() => void onSync()}
-                className="inline-flex cursor-pointer items-center gap-1 rounded-sm border border-line bg-gold-soft px-3 py-1.5 text-sm text-gold-hi transition-colors duration-120 hover:border-gold-hi disabled:cursor-not-allowed disabled:opacity-40"
+                className={`${btn.base} ${btn.sm} ${btn.sec}`}
               >
                 <Icon name="sougo" size={12} />
                 {busy ? '同步中…' : `同步到 ${targets.length || 0} 个账号`}
               </button>
-              {!keys.length ? <span className="text-sm text-warn">请至少选择一项内容</span> : null}
+              {!keys.length ? <span className={`${tx.message} text-warn`}>请至少选择一项内容</span> : null}
             </div>
 
             {msg ? (
               <p
-                className={`mt-2 flex items-start gap-1.5 text-sm leading-relaxed ${
+                className={`mt-2 flex items-start gap-1.5 ${tx.message} ${
                   msg.tone === 'ok'
                     ? 'text-success-deep'
                     : msg.tone === 'warn'
@@ -178,7 +175,7 @@ export default function ProfileSyncSection() {
             ) : null}
           </>
         ) : (
-          <p className="text-sm leading-relaxed text-ink-3">
+          <p className={`${tx.note} text-ink-3`}>
             目前只有一个账号。在「账号管理」里新建小号后，才能把配置同步过去。
           </p>
         )}

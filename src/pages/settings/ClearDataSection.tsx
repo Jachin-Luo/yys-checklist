@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import CollapsibleSection from '../../components/common/CollapsibleSection';
-import { btn } from '../../components/common/controls';
+import { btn, tx } from '../../components/common/controls';
 import { dayKey, idsLoggedOn, LOG_KEEP_DAYS } from '../../domain/checkLog';
 import { useCheckStore } from '../../stores/check';
 import { useUiStore } from '../../stores/ui';
@@ -98,7 +98,7 @@ export default function ClearDataSection() {
       summary={`今天已记 ${todayIds.length} 项 · 当前完成 ${doneCount} 项 · 日志 ${logDays} 天`}
     >
       <div className="px-3 py-3">
-        <p className="text-sm leading-relaxed text-ink-3">
+        <p className={`${tx.note} text-ink-3`}>
           只作用于<b className="text-ink-2">勾选与日志</b>。账号、偏好、自建条目与寮时间各有自己的
           重置入口，不会跟着一起没。
         </p>
@@ -120,7 +120,7 @@ export default function ClearDataSection() {
             清空全部（{doneCount} 项）
           </button>
         </div>
-        <p className="mt-2 text-sm leading-relaxed text-ink-3">
+        <p className={`mt-2 ${tx.note} text-ink-3`}>
           清空不可撤销。想留底就先在「数据备份」导出一份 —— 那份 JSON 可以把勾选与日志原样带回来。
         </p>
       </div>

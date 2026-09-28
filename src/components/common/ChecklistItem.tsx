@@ -10,7 +10,7 @@ import { useUiStore } from '../../stores/ui';
 import { useViewStore } from '../../stores/view';
 import CheckBox from './CheckBox';
 import { CoveredTag, GainBadges, KindBadges, PremiumTag } from './GainBadges';
-import { Field } from './ItemField';
+import { Field, FieldBlock } from './ItemField';
 import { DeadlineTag, TimeTag } from './Tags';
 import Icon, { type IconName } from '../icons/Icon';
 import { SnakeEye } from '../ornament';
@@ -94,13 +94,10 @@ interface Props {
  * 历史反面教材（AGENTS 铁律 7）。`cycle` 是结构化枚举，映射是确定的。
  */
 const CYCLE_ICON: Record<Cycle, IconName> = {
-  once: 'ofuda',
   daily: 'ema',
   weekly: 'ougi',
   monthly: 'koyomi',
   limited: 'chochin',
-  version: 'nobori',
-  season: 'nobori',
 };
 
 function ChecklistItem({
@@ -191,15 +188,22 @@ function ChecklistItem({
         }`}
       />
 
-      {/* 长按进度贴**底边**、与 2px 底轨共用同一条边：两者都是 2px，叠在一起不会互相误读，
-          而它渲染在底轨之后 → 压在上面。2026-09-23 修：上一版把它挪到了卡片顶部，
-          用户反馈"长按的条怎么跑到上面了" —— 按压反馈跑离手指落点就是错的 */}
+      {/* 长按进度贴**底边**（按压反馈要在手指落点附近）。2026-09-23 修：上一版把它挪到
+          了卡片顶部，用户反馈"长按的条怎么跑到上面了" —— 按压反馈跑离手指落点就是错的。
+          ⚠️ 2026-09-28 修：整宽的**方头**细条在圆角行上会伸出圆角之外（用户反馈"超出了
+          原本框的长度"）—— 行的圆角是 11px，而 2px 条的两端落在弧线外的直线段里。
+          现在外面套一层**两端内缩 10px 的圆角轨道**（`overflow-hidden`），进度在轨道内跑，
+          两端自然收进圆角里。轨道内缩量取 10px ≈ 行的圆角半径，再窄会露出弧线缺口 */}
       <span
         aria-hidden
-        className={`absolute bottom-0 left-0 h-0.5 bg-crimson ${
-          pressing ? 'w-full transition-[width] duration-500 ease-linear' : 'w-0 transition-none'
-        }`}
-      />
+        className="absolute bottom-0 left-2.5 right-2.5 h-0.5 overflow-hidden rounded-full"
+      >
+        <i
+          className={`block h-full rounded-full bg-crimson ${
+            pressing ? 'w-full transition-[width] duration-500 ease-linear' : 'w-0 transition-none'
+          }`}
+        />
+      </span>
 
       <CheckBox
         checked={checked}
@@ -211,12 +215,15 @@ function ChecklistItem({
       />
 
       {/* 周期符独占一列（参考稿 `.entry .glyph` 的站位）：标题与其下所有行都从 body
-          左缘起 —— 之前它挤在标题行里，标题被顶右、下面的行缩回去，正是"没对齐"的来源 */}
+          左缘起 —— 之前它挤在标题行里，标题被顶右、下面的行缩回去，正是"没对齐"的来源。
+          ⚠️ **不要给它加 mt**：行首三件（菱形 18px / 图标 17px / 标题首行 ~17.9px）都是
+          `items-start` 顶对齐，各自在自身框内居中 —— 三者中线分别落在 9 / 8.5 / 8.94px，
+          已在半像素内。此前那个 `mt-0.5` 把图标中线推到 10.5px，与另两件错开 1.5px */}
       <Icon
         name={CYCLE_ICON[item.cycle]}
         size={17}
         /* 已完成侧 `text-ink-3` / 未完成侧 `text-gold-hi` —— 调色口径见文件头换肤一节 */
-        className={`mt-0.5 flex-none ${checked ? 'text-ink-3' : 'text-gold-hi'}`}
+        className={`flex-none ${checked ? 'text-ink-3' : 'text-gold-hi'}`}
       />
 
       <div className="min-w-0 flex-1">
@@ -252,10 +259,15 @@ function ChecklistItem({
           </>
         ) : null}
 
-        {/* 这三行是卡片高度的主要来源，也是「只想打卡」时最不需要的内容 —— 逐项可关 */}
-        {card.path && item.path ? <Field kind="path" value={item.path} /> : null}
-        {card.condition && item.condition ? <Field kind="condition" value={item.condition} /> : null}
-        {card.note && item.note ? <Field kind="note" value={item.note} /> : null}
+        {/* 这三行是卡片高度的主要来源，也是「只想打卡」时最不需要的内容 —— 逐项可关。
+            三行共用一个 `FieldBlock`（缩进引线）；**全关掉时整块不渲染**，否则会留下空引线 */}
+        {(card.path && item.path) || (card.condition && item.condition) || (card.note && item.note) ? (
+          <FieldBlock>
+            {card.path && item.path ? <Field kind="path" value={item.path} /> : null}
+            {card.condition && item.condition ? <Field kind="condition" value={item.condition} /> : null}
+            {card.note && item.note ? <Field kind="note" value={item.note} /> : null}
+          </FieldBlock>
+        ) : null}
       </div>
 
       {/* 桌面右列（册页稿 `.entry .pay`）：标签在上、徽章右对齐 ——

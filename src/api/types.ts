@@ -179,11 +179,10 @@ export interface SoulsDb {
 
 /* ───────────────────────── 系统库 meta ───────────────────────── */
 
-export interface PeriodAnchor {
-  key: string;
-  startAt: string;
-  note?: string;
-}
+/* 2026-09-28 删除 `PeriodAnchor` 与 `Meta.periods`：那套锚点只服务于 `version` / `season`
+   两个周期的"随版本翻篇"，而这两个周期已并入 `limited`（见 `domain/enums`），
+   没有周期再消费它 —— 留着就是一个永远为空的对象。 */
+
 
 export interface DictEntry {
   type: string;
@@ -220,7 +219,6 @@ export interface Meta {
   updated: string;
   resetHour: number;
   resetNote?: string;
-  periods: { version?: PeriodAnchor; season?: PeriodAnchor };
   disclaimer: string;
   gainKindNote?: string;
   weightNote?: string;
@@ -359,6 +357,43 @@ export interface CardDisplay {
   note: boolean;
 }
 
+/**
+ * 预设条目的**字段改写**（2026-09-28 新增，配合"预设条目也能编辑"）。
+ *
+ * ## 稀疏覆盖，两种键态必须分清
+ *
+ * - 键**不存在** = 不改动该字段（按随包发布的原值显示）；
+ * - 值为 **`null`** = 显式清空该字段。
+ *
+ * 必须有 `null` 这一档：JSON 序列化会把 `undefined` 直接丢掉 —— 若只靠"有值才覆盖"，
+ * 「用户把预设的备注清空了」与「用户没动备注」在存储上就无法区分，清空永远生效不了。
+ * 这正是编辑功能最容易踩的坑（同一坑在 `domain/itemDraft` 里也记了一遍）。
+ *
+ * ## 为什么改写而不直接改种子
+ *
+ * 种子是随包发布的**只读主数据**：就地改写会让下一次数据版本升级变成无法对账的合并
+ * （新种子和旧改写谁赢？）。改写只存在用户自己的 `overrides` 分片里，
+ * 随备份走、随「恢复默认条目库」一起清掉。
+ *
+ * ⚠️ 改写**不改变条目 id**：勾选状态、日志、自定义顺序、聚合分组全都按 id 关联，
+ * 改字段不动 id，这些关联就不会断。
+ */
+export interface ItemPatch {
+  name?: string;
+  cycle?: Cycle;
+  start?: string | null;
+  deadline?: string | null;
+  until?: string | null;
+  time?: string | null;
+  timeEnd?: string | null;
+  path?: string | null;
+  condition?: string | null;
+  note?: string | null;
+  gainNote?: string | null;
+  gainKind?: GainKind[] | null;
+  gain?: Gain | null;
+}
+
 export interface ItemOverrides {
   profileId: string;
   /** 用户自建条目 */
@@ -367,6 +402,11 @@ export interface ItemOverrides {
   hidden: string[];
   /** 自定义排序全序（itemId 数组） */
   order: string[];
+  /**
+   * 预设条目的字段改写：`itemId -> ItemPatch`。可选（2026-09-28 新增）——
+   * 旧分片与旧备份没有这一项，读取时归一成空对象（见 `domain/merge.mergeItems`）。
+   */
+  patches?: Record<string, ItemPatch>;
   updatedAt: string;
 }
 
@@ -419,17 +459,34 @@ export interface BootstrapPayload {
   plans: NurturePlans;
 }
 
-/** 新建自建条目的入参：不含 id / origin（由实现生成，杜绝 id 冲突与 origin 伪造） */
+/**
+ * 新建 / 编辑自建条目的入参：不含 `id` / `origin`（由实现生成，杜绝 id 冲突与 origin 伪造）。
+ *
+ * 字段集**刻意小于** `Item`：`days`（只在某几天适用）与 `isGuildTime`（寮时间专属）
+ * 属于预设数据的进阶规则，自建表单不收集 —— 它们各有自己的专属分区在管
+ * （「寮时间」分区、视图的星期筛选），这里开口子会让同一条规则有两个落点。
+ *
+ * 2026-09-28 补 `start` / `until`：条目管理要能录入"活动从哪天开始、哪天归档"。
+ * 尤其是 `until` —— 版本 / 赛季并入 `limited` 之后（见 `domain/enums`），
+ * **翻篇只能靠 `until`**，表单不给它开口，合并后的活动条目就永远下不了线。
+ */
 export interface ItemDraft {
   name: string;
   cycle: Cycle;
   gainKind: GainKind[];
+  /** 活动类开始日 */
+  start?: string;
+  /** 活动类截止时间 */
   deadline?: string;
+  /** 条目下线日（过期自动归档）；与 `deadline` 语义不同 */
+  until?: string;
   time?: string;
   timeEnd?: string;
   path?: string;
   condition?: string;
   note?: string;
+  /** 固定收益的口径说明（如"每只 20 勾"）；改了 `gain` 数值时它是必要的注解 */
+  gainNote?: string;
   gain?: Gain;
 }
 

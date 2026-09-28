@@ -13,9 +13,11 @@ import type {
   UserDataBundle, ViewPrefs, YuhunDb,
 } from '../types';
 import { activeItems, mergeChecked, type ResetCtx } from '../../domain/reset';
+import { applyDraft } from '../../domain/itemDraft';
+import { applyPatch, diffPatch } from '../../domain/itemPatch';
 import { buildMeta, effectiveView, mergeItems } from '../../domain/merge';
 import { loadBountyDb, loadSoulsDb, loadYuhunDb, seedItems, seedMetaDb, seedVersions } from './db';
-import { injectFailure, mainDelay, writeDelay } from './latency';
+import { ApiError, injectFailure, mainDelay, writeDelay } from './latency';
 import * as store from './userStore';
 
 export function assembleMeta(): Meta {
@@ -23,7 +25,7 @@ export function assembleMeta(): Meta {
 }
 
 function resetCtx(meta: Meta): ResetCtx {
-  return { resetHour: meta.resetHour, periods: meta.periods };
+  return { resetHour: meta.resetHour };
 }
 
 /** 有效条目：合并覆盖层 + 过滤已下线条目 */
@@ -390,23 +392,48 @@ export class MockApi implements ApiClient {
     await writeDelay();
     return store.enqueue(() => {
       store.assertScope(scope);
-      const item: Item = {
-        id: newId('custom'),
-        name: draft.name,
-        cycle: draft.cycle,
-        gainKind: draft.gainKind,
-        gain: draft.gain,
-        deadline: draft.deadline,
-        time: draft.time,
-        timeEnd: draft.timeEnd,
-        path: draft.path,
-        condition: draft.condition,
-        note: draft.note,
-        origin: 'custom',
-      };
+      /* 字段映射（空串归一、收益清洗）在 domain，见 `domain/itemDraft` —— Mock 只生成 id */
+      const item: Item = { id: newId('custom'), origin: 'custom', ...applyDraft(draft) };
       const ov = store.readOverridesShard(scope.profileId);
       store.saveOverridesShard({ ...ov, custom: [...ov.custom, item] });
       return item;
+    });
+  }
+
+  async updateItem(scope: DataScope, itemId: string, draft: ItemDraft): Promise<Item> {
+    injectFailure('updateItem');
+    await writeDelay();
+    return store.enqueue(() => {
+      store.assertScope(scope);
+      const ov = store.readOverridesShard(scope.profileId);
+
+      /* ① 自建条目：**整体覆盖** —— 那一条就是用户自己的数据，草稿没给的字段就是清掉
+         （理由见 `domain/itemDraft`）。`order` 与勾选状态都不动：
+         编辑字段不该影响排序与"做没做过" */
+      if (ov.custom.some((it) => it.id === itemId)) {
+        const item: Item = { id: itemId, origin: 'custom', ...applyDraft(draft) };
+        store.saveOverridesShard({
+          ...ov,
+          custom: ov.custom.map((it) => (it.id === itemId ? item : it)),
+        });
+        return item;
+      }
+
+      /* ② 预设条目：写一层字段改写，种子本身不动。
+         差异**对着种子求** —— 改回原样时 patch 为 null，改写被删掉（"编辑回原样 = 没改过"） */
+      const seed = seedItems.find((it) => it.id === itemId);
+      if (!seed) throw new ApiError('E_NOT_ITEM', `[mock] 找不到条目 ${itemId}`);
+      const patch = diffPatch(seed, draft);
+      const patches = { ...(ov.patches ?? {}) };
+      if (patch) patches[itemId] = patch;
+      else delete patches[itemId];
+      store.saveOverridesShard({
+        ...ov,
+        /* 一条不剩时把键删掉，而不是留一个 `{}`：`patches` 是可选项，
+           "空壳存在"与"从未改写过"应当是同一种状态（备份 diff 也干净） */
+        patches: Object.keys(patches).length ? patches : undefined,
+      });
+      return applyPatch(seed, patch);
     });
   }
 
@@ -455,7 +482,8 @@ export class MockApi implements ApiClient {
     await store.enqueue(() => {
       store.assertScope(scope);
       const ov = store.readOverridesShard(scope.profileId);
-      store.saveOverridesShard({ ...ov, custom: [], hidden: [], order: [] });
+      /* 预设改写也在清空范围内：它是"覆盖层"的一部分，与隐藏 / 自建 / 顺序同级 */
+      store.saveOverridesShard({ ...ov, custom: [], hidden: [], order: [], patches: undefined });
     });
   }
 

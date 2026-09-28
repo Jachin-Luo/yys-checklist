@@ -38,6 +38,8 @@ const source: SyncSource = {
     custom: [{ id: 'c1', name: '自建', cycle: 'daily', gainKind: [], origin: 'custom' }],
     order: ['c1', 'daily_sign'],
     hidden: ['daily_pet'],
+    /* 预设改写（2026-09-28）：与自建同属"我的条目长什么样"，跟着 customItems 这一项走 */
+    patches: { daily_sign: { name: '改过的签到', note: null } },
   }),
 };
 
@@ -93,10 +95,12 @@ describe('applyParts：整表接管 vs 字段级接管', () => {
     expect(patch.view?.pinned).toEqual(['daily_sign']);
   });
 
-  it('只勾自建条目 → 连 order 一起带（只带条目不带走顺序会把新条目全排到末尾）', () => {
+  it('只勾自建条目 → 连 order 与预设改写一起带（只带条目不带走顺序会把新条目全排到末尾）', () => {
     const patch = applyParts(source, target, ['customItems']);
     expect(patch.overrides?.custom).toHaveLength(1);
     expect(patch.overrides?.order).toEqual(['c1', 'daily_sign']);
+    /* 预设改写与自建同属一项：只同步一半会出现"条目名字改过来了、改写没过来" */
+    expect(patch.overrides?.patches?.daily_sign.name).toBe('改过的签到');
     /* hidden 没勾 → 保留目标自己的 */
     expect(patch.overrides?.hidden).toEqual(['daily_other']);
   });

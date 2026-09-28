@@ -4,17 +4,19 @@
 
 ## 0. 前置
 
-1. 更新 `src/db/meta.db.json` 的 `meta.periods.version`（`key` = 版本号，`startAt` = 开服时刻，惯例 09:00）；
-2. 赛季同步更新 `meta.periods.season`。
+1. 2026-09-28 起**没有版本 / 赛季周期**（两者已并入 `limited`）：版本活动条目直接写进
+   `src/db/limited.db.json`，`cycle` 用 `limited`；
+2. 上一版本的活动条目由 `until` 到期归档 —— **不再有"改锚点即全体翻篇"**这回事，
+   翻篇只能靠 `until`，所以新增条目时就要把 `until` 填上。
 
-> 改这一处，全部 `cycle` 为 `version` / `season` 的条目勾选状态**自动失效**（这正是期望行为）。
+> 旧的 `meta.periods` 锚点机制已随周期合并整体删除，别再去找它。
 
 ## 1. 录入清单
 
 | 步骤 | 动作 | 校验点 |
 |---|---|---|
 | ① 归档 | 上一版本条目：确认 `until` 已过，或补上 `until` | `npm run db:check` 无「应归档」提示 |
-| ② 新增 | 复制下方模板到 `src/db/items.db.json` 的 `items` 数组 | `id` 唯一、`^[a-z0-9_]+$` |
+| ② 新增 | 复制下方模板到 `src/db/limited.db.json` 的 `items` 数组 | `id` 唯一、`^[a-z0-9_]+$` |
 | ③ 枚举 | `cycle` / `gainKind` 只能取 `src/domain/enums.ts` 中的值 | 双轨校验通过 |
 | ④ 时间 | 活动类填 `start` + `deadline`（+`until`）；日常类填 `time` + `timeEnd` | `deadline ≥ start`、`timeEnd > time` |
 | ⑤ 收益 | 只填**保底固定值**；浮动的只标 `gainKind` 不填 `gain` | `gain` 与 `gainKind` 对应关系校验 |

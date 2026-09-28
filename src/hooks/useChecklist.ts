@@ -74,9 +74,8 @@ export function useChecklist(target: ChecklistTarget): Checklist {
       /* 月常自成一页（2026-09-15 用户需求）：此前与周常同在本周页，但两者刷新口径不同 ——
          周常周一 0 点、月常每月 1 日 0 点，混在一起时"哪几条下周才会翻篇"看不出来 */
       if (target === 'month') return it.cycle === 'monthly';
-      /* version / season 不在周页（2026-09-11 用户决策）：这两类随版本/赛季滚动、无固定截止，
-         挪到限时页的「版本 / 赛季」分区（见 LimitedPage）。
-         统计口径不受影响 —— domain/stats 的 month 仍覆盖这两个周期 */
+      /* 周页只留周常：一个周期一页，别的一律不在这儿出现
+         （`limited` 全部在限时页 —— 含 2026-09-28 并入的版本 / 赛季活动） */
       return it.cycle === 'weekly';
     });
 

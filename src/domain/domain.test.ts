@@ -1,6 +1,6 @@
 /**
  * 领域逻辑单测（设计文档 §9 S3 验收）：
- * 覆盖边界 —— 跨天 / 跨周 / 跨月 / 跨版本 / 跨赛季、无截止日、`isAutoHub` 恒第一。
+ * 覆盖边界 —— 跨天 / 跨周 / 跨月、限时条目永不自动重置、无截止日、`isAutoHub` 恒第一。
  */
 import { describe, expect, it } from 'vitest';
 import { isArchived, mergeChecked, periodEndOf, periodStartOf, type ResetCtx } from './reset';
@@ -14,15 +14,10 @@ const item = (over: Partial<Item>): Item => ({
   id: 'x', name: '测试条目', cycle: 'daily', origin: 'preset', ...over,
 });
 
-const CTX: ResetCtx = {
-  resetHour: 0,
-  periods: {
-    version: { key: '2026.09.09', startAt: '2026-09-09T09:00' },
-    season: { key: '寻龙逐英', startAt: '2026-09-09T09:00' },
-  },
-};
+/* 周期收口为四类后只剩一个上下文字段（2026-09-28：版本 / 赛季锚点随周期合并退场） */
+const CTX: ResetCtx = { resetHour: 0 };
 
-describe('periodStartOf：7 档周期分派（§7）', () => {
+describe('periodStartOf：4 档周期分派（§7）', () => {
   it('daily：0 点为界 —— 当天任意时刻归当天 0 点，前一天 23:59 归前一天 0 点（跨天）', () => {
     const it = item({});
     expect(periodStartOf(it, new Date(2026, 8, 10, 6, 0), CTX)).toBe(new Date(2026, 8, 10, 0, 0).getTime());
@@ -43,29 +38,22 @@ describe('periodStartOf：7 档周期分派（§7）', () => {
     expect(periodStartOf(it, new Date(2026, 8, 1, 0, 0), CTX)).toBe(new Date(2026, 8, 1, 0, 0).getTime());
   });
 
-  it('version / season：按 meta.periods 锚点，不套每日 0 点（D2）', () => {
-    const anchor = new Date(2026, 8, 9, 9, 0).getTime();
-    expect(periodStartOf(item({ cycle: 'version' }), new Date(2026, 8, 10, 6, 0), CTX)).toBe(anchor);
-    expect(periodStartOf(item({ cycle: 'season' }), new Date(2026, 8, 10, 3, 0), CTX)).toBe(anchor);
-  });
-
-  it('once / limited 不自动重置；锚点缺失时退化为不重置', () => {
-    expect(periodStartOf(item({ cycle: 'once' }), new Date(), CTX)).toBe(0);
+  it('limited（含并入的版本 / 赛季活动）不自动重置：起点恒为 0', () => {
     expect(periodStartOf(item({ cycle: 'limited' }), new Date(), CTX)).toBe(0);
-    expect(periodStartOf(item({ cycle: 'version' }), new Date(), { resetHour: 0, periods: {} })).toBe(0);
+    expect(periodStartOf(item({ cycle: 'limited' }), new Date(2027, 0, 1), CTX)).toBe(0);
   });
 });
 
 describe('mergeChecked：时间戳比对归零 + 清理过期键', () => {
   const now = new Date(2026, 8, 10, 6, 0);
   it('周期内的保留，跨过起点的归零，已下线条目的键清理', () => {
-    const items = [item({ id: 'd1' }), item({ id: 'v1', cycle: 'version' }), item({ id: 'gone' })];
+    const items = [item({ id: 'd1' }), item({ id: 'm1', cycle: 'monthly' }), item({ id: 'gone' })];
     const out = mergeChecked(
-      { d1: new Date(2026, 8, 10, 5, 30).getTime(), v1: new Date(2026, 8, 9, 10).getTime(), gone: 1 },
+      { d1: new Date(2026, 8, 10, 5, 30).getTime(), m1: new Date(2026, 8, 9, 10).getTime(), gone: 1 },
       items, now, CTX,
     );
     expect(out.d1).toBeTruthy();
-    expect(out.v1).toBeTruthy();
+    expect(out.m1).toBeTruthy();
     expect(out.gone).toBeUndefined();
   });
 
@@ -91,7 +79,7 @@ describe('weightOf：痛感分派生（取代主观价值档）', () => {
     expect(weightOf(item({ cycle: 'monthly' }))).toBe(30);
     expect(weightOf(item({ cycle: 'daily', deadline: '2026-10-06' }))).toBe(25);
     expect(weightOf(item({ cycle: 'monthly', gain: { jade: 20 } }))).toBe(40);
-    expect(weightOf(item({ cycle: 'once', until: '2026-10-07', gain: { jade: 20 } }))).toBe(65);
+    expect(weightOf(item({ cycle: 'limited', until: '2026-10-07', gain: { jade: 20 } }))).toBe(65);
   });
 
   it('isAutoHub 虽只有 10 分，但不靠它排序（由 compare 特判）', () => {
@@ -102,7 +90,7 @@ describe('weightOf：痛感分派生（取代主观价值档）', () => {
 
 describe('buildComparator：优先级 ① 一键入口 → ② 置顶 → ③ sortBy（D1）', () => {
   const hub = item({ id: 'hub', name: '一键日常', isAutoHub: true });
-  const high = item({ id: 'once1', name: '一次性', cycle: 'once', gain: { jade: 5 } });
+  const high = item({ id: 'lim1', name: '限时活动', cycle: 'limited', gain: { jade: 5 } });
   const low = item({ id: 'daily1', name: '每日', cycle: 'daily' });
   const pinned = item({ id: 'pin1', name: '置顶项', cycle: 'daily' });
 
@@ -116,7 +104,7 @@ describe('buildComparator：优先级 ① 一键入口 → ② 置顶 → ③ so
   it('☆ 置顶压过排序规则，但压不过一键入口', () => {
     const cmp = buildComparator({ sortBy: 'weight', pinned: ['pin1'], order: [] });
     const sorted = [low, high, pinned, hub].sort(cmp);
-    expect(sorted.map((i) => i.id)).toEqual(['hub', 'pin1', 'once1', 'daily1']);
+    expect(sorted.map((i) => i.id)).toEqual(['hub', 'pin1', 'lim1', 'daily1']);
   });
 
   it('weight 降序；同分时 deadline 近的靠前', () => {
@@ -137,14 +125,14 @@ describe('buildComparator：优先级 ① 一键入口 → ② 置顶 → ③ so
   it('name 按字典序；cycle 按周期顺序', () => {
     expect([item({ id: 'b', name: 'B项' }), item({ id: 'a', name: 'A项' })]
       .sort(buildComparator({ sortBy: 'name', pinned: [], order: [] })).map((i) => i.id)).toEqual(['a', 'b']);
-    const byCycle = [item({ id: 'd', cycle: 'daily' }), item({ id: 'o', cycle: 'once' })]
+    const byCycle = [item({ id: 'd', cycle: 'daily' }), item({ id: 'o', cycle: 'limited' })]
       .sort(buildComparator({ sortBy: 'cycle', pinned: [], order: [] }));
-    expect(byCycle[0].cycle).toBe('once');
+    expect(byCycle[0].cycle).toBe('limited');
   });
 
   it('custom：按 order 全序，新条目（不在 order 里）沉底', () => {
     const cmp = buildComparator({ sortBy: 'custom', pinned: [], order: ['d', 'o'] });
-    const fresh = item({ id: 'fresh', cycle: 'once', name: '新条目' });
+    const fresh = item({ id: 'fresh', cycle: 'daily', name: '新条目' });
     const sorted = [fresh, item({ id: 'o' }), item({ id: 'd' })].sort(cmp);
     expect(sorted.map((i) => i.id)).toEqual(['d', 'o', 'fresh']);
   });
@@ -190,6 +178,34 @@ describe('mergeItems / effectiveView：种子 + 覆盖层 → 有效数据（§2
     });
     expect(out.map((i) => i.id)).toEqual(['p1', 'p3', 'c1']);
     expect(out.find((i) => i.id === 'c1')?.origin).toBe('custom');
+  });
+
+  it('自建条目里已删除的历史周期 `once` 归一为 `limited`', () => {
+    /* 旧版录入下拉里有「一次性」，用户的自建条目可能仍是这个值 ——
+       类型上已不合法，分片字节里却真实存在，所以这里绕过 TS 造一条 */
+    const legacy = { ...item({ id: 'c1' }), cycle: 'once' } as unknown as Item;
+    const out = mergeItems(seed, {
+      profileId: 'p', hidden: [], order: [], custom: [legacy], updatedAt: '',
+    });
+    expect(out.find((i) => i.id === 'c1')?.cycle).toBe('limited');
+    /* 其余周期原样放行 */
+    const untouched = mergeItems(seed, {
+      profileId: 'p', hidden: [], order: [], custom: [item({ id: 'c2', cycle: 'monthly' })], updatedAt: '',
+    });
+    expect(untouched.find((i) => i.id === 'c2')?.cycle).toBe('monthly');
+  });
+
+  it('预设改写（`patches`）按 id 盖在种子上；没被改写的条目引用不变', () => {
+    const out = mergeItems(seed, {
+      profileId: 'p', custom: [], hidden: [], order: [], updatedAt: '',
+      patches: { p2: { name: '改过的名字', note: null } },
+    });
+    const p2 = out.find((i) => i.id === 'p2');
+    expect(p2?.name).toBe('改过的名字');
+    expect(p2?.origin).toBe('preset'); // 改写不改来源
+    /* 没被改写的条目原样返回（引用相等）—— 上游有按引用做的 memo */
+    expect(out.find((i) => i.id === 'p1')).toBe(seed[0]);
+    expect(out.find((i) => i.id === 'p3')).toBe(seed[2]);
   });
 
   it('effectiveView：账号偏好缺字段时回落默认值', () => {
@@ -272,7 +288,7 @@ describe('countdown：倒计时与时间窗', () => {
 });
 
 describe('periodEndOf：周期结束点（今日 / 本周 / 本月倒计时）', () => {
-  const ctx: ResetCtx = { resetHour: 0, periods: {} };
+  const ctx: ResetCtx = { resetHour: 0 };
 
   it('日 / 周 / 月各取下一次重置时刻', () => {
     /* 2026-09-20 是周日 */
@@ -287,17 +303,14 @@ describe('periodEndOf：周期结束点（今日 / 本周 / 本月倒计时）',
 
   it('resetHour 非 0：周期起点落在"昨天"时，终点落在今天', () => {
     /* 4 点刷新、现在 2:00 → 当前周期起点是昨天 4:00，结束在**今天** 4:00（即 2 小时后） */
-    const ctx4: ResetCtx = { resetHour: 4, periods: {} };
+    const ctx4: ResetCtx = { resetHour: 4 };
     expect(periodEndOf('daily', new Date(2026, 8, 20, 2, 0), ctx4)).toBe(
       new Date(2026, 8, 20, 4, 0).getTime(),
     );
   });
 
   it('不自动重置的周期返回 null（调用点据此不渲染倒计时）', () => {
-    expect(periodEndOf('once', new Date(2026, 8, 20), ctx)).toBeNull();
     expect(periodEndOf('limited', new Date(2026, 8, 20), ctx)).toBeNull();
-    expect(periodEndOf('version', new Date(2026, 8, 20), ctx)).toBeNull();
-    expect(periodEndOf('season', new Date(2026, 8, 20), ctx)).toBeNull();
   });
 
   it('倒计时归零的那一刻就是重置的那一刻（两个函数必须闭合）', () => {

@@ -29,6 +29,7 @@ interface ItemState {
   /** 懒加载完整预设池（首屏 bootstrap 不返回它） */
   loadPreset: () => Promise<void>;
   addItem: (draft: ItemDraft) => Promise<Item | null>;
+  updateItem: (itemId: string, draft: ItemDraft) => Promise<Item | null>;
   hideItem: (itemId: string) => Promise<void>;
   restoreItem: (itemId: string) => Promise<void>;
   removeItem: (itemId: string) => Promise<void>;
@@ -102,6 +103,23 @@ export const useItemStore = create<ItemState>((set, get) => {
         return item;
       } catch (e) {
         console.error('[items] 新建条目失败', e);
+        set({ error: e as Error });
+        return null;
+      }
+    },
+
+    updateItem: async (itemId, draft) => {
+      const scope = scopeOf();
+      if (!scope) return null;
+      try {
+        /* 与 `addItem` 同形：成功后 `reload()` 重取（会让 items 与 overrides 一起刷新），
+           失败保留错误态但不改本地数据 —— 编辑是"改一条已存在的东西"，
+           乐观更新写错一个字段比新建失败更难察觉 */
+        const item = await api.updateItem(scope, itemId, draft);
+        await reload();
+        return item;
+      } catch (e) {
+        console.error('[items] 编辑条目失败', e);
         set({ error: e as Error });
         return null;
       }

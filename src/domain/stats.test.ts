@@ -23,16 +23,24 @@ const ITEMS: Item[] = [
   mk({ id: 'd_fengmo', name: '逢魔之时', gainKind: ['bossSoul'], autoDaily: true }),
   /* 周常：1 蓝票 */
   mk({ id: 'w_medal', name: '勋章商店蓝票', cycle: 'weekly', gain: { blueTicket: 1 }, gainKind: ['blueTicket'] }),
-  /* 版本：25 黑碎（1 整颗黑蛋） */
-  mk({ id: 'v_shop', name: '活动商店黑蛋', cycle: 'version', gain: { blackFrag: 25 }, gainKind: ['blackDaruma'], deadline: '2026-10-06' }),
+  /* 每月：25 黑碎（1 整颗黑蛋） */
+  mk({ id: 'm_shop', name: '秘卷屋礼盒', cycle: 'monthly', gain: { blackFrag: 25 }, gainKind: ['blackDaruma'], deadline: '2026-10-06' }),
 ];
 
 describe('periodItems：统计口径的周期范围', () => {
-  it('本日 = 日常；本周 = 周常；本月 = 每月 / 版本 / 赛季', () => {
+  it('本日 = 日常；本周 = 周常；本月 = 每月', () => {
     expect(periodItems(ITEMS, 'day').map((i) => i.id)).toContain('d_card');
     expect(periodItems(ITEMS, 'day').map((i) => i.id)).not.toContain('w_medal');
     expect(periodItems(ITEMS, 'week').map((i) => i.id)).toEqual(['w_medal']);
-    expect(periodItems(ITEMS, 'month').map((i) => i.id)).toEqual(['v_shop']);
+    expect(periodItems(ITEMS, 'month').map((i) => i.id)).toEqual(['m_shop']);
+  });
+
+  it('限时（含并入的版本 / 赛季活动）不进任何周期口径 —— 没有周期起点就没有"本期进度"', () => {
+    const lim = mk({ id: 'l_event', name: '当期活动', cycle: 'limited', gain: { jade: 5 } });
+    const all = [...ITEMS, lim];
+    for (const p of ['day', 'week', 'month'] as const) {
+      expect(periodItems(all, p).map((i) => i.id)).not.toContain('l_event');
+    }
   });
 });
 
@@ -58,8 +66,8 @@ describe('summarizeGain：固定收益汇总', () => {
   });
 
   it('黑碎小数聚合无浮点噪声', () => {
-    const extra = mk({ id: 'v_shop2', name: '另一黑蛋', cycle: 'version', gain: { blackFrag: 25 }, gainKind: ['blackDaruma'] });
-    const r = summarizeGain([...ITEMS, extra], { v_shop: Date.now(), v_shop2: Date.now() }, 'month');
+    const extra = mk({ id: 'm_shop2', name: '另一黑蛋', cycle: 'monthly', gain: { blackFrag: 25 }, gainKind: ['blackDaruma'] });
+    const r = summarizeGain([...ITEMS, extra], { m_shop: Date.now(), m_shop2: Date.now() }, 'month');
     expect(r.blackFrag.total).toBe(50);
     expect(r.blackFrag.got).toBe(50);
     expect(r.blackFrag.pct).toBe(100);

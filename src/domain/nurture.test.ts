@@ -7,8 +7,10 @@ import {
   clearPointDone,
   dueText,
   endLabelOf,
+  endRecord,
   endTsOf,
   hmToDate,
+  isRunning,
   makeNurture,
   markPointDone,
   MAX_NURTURE_DELAY,
@@ -21,7 +23,9 @@ import {
   pointCountOf,
   pointStats,
   recordPoints,
+  sanitizePlans,
   sortNurture,
+  type NurtureRecord,
 } from './nurture';
 
 /** 2026-09-10（周四）14:00 */
@@ -288,5 +292,85 @@ describe('makeNurture / sortNurture', () => {
     const sorted = sortNurture(recs);
     expect(sorted.map((r) => r.base)).toEqual(['12:00', '11:00', '10:00']);
     expect(sorted.map((r) => r.started)).toEqual([true, true, false]);
+  });
+});
+
+/* ─────────────── 上卡日期锚定 + 「同时只记一条进行中」（2026-09-28） ─────────────── */
+
+describe('上卡日期：任务记下 `baseDate`，点不再漂到今天', () => {
+  it('任务是唯一带日期的形态；计划不带（它本就按"今晚"解释）', () => {
+    expect(makeNurture('21:00', 24, true, NOW).baseDate).toBe('2026-09-10');
+    expect(makeNurture('21:00', 24, false, NOW).baseDate).toBeUndefined();
+  });
+
+  it('`baseTsOf` 按 `baseDate` 锚定，而不是每次都算今天', () => {
+    expect(baseTsOf({ base: '21:00', baseDate: '2026-09-08' }, NOW)).toBe(
+      new Date(2026, 8, 8, 21, 0).getTime(),
+    );
+    /* 无 `baseDate` 的计划仍按今天 —— 保留「预先登记今晚上卡」的用法 */
+    expect(baseTsOf({ base: '21:00' }, NOW)).toBe(at(21));
+  });
+
+  it('老记录（任务、无 `baseDate`）回落 `createdAt` 那一天 —— 这就是"几天后还在进行中"的正解', () => {
+    const legacy = {
+      id: 'x',
+      base: '21:00',
+      hours: 24,
+      delay: 0,
+      started: true,
+      createdAt: new Date(2026, 8, 8, 21, 0).getTime(),
+    };
+    expect(baseTsOf(legacy, NOW)).toBe(new Date(2026, 8, 8, 21, 0).getTime());
+  });
+
+  it('过去的日子标「昨天 / M/D」，不再一律写成"今天"', () => {
+    /* 9/9 10:00 上卡、6h 卡 → 上卡点与唯一一个收点都落在昨天 */
+    const r = { ...makeNurture('10:00', 6, true, NOW), baseDate: '2026-09-09' };
+    expect(recordPoints(r, NOW).map((p) => p.dayLabel)).toEqual(['昨天', '昨天']);
+    /* 更早的日子没有"前天"这种说法，写日期 */
+    const older = { ...r, baseDate: '2026-09-07' };
+    expect(recordPoints(older, NOW)[0].dayLabel).toBe('9/7');
+  });
+});
+
+describe('isRunning / nextDue：到期与被结束都不算进行中', () => {
+  it('进行中 = 任务 且 未结束 且 卡未到期', () => {
+    const running = { ...makeNurture('10:00', 24, true, NOW), baseDate: '2026-09-10' };
+    expect(isRunning(running, NOW)).toBe(true);
+    /* 三天前的 24h 卡：早到期 */
+    expect(isRunning({ ...running, baseDate: '2026-09-07' }, NOW)).toBe(false);
+    expect(isRunning({ ...running, endedAt: NOW.getTime() }, NOW)).toBe(false);
+    expect(isRunning({ ...running, started: false }, NOW)).toBe(false);
+  });
+
+  it('endRecord 只给"任务且未结束"盖时间戳（计划 / 已结束的不动）', () => {
+    const task = makeNurture('10:00', 24, true, NOW);
+    const plan = makeNurture('10:00', 24, false, NOW);
+    expect(endRecord(plan, NOW).endedAt).toBeUndefined();
+    const once = endRecord(task, NOW);
+    expect(once.endedAt).toBe(NOW.getTime());
+    expect(endRecord(once, new Date(2026, 8, 11)).endedAt).toBe(NOW.getTime());
+  });
+
+  it('几天前的旧任务不再占着徽章', () => {
+    const stale: NurtureRecord = {
+      ...makeNurture('10:00', 24, true, NOW),
+      baseDate: '2026-09-05',
+    };
+    expect(nextDue([stale], NOW)).toBeNull();
+  });
+});
+
+describe('sanitizePlans：新增的两个可选字段', () => {
+  it('`baseDate` 合法才留、`endedAt` 只认有限数；缺失照旧可用（不丢整条）', () => {
+    const rows = sanitizePlans([
+      { id: 'a', base: '10:00', hours: 24, started: true, createdAt: 1, baseDate: '2026-09-08', endedAt: 123 },
+      { id: 'b', base: '10:00', hours: 24, started: true, createdAt: 1, baseDate: '乱填', endedAt: 'x' },
+    ]);
+    expect(rows).toHaveLength(2);
+    expect(rows[0].baseDate).toBe('2026-09-08');
+    expect(rows[0].endedAt).toBe(123);
+    expect(rows[1].baseDate).toBeUndefined();
+    expect(rows[1].endedAt).toBeUndefined();
   });
 });

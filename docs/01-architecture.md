@@ -1,6 +1,6 @@
 # 01 · 架构总览
 
-> 对应数据版本：`2026.09.20-常驻条目按次数拆分` ｜ 事实核对日期：2026-09-20
+> 对应数据版本：`2026.09.28-周期收口为四类` ｜ 事实核对日期：2026-09-28
 > 本文回答：**代码放在哪、谁调用谁、一次点击之后发生了什么**。符号名与路径均可在代码中直接跳转核对。
 
 ## 1. 技术栈与工程配置
@@ -61,7 +61,7 @@ yys-checklist/
 | `src/stores/` | Zustand 状态容器（按领域分片） | `session.ts`、`items.ts`、`check.ts`、`view.ts`、`device.ts`、`ui.ts`、`tools.ts`、`nurture.ts` + 5 个 `*.test.ts` |
 | `src/hooks/` | 编排与副作用封装（竞态、首屏、断点、焦点、周期刷新） | `useApi.ts`、`useBootstrap.ts`、`useChecklist.ts`、`useAutoDaily.ts`、`useBreakpoint.ts`、`useDevicePrefs.ts`、`useModalFocus.ts`、`usePeriodRefresh.ts`、`useScope.ts` + `usePeriodRefresh.test.ts` |
 | `src/pages/` | 页面容器（只管排列） | `TodayPage.tsx`、`WeekPage.tsx`、`MonthPage.tsx`、`LimitedPage.tsx`、`StatsPage.tsx`、`ToolsPage.tsx`、`MePage.tsx`；`pages/settings/`：`ProfileSection.tsx`、`AutoDailySection.tsx`、`ItemManagerSection.tsx`、`GuildTimeSection.tsx`；`pages/tools/`：`YuhunSection.tsx`、`BountySection.tsx`、`NurtureSection.tsx` |
-| `src/components/` | 展示原子件与布局骨架 | `common/`（19）：`Alert.tsx`、`BackToTop.tsx`、`CheckBox.tsx`、`ChecklistItem.tsx`、`CollapsibleSection.tsx`、`ConfirmDialog.tsx`、`EmptyState.tsx`、`GainBadges.tsx`、`GainBar.tsx`、`HubCard.tsx`、`ItemField.tsx`、`NavContent.tsx`、`NurtureBadge.tsx`、`OnboardingDialog.tsx`、`ProfileSwitcher.tsx`、`ProgressBar.tsx`、`SaveErrorNotice.tsx`、`Tags.tsx`、`ViewBar.tsx`；`desktop/DesktopShell.tsx`；`mobile/MobileShell.tsx`；`settings/BackupSection.tsx`、`settings/DataVersionSection.tsx` |
+| `src/components/` | 展示原子件与布局骨架 | `common/`（28）：`Alert.tsx`、`BackToTop.tsx`、`CheckBox.tsx`、`ChecklistEntry.tsx`、`ChecklistGroupCard.tsx`、`ChecklistItem.tsx`、`CollapsibleSection.tsx`、`ConfirmDialog.tsx`、`EmptyState.tsx`、`GainBadges.tsx`、`GainBar.tsx`、`HubCard.tsx`、`ItemField.tsx`、**`Modal.tsx`**（2026-09-28 抽出的弹层外壳）、`NavContent.tsx`、`NurtureBadge.tsx`、`OnboardingDialog.tsx`、`PageHead.tsx`、`ProfilePickDialog.tsx`、`ProfileSwitcher.tsx`、`ProgressBar.tsx`、`SaveErrorNotice.tsx`、`Segmented.tsx`、`SettingRow.tsx`、`SummaryBar.tsx`、`Tags.tsx`、`ThemeToggle.tsx`、`ViewBar.tsx`；`desktop/DesktopShell.tsx`；`mobile/MobileShell.tsx`；`settings/AboutSection.tsx`、`settings/BackupSection.tsx`、`settings/DataVersionSection.tsx`、`settings/`**`ItemForm.tsx`**（条目新建 / 编辑表单，弹层形态） |
 | `src/services/` | 跨域用例编排与基础设施 | `localStore.ts`、`backupService.ts`、`clipboard.ts` + `localStore.test.ts` |
 | `src/styles/` | 设计令牌与共享容器类 | `index.css`、`base.css`、`layout.ts`、`tokens.ts` |
 | `src/test/` | 单测垫片 | `memoryStorage.ts` |
@@ -117,7 +117,7 @@ sequenceDiagram
 | 周期刷新 | `hooks/usePeriodRefresh.ts` | 每分钟边界 + 窗口聚焦 + 可见性变化时重估周期状态，**不写盘** |
 | 设备级状态 | `src/App.tsx` 挂载时 `hydrate()` → `stores/device.ts` | **只剩引导标记**（2026-09-16 起）。寮时间迁至 `stores/guildTime`、寄养迁至 `stores/nurture`，两者都改为**账号级**并随 `getBootstrap` 下发 |
 | 首屏错误 | `App.tsx` | 渲染 `ErrorScreen` |
-| 顶层提示 | `App.tsx` | `SaveErrorNotice`（聚合六处 `error`）、`OnboardingDialog`、`ConfirmDialog`、`ProfilePickDialog`（长按跨账号勾选的选择器，与确认框同一位置） |
+| 顶层提示 | `App.tsx` | `SaveErrorNotice`（聚合六处 `error`）、`OnboardingDialog`、`ConfirmDialog`、`ProfilePickDialog`（长按跨账号勾选的选择器，与确认框同一位置）。后三者共用 `Modal` 外壳；条目新建 / 编辑的弹层长在设置页里，经 `createPortal` 挂到 `body`（设置页的滚动容器会裁 `fixed` 遮罩） |
 
 ## 5. 导航与页面分派
 

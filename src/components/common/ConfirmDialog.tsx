@@ -1,6 +1,5 @@
-import Icon from '../icons/Icon';
 import { btn } from './controls';
-import { useModalFocus } from '../../hooks/useModalFocus';
+import Modal from './Modal';
 import { useUiStore } from '../../stores/ui';
 
 /**
@@ -26,44 +25,22 @@ import { useUiStore } from '../../stores/ui';
 export default function ConfirmDialog() {
   const confirmState = useUiStore((s) => s.confirmState);
   const answer = useUiStore((s) => s.answerConfirm);
-  /* 未打开时组件 `return null`，所以"是否可见"必须显式传进去，否则 effect 不会重跑 */
-  const ref = useModalFocus(Boolean(confirmState), () => answer(false));
 
   if (!confirmState) return null;
 
   const danger = confirmState.tone === 'danger';
 
+  /* 骨架（遮罩 / 面板 / 标题 / 页脚 / 焦点管理）在 `Modal` —— 2026-09-28 抽出，
+     视觉与抽出前一字不差（那段本来就是从这里抄过去的标准）。 */
   return (
-    <div
-      className="fixed inset-0 z-[60] flex items-center justify-center bg-scrim/60 px-4 backdrop-blur-sm"
-      onClick={() => answer(false)}
-    >
-      <div
-        ref={ref}
-        tabIndex={-1}
-        role="dialog"
-        aria-modal="true"
-        aria-label={confirmState.title}
-        onClick={(e) => e.stopPropagation()}
-        className="w-full max-w-sm overflow-hidden rounded-2xl border border-line bg-surface-3 shadow-panel"
-      >
-        <div className="flex items-start gap-2 px-4 py-3.5">
-          {danger ? (
-            <Icon name="alert" size={16} className="mt-0.5 flex-none text-crimson" />
-          ) : null}
-          <div className="min-w-0 flex-1">
-            <h2
-              className={`font-serif text-lg tracking-card ${danger ? 'text-crimson' : 'text-ink'}`}
-            >
-              {confirmState.title}
-            </h2>
-            {confirmState.body ? (
-              <p className="mt-1.5 text-sm leading-relaxed text-ink-2">{confirmState.body}</p>
-            ) : null}
-          </div>
-        </div>
-
-        <footer className="flex justify-end gap-2 border-t border-line-faint px-4 py-2.5">
+    <Modal
+      title={confirmState.title}
+      desc={confirmState.body}
+      icon={danger ? 'alert' : undefined}
+      danger={danger}
+      onClose={() => answer(false)}
+      footer={
+        <>
           <button
             type="button"
             onClick={() => answer(false)}
@@ -78,8 +55,8 @@ export default function ConfirmDialog() {
           >
             {confirmState.confirmLabel ?? '确认'}
           </button>
-        </footer>
-      </div>
-    </div>
+        </>
+      }
+    />
   );
 }

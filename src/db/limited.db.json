@@ -409,7 +409,7 @@
     {
       "id": "version_event_climb",
       "name": "版本活动爬塔积分",
-      "cycle": "version",
+      "cycle": "limited",
       "path": "活动页 → 当期版本活动",
       "gainKind": [
         "token",
@@ -421,7 +421,7 @@
     {
       "id": "version_event_shop",
       "name": "活动商店兑换",
-      "cycle": "version",
+      "cycle": "limited",
       "path": "活动页 → 活动商店",
       "gainKind": [
         "blackFrag"
@@ -436,7 +436,7 @@
     {
       "id": "season_douji",
       "name": "斗技赛季奖励",
-      "cycle": "season",
+      "cycle": "limited",
       "path": "町中 → 斗技 → 赛季结算",
       "gainKind": [
         "jade",
@@ -450,7 +450,7 @@
     {
       "id": "version_skin_return",
       "name": "皮肤返场 / 限定兑换",
-      "cycle": "version",
+      "cycle": "limited",
       "path": "商店 → 皮肤屋（限时区）",
       "gainKind": [
         "skin"
@@ -461,7 +461,7 @@
     {
       "id": "version_xunqi",
       "name": "寻契心缘商店",
-      "cycle": "version",
+      "cycle": "limited",
       "path": "商店 → 寻契心缘",
       "gainKind": [
         "token",
@@ -473,7 +473,7 @@
     {
       "id": "version_yaozhige",
       "name": "曜之阁·星光契兑换",
-      "cycle": "version",
+      "cycle": "limited",
       "path": "惠比寿的曜之阁",
       "gainKind": [
         "skin"
