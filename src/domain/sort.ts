@@ -107,9 +107,15 @@ export function moveWithinGroup(
   return dir < 0 ? moveBefore(order, id, group[j], seed) : moveAfter(order, id, group[j], seed);
 }
 
-/** 有截止日的按剩余天数升序，无截止的一律沉底（数据未核实时不能装作快到了） */
+/**
+ * 有 `deadline` 的按剩余天数升序；**没有 `deadline` 但有 `until`（活动下线日）的按下线日排**。
+ *
+ * 回退是 2026-09-28 加的：活动期的每日任务改走限时页后（`cycle: 'limited'` + 子步骤记次数），
+ * 它们只有 `until` 没有 `deadline` —— 不回退就整批沉到"截止未定"那一堆里，
+ * 临时性的东西反而排在最后。两者都没有才沉底（数据未核实时不能装作快到了）。
+ */
 function deadlineRank(it: Item): number {
-  const t = parseTs(it.deadline);
+  const t = parseTs(it.deadline) ?? parseTs(it.until);
   return t === null ? Number.POSITIVE_INFINITY : t;
 }
 
@@ -171,16 +177,19 @@ export function buildComparator(ctx: SortContext): (a: Item, b: Item) => number 
 
 /**
  * 列表是否可见（视图筛选）：
- *   - 奖励类型 `showKinds`（空数组 = 全部）
  *   - 今天是否适用（`days`）
+ *
+ * 2026-09-28 **删掉 `showKinds`（按奖励类型筛选）**：它是 `SHOW_KIND_FILTER` 开关
+ * 拴着的最后一段代码 —— 开关与 `ViewBar` 组件当日已删，字段只余"契约形状不动"这一个
+ * 理由留在数据层。留着它，下一个读者会以为"这里还有什么在按类型筛"，而调用方恒传空数组。
  *
  * 2026-09-15「痛感只用于默认排序」：原先的 `minWeight` 门槛已删除 ——
  * 痛感不再是筛选维度，只作排序键（见 `buildComparator`）。
  *
  * 2026-09-24 **删掉 `hideDone`，连同它的豁免口 `keepDone`**：它是全场唯一一条
  * "**界面上碰不到、代码里却仍生效**"的筛选 —— 用户既改不了它，也没有任何地方能看出
- * 它开着，而它会在聚合之前把已勾条目从数组里抽走（正是 `domain/grouping` 那次
- * "分组静默散开"的成因之一）。"已完成"在本项目的表达是**沉下去但仍在**
+ * 它开着，而它会在聚合之前把已勾条目从数组里抽走（正是当年"分组静默散开"的成因之一 ——
+ * 2026-09-28 起组关系写进 `Item.children`，这类"成员被滤掉"的问题从根上不存在了）。"已完成"在本项目的表达是**沉下去但仍在**
  * （`card-done` + 划朱线），不是消失 —— 页面上的「已完成」分区本身就是这个口径。
  * 当初为统计留的豁免口 `keepDone` 早已没有调用方（统计不经过本函数）。
  *
@@ -188,13 +197,11 @@ export function buildComparator(ctx: SortContext): (a: Item, b: Item) => number 
  * 以为"这里还有什么在按状态筛"，而实际什么都不做。
  */
 export interface VisibilityContext {
-  showKinds: string[];
   today: number;
 }
 
 export function isVisible(it: Item, ctx: VisibilityContext): boolean {
   if (!it.isAutoHub) {
-    if (ctx.showKinds.length && !(it.gainKind || []).some((k) => ctx.showKinds.includes(k))) return false;
     if (it.days && it.days.length && !it.days.includes(ctx.today)) return false;
   }
   return true;

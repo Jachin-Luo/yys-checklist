@@ -79,7 +79,12 @@ for (const [type, codes] of PAIRS) {
    旧数据若残留这些字段会被这条白名单拦下（`未知/已废字段`），这正是想要的效果 */
 const ALLOWED = new Set(['id', 'name', 'cycle', 'days', 'path',
   'gainKind', 'gain', 'gainNote', 'condition', 'time', 'timeEnd', 'timeNote', 'isGuildTime',
-  'start', 'deadline', 'until', 'since', 'autoDaily', 'isAutoHub', 'premium', 'note', 'origin']);
+  'start', 'deadline', 'until', 'since', 'autoDaily', 'isAutoHub', 'premium', 'note', 'origin',
+  'children']);
+/* 子步骤（2026-09-28）只许存"逐次可能不同"的字段：周期 / 时间 / 入口 / autoDaily /
+   premium / origin 一律继承父，写在子条目上就是无法表达的脏数据（一张卡只有一个周期）。
+   白名单之外一律报错 —— 与顶层 ALLOWED 同一枚尺子。 */
+const SUB_ALLOWED = new Set(['id', 'gain', 'gainKind', 'gainNote', 'condition', 'note', 'timeNote']);
 /* 条目双文件（2026-09-11；2026-09-15 收紧常驻口径）：items = 真正的常驻（每日/每周/每月），
    limited = 非常驻（活动期每日 / 限时活动，含 2026-09-28 并入的版本 / 赛季活动；带 until 的到期即删）。
    校验一律作用在**合并集**上 —— id 查重 / isAutoHub 全局恰 1 / 字典约束都跨文件生效 */
@@ -89,6 +94,8 @@ const fileOf = new Map([
   ...limitedDb.items.map((x) => [x.id, 'limited']),
 ]);
 const itemIds = new Set();
+/* 子 id 与条目 id 共用同一个键空间（勾选态 / 排序 / 隐藏都按 id 索引），所以要一起查重 */
+const childIds = new Map();
 let hubCount = 0;
 for (const it of items) {
   const tag = `[${fileOf.get(it.id)}/${it.id || '?'}]`;
@@ -131,6 +138,48 @@ for (const it of items) {
       }
     }
   }
+  /* 子步骤：只校验"逐次不同"的那几个字段，其余继承父（与运行时取字段的口径一致） */
+  if (it.children !== undefined) {
+    if (!Array.isArray(it.children)) err(`${tag} children 应为数组`);
+    else {
+      if (!it.children.length) err(`${tag} children 为空数组（不写 = 单条，写了就至少 1 项）`);
+      if (it.children.length > 31) err(`${tag} children 超过 31 项（进度格上限）`);
+      /* 名字里的 `k/N` 后缀：按名字猜分组的机制已删，后缀不再有任何含义，留着是误导 */
+      if (/\d\s*\/\s*\d\s*$/.test(it.name || '')) {
+        warn(`${tag} name 残留「k/N」后缀，父子关系已写进 children，组名应去掉后缀`);
+      }
+      const subSeen = new Set();
+      for (const c of it.children) {
+        const stag = `${tag}#${c.id || '?'}`;
+        for (const k of Object.keys(c)) if (!SUB_ALLOWED.has(k)) err(`${stag} 不允许的子字段: ${k}`);
+        if (!/^[a-z0-9_]+$/.test(c.id || '')) err(`${stag} 子 id 格式非法`);
+        if (subSeen.has(c.id)) err(`${stag} 子 id 组内重复`);
+        subSeen.add(c.id);
+        if (childIds.has(c.id)) err(`${stag} 子 id 与其它条目的子步骤重复`);
+        childIds.set(c.id, stag);
+        /* 收益校验：gain / gainKind 缺省继承父 —— 与卡片"显示当前步"同一口径 */
+        const gain = c.gain || it.gain;
+        const kinds = c.gainKind || it.gainKind;
+        if (gain) {
+          for (const k of Object.keys(gain)) {
+            if (!['jade', 'blackFrag', 'blueTicket'].includes(k)) err(`${stag} gain.${k} 未知币种`);
+            else if (typeof gain[k] !== 'number' || gain[k] < 0) err(`${stag} gain.${k} 应为非负数`);
+          }
+          if (!Object.keys(gain).some((k) => gain[k] > 0)) err(`${stag} gain 三项全为 0`);
+          const EQUIV_S = { jade: ['jade'], blackFrag: ['blackFrag', 'blackDaruma'], blueTicket: ['blueTicket'] };
+          for (const [gk, alts] of Object.entries(EQUIV_S)) {
+            if (gain[gk] > 0 && !(kinds || []).some((k) => alts.includes(k))) {
+              err(`${stag} gain.${gk}>0 但 gainKind 未标注（需 ${alts.join('/')}）`);
+            }
+          }
+        }
+        if (c.gainNote && c.gainNote.length > 40) err(`${stag} gainNote 超过 40 字`);
+        if ((c.condition || '').length > 40) err(`${stag} condition 超过 40 字`);
+        if ((c.note || '').length > 60) err(`${stag} note 超过 60 字`);
+        if ((c.timeNote || '').length > 30) err(`${stag} timeNote 超过 30 字`);
+      }
+    }
+  }
   if (it.time && !/^\d{2}:\d{2}$/.test(it.time)) err(`${tag} time 格式应为 HH:mm`);
   if (it.timeEnd && !/^\d{2}:\d{2}$/.test(it.timeEnd)) err(`${tag} timeEnd 格式应为 HH:mm`);
   if (it.time && it.timeEnd && it.time >= it.timeEnd) err(`${tag} timeEnd 应晚于 time`);
@@ -152,6 +201,10 @@ for (const it of items) {
   if (it.deadline && ts(it.deadline) < NOW) warn(`${tag} deadline=${it.deadline} 已过，活动已结束`);
 }
 if (hubCount !== 1) err(`isAutoHub 条目应恰好 1 条，当前 ${hubCount} 条`);
+/* 子 id 与条目 id 共用键空间：勾选态 / 排序 / 隐藏都按 id 索引，撞了就是串台 */
+for (const [cid, stag] of childIds) {
+  if (itemIds.has(cid)) err(`${stag} 子 id 与条目 id 冲突: ${cid}`);
+}
 
 /* ---------- 4.（已废弃）版本 / 赛季锚点校验 ----------
    2026-09-28 那两个周期并入 `limited`，`meta.periods` 随锚点机制整体删除，
@@ -161,8 +214,6 @@ if (metaDb.meta.version !== '1.4.0') warn(`[meta] version=${metaDb.meta.version}
 /* ---------- 5. viewDefaults / sortOptions ---------- */
 const vd = metaDb.viewDefaults;
 if (!SORT_BY.includes(vd.sortBy)) err(`[viewDefaults] sortBy=${vd.sortBy} 不在 sortOptions 中`);
-if (!Array.isArray(vd.showKinds)) err('[viewDefaults] showKinds 应为数组');
-else vd.showKinds.forEach((k) => { if (!GAIN_KIND.includes(k)) err(`[viewDefaults] showKinds 含非法类型 ${k}`); });
 if (typeof vd.minWeight !== 'number' || vd.minWeight < 0) err('[viewDefaults] minWeight 应为非负数');
 if (!Array.isArray(vd.pinned)) err('[viewDefaults] pinned 应为数组');
 else vd.pinned.forEach((id) => { if (!itemIds.has(id)) err(`[viewDefaults] pinned 的 id 不存在: ${id}`); });
@@ -252,7 +303,6 @@ for (const [table, rows] of [['states', usersDb.states], ['viewPrefs', usersDb.v
 }
 const COVER_MODES = ['dim', 'hide'];
 for (const v of usersDb.viewPrefs) {
-  (v.showKinds || []).forEach((k) => { if (!GAIN_KIND.includes(k)) err(`[viewPrefs/${v.profileId}] showKinds 非法类型 ${k}`); });
   if (v.coverMode !== undefined && !COVER_MODES.includes(v.coverMode)) {
     err(`[viewPrefs/${v.profileId}] coverMode 非法: ${v.coverMode}（只能是 ${COVER_MODES.join('|')}）`);
   }
@@ -279,13 +329,21 @@ for (const v of versionDb.versions) {
 }
 
 /* ---------- 11. 数据核对报告（S1.5 ②） ---------- */
-const gainItems = items.filter((i) => i.gain);
+/** 统计口径的"叶子"：有子步骤的父条目不参与（收益在子步骤上），否则会漏算整组的收益 */
+const leaves = items.flatMap((it) =>
+  (it.children || []).length
+    ? it.children.map((c) => ({ ...it, ...c, gain: c.gain ?? it.gain, gainKind: c.gainKind ?? it.gainKind }))
+    : [it],
+);
+const gainItems = leaves.filter((i) => i.gain);
 const sum = (k) => gainItems.reduce((s, i) => s + (i.gain[k] || 0), 0);
 const calib = items.filter((i) => i.gainNote && /待校准/.test(i.gainNote));
 const noUntilUnmarked = items.filter((i) => i.cycle === 'limited' && !i.until && !isExplicitlyPending(i));
 const noUntilPending = items.filter((i) => i.cycle === 'limited' && !i.until && isExplicitlyPending(i));
 const timeWindow = items.filter((i) => i.time);
 const pendingReview = items.filter((i) => /待核|待校准|以游戏内为准|未正式|未官方/.test(`${i.note || ''}${i.gainNote || ''}`));
+const groupCount = items.filter((i) => (i.children || []).length).length;
+const stepCount = items.reduce((s, i) => s + (i.children || []).length, 0);
 const byCycle = {};
 items.forEach((i) => { byCycle[i.cycle] = (byCycle[i.cycle] || 0) + 1; });
 const kindDist = {};
@@ -301,6 +359,7 @@ const report = [
   `| 项 | 值 |`,
   `|---|---|`,
   `| 条目总数 | ${items.length} |`,
+  `| 子组（N 次任务） | ${groupCount} 处 · ${stepCount} 步（子步骤挂在父条目下，不单算条目） |`,
   `| 周期分布 | ${Object.entries(byCycle).map(([k, v]) => `${k} ${v}`).join(' · ')} |`,
   `| 固定收益条目 | ${gainItems.length}（勾玉 ${sum('jade')} / 黑碎 ${sum('blackFrag')} / 蓝票 ${sum('blueTicket')}） |`,
   `| 标「待校准」 | ${calib.length}${calib.length ? ` —— ${calib.map((i) => i.id).join('、')}` : ''} |`,
@@ -337,7 +396,7 @@ console.log(`  周期分布 ${JSON.stringify(byCycle)}`);
 console.log(`  固定收益 ${gainItems.length} 条（勾玉 ${sum('jade')} / 黑碎 ${sum('blackFrag')} / 蓝票 ${sum('blueTicket')}）`);
 console.log(`  关系表 souls ${soulsDb.rows.length} · dungeons ${yuhunDb.dungeons.length} · drops ${yuhunDb.dungeons.reduce((s, d) => s + d.drops.length, 0)}`
   + ` · shikigami ${bountyDb.shikigami.length} · spots ${bountyDb.spots.length} · 关联 ${bountyDb.shikigamiSpots.length}/${bountyDb.shikigamiClues.length}`);
-console.log(`  带时间窗 ${timeWindow.length} 条 · 已拆条 2 处 · 含 until ${items.filter((i) => i.until).length} 条`);
+console.log(`  带时间窗 ${timeWindow.length} 条 · 子组 ${groupCount} 处（共 ${stepCount} 步） · 含 until ${items.filter((i) => i.until).length} 条`);
 console.log(`  已生成 reports/data-check.md`);
 if (warnings.length) {
   console.log(`\n${warnings.length} 个警告（不阻塞）：`);

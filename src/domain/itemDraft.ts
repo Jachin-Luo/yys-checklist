@@ -11,7 +11,7 @@
  *   - **`gain` 只留三币种里大于 0 的有限数**：`0` 的语义是"没有这个收益"，与缺省同义；
  *     留着会让 `GainBadges` 渲染出 "+0"。
  */
-import type { Gain, Item, ItemDraft } from '../api/types';
+import type { Gain, Item, ItemDraft, SubItem } from '../api/types';
 import { GAIN_CURRENCY } from './enums';
 
 /** 空白字符串 → undefined（顺带 trim：用户手打的尾随空格不该进库） */
@@ -29,6 +29,29 @@ export function cleanGain(gain?: Gain): Gain | undefined {
     if (typeof v === 'number' && Number.isFinite(v) && v > 0) out[c] = v;
   }
   return Object.keys(out).length ? out : undefined;
+}
+
+/**
+ * 子步骤 → 落库形状：空白串归 `undefined`、`gain` 走同一把尺子（只留正数）。
+ *
+ * 只留"逐次可能不同"的那几个字段 —— 周期 / 时间 / 入口 / 截止一律继承父条目，
+ * 子步骤上出现它们就是无法表达的脏数据（一张卡只有一个周期）。
+ * `id` 是唯一必留项：它关联已勾状态与勾选日志，且**生成后不复用**。
+ */
+export function cleanSubItem(c: SubItem): SubItem {
+  const out: SubItem = { id: c.id };
+  const note = opt(c.note);
+  if (note) out.note = note;
+  const condition = opt(c.condition);
+  if (condition) out.condition = condition;
+  const gainNote = opt(c.gainNote);
+  if (gainNote) out.gainNote = gainNote;
+  const timeNote = opt(c.timeNote);
+  if (timeNote) out.timeNote = timeNote;
+  if (c.gainKind?.length) out.gainKind = [...c.gainKind];
+  const gain = cleanGain(c.gain);
+  if (gain) out.gain = gain;
+  return out;
 }
 
 /**
@@ -55,6 +78,9 @@ export function applyDraft(draft: ItemDraft): Omit<Item, 'id' | 'origin'> {
        而所有消费者（`KindBadges` 的 `kinds.length`、筛选的 `includes`）都只认后者 */
     gainKind: draft.gainKind.length ? [...draft.gainKind] : undefined,
     gain: cleanGain(draft.gain),
+    /* 空（没有 / 空数组）= 单条条目（不留 `[]`：`isGroup` 只看长度，留空数组等于给自己埋一个
+       "是不是多次任务"的歧义，且 `diffPatch` 会把 `[]` 与"没写"算成两种状态） */
+    children: draft.children?.length ? draft.children.map(cleanSubItem) : undefined,
   };
 }
 
@@ -80,5 +106,6 @@ export function draftFromItem(it: Item): ItemDraft {
     note: it.note,
     gainNote: it.gainNote,
     gain: it.gain,
+    children: (it.children ?? []).map((c) => ({ ...c })),
   };
 }

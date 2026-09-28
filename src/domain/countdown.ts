@@ -30,22 +30,6 @@ export function daysLeft(deadline?: string, now: Date = new Date()): number | nu
   return Math.ceil((t - now.getTime()) / DAY_MS);
 }
 
-/**
- * 距截止还有几小时（向上取整）。null = 无截止日。
- *
- * 2026-09-20 新增（用户要求：不足一天显示小时）。它与 `daysLeft` 是**同一次时间差的两种刻度**，
- * 不是替代关系：`daysLeft` 的 ceil 会把"还有 2 小时"说成"剩 1 天" —— 对限时活动的最后一段
- * 来说太粗，"剩 1 天"让人以为还有一整天，而实际马上要结束。徽章在剩余不足 24 小时时改用它。
- *
- * `daysLeft` 保持原样：排序（`deadlineRank` 走的是原始时间戳）、`LimitedPage` 的 urgent 计数
- * （`d <= 3`）依赖的是它"按天粗粒度"的语义，把它们改成小时口径属于另一件事。
- */
-export function hoursLeft(deadline?: string, now: Date = new Date()): number | null {
-  const t = parseTs(deadline);
-  if (t === null) return null;
-  return Math.ceil((t - now.getTime()) / HOUR_MS);
-}
-
 export type DeadlineLevel = 'hot' | 'warn' | 'normal' | 'none';
 
 export interface DeadlineBadge {

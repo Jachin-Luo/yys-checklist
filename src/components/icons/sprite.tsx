@@ -692,19 +692,8 @@ export default function IconSprite() {
           <path d="M15.4,15.4 L20.4,20.4" />
         </symbol>
 
-        {/* 筛（三线递减）· 筛选 */}
-        <symbol
-          id="g-filter"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth={1.7}
-          strokeLinecap="round"
-        >
-          <path d="M4.6,7.6 H19.4" />
-          <path d="M7.4,12 H16.6" />
-          <path d="M10.2,16.4 H13.8" />
-        </symbol>
+        {/* 2026-09-28 删除 `filter`（三线递减的筛子）：它唯一的语义就是"按奖励类型筛选"，
+            随 `ViewBar` 与 `SHOW_KIND_FILTER` 一并退场。需要时从 git 历史取回 */}
 
         {/* 叉 · 关闭 / 清空输入 */}
         <symbol

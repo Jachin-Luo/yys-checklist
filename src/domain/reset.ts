@@ -11,12 +11,11 @@
  */
 import type { Item } from '../api/types';
 import type { Cycle } from './enums';
+import { stepIds } from './steps';
 
 export interface ResetCtx {
   resetHour: number;
 }
-
-const DAY_MS = 86400000;
 
 /** 当天 `resetHour` 时刻（若此刻早于该时刻，则周期起点是昨天那一档） */
 function lastHour(now: Date, resetHour: number): number {
@@ -94,7 +93,12 @@ export function periodEndOf(cycle: Cycle, now: Date, ctx: ResetCtx): number | nu
 
 /**
  * 一次处理全量条目，返回归零后的状态；顺带清理已下线条目的过期键。
- * 复杂度 O(n)，n = 条目数（当前 89），启动时执行一次。
+ * 复杂度 O(n)，n = 条目数，启动时执行一次。
+ *
+ * ⚠️ **键空间是"步骤 id"不是"条目 id"**（2026-09-28）：子步骤的勾选也记在 `checked` 里，
+ * 而子步骤 id 不在 `items` 的顶层 —— 只按 `item.id` 建存活集合会把**子步骤的进度当成孤儿
+ * 清掉**（周期还没翻篇就没了）。所以存活集合取 `stepIds`，且周期起点按**父条目**算
+ * （子步骤没有自己的周期，它继承父）。
  */
 export function mergeChecked(
   checked: Record<string, number>,
@@ -102,11 +106,13 @@ export function mergeChecked(
   now: Date,
   ctx: ResetCtx,
 ): Record<string, number> {
-  const alive = new Set(items.map((i) => i.id));
+  /* id → 它所属的条目（子步骤指向父条目） */
+  const ownerOf = new Map<string, Item>();
+  for (const it of items) for (const id of stepIds(it)) ownerOf.set(id, it);
   const out: Record<string, number> = {};
   for (const [id, at] of Object.entries(checked)) {
-    if (!alive.has(id)) continue; // 条目已下线 / 已隐藏：顺手清理，避免无限膨胀
-    const it = items.find((i) => i.id === id);
+    /* 不在集合里 = 条目已下线 / 已隐藏 / 这一步骤已被删除：顺手清理，避免无限膨胀 */
+    const it = ownerOf.get(id);
     if (!it) continue;
     if (at >= periodStartOf(it, now, ctx)) out[id] = at;
   }
@@ -127,10 +133,3 @@ export function activeItems(items: Item[], now: Date): Item[] {
   return items.filter((it) => !isArchived(it, now));
 }
 
-/** 距 `until` 还有几天（负数 = 已过） */
-export function daysUntilExit(it: Item, now: Date): number | null {
-  if (!it.until) return null;
-  const [y, m, d] = it.until.split('-').map(Number);
-  const end = new Date(y, m - 1, d, 23, 59, 59, 999).getTime();
-  return Math.ceil((end - now.getTime()) / DAY_MS);
-}

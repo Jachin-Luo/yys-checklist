@@ -47,7 +47,7 @@ function bootstrap() {
   useItemStore.setState({ items: ITEMS, meta: null, overrides: null, error: null });
   useViewStore.setState({
     view: {
-      profileId: 'p_main', sortBy: 'weight', showKinds: [], minWeight: 0,
+      profileId: 'p_main', sortBy: 'weight', minWeight: 0,
       pinned: [], coverMode: 'dim', updatedAt: '',
     },
     defaults: null,

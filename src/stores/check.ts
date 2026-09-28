@@ -271,6 +271,3 @@ export const resetCheckMemory = (): void => {
   resetTracking({});
   useCheckStore.setState({ checked: {}, log: {}, error: null });
 };
-
-export const isChecked = (checked: Record<string, number>, itemId: string): boolean =>
-  checked[itemId] !== undefined;

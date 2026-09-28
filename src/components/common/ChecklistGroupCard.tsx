@@ -1,8 +1,7 @@
 import { memo } from 'react';
 import type { Item } from '../../api/types';
 import { DEFAULT_CARD_DISPLAY } from '../../domain/cardDisplay';
-import type { ItemUnit } from '../../domain/grouping';
-import { unitProgress } from '../../domain/grouping';
+import { currentStepIndex, doneSteps, stepIds, stepView } from '../../domain/steps';
 import { LONG_PRESS_MS, useLongPress } from '../../hooks/useLongPress';
 import { useBreakpoint } from '../../hooks/useBreakpoint';
 import { useCheckStore } from '../../stores/check';
@@ -16,57 +15,74 @@ import Icon, { type IconName } from '../icons/Icon';
 import { SnakeEye } from '../ornament';
 
 /**
- * **聚合卡**：把「同一件事的第 k / N 次」并成一张卡，菱形当推进器（2026-09-24 用户需求，方案 B）。
+ * 超过这个步数就不画菱形格了：31 个菱形会把标题挤没（用户定的阈值）。
+ * 超过时改画**竖条**（重设计样式稿的 `.prog .bars`），不是"干脆不画" —— 见文件头。
+ */
+const DIAMOND_MAX = 7;
+
+/**
+ * **多次卡**：「同一件事做 N 次」的任务（2026-09-28 子组模型）。
  *
- * 数据一行都没改 —— 组与组内成员由 `domain/grouping.groupByCount` 从既有名字里推导，
- * **进度 = 组内真实已完成的条数**（`unitProgress`），不是另记一个计数。
+ * 数据是**一个父条目 + N 个子步骤**（`Item.children`），不是 N 条平级条目 ——
+ * 所以"这是不是一组""有几步""走到第几步"全是事实，不用猜（2026-09-24 那版是按名字
+ * 里的 `k/N` 猜的，连带一整套"缺员仍要聚合""成员豁免筛选"的补丁，随本版一起删除）。
  *
  * ## 与 `ChecklistItem`（单条卡）的关系
  *
  * 外壳、颜色、动效全部同构（同一套令牌类），差异只在**三个地方**：
  *
- * | | 单条卡 | 聚合卡 |
+ * | | 单条卡 | 多次卡 |
  * |---|---|---|
- * | 左侧菱形 | 勾选框：点一下 = 完成 / 取消 | **推进器**：点一下 = 完成下一步；满段后再点 = 取消整组 |
- * | 标题行 | 任务名 | 组名 + **菱形进度格**（一格一步）+ **`cur/total` 等宽计数** |
- * | 逐次说明 | 恒显示本条自己的 | 显示**当前这一步**的（`地域鬼王 2/3` 的"需声望 2000" 只在推进到那一步时出现） |
+ * | 左侧菱形 | 勾选框：点一下 = 完成 / 取消 | **推进器**：点一下 = 完成下一步；满段后再点 = 取消整卡 |
+ * | 标题行 | 任务名 | 任务名 + **菱形进度格**（一格一步）+ **`cur/total` 等宽计数** |
+ * | 逐次说明 | 恒显示本条自己的 | 显示**当前这一步**的（`地域鬼王` 第 2 步的"需声望 2000"只在推进到那一步时出现） |
  *
  * 外壳代码与 `ChecklistItem` 是重复的（两份 `article` + 竖条 + 底轨）。**暂时不抽公共壳**：
  * 抽壳要引入一层 slot 协议，而现在只有两张卡；等第三张出现再抽，比先抽错便宜。
  *
- * ## 三个交互决策（我按最不意外的选项定的，可改）
+ * ## 三个交互决策（沿用 2026-09-24 那版，用户 2026-09-28 确认不动）
  *
- * 1. **点整卡 = 点菱形 = 推进一步**（不另设"一键完成整组"）：与参考稿"点一次菱形推进一步"
+ * 1. **点整卡 = 点菱形 = 推进一步**（不另设"一键完成整组"）：与"点一次菱形推进一步"
  *    一致；否则整卡一点就满段，"分段推进"就没有意义了。
- * 2. **满段后再点 = 取消整组**（把整组成员一起清掉），与单条卡"再点一次取消"同源。
+ * 2. **满段后再点 = 取消整卡**（把所有步一起清掉），与单条卡"再点一次取消"同源。
  * 3. **长按 = 把当前进度复刻到其他账号**：把「下一步 + 已完成的那些步」一起写过去，
  *    `toggleInProfiles` 的方向由**第一个 id** 决定，所以第一个必须放"下一步"（它必然是
  *    未完成 → 整批按"勾选"写），目标账号拿到的正好是"前 cur+1 步已完成"。
- *    满段时长按传整组（第一个已完成 → 整批按"取消"写），语义是撤销。
+ *    满段时长按传整卡（第一个已完成 → 整批按"取消"写），语义是撤销。
  *
- * ## 菱形进度格（2026-09-24 用户要求："没有菱形的进度"）
+ * **不做中间回退**（2026-09-28 用户决定）：做了 2/3 想退回 1/3 是做不到的 ——
+ * 不做乱序勾选，就只能一路推进、或到满段后整卡取消。
  *
- * 单条卡当初否掉了参考稿的"一排菱形进度格"，理由是"数据是布尔勾选、没有 `cur/total`" ——
- * 这条前提**在聚合卡上不成立**：`cur/total` 是组内真实的已完成条数。所以进度格只画在这里：
- * 一格 = 一步，三态与推进器同一套（金描边空心 → 朱红描边 = 当前步 → 朱红实心 = 已完成），
- * "走到第几步"是**看得见的一排**，不必只靠数字。格数 = `unit.total` = **可见步数**
- * （某一步被手动隐藏时按剩余步数算，见 `domain/grouping` 的缺员说明）。
- * 它纯装饰（`aria-hidden`）：读屏器由紧随其后的 `cur/total` 承担。
+ * ## 两种进度形式（按步数切）
  *
- * ## 徽章与字段的"宁可少显示"原则
+ * | 步数 | 形式 | 出处 |
+ * |---|---|---|
+ * | ≤ `DIAMOND_MAX`（7） | **菱形格**：三态（金描边空心 → 朱红描边 = 当前步 → 朱红实心 = 已完成） | 参考稿的进度格 |
+ * | > 7（上限 31） | **竖条**：两态（`line` 灰 = 未做 / `crimson` 朱红 = 已做） | `uiRef/囤囤鼠大作战_重设计样式稿.html` 的 `.prog .bars` |
  *
- * 逐次不同的信息（时间窗、奖励、入口）**只在全组一致时显示**，否则整项不显示 ——
- * 把 `1/3` 的时间当成 `2/3` 的显示，比不显示更糟。唯一的例外是**截止**：取全组**最早**
- * 的那个（临期提示宁可早不可晚）。逐次说明（`note` / `condition`）不受此限，
- * 它显示的就是**当前这一步**的原文，天然准确。
+ * 为什么切：菱形一枚约 9px 宽（6px + 间距），31 步接近 280px，会把标题挤没；
+ * 竖条 3px + 2px 间距，31 步约 153px，还留在标题行里 —— 用户 2026-09-28 定的
+ * 「超过 7 个时用重设计样式稿里的形式」，所以是**换一种画法**，不是"干脆不画"。
+ *
+ * 竖条只有两态：步数一多，"当前步是哪一步"由紧随其后的 `cur/total` 说更准
+ * （样式稿的 `.prog` 也是这个取舍：条只分 on / off，数字另说）。
+ *
+ * 两者都纯装饰（`aria-hidden`）：读屏器由紧随其后的 `cur/total` 承担。
+ *
+ * ## 逐次不同的字段显示"当前步"
+ *
+ * 子步骤只写差异（奖励 / 条件 / 备注 / 时间备注），没写的**继承父**（`stepView`）。
+ * 所以卡上显示的是**当前步合并后的视图**：走一步换一条说明、换一份奖励 ——
+ * 这正是"分段推进"的用处，也是"每步奖励可以不同"落在界面上的样子。
+ * 周期 / 时间 / 入口 / 截止这类字段父条目说了算（子步骤不许覆盖），直接读父。
  */
 function ChecklistGroupCard({
-  unit,
+  item,
   dimmed = false,
   showDeadline = false,
   highlight = false,
 }: {
-  unit: ItemUnit;
+  item: Item;
   dimmed?: boolean;
   showDeadline?: boolean;
   /** 「唯一高亮位」（金描边 + 淡金底）。与单条卡同一语义，全屏最多一处 */
@@ -82,39 +98,20 @@ function ChecklistGroupCard({
   const setPinned = useViewStore((s) => s.setPinned);
   const askPick = useUiStore((s) => s.askPick);
 
+  const steps = item.children ?? [];
+  const ids = stepIds(item);
   const isDone = (id: string) => checked[id] !== undefined;
-  const cur = unitProgress(unit, isDone);
-  const done = cur === unit.total;
+  const cur = doneSteps(item, isDone);
+  const done = cur === steps.length;
   /* 当前步：未满段时是"下一步"，满段后退回最后一步（卡上仍能读到那一步的说明，不会突然空掉） */
-  const step = unit.items[Math.min(cur, unit.total - 1)];
+  const step = stepView(item, currentStepIndex(item, isDone));
 
-  /* 全组一致才显示（见文件头"宁可少显示"） */
-  const sameOf = (pick: (it: Item) => string | undefined): string | undefined => {
-    const first = pick(unit.items[0]);
-    return unit.items.every((it) => pick(it) === first) ? first : undefined;
-  };
-  const samePath = sameOf((it) => it.path);
-  const sameTime = sameOf((it) => it.time);
-  const gain = unit.items.every((it) => JSON.stringify(it.gain) === JSON.stringify(unit.items[0].gain))
-    ? unit.items[0].gain
-    : undefined;
-  const kinds = unit.items.every(
-    (it) => JSON.stringify(it.gainKind) === JSON.stringify(unit.items[0].gainKind),
-  )
-    ? unit.items[0].gainKind
-    : undefined;
   const kindLabels = new Map([...dictIndexOf(meta, 'gainKind').entries()].map(([k, v]) => [k, v.label]));
-  /* 截止取最早那条 —— 与单条卡的 `showDeadline` 语义一致（限时页才传 true） */
-  const earliest = unit.items.reduce<Item | null>(
-    (acc, it) =>
-      it.deadline && (!acc?.deadline || it.deadline < acc.deadline) ? it : acc,
-    null,
-  );
 
-  /* 推进一步：勾掉下一个未完成的成员 */
-  const advance = () => void toggle(unit.items[cur].id);
-  /* 满段后再点：整组一起取消（`setMany` 传 null 即清掉这些 id） */
-  const reset = () => void setMany(unit.items.map((it) => it.id), null);
+  /* 推进一步：勾掉下一个未完成的步 */
+  const advance = () => void toggle(ids[cur]);
+  /* 满段后再点：整卡一起取消（`setMany` 传 null 即清掉这些 id） */
+  const reset = () => void setMany(ids, null);
   const onMain = () => (done ? reset() : advance());
 
   const { handlers, pressing, swallowClick } = useLongPress({
@@ -123,13 +120,11 @@ function ChecklistGroupCard({
       void (async () => {
         const picked = await askPick({
           itemId: step.id,
-          itemName: unit.label,
+          itemName: item.name,
           checked: done,
         });
         if (!picked?.length) return;
-        const payload = done
-          ? unit.items.map((it) => it.id)
-          : [step.id, ...unit.items.slice(0, cur).map((it) => it.id)];
+        const payload = done ? ids : [step.id, ...ids.slice(0, cur)];
         await toggleInProfiles(payload, picked);
       })();
     },
@@ -141,9 +136,9 @@ function ChecklistGroupCard({
   const isHighlight = highlight && !done;
   /* 收益徽章的站位随断点 —— 与 `ChecklistItem` 同一条注释，不再重复 */
   const payColumn = useBreakpoint() === 'desktop';
-  /* 置顶状态取"**全组成员都已置顶**"（与其它"全组一致才显示"的口径同一枚尺子）：
-     只有部分成员在置顶表里时，卡片显示未置顶 —— 排序会把它拉散，那时显示"已置顶"是撒谎 */
-  const allPinned = unit.items.every((it) => pinnedIds.includes(it.id));
+  /* 置顶只看父条目：子步骤不进置顶表（粒度锁在父，见 `SubItem` 的说明） */
+  const allPinned = pinnedIds.includes(item.id);
+  const showDiamonds = steps.length <= DIAMOND_MAX;
 
   /* 三态菱形推进器：未开始 = 金描边空心 / 进行中 = 朱红描边 + 内芯 / 满段 = 朱红实心 */
   const mark =
@@ -158,7 +153,7 @@ function ChecklistGroupCard({
       {...handlers}
       data-state={done ? 'done' : 'open'}
       data-cur={cur}
-      data-total={unit.total}
+      data-total={steps.length}
       className={[
         /* 账目行（册页稿 `.entry`）：与单条行同构；进度不再画底轨 —— 标题行里的
            菱形进度格 + `cur/total` 已经把"走到第几步"说清了 */
@@ -196,7 +191,7 @@ function ChecklistGroupCard({
       {/* 推进器：语义控件仍是 button（可聚焦、可键盘操作），点它 = 推进一步 */}
       <button
         type="button"
-        aria-label={`${done ? '取消完成' : `推进到第 ${cur + 1} 步`}：${unit.label}`}
+        aria-label={`${done ? '取消完成' : `推进到第 ${cur + 1} 步`}：${item.name}`}
         aria-pressed={done}
         onClick={(e) => {
           e.stopPropagation();
@@ -216,7 +211,7 @@ function ChecklistGroupCard({
       {/* 组图标独占一列 —— 与单条卡同站位（参考稿 `.entry .glyph`），标题与下各行左对齐。
           同样**不加 mt**：行首三件顶对齐、各自居中，中线才落在一条线上（见 `ChecklistItem`） */}
       <Icon
-        name={CYCLE_ICON[step.cycle]}
+        name={CYCLE_ICON[item.cycle]}
         size={17}
         className={`flex-none ${done ? 'text-ink-3' : 'text-gold-hi'}`}
       />
@@ -227,50 +222,64 @@ function ChecklistGroupCard({
               done ? 'text-ink-3 line-through decoration-crimson decoration-1' : 'text-ink'
             }`}
           >
-            {unit.label}
+            {item.name}
             {/* 菱形进度格：一格 = 一步，三态与左侧推进器同源（所以"走到第几步"是一排看得见的菱形） */}
-            <span aria-hidden className="flex items-center gap-[3px]">
-              {unit.items.map((it, i) => (
-                <i
-                  key={it.id}
-                  className={`block h-1.5 w-1.5 rotate-45 border transition-colors duration-220 ease-genso ${
-                    i < cur
-                      ? 'border-crimson bg-crimson'
-                      : i === cur && !done
-                        ? 'border-crimson'
-                        : 'border-gold'
-                  }`}
-                />
-              ))}
-            </span>
+            {showDiamonds ? (
+              <span aria-hidden className="flex items-center gap-[3px]">
+                {steps.map((it, i) => (
+                  <i
+                    key={it.id}
+                    className={`block h-1.5 w-1.5 rotate-45 border transition-colors duration-220 ease-genso ${
+                      i < cur
+                        ? 'border-crimson bg-crimson'
+                        : i === cur && !done
+                          ? 'border-crimson'
+                          : 'border-gold'
+                    }`}
+                  />
+                ))}
+              </span>
+            ) : (
+              /* 竖条（重设计样式稿 `.prog .bars`）：3×11px 的细条比菱形省一半宽度，
+                 14 步约 68px、31 步约 153px，都还待在标题行里；菱形到 31 步要 280px，
+                 会把标题挤没。两态即可 —— "走到第几步"由紧随其后的计数说 */
+              <span aria-hidden className="flex items-center gap-[2px]">
+                {steps.map((it, i) => (
+                  <i
+                    key={it.id}
+                    className={`block h-[11px] w-[3px] rounded-[1px] transition-colors duration-220 ease-genso ${
+                      i < cur ? 'bg-crimson' : 'bg-line'
+                    }`}
+                  />
+                ))}
+              </span>
+            )}
             {/* 计数：等宽字体，数字不跳（参考稿的 `.cnt`） */}
             <span className="font-mono text-sm text-gold-hi">
               {cur}
-              <span className="text-ink-4">/{unit.total}</span>
+              <span className="text-ink-4">/{steps.length}</span>
             </span>
             {done ? <SnakeEye size={13} className="ml-1" /> : null}
-            {card.tags && showDeadline && earliest ? <DeadlineTag item={earliest} /> : null}
-            {card.tags && unit.items[0].autoDaily ? <CoveredTag /> : null}
-            {card.tags && unit.items[0].premium ? <PremiumTag /> : null}
-            {/* 时间窗只在全组一致时显示；不一致时整项不显示（见文件头） */}
-            {card.tags && sameTime ? <TimeTag item={step} /> : null}
+            {card.tags && showDeadline && step.deadline ? <DeadlineTag item={step} /> : null}
+            {card.tags && item.autoDaily ? <CoveredTag /> : null}
+            {card.tags && item.premium ? <PremiumTag /> : null}
+            {card.tags && step.time ? <TimeTag item={step} /> : null}
         </h3>
 
-        {/* 收益与类型同样"全组一致才显示" —— 逐次收益不同的组不显示，避免被读成合计。
-            提示文案沿用数据里的 `gainNote`（如"每只 20 勾"，它本来就说明了这是**单次**收益），
-            全组口径不一致时不写 title，让徽章自己说话。站位随断点（移动正文流 / 桌面右列） */}
-        {!payColumn && card.gain && gain ? (
-          <GainBadges gain={gain} note={sameOf((it) => it.gainNote)} />
+        {/* 收益取**当前步**的：逐次不同的奖励写在子步骤上，走一步换一份 ——
+            提示文案沿用 `gainNote`（如"每只 20 勾"，它本来就说明这是**单次**收益） */}
+        {!payColumn && card.gain && step.gain ? (
+          <GainBadges gain={step.gain} note={step.gainNote} />
         ) : null}
-        {!payColumn && card.kinds && kinds ? (
-          <KindBadges kinds={kinds} gain={gain} labels={kindLabels} />
+        {!payColumn && card.kinds && step.gainKind ? (
+          <KindBadges kinds={step.gainKind} gain={step.gain} labels={kindLabels} />
         ) : null}
 
-        {/* 逐次说明用**当前步**的原文：走一步换一条，这正是"分段推进"的用处。
-            与单条卡同口径：三行共用一个 `FieldBlock`（缩进引线），全关时不渲染 */}
-        {(card.path && samePath) || (card.condition && step.condition) || (card.note && step.note) ? (
+        {/* 入口读父（子步骤不覆盖）；条件与备注读**当前步**的原文：走一步换一条，
+            这正是"分段推进"的用处。与单条卡同口径：三行共用一个 `FieldBlock`，全关时不渲染 */}
+        {(card.path && item.path) || (card.condition && step.condition) || (card.note && step.note) ? (
           <FieldBlock>
-            {card.path && samePath ? <Field kind="path" value={samePath} /> : null}
+            {card.path && item.path ? <Field kind="path" value={item.path} /> : null}
             {card.condition && step.condition ? <Field kind="condition" value={step.condition} /> : null}
             {card.note && step.note ? <Field kind="note" value={step.note} /> : null}
           </FieldBlock>
@@ -280,29 +289,24 @@ function ChecklistGroupCard({
       {/* 桌面右列（册页稿 `.entry .pay`）—— 与单条卡同一站位 */}
       {payColumn ? (
         <div className="flex-none">
-          {card.gain && gain ? <GainBadges gain={gain} note={sameOf((it) => it.gainNote)} column /> : null}
-          {card.kinds && kinds ? (
-            <KindBadges kinds={kinds} gain={gain} labels={kindLabels} column />
+          {card.gain && step.gain ? <GainBadges gain={step.gain} note={step.gainNote} column /> : null}
+          {card.kinds && step.gainKind ? (
+            <KindBadges kinds={step.gainKind} gain={step.gain} labels={kindLabels} column />
           ) : null}
         </div>
       ) : null}
 
-      {/* 置顶（2026-09-28 用户反馈补上：聚合卡此前没有这颗钮）。
-          **整组一次写入** —— 只置顶一个成员会让该组在排序里散架（成员分处榜首与榜尾），
-          所以走 store 的 `setPinned` 批量 action，而不是循环 `togglePin`（那是每个成员一次落盘）。
+      {/* 置顶：只写父条目一个 id —— 子步骤不进置顶表，否则排序会把一张卡拉散。
           与单条卡同款：按下即 `stopPropagation`，否则在它身上按住会触发整卡的长按选择器，
           而整卡点击是"推进一步" */}
       <button
         type="button"
-        aria-label={allPinned ? `取消置顶：${unit.label}` : `置顶：${unit.label}`}
+        aria-label={allPinned ? `取消置顶：${item.name}` : `置顶：${item.name}`}
         title={allPinned ? '取消置顶' : '置顶这一组'}
         onPointerDown={(e) => e.stopPropagation()}
         onClick={(e) => {
           e.stopPropagation();
-          void setPinned(
-            unit.items.map((it) => it.id),
-            !allPinned,
-          );
+          void setPinned([item.id], !allPinned);
         }}
         className={`mt-0.5 flex-none cursor-pointer rounded-full p-1 transition-colors duration-150 ease-genso hover:bg-fill ${
           allPinned ? 'text-gold-hi' : 'text-ink-4 hover:text-gold-hi'
@@ -315,8 +319,8 @@ function ChecklistGroupCard({
 }
 
 /**
- * 周期 → 图标。与 `ChecklistItem` 的同一张表（分组规则要求同组同周期，
- * 所以取当前步的周期是稳定的）。两处各留一份是刻意的：这张表属于"卡片的呈现"，
+ * 周期 → 图标。与 `ChecklistItem` 的同一张表（子步骤不覆盖周期，所以读父条目是稳定的）。
+ * 两处各留一份是刻意的：这张表属于"卡片的呈现"，
  * 抽到 domain 会让 domain 反向依赖图标名。
  */
 const CYCLE_ICON: Record<Item['cycle'], IconName> = {

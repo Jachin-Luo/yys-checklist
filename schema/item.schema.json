@@ -135,6 +135,49 @@
       "type": "string",
       "enum": ["preset", "custom"],
       "description": "区分预设条目与用户自建。source 删除后，这是唯一的自建标识；用户对 custom 条目可真删"
+    },
+    "children": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 31,
+      "description": "子步骤（2026-09-28 新增）：有此字段的条目是「N 次任务」，一格一步、点一次推进一步。子条目只存逐次可能不同的字段，周期与时间一律继承父；子 id 与条目 id 共用同一个键空间（勾选态 / 排序 / 隐藏都按 id 索引），必须全局唯一且不复用",
+      "items": {
+        "type": "object",
+        "required": ["id"],
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z0-9_]+$",
+            "description": "子步骤标识，全局唯一。生成后不复用：删掉中间一步不影响其余步的已勾状态"
+          },
+          "gain": {
+            "type": "object",
+            "description": "固定收益。缺省继承父",
+            "additionalProperties": false,
+            "properties": {
+              "jade": { "type": "number", "minimum": 0 },
+              "blackFrag": { "type": "number", "minimum": 0 },
+              "blueTicket": { "type": "number", "minimum": 0 }
+            }
+          },
+          "gainKind": {
+            "type": "array",
+            "description": "奖励类型。缺省继承父",
+            "items": { "type": "string", "enum": ["jade", "blueTicket", "blackFrag", "blackDaruma", "skinTicket", "medal", "merit", "soul", "bossSoul", "daruma", "gold", "stamina", "exp", "shard", "ssr", "skin", "token", "other"] },
+            "uniqueItems": true,
+            "maxItems": 8
+          },
+          "gainNote": { "type": "string", "maxLength": 40, "description": "收益口径。缺省继承父" },
+          "condition": { "type": "string", "maxLength": 40, "description": "触发条件，如「每周第二次」。缺省继承父" },
+          "note": { "type": "string", "maxLength": 60, "description": "提醒备注，如「需声望 10000」。缺省继承父" },
+          "timeNote": { "type": "string", "maxLength": 30, "description": "时间备注，如「寮自定 · 多在周六」。缺省继承父" }
+        }
+      }
     }
-  }
+  },
+  "x-notes": [
+    "2026-09-28：新增 children（子步骤）。此前「同一件事做 N 次」靠拆成 N 条平级条目 + 名字里的 k/N 后缀，再由 domain/grouping 按名字猜着聚合——组关系是猜出来的，且成员各自能进 order/hidden/置顶。父子关系写进数据后，那层随本版删除（entry/action/reward 同例：靠猜或零消费的冗余不留）。",
+    "子条目允许覆盖的字段只限于逐次可能不同的：gain / gainKind / gainNote（奖励）、condition、note、timeNote。周期（cycle/days/start/deadline/until/since）与 autoDaily/premium/origin/isAutoHub 一律继承父——一张卡只有一个周期，子条目带不同周期无法表达。"
+  ]
 }

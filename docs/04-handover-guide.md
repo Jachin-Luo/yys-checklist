@@ -123,8 +123,8 @@ npm run dev          # http://localhost:5173/
 | PWA 打包 | **暂缓但未取消**：已有图标与移动端适配（`safe-area` / `dvh`），缺 `manifest`、Service Worker、安装图标；`main.tsx` 明确不注册 SW | `index.html`、`src/main.tsx`、`src/styles/base.css` |
 | 数据快照热更新 | 不做：条目库随包发布 | `src/components/settings/DataVersionSection.tsx` |
 | 提醒能力 | 2026-09-11 已整体下线（非待办）：无浏览器通知，相关存储键已删 | —— |
-| 排序控件 | 按产品决策取消：排序由「默认痛感 + 置顶 + 自定义顺序」决定；`ViewPrefs.sortBy` 字段保留在数据层 | `src/components/common/ViewBar.tsx`、`src/domain/sort.ts` |
-| 痛感的其他出口 | 2026-09-15 收敛为「只作默认排序键」：`minWeight` 门槛（筛选项 + `isVisible` 判断）、今日页高痛感警示条（原 `SHOW_WEEKLY_ALERT`）、`missGroups` 漏失分级、`WEIGHT_LEGEND` 图例 **全部删除**（不是隐藏） | `domain/sort.ts`、`domain/stats.ts`、`domain/weight.ts`、`pages/TodayPage.tsx`、`components/common/ViewBar.tsx`、`components/common/OnboardingDialog.tsx` |
+| 排序控件 | 按产品决策取消：排序由「默认痛感 + 置顶 + 自定义顺序」决定；`ViewPrefs.sortBy` 字段保留在数据层 | `src/domain/sort.ts`（原控件 `ViewBar` 已于 2026-09-28 删除） |
+| 痛感的其他出口 | 2026-09-15 收敛为「只作默认排序键」：`minWeight` 门槛（筛选项 + `isVisible` 判断）、今日页高痛感警示条（原 `SHOW_WEEKLY_ALERT`）、`missGroups` 漏失分级、`WEIGHT_LEGEND` 图例 **全部删除**（不是隐藏） | `domain/sort.ts`、`domain/stats.ts`、`domain/weight.ts`、`pages/TodayPage.tsx`、`components/common/OnboardingDialog.tsx` |
 | 读取游戏数据 | **长期不做**，属于产品定位而非待办 | `README.md` |
 
 ### 已登记但暂不修复的技术债（2026-09-14 评估）

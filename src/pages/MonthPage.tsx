@@ -1,10 +1,8 @@
 import ChecklistEntry from '../components/common/ChecklistEntry';
-import { groupChecklist } from '../domain/grouping';
 import { EmptyState, SectionTitle } from '../components/common/EmptyState';
 import { sectionNo } from '../components/common/sectionNo';
 import PageHead from '../components/common/PageHead';
 import SummaryBar from '../components/common/SummaryBar';
-import ViewBar from '../components/common/ViewBar';
 import { Closing, Rule } from '../components/ornament';
 import { monthRangeLabel } from '../domain/dateLabel';
 import { useChecklist } from '../hooks/useChecklist';
@@ -21,7 +19,7 @@ import { CHECKLIST_GRID } from '../styles/layout';
  *
  * 2026-09-23 换肤：同本周页（`PageHead` + 朱印分组头 + 收束纹带）。
  */
-export default function MonthPage({ variant }: { variant: 'mobile' | 'desktop' }) {
+export default function MonthPage() {
   const { pending, done, coveredSet, coverMode } = useChecklist('month');
   const isDimmed = (id: string) => coverMode === 'dim' && coveredSet.has(id);
   /* 距下月 1 日 0 点还有多久（与勾选重置同源） */
@@ -31,10 +29,6 @@ export default function MonthPage({ variant }: { variant: 'mobile' | 'desktop' }
 
   return (
     <div className="pb-6">
-      {/* 筛选 2026-09-23 起整体下线（`stores/view.SHOW_KIND_FILTER`）：此处 ViewBar 渲染空。
-          调用保留，是为了恢复时不必回来改页面 */}
-      {variant === 'desktop' ? <ViewBar mode="desktop" /> : null}
-
       {/* 顶部日期：自然月区间，纯展示 —— 与「每月 1 日 0 点刷新」的勾选语义无关（domain/dateLabel）。
           月常刷新不是常识（周常周一刷新才是），所以这一页把刷新点写在日期旁边；
           右侧再接具体还剩多久 —— 规则与倒计时并列，既说清"什么时候刷"也说清"还有多久" */}
@@ -43,7 +37,6 @@ export default function MonthPage({ variant }: { variant: 'mobile' | 'desktop' }
         detail={<>本月 {monthRangeLabel(new Date())} · 每月 1 日 0 点刷新</>}
         countdown={countdown}
         countdownLabel="月常重置"
-        action={variant === 'mobile' ? <ViewBar mode="mobile" /> : null}
       />
 
       {/* 汇总条（册页稿 `.summary`）：页级进度只在这一处 */}
@@ -54,8 +47,8 @@ export default function MonthPage({ variant }: { variant: 'mobile' | 'desktop' }
       </SectionTitle>
       {pending.length ? (
         <div className={CHECKLIST_GRID}>
-          {groupChecklist(pending, done).pending.map((u) => (
-            <ChecklistEntry key={u.key} unit={u} dimmedOf={isDimmed} />
+          {pending.map((it) => (
+            <ChecklistEntry key={it.id} item={it} dimmedOf={isDimmed} />
           ))}
         </div>
       ) : (
@@ -68,8 +61,8 @@ export default function MonthPage({ variant }: { variant: 'mobile' | 'desktop' }
             本月已结
           </SectionTitle>
           <div className={CHECKLIST_GRID}>
-            {groupChecklist(pending, done).done.map((u) => (
-              <ChecklistEntry key={u.key} unit={u} dimmedOf={isDimmed} />
+            {done.map((it) => (
+              <ChecklistEntry key={it.id} item={it} dimmedOf={isDimmed} />
             ))}
           </div>
         </>

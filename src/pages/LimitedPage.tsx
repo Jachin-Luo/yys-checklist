@@ -1,18 +1,16 @@
 import { useMemo } from 'react';
 import Alert from '../components/common/Alert';
 import ChecklistEntry from '../components/common/ChecklistEntry';
-import { groupChecklist } from '../domain/grouping';
 import { EmptyState, SectionTitle } from '../components/common/EmptyState';
 import { sectionNo } from '../components/common/sectionNo';
 import PageHead from '../components/common/PageHead';
 import SummaryBar from '../components/common/SummaryBar';
-import ViewBar from '../components/common/ViewBar';
 import { Closing, Rule } from '../components/ornament';
 import { daysLeft } from '../domain/countdown';
 import { buildComparator, isVisible } from '../domain/sort';
 import { useCheckStore } from '../stores/check';
 import { useItemStore } from '../stores/items';
-import { SHOW_KIND_FILTER, useViewStore } from '../stores/view';
+import { useViewStore } from '../stores/view';
 import { CHECKLIST_GRID } from '../styles/layout';
 
 /**
@@ -31,7 +29,7 @@ import { CHECKLIST_GRID } from '../styles/layout';
  * 这一屏最需要行动的就是"马上要过期的那几个"，其余条目走常规卡面。
  * 参考稿铁律二：全屏只有一处允许"高饱和色 + 金描边 + 淡色底"。
  */
-export default function LimitedPage({ variant }: { variant: 'mobile' | 'desktop' }) {
+export default function LimitedPage() {
   const items = useItemStore((s) => s.items);
   const overrides = useItemStore((s) => s.overrides);
   const checked = useCheckStore((s) => s.checked);
@@ -39,11 +37,7 @@ export default function LimitedPage({ variant }: { variant: 'mobile' | 'desktop'
 
   const { pending, done, urgentIds } = useMemo(() => {
     const now = new Date();
-    const visibility = {
-      /* 同 `hooks/useChecklist`：筛选总开关关着时传空数组（见 `stores/view.SHOW_KIND_FILTER`） */
-      showKinds: SHOW_KIND_FILTER ? (view.showKinds as string[]) : [],
-      today: now.getDay(),
-    };
+    const visibility = { today: now.getDay() };
     const list = items
       .filter((it) => it.cycle === 'limited')
       .filter((it) => isVisible(it, visibility))
@@ -70,16 +64,9 @@ export default function LimitedPage({ variant }: { variant: 'mobile' | 'desktop'
 
   return (
     <div className="pb-6">
-      {/* 筛选 2026-09-23 起整体下线（`stores/view.SHOW_KIND_FILTER`）：此处 ViewBar 渲染空。
-          调用保留，是为了恢复时不必回来改页面 */}
-      {variant === 'desktop' ? <ViewBar mode="desktop" /> : null}
-
       {/* 页头不再复述"N 个活动在跑 · 临期几天" —— 下一行的警示条已经说了同一句话，
           两处逐字相同只会多占一行高度（首屏高度在移动端尤其贵） */}
-      <PageHead
-        title="限时"
-        action={variant === 'mobile' ? <ViewBar mode="mobile" /> : null}
-      />
+      <PageHead title="限时" />
 
       {pending.length ? (
         <Alert tone={urgent ? 'danger' : 'warn'}>
@@ -96,10 +83,10 @@ export default function LimitedPage({ variant }: { variant: 'mobile' | 'desktop'
       </SectionTitle>
       {pending.length ? (
         <div className={CHECKLIST_GRID}>
-          {groupChecklist(pending, done).pending.map((u) => (
+          {pending.map((it) => (
             <ChecklistEntry
-              key={u.key}
-              unit={u}
+              key={it.id}
+              item={it}
               showDeadline
               highlightOf={(id) => urgentIds.has(id)}
             />
@@ -118,8 +105,8 @@ export default function LimitedPage({ variant }: { variant: 'mobile' | 'desktop'
             限时已结
           </SectionTitle>
           <div className={CHECKLIST_GRID}>
-            {groupChecklist(pending, done).done.map((u) => (
-              <ChecklistEntry key={u.key} unit={u} showDeadline />
+            {done.map((it) => (
+              <ChecklistEntry key={it.id} item={it} showDeadline />
             ))}
           </div>
         </>

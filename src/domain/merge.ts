@@ -76,7 +76,6 @@ export function effectiveView(defaults: ViewDefaults, pref?: Partial<ViewPrefs> 
   return {
     profileId: p.profileId ?? '',
     sortBy: p.sortBy ?? defaults.sortBy,
-    showKinds: Array.isArray(p.showKinds) ? p.showKinds : [...defaults.showKinds],
     minWeight: typeof p.minWeight === 'number' && p.minWeight >= 0 ? p.minWeight : defaults.minWeight,
     pinned: Array.isArray(p.pinned) ? p.pinned : [...defaults.pinned],
     /* 卡片字段显示（2026-09-16）：老数据没有 `card`，这里补成"全部显示"，

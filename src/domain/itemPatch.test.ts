@@ -7,7 +7,8 @@
 import { describe, expect, it } from 'vitest';
 import type { Item } from '../api/types';
 import { draftFromItem } from './itemDraft';
-import { applyPatch, diffPatch, hasPatch, sanitizePatches } from './itemPatch';
+import { applyPatch, diffPatch, hasPatch, sanitizeChildren, sanitizePatches } from './itemPatch';
+import { newId } from './ids';
 
 const seed: Item = {
   id: 'p1',
@@ -74,6 +75,42 @@ describe('sanitizePatches：外部字节的净化', () => {
     expect(sanitizePatches(undefined)).toBeUndefined();
     expect(sanitizePatches([])).toBeUndefined();
     expect(sanitizePatches({ p1: {} })).toBeUndefined();
+  });
+});
+
+describe('sanitizeChildren：子步骤表的净化（2026-09-28）', () => {
+  it('id 写法不合规 → **归一**而不是丢弃', () => {
+    /* 丢弃就是那个真 bug 的形状：表单用 `nanoid(6)` 生成 `sub_DvBaJW`（默认字母表含大写与 `-`），
+       写进分片是 14 步、读回来被丢成 3 步，界面上表现为"加了子步骤没生效"且没有任何提示 */
+    const out = sanitizeChildren([
+      { id: 'sub_DvBaJW' },
+      { id: 'sub_ab-cd' },
+      { id: 'ok_1' },
+    ]);
+    expect(out.map((s) => s.id)).toEqual(['sub_dvbajw', 'sub_ab_cd', 'ok_1']);
+  });
+
+  it('没有 id / 归一后撞车 → 才丢（这两种没有安全的补救办法）', () => {
+    expect(
+      sanitizeChildren([{ note: '没有 id' }, { id: 'sub_A' }, { id: 'sub_a' }]).map((s) => s.id),
+    ).toEqual(['sub_a']);
+  });
+
+  it('超过 31 步截断（进度格上限）；只留 SubItem 允许的字段', () => {
+    const many = Array.from({ length: 40 }, (_, i) => ({ id: `s_${i}` }));
+    expect(sanitizeChildren(many)).toHaveLength(31);
+    expect(sanitizeChildren([{ id: 's_1', cycle: 'daily', note: '留', 乱键: '丢' }])[0]).toEqual({
+      id: 's_1',
+      note: '留',
+    });
+  });
+});
+
+describe('newId：生成的 id 必须合规则（domain/ids）', () => {
+  it('500 个 id 全部只含小写字母 / 数字 / 下划线，且互不重复', () => {
+    const ids = Array.from({ length: 500 }, () => newId('sub'));
+    for (const id of ids) expect(id).toMatch(/^sub_[a-z0-9_]+$/);
+    expect(new Set(ids).size).toBe(ids.length);
   });
 });
 

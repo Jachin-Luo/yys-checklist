@@ -429,6 +429,16 @@ export default function ItemManagerSection() {
                 </button>
               </div>
               <span className={`min-w-0 flex-1 break-words ${tx.rowName} text-ink`}>{it.name}</span>
+              {/* 多次任务标出步数：子步骤**不单独成行**，不标的话从这一行看不出它要做 N 次
+                  （清单页那张卡有菱形进度格，这里只有一行字，所以补一个标记） */}
+              {it.children?.length ? (
+                <span
+                  title={`做 ${it.children.length} 次：清单上是一张卡，点一下推进一格`}
+                  className={`${tag.base} ${tag.mute}`}
+                >
+                  ×{it.children.length}
+                </span>
+              ) : null}
               {it.origin === 'custom' ? (
                 <span className={`${tag.base} ${tag.gold}`}>自建</span>
               ) : null}

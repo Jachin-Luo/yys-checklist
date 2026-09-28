@@ -156,9 +156,3 @@ export const useSessionStore = create<SessionState>((set, get) => ({
 export const aliveProfiles = (profiles: Profile[]): Profile[] =>
   profiles.filter((p) => !p.archived).sort((a, b) => a.sort - b.sort);
 
-/** 当前账号（顶部常驻标识用；用户忘记自己在哪个号会勾错） */
-export const currentProfile = (): Profile | null => {
-  const { session, profiles } = useSessionStore.getState();
-  if (!session) return null;
-  return profiles.find((p) => p.id === session.profileId) ?? null;
-};

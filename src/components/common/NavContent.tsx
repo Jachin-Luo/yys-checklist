@@ -28,13 +28,13 @@ export default function NavContent({ variant }: { variant: 'mobile' | 'desktop' 
 
   switch (nav) {
     case 'today':
-      return <TodayPage variant={variant} />;
+      return <TodayPage />;
     case 'week':
-      return <WeekPage variant={variant} />;
+      return <WeekPage />;
     case 'month':
-      return <MonthPage variant={variant} />;
+      return <MonthPage />;
     case 'limited':
-      return <LimitedPage variant={variant} />;
+      return <LimitedPage />;
     case 'stats':
       return <StatsPage />;
     case 'tools':

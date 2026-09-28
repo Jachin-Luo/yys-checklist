@@ -44,8 +44,6 @@ const size = {
   lg: 'h-11 rounded-lg px-6 text-lg',
 } as const;
 
-export type ControlSize = keyof typeof size;
-
 export const btn = {
   /** 骨架：只放所有按钮共有的东西（**不含圆角与内缩**，见纪律 2） */
   base: 'inline-flex flex-none cursor-pointer items-center justify-center gap-2 font-medium tracking-wide transition-all duration-220 ease-genso disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none',

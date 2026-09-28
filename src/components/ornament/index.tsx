@@ -1,5 +1,4 @@
 import { type ReactNode } from 'react';
-import Icon, { type IconName } from '../icons/Icon';
 
 /**
  * 工艺层零件库 —— 朱印语言的"面"与"纹"。
@@ -64,55 +63,6 @@ export function FrameInner() {
   );
 }
 
-/* ───────────────────────── 横饰 ───────────────────────── */
-
-/**
- * 御币 —— 顶栏下方横贯的 1.5px 金杆，等分垂 5 条纸垂（宽 10 高 18 尖底），
- * 纸垂内各有一条折痕竖线。
- *
- * `viewBox` 直接按目标比例 620×26 画（而不是沿用图标的 24×24 再拉伸）——
- * 参考稿陷阱四：横铺类装饰沿用方 viewBox 会把绳体与纸垂压成一排方块。
- */
-export function Gohei({ className = '' }: { className?: string }) {
-  return (
-    /* ⚠️ `className`（外边距）挂在**外层 div**、`w-full` 留在内层 svg。
-       两者挂在同一个元素上时，`w-full` 解析的是父容器宽度，再叠加 `mx-*`
-       就会横向溢出 2×margin，在 `main` 上冒出一条横向滚动条。
-       仓库里的 `Alert` 早用 `w-[calc(100%-1.75rem)]` 绕开了同一个问题。 */
-    <div className={className}>
-      <svg
-        aria-hidden
-        viewBox="0 0 620 26"
-        preserveAspectRatio="none"
-        className="h-[26px] w-full overflow-visible"
-      >
-      <line
-        x1="0"
-        y1="1.5"
-        x2="620"
-        y2="1.5"
-        className="genso-gohei-bar"
-        strokeWidth="1.5"
-        opacity="0.85"
-      />
-      <g className="genso-gohei-paper">
-        <path d="M57,2 h10 v14 l-5,4 l-5,-4 Z" />
-        <path d="M181,2 h10 v14 l-5,4 l-5,-4 Z" />
-        <path d="M305,2 h10 v14 l-5,4 l-5,-4 Z" />
-        <path d="M429,2 h10 v14 l-5,4 l-5,-4 Z" />
-        <path d="M553,2 h10 v14 l-5,4 l-5,-4 Z" />
-      </g>
-      <g className="genso-gohei-crease" fill="none" strokeWidth="0.8">
-        <path d="M58.4,4.5 h2.4 v9.5" />
-        <path d="M182.4,4.5 h2.4 v9.5" />
-        <path d="M306.4,4.5 h2.4 v9.5" />
-        <path d="M430.4,4.5 h2.4 v9.5" />
-        <path d="M554.4,4.5 h2.4 v9.5" />
-      </g>
-      </svg>
-    </div>
-  );
-}
 
 /**
  * 墨线菱点（册页稿 `.rule`）—— 分区与分区之间的收束线：
@@ -175,120 +125,6 @@ export function SnakeEye({ size = 13, className = '' }: { size?: number; classNa
       <circle r="5.5" fill="none" stroke="currentColor" strokeWidth="1.3" />
       <circle r="2.4" fill="rgb(var(--c-crimson))" />
     </svg>
-  );
-}
-
-/**
- * 达摩点睛（参考稿 §5.1）—— 本项目的"彩蛋"。
- *
- * 传统玩法：许愿时涂左眼、愿望达成时涂右眼。映射到清单上：
- * **左眼常亮（有愿在许）**，右眼在**当前页全部完成**时点亮，同时整只由金转朱红。
- * 判定不是自己算的 —— 由页面把 `.all-done` 挂在共同祖先上（见 `styles/theme.css`），
- * 与统计卡的静默处理共用同一个状态源。
- */
-export function Daruma({ size = 17, className = '' }: { size?: number; className?: string }) {
-  return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 24 24"
-      className={`genso-daruma flex-none ${className}`}
-      role="img"
-      aria-label="完成度"
-    >
-      <g fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" strokeLinecap="round">
-        <path d="M12,2.6 C17.2,2.6 20.6,8.2 20.6,14.6 C20.6,19.8 16.8,22.4 12,22.4 C7.2,22.4 3.4,19.8 3.4,14.6 C3.4,8.2 6.8,2.6 12,2.6 Z" />
-        <path d="M12,15.4 C11,16.6 11,18.2 12,19" />
-      </g>
-      <circle className="genso-daruma-eye-l" cx="8.6" cy="12.2" r="1.9" fill="currentColor" />
-      <circle className="genso-daruma-eye-r" cx="15.4" cy="12.2" r="1.9" fill="currentColor" />
-    </svg>
-  );
-}
-
-/* ───────────────────────── 边缘装饰 ───────────────────────── */
-
-/**
- * 竖排书脊（面板左缘）。参考稿：衬线 10.5px、字距 6px、金 50%，中间夹一枚 4px 菱形。
- *
- * `top` / `bottom` 是**定位偏移**（如 `4.5rem`），`title` / `subtitle` 才是文字内容 ——
- * 两者分开是因为书脊要避开顶栏与页脚，而文字是固定的品牌语。
- * 窄屏隐藏（参考稿 ≤620px 隐藏书脊）。
- */
-export function Spine({
-  top,
-  bottom,
-  title,
-  subtitle,
-}: {
-  top: string;
-  bottom: string;
-  title: string;
-  subtitle: string;
-}) {
-  return (
-    <div
-      aria-hidden
-      className="pointer-events-none absolute left-3 z-20 hidden w-4 flex-col items-center justify-center gap-1.5 font-serif text-2xs tracking-title text-gold opacity-50 [writing-mode:vertical-rl] md:flex"
-      style={{ top, bottom }}
-    >
-      <span>{title}</span>
-      <i className="my-1 h-1 w-1 flex-none rotate-45 bg-gold opacity-80" />
-      <span>{subtitle}</span>
-    </div>
-  );
-}
-
-/* ───────────────────────── 统计三卡 ───────────────────────── */
-
-export type StatTone = 'active' | 'ready' | 'done' | 'plain';
-
-export interface StatItem {
-  icon: IconName;
-  value: string;
-  label: string;
-  tone?: StatTone;
-}
-
-const TONE_CLASS: Record<StatTone, string> = {
-  active: 'text-state-active',
-  ready: 'text-state-ready',
-  done: 'text-state-done',
-  plain: 'text-ink',
-};
-
-/**
- * 统计三卡 —— 数值等宽、单位小字、左上/右下 6px 折角。
- *
- * 语义由调用方给（不硬编码"进行中/待提交/已完成"）：本项目数据的真实维度是
- * 待做 / 已完成 / 分组计数，硬塞参考稿的四态会造出没有数据支撑的指标。
- *
- * **全清静默**：父级挂 `.all-done` 时，`active` / `ready` 两卡的数值退为弱化色 ——
- * 否则"任务都做完了"却还留着醒目的蓝与金，与语义打架（见 `styles/theme.css`）。
- */
-export function StatStrip({ items }: { items: StatItem[] }) {
-  return (
-    <div className="grid grid-cols-3 gap-2.5">
-      {items.map((it) => {
-        const tone = it.tone ?? 'plain';
-        return (
-          <div
-            key={it.label}
-            className={`genso-stat is-${tone} relative rounded-sm border border-line-soft bg-surface-3 px-3 pb-2.5 pt-2.5 ${
-              tone === 'ready' ? 'border-line' : ''
-            }`}
-          >
-            <i className="absolute -left-px -top-px h-1.5 w-1.5 border-l border-t border-line" />
-            <i className="absolute -bottom-px -right-px h-1.5 w-1.5 border-b border-r border-line" />
-            <Icon name={it.icon} size={14} className="absolute right-2.5 top-2 text-gold opacity-50" />
-            <span className={`genso-stat-value block font-mono text-2xl leading-none ${TONE_CLASS[tone]}`}>
-              {it.value}
-            </span>
-            <span className="mt-1.5 block text-2xs tracking-label text-ink-2">{it.label}</span>
-          </div>
-        );
-      })}
-    </div>
   );
 }
 

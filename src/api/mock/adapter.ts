@@ -5,7 +5,7 @@
  *       写操作成功落盘后提交内存库，只写**对应分片键**，整体串行化。
  * **不写任何合并规则**（那在 domain，见 §2 铁律）。
  */
-import { nanoid } from 'nanoid';
+import { newId } from '../../domain/ids';
 import type { ApiClient, DataScope } from '../contract';
 import type {
   BountyDb, BootstrapPayload, CheckLog, CheckState, GuildTimePrefs, Item, ItemDraft,
@@ -16,7 +16,7 @@ import { activeItems, mergeChecked, type ResetCtx } from '../../domain/reset';
 import { applyDraft } from '../../domain/itemDraft';
 import { applyPatch, diffPatch } from '../../domain/itemPatch';
 import { buildMeta, effectiveView, mergeItems } from '../../domain/merge';
-import { loadBountyDb, loadSoulsDb, loadYuhunDb, seedItems, seedMetaDb, seedVersions } from './db';
+import { loadBountyDb, loadSoulsDb, loadYuhunDb, seedItems, seedMetaDb } from './db';
 import { ApiError, injectFailure, mainDelay, writeDelay } from './latency';
 import * as store from './userStore';
 
@@ -39,8 +39,7 @@ function computedState(profileId: string, items: Item[], now: Date): CheckState 
   return { ...raw, checked: mergeChecked(raw.checked, items, now, resetCtx(assembleMeta())) };
 }
 
-const newId = (prefix: string) => `${prefix}_${nanoid(6)}`;
-
+/** 见 `domain/ids`：id 字符集只有一处定义，这里不再自己拼 */
 export class MockApi implements ApiClient {
   /* ── 系统 ── */
 
@@ -546,6 +545,3 @@ export class MockApi implements ApiClient {
     });
   }
 }
-
-/** 版本库读取（S7 数据版本提示用；此处暴露以便契约单测覆盖） */
-export const readVersions = () => seedVersions;

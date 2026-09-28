@@ -81,17 +81,23 @@ describe('勾选：增量写 + 分片验证（E-02 / §3.2）', () => {
     expect(s.checked).toEqual({});
   });
 
-  it('周期重置：daily 的过期勾选读取时归零；version 的保留', async () => {
+  it('周期重置：daily 的过期勾选读取时归零；limited 的保留', async () => {
     /* 读取时刻为真实 now：daily 起点 = 当天 0 点，09-09 的勾选必然早于它，故被归零 */
-    const versionItem = { id: 'version_event_climb', cycle: 'version' as const };
-    const dailyItem = { id: 'daily_sign', cycle: 'daily' as const };
-    await api.setChecked(scope, versionItem.id, new Date(2026, 8, 9, 10).getTime());
-    await api.setChecked(scope, dailyItem.id, new Date(2026, 8, 9, 3).getTime());
     const items = await api.listItems();
+    /* 「保留」这一侧取一条**真实存在**的 limited 条目：2026-09-28 起 version / season
+       并入 limited，这一类不按周期翻篇、只靠 `until` 归档（见 `domain/reset` 的周期表），
+       故旧勾选仍在。原先写死 `version_event_climb` —— 那条已随本次清理删除，而**写死 id
+       等于让测试去断言数据里有没有这条**，数据一动就把测试变成假红，故改为从当前数据取。
+       取**非子组**的：多次任务的勾选键空间是子步骤 id、父 id 不自勾（见 `domain/steps.stepIds`），
+       勾父 id 会被 `mergeChecked` 当孤儿清掉 —— 那是设计而非 bug */
+    const keepItem = items.find((i) => i.cycle === 'limited' && !i.children?.length)!;
+    const dailyItem = { id: 'daily_sign', cycle: 'daily' as const };
+    await api.setChecked(scope, keepItem.id, new Date(2026, 8, 9, 10).getTime());
+    await api.setChecked(scope, dailyItem.id, new Date(2026, 8, 9, 3).getTime());
     const state = await api.getState(scope);
-    expect(state.checked[versionItem.id]).toBeTruthy();
+    expect(state.checked[keepItem.id]).toBeTruthy();
     expect(state.checked[dailyItem.id]).toBeUndefined();
-    expect(items.some((i) => i.id === versionItem.id)).toBe(true);
+    expect(items.some((i) => i.id === keepItem.id)).toBe(true);
   });
 });
 
@@ -99,12 +105,11 @@ describe('视图 / 覆盖层：各自独立分片（D3）', () => {
   it('改排序只写 yys:view:p_main', async () => {
     const view = await api.getView(scope);
     storage.written.length = 0;
-    await api.saveView(scope, { ...view, sortBy: 'name', minWeight: 20, showKinds: ['jade'] });
+    await api.saveView(scope, { ...view, sortBy: 'name', minWeight: 20 });
     expect(storage.written).toEqual(['yys:view:p_main']);
     const v = await api.getView(scope);
     expect(v.sortBy).toBe('name');
     expect(v.minWeight).toBe(20);
-    expect(v.showKinds).toEqual(['jade']);
   });
 
   it('隐藏预设只进 hidden（软删），自建真删', async () => {
@@ -187,6 +192,17 @@ describe('视图 / 覆盖层：各自独立分片（D3）', () => {
        走 `draftFromItem(seed)`，与 UI 的「还原默认」同一路径 */
     await api.updateItem(scope, 'daily_sign', draftFromItem(seed));
     expect((await api.getOverrides(scope)).patches?.daily_sign).toBeUndefined();
+  });
+
+  it('加子步骤后读回来步数不变（2026-09-28 修：不合规的 id 曾被静默丢弃）', async () => {
+    const seed = (await api.listItems()).find((i) => i.id === 'daily_sign')!;
+    /* 这三个是**表单真实会生成的形态**：`nanoid(6)` 默认字母表含大写与 `-`。
+       此前写进分片是 3 步、读回来是 0 步 —— "改成 N 个子条目没生效"，且没有任何报错 */
+    const subs = [{ id: 'sub_DvBaJW' }, { id: 'sub_zz-99' }, { id: 'sub_ok01' }];
+    await api.updateItem(scope, 'daily_sign', { ...draftFromItem(seed), children: subs } as never);
+
+    const live = (await api.getBootstrap(scope)).items.find((i) => i.id === 'daily_sign')!;
+    expect(live.children).toHaveLength(3);
   });
 
   it('改写不存在的 id 报 E_NOT_ITEM', async () => {

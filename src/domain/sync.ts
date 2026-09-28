@@ -142,7 +142,6 @@ export function applyParts(
       view.coverMode = source.view.coverMode;
     }
     if (pick.has('viewPrefs')) {
-      view.showKinds = [...source.view.showKinds];
       view.pinned = [...source.view.pinned];
       /* 卡片信息密度也属于"清单显示偏好"：多号对"卡片要多详细"的偏好通常一致 */
       view.card = source.view.card ? { ...source.view.card } : undefined;

@@ -1,38 +1,36 @@
 import type { Item } from '../../api/types';
-import type { ItemUnit } from '../../domain/grouping';
+import { isGroup } from '../../domain/steps';
 import ChecklistGroupCard from './ChecklistGroupCard';
 import ChecklistItem from './ChecklistItem';
 
 /**
- * 清单渲染单元的分发件：**单条 → 单条卡，同组 → 聚合卡**（2026-09-24，方案 B）。
+ * 清单渲染单元的分发件：**单条 → 单条卡，有子步骤 → 多次卡**（2026-09-28）。
  *
  * ## 为什么要有这一层
  *
- * 聚合是**渲染时**发生的（数据一行不改，见 `domain/grouping` 的文件头），
- * 而"哪些条目构成一组"必须在**整个列表**上判定 —— 单张卡自己看不到兄弟条目。
- * 于是页面把「已排序的条目数组」交给 `groupByCount` 折成渲染单元，再逐单元交给本组件；
- * 页面只需要改一行映射，不必关心单元是什么形状。
+ * 页面拿到的是「已排序的条目数组」，而"这张卡走哪条渲染路径"要看它自己有没有
+ * `children` —— 把判断收在这里，页面只管映射，不必关心卡的内部形状。
  *
  * ## 三个"由谁决定"的口径
  *
- * | 入参 | 单条卡 | 聚合卡 |
+ * | 入参 | 单条卡 | 多次卡 |
  * |---|---|---|
- * | `dimmedOf`（被一键日常覆盖而弱化） | 该条自己 | **全组都弱化**才算弱化 |
- * | `showDeadline`（是否显示截止徽章） | 原样 | 全组**任一**有截止就显示（取最早那个） |
- * | `highlightOf`（唯一高亮位） | 该条自己 | 组内**任一**命中即高亮（限时页给临期条目） |
+ * | `dimmedOf`（被一键日常覆盖而弱化） | 该条自己 | **父条目**（整张卡一个状态） |
+ * | `showDeadline`（是否显示截止徽章） | 该条自己 | 父条目的截止（子步骤不覆盖周期字段） |
+ * | `highlightOf`（唯一高亮位） | 该条自己 | 父条目（整张卡一起高亮） |
  *
- * 聚合侧一律取"更保守"的方向：弱化要整组一致（否则一半蒙一半亮，读起来像 bug），
- * 截止与高亮取并集（宁可早提示、也不漏提示）。
+ * 2026-09-28：三处全部从"看组内成员"改成"看父条目" —— 粒度锁在父条目上，
+ * 子步骤不单独进排序 / 隐藏 / 置顶 / 筛选，所以这里没有"一半亮一半蒙"的可能。
  */
 export default function ChecklistEntry({
-  unit,
+  item,
   dimmedOf,
   showDeadline = false,
   highlightOf,
   onToggle,
   cascadeIds,
 }: {
-  unit: ItemUnit;
+  item: Item;
   /** 该条目是否应弱化（页面自己的 `isDimmed` 助手原样传进来） */
   dimmedOf?: (id: string) => boolean;
   /** `true` = 都显示；也可传判定函数（限时页只给真有截止的条目显示） */
@@ -44,29 +42,22 @@ export default function ChecklistEntry({
   /** 长按跨账号时一并写入的额外条目 id —— 只有单条卡消费 */
   cascadeIds?: string[];
 }) {
-  if (unit.grouped) {
+  if (isGroup(item)) {
     return (
       <ChecklistGroupCard
-        unit={unit}
-        dimmed={dimmedOf ? unit.items.every((it) => dimmedOf(it.id)) : false}
-        showDeadline={
-          typeof showDeadline === 'function'
-            ? unit.items.some((it) => showDeadline(it))
-            : showDeadline
-        }
-        highlight={highlightOf ? unit.items.some((it) => highlightOf(it.id)) : false}
+        item={item}
+        dimmed={dimmedOf ? dimmedOf(item.id) : false}
+        showDeadline={typeof showDeadline === 'function' ? showDeadline(item) : showDeadline}
+        highlight={highlightOf ? highlightOf(item.id) : false}
       />
     );
   }
 
-  const item = unit.items[0];
   return (
     <ChecklistItem
       item={item}
       dimmed={dimmedOf ? dimmedOf(item.id) : false}
-      showDeadline={
-        typeof showDeadline === 'function' ? showDeadline(item) : showDeadline
-      }
+      showDeadline={typeof showDeadline === 'function' ? showDeadline(item) : showDeadline}
       highlight={highlightOf ? highlightOf(item.id) : false}
       onToggle={onToggle}
       cascadeIds={cascadeIds}

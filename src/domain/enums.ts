@@ -49,11 +49,8 @@ export const GAIN_KIND = [
 ] as const;
 export type GainKind = (typeof GAIN_KIND)[number];
 
-/**
- * UI 只暴露高频 6 类 chip，其余 12 类进可展开面板（设计文档 §4.2 / 评审 R6）。
- * 口径：按实测频次取，**排除兜底类 `other`** —— 它在 87 条里出现 24 次，但不具筛选意义。
- */
-export const TOP_GAIN_KIND = ['jade', 'blueTicket', 'skin', 'blackFrag', 'soul', 'exp'] as const;
+/* 2026-09-28 删除 `TOP_GAIN_KIND`（"UI 只暴露高频 6 类 chip"的那份清单 —— 它唯一的
+   消费方是 `components/common/ViewBar` 的筛选面板，随奖励类型筛选整体删除一并退场）。
 
 /* 2026-09-11 删除 `ENTRY` / `ACTION` 枚举（连同 `EntryKind` / `ActionKind` 类型）。
    它们标注为"纯展示字段（D4）"，但实测**零消费**：没有任何组件读这两个字段，
@@ -73,7 +70,6 @@ export const DICT_TYPE = [
   'spotKind',
   'soulCategory',
 ] as const;
-export type DictType = (typeof DICT_TYPE)[number];
 
 /** 条目来源：预设 / 用户自建（`source` 已删除，这是唯一的自建标识，K5） */
 export const ORIGIN = ['preset', 'custom'] as const;
@@ -82,13 +78,3 @@ export type Origin = (typeof ORIGIN)[number];
 /** 固定收益支持的三个币种（不折算、不估算，Q6） */
 export const GAIN_CURRENCY = ['jade', 'blackFrag', 'blueTicket'] as const;
 export type GainCurrency = (typeof GAIN_CURRENCY)[number];
-
-/** 按字典类别建索引用的通用类型 */
-export interface DictRow {
-  type: string;
-  code: string;
-  label: string;
-  sort: number;
-  note?: string;
-  meta?: Record<string, unknown>;
-}

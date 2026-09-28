@@ -16,6 +16,7 @@
  */
 import type { Gain, Item } from '../api/types';
 import { eachDay, type LogDays } from './checkLog';
+import { stepView } from './steps';
 import type { Cycle } from './enums';
 
 export type StatPeriod = 'day' | 'week' | 'month';
@@ -42,20 +43,15 @@ export interface GainSummary {
   pct: number;
 }
 
-export interface GainRow {
-  id: string;
-  name: string;
-  checked: boolean;
-  gain: Gain;
-}
-
 export interface GainReport {
   jade: GainSummary;
   blackFrag: GainSummary;
   blueTicket: GainSummary;
-  /** 参与统计的条目（已含自建条目），供明细行渲染 */
-  rows: GainRow[];
 }
+/* 2026-09-28：原先的 `rows`（每个条目的收益明细行）**整块删除** —— 它算出了一份
+   明细，而统计页一次都没渲染过它，全库只有它自己的单测在断言（零消费，与 2026-09-11
+   删掉的 `entry` / `action` / `reward` 同一类）。删掉之后，"子步骤在明细里怎么排"
+   这个问题也就不存在了：统计只汇总三币种，不做逐条明细。 */
 
 /** 黑碎存在 0.5 这类小数，统一保留 1 位，避免 0.1+0.2 的浮点噪声 */
 const round1 = (n: number): number => Math.round(n * 10) / 10;
@@ -66,24 +62,28 @@ export function periodItems(items: Item[], period: StatPeriod): Item[] {
   return items.filter((it) => cycles.includes(it.cycle));
 }
 
-/** 固定收益汇总：三币种的「已得 / 总量 / 还差 / 完成度」+ 明细行 */
+/** 固定收益汇总：三币种的「已得 / 总量 / 还差 / 完成度」 */
 export function summarizeGain(
   items: Item[],
   checked: Record<string, number>,
   period: StatPeriod,
 ): GainReport {
-  const rows: GainRow[] = periodItems(items, period)
-    .filter((it) => it.gain)
-    .map((it) => ({
-      id: it.id,
-      name: it.name,
-      checked: checked[it.id] !== undefined,
-      gain: it.gain as Gain,
-    }));
+  /* 统计吃的是"叶子"：有子步骤的父条目**自身不参与**（收益记在子步骤上），
+     否则「地域鬼王」这类 N 次任务整组的收益会凭空消失 —— 父条目常常没写 `gain`。
+     子步骤没写 `gain` 就继承父的（`stepView` 是"缺省继承父"的唯一实现处）。 */
+  const rows: { gain: Gain; done: boolean }[] = periodItems(items, period).flatMap((it) => {
+    if (!it.children?.length) {
+      return it.gain ? [{ gain: it.gain, done: checked[it.id] !== undefined }] : [];
+    }
+    return it.children
+      .map((_, i) => stepView(it, i))
+      .filter((v) => v.gain)
+      .map((v) => ({ gain: v.gain as Gain, done: checked[v.id] !== undefined }));
+  });
 
   const summaryOf = (key: keyof Gain): GainSummary => {
     const total = round1(rows.reduce((s, r) => s + (r.gain[key] || 0), 0));
-    const got = round1(rows.reduce((s, r) => s + (r.checked ? r.gain[key] || 0 : 0), 0));
+    const got = round1(rows.reduce((s, r) => s + (r.done ? r.gain[key] || 0 : 0), 0));
     return {
       got,
       total,
@@ -96,20 +96,12 @@ export function summarizeGain(
     jade: summaryOf('jade'),
     blackFrag: summaryOf('blackFrag'),
     blueTicket: summaryOf('blueTicket'),
-    rows,
   };
 }
 
 /* 2026-09-15：原先的「漏失明细」整块（`MissLevel` / `MissItem` / `MissGroup` / `LEVEL_LABEL` / `missGroups`）
    已删除 —— 它按痛感分给漏掉的条目分级（高 / 中 / 低），是痛感在排序之外的第二个用途，
    随「痛感只用于默认排序」的收敛一并移除；统计页自 2026-09-14 起也不再展示这一块。 */
-
-/** 统计口径文案（页面副标题用，避免页面里散落魔法字符串） */
-export const PERIOD_META: Record<StatPeriod, { label: string; note: string }> = {
-  day: { label: '本日', note: '每日 0 点刷新' },
-  week: { label: '本周', note: '周一 0 点刷新' },
-  month: { label: '本月', note: '每月 1 日 0 点刷新' },
-};
 
 /* ───────────────────────── 按日期区间的收益（2026-09-15） ───────────────────────── */
 

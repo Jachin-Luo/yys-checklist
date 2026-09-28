@@ -1,5 +1,6 @@
 import { useState, type ReactNode } from 'react';
-import type { Gain, Item, ItemDraft } from '../../api/types';
+import type { Gain, Item, ItemDraft, SubItem } from '../../api/types';
+import { newId } from '../../domain/ids';
 import type { Cycle, GainCurrency, GainKind } from '../../domain/enums';
 import { CYCLE, GAIN_CURRENCY, GAIN_KIND } from '../../domain/enums';
 import { parseTs } from '../../domain/countdown';
@@ -97,6 +98,52 @@ function Row({
   );
 }
 
+/**
+ * 子步骤的**表单态**：数值框必须存字符串（否则 "12." 这类打了一半的状态输不进去），
+ * 提交时才转成 `SubItem`（数字 + 留空即继承本条）。
+ */
+interface SubDraft {
+  id: string;
+  condition: string;
+  note: string;
+  timeNote: string;
+  gainNote: string;
+  jade: string;
+  blackFrag: string;
+  blueTicket: string;
+}
+
+/**
+ * 子步骤 id 生成后**不再复用**：删掉中间一步时，其余步的已勾状态不能跟着错位。
+ *
+ * id 的合法字符集收口在 `domain/ids` —— 此前这里直接 `nanoid(6)`，默认字母表含大写与 `-`，
+ * 与 id 规则不符，结果是"存进去 14 步、读出来 3 步"（见 `domain/ids` 的说明）。
+ */
+const newSubId = () => newId('sub');
+
+/** 空白一步：id 现生成，其余留空（留空 = 继承本条，见 `SubItem` 的说明） */
+const blankSub = (): SubDraft => ({
+  id: newSubId(),
+  condition: '',
+  note: '',
+  timeNote: '',
+  gainNote: '',
+  jade: '',
+  blackFrag: '',
+  blueTicket: '',
+});
+
+const subDraftOf = (c: SubItem): SubDraft => ({
+  id: c.id,
+  condition: c.condition ?? '',
+  note: c.note ?? '',
+  timeNote: c.timeNote ?? '',
+  gainNote: c.gainNote ?? '',
+  jade: num2str(c.gain?.jade),
+  blackFrag: num2str(c.gain?.blackFrag),
+  blueTicket: num2str(c.gain?.blueTicket),
+});
+
 interface FormState {
   name: string;
   cycle: Cycle;
@@ -113,6 +160,8 @@ interface FormState {
   jade: string;
   blackFrag: string;
   blueTicket: string;
+  /** 子步骤（多次任务）；空数组 = 单条条目 */
+  subs: SubDraft[];
 }
 
 export default function ItemForm({
@@ -159,7 +208,11 @@ export default function ItemForm({
     jade: num2str(initial?.gain?.jade),
     blackFrag: num2str(initial?.gain?.blackFrag),
     blueTicket: num2str(initial?.gain?.blueTicket),
+    subs: (initial?.children ?? []).map(subDraftOf),
   }));
+  /* 子步骤区：条目本来就是"N 次任务"时直接展开 —— 收起时那几步看不见，
+     看起来像"步数被清掉了"，其实只是没显示（与「更多字段」同一条理由） */
+  const [subsOpen, setSubsOpen] = useState(() => Boolean(initial?.children?.length));
   /* 编辑一条带描述性内容的条目时直接展开「更多字段」——
      收起状态下那几行是空白，看起来像"原来的备注没了"，其实只是没显示 */
   const [more, setMore] = useState(
@@ -175,9 +228,40 @@ export default function ItemForm({
       ),
   );
   const [err, setErr] = useState('');
+  /* 「直接设成 N 步」的输入：**独立一份字符串**，不跟着 `subs` 走 ——
+     跟着走的话，用户点一次「加一步」就看到框里的数字自己变了，反而像出了问题 */
+  const [bulk, setBulk] = useState('');
+  const bulkN = Number(bulk.trim());
+  const bulkOk = bulk.trim() !== '' && Number.isInteger(bulkN) && bulkN >= 0 && bulkN <= 31;
+  const applyStepCount = () => {
+    if (!bulkOk) return;
+    setStepCount(bulkN);
+    setBulk('');
+  };
 
   const set = <K extends keyof FormState>(k: K, v: FormState[K]) =>
     setF((p) => ({ ...p, [k]: v }));
+
+  const setSub = (i: number, patch: Partial<SubDraft>) =>
+    setF((p) => ({ ...p, subs: p.subs.map((s, j) => (j === i ? { ...s, ...patch } : s)) }));
+  const addSub = () => setF((p) => ({ ...p, subs: [...p.subs, blankSub()] }));
+  const removeSub = (i: number) =>
+    setF((p) => ({ ...p, subs: p.subs.filter((_, j) => j !== i) }));
+
+  /**
+   * **直接设成 N 步**：要 14 步不必点 14 次「加一步」（2026-09-28 用户要求）。
+   *
+   * 只在**尾部**增减 —— 保留前 N 步（含每步已填的内容），不够的补空白、多出来的从尾部删。
+   * 不从中间删：子步骤是**有序**的（第 k 步就是第 k 步），中间抽掉一步会让后面全部错位，
+   * 而每步的 id 关联着已勾状态，错位等于"做过的那一步记到了别的一步上"。
+   */
+  const setStepCount = (n: number) =>
+    setF((p) => {
+      const subs = [...p.subs];
+      while (subs.length > n) subs.pop();
+      while (subs.length < n) subs.push(blankSub());
+      return { ...p, subs };
+    });
 
   /** 校验 + 组装草稿；返回字符串 = 校验没过（就是给用户看的那句话） */
   const build = (): ItemDraft | string => {
@@ -211,6 +295,28 @@ export default function ItemForm({
       gain[c] = n;
     }
 
+    /* 子步骤：留空即**继承本条**的奖励 / 条件 / 备注，写了才覆盖 */
+    if (f.subs.length > 31) return '子步骤最多 31 步';
+    const children: SubItem[] = [];
+    for (const [i, s] of f.subs.entries()) {
+      const subGain: Gain = {};
+      for (const c of GAIN_CURRENCY) {
+        const raw = s[c].trim();
+        if (!raw) continue;
+        const n = Number(raw);
+        if (!Number.isFinite(n) || n < 0) return `第 ${i + 1} 步的${CURRENCY_LABEL[c]}数量应是不小于 0 的数字`;
+        subGain[c] = n;
+      }
+      children.push({
+        id: s.id,
+        condition: s.condition.trim() || undefined,
+        note: s.note.trim() || undefined,
+        timeNote: s.timeNote.trim() || undefined,
+        gainNote: s.gainNote.trim() || undefined,
+        gain: Object.keys(subGain).length ? subGain : undefined,
+      });
+    }
+
     return {
       name,
       cycle: f.cycle,
@@ -225,6 +331,7 @@ export default function ItemForm({
       note: f.note.trim() || undefined,
       gainNote: f.gainNote.trim() || undefined,
       gain,
+      children,
     };
   };
 
@@ -364,12 +471,13 @@ export default function ItemForm({
           />
         </Row>
 
-        {/* 这一句讲的是**两个字段的组合**，挂在任何单行下都读不通，故单独一行：
-            今日页正是按"有没有日期"分 tab 的（`TodayPage.isEvent = until || deadline`） */}
+        {/* 这一句讲的是**两个字段的组合**，挂在任何单行下都读不通，故单独一行 */}
         <p className={`${tx.note} text-ink-3`}>
           周期选「每日 / 每周 / 每月」再填<b className="font-medium text-ink-2">截止日或归档日</b>，
-          它就是<b className="font-medium text-ink-2">活动期条目</b>：今日页会归到「活动」tab，
-          到归档日自动下线（如"活动每日签到"）。两个日期都不填就是常驻。
+          它就是<b className="font-medium text-ink-2">有期限的条目</b>：到归档日自动下线。
+          活动期的每日任务请直接把周期选成<b className="font-medium text-ink-2">限时</b> ——
+          今日页按周期取条目（只列常驻），限时页不翻篇，配合子步骤用次数记"还要做几次"。
+          两个日期都不填就是常驻。
         </p>
 
         <Row
@@ -429,6 +537,151 @@ export default function ItemForm({
             ))}
           </div>
         </Row>
+
+        {/* 子步骤区：一件要做 N 次的事。条目本来就有子步骤时默认展开（见 `subsOpen` 的初值） */}
+        <button
+          type="button"
+          aria-expanded={subsOpen}
+          onClick={() => setSubsOpen((v) => !v)}
+          className={`flex cursor-pointer items-center gap-1.5 self-start ${tx.label} text-ink-3 transition-colors duration-120 hover:text-ink`}
+        >
+          <Icon
+            name="chevron-right"
+            size={13}
+            className={`flex-none transition-transform duration-120 ${subsOpen ? 'rotate-90' : ''}`}
+          />
+          子步骤（{f.subs.length ? `做 ${f.subs.length} 次` : '单条条目'}）
+        </button>
+
+        {subsOpen ? (
+          <div className="flex flex-col gap-2">
+            <p className={`${tx.note} text-ink-3`}>
+              一件要做 N 次的事：清单上<b className="font-medium text-ink-2">只有一张卡</b>，
+              点一下推进一格，卡面显示<b className="font-medium text-ink-2">当前这一步</b>的说明。
+              每步可单独写<b className="font-medium text-ink-2">奖励 / 条件 / 备注 / 时间备注</b>，
+              留空就跟着上面填的走 —— 周期、时间、入口、截止一律继承本条。
+              <b className="font-medium text-ink-2">要几步直接填数字</b>，不必一步步加。
+            </p>
+
+            {f.subs.map((s, i) => (
+              <div key={s.id} className="rounded-sm border border-line-soft bg-fill p-2.5">
+                <div className="mb-1.5 flex items-center gap-2">
+                  <span className={`${tx.label} text-gold-hi`}>第 {i + 1} 步</span>
+                  <span className={`${tx.note} text-ink-4`}>留空即继承本条</span>
+                  <button
+                    type="button"
+                    disabled={busy}
+                    onClick={() => removeSub(i)}
+                    aria-label={`删除第 ${i + 1} 步`}
+                    title={`删除第 ${i + 1} 步`}
+                    className="ml-auto flex-none cursor-pointer rounded-sm p-1 text-ink-4 transition-colors duration-120 hover:text-danger"
+                  >
+                    <Icon name="trash" size={12} />
+                  </button>
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  <input
+                    value={s.condition}
+                    onChange={(e) => setSub(i, { condition: e.target.value })}
+                    placeholder="条件（如：每周第二次）"
+                    aria-label={`第 ${i + 1} 步的条件`}
+                    disabled={busy}
+                    className={`${input.base} ${input.sm}`}
+                  />
+                  <input
+                    value={s.note}
+                    onChange={(e) => setSub(i, { note: e.target.value })}
+                    placeholder="备注（如：需声望 10000）"
+                    aria-label={`第 ${i + 1} 步的备注`}
+                    disabled={busy}
+                    className={`${input.base} ${input.sm}`}
+                  />
+                  <input
+                    value={s.timeNote}
+                    onChange={(e) => setSub(i, { timeNote: e.target.value })}
+                    placeholder="时间备注（如：多在周六）"
+                    aria-label={`第 ${i + 1} 步的时间备注`}
+                    disabled={busy}
+                    className={`${input.base} ${input.sm}`}
+                  />
+                  <div className="flex flex-wrap items-center gap-2">
+                    {GAIN_CURRENCY.map((c) => (
+                      <span key={c} className="flex items-center gap-1.5">
+                        <span className={`${tx.label} text-ink-3`}>{CURRENCY_LABEL[c]}</span>
+                        <span className="w-16 flex-none">
+                          <input
+                            type="number"
+                            min={0}
+                            step="any"
+                            inputMode="decimal"
+                            value={s[c]}
+                            onChange={(e) => setSub(i, { [c]: e.target.value } as Partial<SubDraft>)}
+                            placeholder="—"
+                            aria-label={`第 ${i + 1} 步的${CURRENCY_LABEL[c]}数量`}
+                            disabled={busy}
+                            className={`${input.base} ${input.sm} ${input.num} text-center`}
+                          />
+                        </span>
+                      </span>
+                    ))}
+                    <span className="min-w-0 flex-1">
+                      <input
+                        value={s.gainNote}
+                        onChange={(e) => setSub(i, { gainNote: e.target.value })}
+                        placeholder="收益说明（如：每只 20 勾）"
+                        aria-label={`第 ${i + 1} 步的收益说明`}
+                        disabled={busy}
+                        className={`${input.base} ${input.sm}`}
+                      />
+                    </span>
+                  </div>
+                </div>
+              </div>
+            ))}
+
+            <div className="flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                disabled={busy || f.subs.length >= 31}
+                onClick={addSub}
+                className={`${btn.base} ${btn.sm} ${btn.sec}`}
+              >
+                <Icon name="plus" size={12} />
+                加一步
+              </button>
+
+              {/* 一步到位：填 14 → 一次生成 14 步（回车同效）。填 0 = 清空、退回单条条目，
+                  按钮文案跟着变成「清空」，免得"输个 0 想试试"就把填好的每步内容抹掉。
+                  上限 31 与校验同一枚尺子（`build` 与 `sanitizeChildren`） */}
+              <span className={`${tx.note} text-ink-3`}>或一步到位：</span>
+              <input
+                type="number"
+                min={0}
+                max={31}
+                value={bulk}
+                onChange={(e) => setBulk(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key !== 'Enter') return;
+                  e.preventDefault();
+                  applyStepCount();
+                }}
+                placeholder={String(f.subs.length || 1)}
+                aria-label="子步骤数量（0 = 清空，最多 31）"
+                disabled={busy}
+                className={`${input.base} ${input.sm} ${input.num} w-16 text-center`}
+              />
+              <span className={`${tx.note} text-ink-3`}>步</span>
+              <button
+                type="button"
+                disabled={busy || !bulkOk}
+                onClick={applyStepCount}
+                className={`${btn.base} ${btn.sm} ${btn.sec}`}
+              >
+                {bulkN === 0 ? '清空' : '应用'}
+              </button>
+            </div>
+          </div>
+        ) : null}
 
         <button
           type="button"

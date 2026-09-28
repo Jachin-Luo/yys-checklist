@@ -55,7 +55,6 @@ export type IconName =
   | 'refresh'
   | 'sougo'
   | 'search'
-  | 'filter'
   | 'close'
   | 'chevron-down'
   | 'chevron-up'

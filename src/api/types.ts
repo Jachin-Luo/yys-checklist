@@ -19,6 +19,52 @@ export interface Gain {
   blueTicket?: number;
 }
 
+/**
+ * **子条目**（2026-09-28 新增）：「同一件事做 N 次」的第 k 步，挂在父条目的 `children` 下。
+ *
+ * ## 为什么不是 `times: N` 一个数字
+ *
+ * `times` 只能记个数，N 个步骤被迫共享一份奖励 / 条件 / 备注 —— 而实际数据里
+ * 「地域鬼王」三次的**门槛不同**（难度 1 级即可 / 需声望 2000 / 需声望 10000）、「阴阳寮宴会」两次的
+ * **次数条件与时间提示不同**（周三 / 周六）。子条目把每一步存成一条记录，
+ * 逐次差异才有地方放，也才有地方改。
+ *
+ * ## 为什么不是 N 条平级条目 + 名字里的 `k/N`
+ *
+ * 平级正是 2026-09-20 拆条、2026-09-24 再按名字聚合的来路：组关系靠**猜名字**，
+ * 且成员各自能进 `order` / `hidden` / 置顶，会出现"藏了一半的组"。父子关系是
+ * **写进数据的事实**，猜名字的那层（`domain/grouping`）随本版一并删除。
+ *
+ * ## 只存"逐次可能不同"的字段
+ *
+ * 周期（`cycle` / `days` / `start` / `deadline` / `until` / `since`）与
+ * `autoDaily` / `premium` / `origin` / `isAutoHub` 一律**继承父**、子条目不存 ——
+ * 一张卡只有一个周期，子条目带不同周期无法表达。缺省即继承，写了才覆盖。
+ *
+ * ## 粒度锁在父条目
+ *
+ * 子条目不进 `order` / `hidden` / `pinned` / 排序 / 筛选，也不参与 `patch`
+ * （字段改写）：整组要么在、要么不在，不做"只改一步"。
+ *
+ * 勾选态仍是 `Record<string, number>`，子条目就是普通 id —— 周期重置 / 同步复刻 /
+ * 备份 / 勾选日志**一行都不用改**，这也是选它而不是改 `Checked` 形状的原因。
+ */
+export interface SubItem {
+  id: string;
+  /** 固定收益（保底，进统计）。缺省继承父 */
+  gain?: Gain;
+  /** 奖励类型（徽章 + 筛选）。缺省继承父 */
+  gainKind?: GainKind[];
+  /** 收益口径，如「每只 20 勾」。缺省继承父 */
+  gainNote?: string;
+  /** 触发条件，如「每周第二次，寮自定时间」。缺省继承父 */
+  condition?: string;
+  /** 提醒备注，如「需声望 10000」。缺省继承父 */
+  note?: string;
+  /** 时间备注，如「寮自定 · 多在周六」。缺省继承父 */
+  timeNote?: string;
+}
+
 export interface Item {
   id: string;
   name: string;
@@ -65,8 +111,20 @@ export interface Item {
   autoDaily?: boolean;
   /** 一键日常入口本身：排序前置特判恒第 0 位（D1） */
   isAutoHub?: boolean;
+  /** true = 需付费前置（月卡 / 花札），未购者应在设置里关掉 */
   premium?: boolean;
   note?: string;
+  /**
+   * **子步骤**（2026-09-28 新增）：有此字段的条目是「N 次任务」—— 卡上画 N 格进度，
+   * 点一次推进一步，逐步显示该步自己的奖励 / 条件 / 备注。上限 31。
+   *
+   * 缺省 = 普通单条条目，行为与旧版完全一致。
+   *
+   * 有子步骤时**父条目自身不再进统计**（收益在子条目上），也不单独参与勾选 ——
+   * 它的完成度就是子步骤的完成数。逐次相同的字段（周期 / 时间 / 入口 / 收益…）
+   * 一律写在父条目上，子条目只写差异（见 `SubItem`）。
+   */
+  children?: SubItem[];
   /** 预设 / 用户自建（`source` 删除后唯一的自建标识） */
   origin: Origin;
 }
@@ -201,8 +259,6 @@ export interface SortOption {
 
 export interface ViewDefaults {
   sortBy: SortBy;
-  /** 按奖励类型筛选，空数组 = 全部显示 */
-  showKinds: GainKind[];
   /**
    * ⚠️ 已废弃（2026-09-15）：痛感收敛为「只作默认排序键」，筛选门槛的判断已从
    * `domain/sort.isVisible` 移除，UI 也不再写入。字段与 `viewDefaults.minWeight`
@@ -306,7 +362,6 @@ export interface ViewPrefs {
    * 字段与 `meta.sortOptions` 保留是为了不动契约形状与既有校验，勿据此新增排序 UI。
    */
   sortBy: SortBy;
-  showKinds: GainKind[];
   minWeight: number;
   pinned: string[];
   /**
@@ -392,6 +447,12 @@ export interface ItemPatch {
   gainNote?: string | null;
   gainKind?: GainKind[] | null;
   gain?: Gain | null;
+  /**
+   * 子步骤：**整体覆盖**（增删改子步骤都是换一个新数组）—— 不做"按子 id 逐条改"，
+   * 那要再引入一层键空间与合并规则，而编辑表单本来就是整份提交。
+   * `null` = 清空子步骤，条目退回单条。
+   */
+  children?: SubItem[] | null;
 }
 
 export interface ItemOverrides {
@@ -488,6 +549,16 @@ export interface ItemDraft {
   /** 固定收益的口径说明（如"每只 20 勾"）；改了 `gain` 数值时它是必要的注解 */
   gainNote?: string;
   gain?: Gain;
+  /**
+   * 子步骤（2026-09-28）：写了（≥ 1 项）就是「N 次任务」，不写 / 空数组 = 单条条目。
+   *
+   * 表单里可增删步数、可改每步的奖励 / 条件 / 备注 / 时间备注 ——
+   * 其余字段一律**继承本条**（周期 / 时间 / 入口 / 截止），所以这里没有它们的输入框。
+   *
+   * **可选**是刻意的不必填：绝大多数调用点（新增一条普通条目）压根不涉及子步骤，
+   * 逼它们都写一个 `children: []` 只会制造噪音；`applyDraft` 对"没有"与"空数组"的处理一致。
+   */
+  children?: SubItem[];
 }
 
 export interface ProfileDraft {

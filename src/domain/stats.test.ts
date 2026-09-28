@@ -47,7 +47,6 @@ describe('periodItems：统计口径的周期范围', () => {
 describe('summarizeGain：固定收益汇总', () => {
   it('只统计有 gain 的条目；浮动收益条目不进分母', () => {
     const r = summarizeGain(ITEMS, {}, 'day');
-    expect(r.rows.map((x) => x.id)).toEqual(['d_card', 'd_daruma']);
     expect(r.jade.total).toBe(20);
     expect(r.blackFrag.total).toBe(0.5);
     expect(r.jade.got).toBe(0);
@@ -83,8 +82,42 @@ describe('summarizeGain：固定收益汇总', () => {
 
   it('总量为 0 时百分比为 0（不产生 NaN）', () => {
     const r = summarizeGain([mk({ id: 'only_kind', gainKind: ['jade'] })], {}, 'day');
-    expect(r.rows).toEqual([]);
     expect(r.jade).toEqual({ got: 0, total: 0, left: 0, pct: 0 });
+  });
+});
+
+describe('summarizeGain：子组（N 次任务）统计口径', () => {
+  const demon: Item = mk({
+    id: 'demon',
+    name: '地域鬼王',
+    gain: { jade: 20 },
+    gainKind: ['jade'],
+    children: [{ id: 'demon_1' }, { id: 'demon_2' }, { id: 'demon_3' }],
+  });
+
+  it('按步计收益 —— 父条目自己不再进统计，三步就是三份', () => {
+    const r = summarizeGain([demon], {}, 'day');
+    expect(r.jade.total).toBe(60);
+    expect(r.jade.got).toBe(0);
+  });
+
+  it('勾一步算一步的收益（做了一半只拿一半）', () => {
+    const r = summarizeGain([demon], { demon_1: Date.now() }, 'day');
+    expect(r.jade.got).toBe(20);
+    expect(r.jade.left).toBe(40);
+    expect(r.jade.pct).toBe(33);
+  });
+
+  it('子步骤覆盖了收益时各算各的', () => {
+    const mixed: Item = mk({
+      id: 'mixed',
+      gain: { jade: 10 },
+      gainKind: ['jade'],
+      children: [{ id: 'mixed_1' }, { id: 'mixed_2', gain: { jade: 30 } }],
+    });
+    const r = summarizeGain([mixed], { mixed_1: Date.now(), mixed_2: Date.now() }, 'day');
+    expect(r.jade.total).toBe(40);
+    expect(r.jade.got).toBe(40);
   });
 });
 

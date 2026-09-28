@@ -155,8 +155,8 @@ src/domain/enums.ts 的字面量联合类型  ←── 双向校验 ──→  
 
 | 模块 | 导出符号 | 用途 |
 | --- | --- | --- |
-| `enums.ts` | `CYCLE` / `Cycle`、`EVENT_CYCLE`、`GAIN_KIND` / `GainKind`、`TOP_GAIN_KIND`、`SORT_BY` / `SortBy`、`DICT_TYPE` / `DictType`、`ORIGIN` / `Origin`、`GAIN_CURRENCY` / `GainCurrency`、`DictRow` | 编译期唯一的枚举真相 |
-| `reset.ts` | `ResetCtx`、`periodStartOf`、`mergeChecked`、`isArchived`、`activeItems`、`daysUntilExit` | 周期重置（**时间戳比对，不用定时器**）与到期过滤 |
+| `enums.ts` | `CYCLE` / `Cycle`、`EVENT_CYCLE`、`GAIN_KIND` / `GainKind`、`TOP_GAIN_KIND`、`SORT_BY` / `SortBy`、`DICT_TYPE`、`ORIGIN` / `Origin`、`GAIN_CURRENCY` / `GainCurrency` | 编译期唯一的枚举真相（`DICT_TYPE` 常量本身被 `tools/build.js` 提取做双向校验，故即使无 TS 引用也保留） |
+| `reset.ts` | `ResetCtx`、`periodStartOf`、`periodEndOf`、`mergeChecked`、`isArchived`、`activeItems` | 周期重置（**时间戳比对，不用定时器**）与到期过滤 |
 | `merge.ts` | `mergeItems`、`effectiveView`、`emptyOverrides`、`buildMeta`；再导出 `mergeChecked`、`ResetCtx` | 种子 + 覆盖层合并规则（全项目唯一）：隐藏 → 盖预设改写 → 追加自建 |
 | `itemDraft.ts` / `itemPatch.ts` | `applyDraft` / `draftFromItem` / `cleanGain`；`applyPatch` / `diffPatch` / `sanitizePatches` / `hasPatch` | 录入草稿与预设改写的**数据规则**（空值语义、改写求差、外部字节净化），Mock 与备份导入共用 |
 | `weight.ts` | `weightOf`、`cycleRank`、`WEIGHT_LEGEND` | 痛感分计算与图例 |
@@ -170,7 +170,7 @@ src/domain/enums.ts 的字面量联合类型  ←── 双向校验 ──→  
 | `cardDisplay.ts` | `DEFAULT_CARD_DISPLAY`、`CardPresetKey` / `CardPreset` / `CARD_PRESETS`（极简 / 简要 / 完整）、`CARD_FIELDS`、`effectiveCardDisplay`、`matchPreset`、`hiddenFieldCount` | 清单卡片**显示哪些字段**（2026-09-16 新增，存在 `view.card`）。预设只是"一次设六项"的快捷键，改任一项后 `matchPreset` 返回 null；默认 = 全部显示，故不改变既有观感 |
 | `guildTime.ts` | `GuildTimePrefs`（类型在 `api/types`，此处 re-export）、`isValidHm`、`guildTimeTargets`、`configuredCount`、`applyGuildTime`、`applyGuildTimeAll`、`withGuildTime` | 寮时间在展示层叠加（**不写回主数据**）。2026-09-16 起配置本身是**账号级**分片 |
 | `sync.ts` | `SyncPartKey` / `SyncPart` / `SYNC_PARTS`、`SyncSource` / `SyncPatch`、`defaultSyncKeys`、`applyParts`、`describeKeys` | 账号间配置同步：可同步内容清单 + **字段级接管**规则（只勾「一键日常覆盖」时不动目标的筛选与置顶）。勾选状态与日志刻意不在清单内 |
-| `grouping.ts` | `ItemUnit`、`groupByCount`、`unitProgress` | **渲染层聚合**（2026-09-24）：把 `地域鬼王 1/3 · 2/3 · 3/3` 这类"同一件事的第 k / N 次"折成一张卡。**数据一行不改**，依据只有名字里的 `k/N` 后缀与 `cycle` + `path` 是否全同，`k` 必须恰好凑齐 `1..N`，否则整堆退回单条。进度 = 组内真实已完成条数，不另记计数 |
+| `steps.ts` | `isGroup`、`stepIds`、`stepTotal`、`doneSteps`、`isCardDone`、`currentStepIndex`、`stepView` | **子步骤派生**（2026-09-28，取代旧的 `grouping.ts`）：「做 N 次」写进数据（`Item.children`），一张卡 = 一个条目、一格 = 一步。进度 = 真实已完成的步数；`stepView` 是"子步骤缺省继承父"的唯一实现处。旧版按名字 `k/N` 猜分组 + 一整套缺员补丁随本版删除 |
 | `nurture.ts` | `NURTURE_HOURS`(6)、`MAX_NURTURE_N`(5)、`NurtureRecord`（含 `dones`）/ `NurturePoint`（含 `index` / `doneAt`）、`isHM` / `normalizeHM` / `nowHM` / `hmToDate`、`baseTsOf` / `nurturePointsFrom` / `recordPoints` / `nurturePoints`、`markPointDone` / `clearPointDone` / `nextPendingPoint`、`pointStats`、`NurtureDue` / `nextDue` / `dueText`、`nurtureId`、`makeNurture`、`sortNurture` | 结界寄养 6 小时收 / 续点派生：点列表 = 上卡点 + 逐点递推（`dones` 逐点记实际完成时间）；`nextDue` / `dueText` 供壳层常驻徽章用 |
 | `yuhun.ts` | `MODE_LABEL`、`WEEK_ORDER`、`DungeonDay`、`hasDayGrid`、`dungeonDay`、`resolveFollow`、`OldFollowInfo`、`oldFollowInfo`、`groupBySection` | 御魂副本轮换与掉落派生 |
 | `bounty.ts` | `BountySpotRef` / `BountyEntry` / `BountyUnionRow`、`buildBountyEntries`、`matchBounty`、`bountyUnion`、`fullCoverage`、`RankedEntry`、`pinMatches` | 悬赏出处派生、线索反查与并集 |
@@ -199,7 +199,7 @@ src/domain/enums.ts 的字面量联合类型  ←── 双向校验 ──→  
   与 `WEIGHT_LEGEND` 图例均已删除 —— 界面里除了「默认排序」不会再出现痛感的任何出口。
 - 一键日常入口恒排第 0 位：`domain/sort.buildComparator` 的前置特判，**不参与上面的比较**。
 - 排序优先级：星标置顶 > （自定义顺序若已调过则接管）> 痛感分；同分兜底依次为截止日 → 周期 → 自定义顺序。
-- 可见性：`domain/sort.isVisible`（奖励类型筛选 + 「今天是否适用」`days`）与 `domain/autoDaily.hiddenByCover`（一键日常覆盖导致隐藏）。2026-09-24 删掉了「隐藏已完成」—— 它当时已无 UI 却仍在过滤里生效，会在按次数聚合之前抽走已勾条目（见 `domain/grouping` 的缺员说明），属"用户改不了、也看不出"的隐患。
+- 可见性：`domain/sort.isVisible`（只剩「今天是否适用」`days` 一条）与 `domain/autoDaily.hiddenByCover`（一键日常覆盖导致隐藏）。两条"界面碰不到却仍在生效"的筛选已按同一理由整体删除：**「隐藏已完成」**（2026-09-24，当时已无 UI 却仍在过滤里生效，会在按次数聚合之前抽走已勾条目）与**「按奖励类型筛选」`showKinds`**（2026-09-28，随 `SHOW_KIND_FILTER` 开关连契约字段一起退场，此前因"不动契约形状"暂留数据层）—— 都属"用户改不了、也看不出"的隐患。
 
 ### 7.3 一键日常：配置 ≠ 状态
 

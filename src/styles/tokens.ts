@@ -92,5 +92,3 @@ export const tokens = {
     md: 768,
   },
 } as const;
-
-export type Tokens = typeof tokens;

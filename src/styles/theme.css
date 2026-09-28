@@ -132,10 +132,6 @@ html[data-theme='light'] {
   /* 遮罩 */
   --c-scrim: 8 7 11;
 
-  /* 御币 */
-  --c-paper: 255 255 255;
-  --c-crease: 186 148 74;
-
   /* 阴影：参考稿三级（sh-1/2/3）映射到既有三档（card 贴地 / pop 浮起 / panel 脱离页面）。
      `cta` = 参考稿 `--sh-sig`（朱红按钮自己的落影） */
   --sh-card: 0 2px 10px -2px rgba(74, 60, 34, 0.1), 0 1px 2px rgba(74, 60, 34, 0.06);
@@ -226,9 +222,6 @@ html[data-theme='dark'] {
 
   --c-scrim: 8 7 11;
 
-  --c-paper: 237 228 211;
-  --c-crease: 25 24 34;
-
   --sh-card: 0 2px 10px -2px rgba(0, 0, 0, 0.5), 0 1px 2px rgba(0, 0, 0, 0.4);
   --sh-pop: 0 14px 36px -12px rgba(0, 0, 0, 0.7), 0 2px 8px rgba(0, 0, 0, 0.45);
   --sh-panel: 0 20px 48px -14px rgba(0, 0, 0, 0.78), 0 4px 12px rgba(0, 0, 0, 0.5);
@@ -275,22 +268,6 @@ body {
   background-repeat: repeat;
 }
 
-/* ───────── 御币：金杆 / 纸垂 / 折痕（三色，故走类而非 currentColor） ───────── */
-.genso-gohei-bar {
-  stroke: rgb(var(--c-gold));
-}
-
-.genso-gohei-paper {
-  fill: rgb(var(--c-paper));
-  stroke: rgb(var(--c-line-soft));
-  stroke-width: 0.8;
-}
-
-.genso-gohei-crease {
-  stroke: rgb(var(--c-crease));
-  opacity: 0.8;
-}
-
 /* 品牌印章「囤」（参考稿 `.sigil`）：径向渐变 + 内圈高光 + 落影。
    径向渐变 Tailwind 表达不了，故走类 —— 与 `.genso-rt` 同一条豁免口径（见 AGENTS.md） */
 .genso-sigil {
@@ -304,45 +281,6 @@ body {
     inset 0 1px 0 rgba(255, 255, 255, 0.24),
     inset 0 0 0 1px rgba(255, 240, 214, 0.3);
   text-shadow: 0 1px 1px rgba(90, 12, 16, 0.45);
-}
-
-/**
- * 达摩点睛（参考稿 §5.1）：许愿涂左眼、还愿涂右眼。
- * 左眼常亮 = 有愿在许；右眼在**当前页全部完成**时点亮，整只由金转朱红。
- * 判定类 `.all-done` 由页面挂在同一个容器上。
- */
-.genso-daruma .genso-daruma-eye-r {
-  opacity: 0;
-  transition: opacity 0.45s ease;
-}
-
-.genso-daruma {
-  color: rgb(var(--c-gold));
-  opacity: 0.7;
-  transition: color 0.45s ease, opacity 0.45s ease;
-}
-
-.all-done .genso-daruma .genso-daruma-eye-r {
-  opacity: 1;
-}
-
-.all-done .genso-daruma {
-  color: rgb(var(--c-crimson));
-  opacity: 1;
-}
-
-/**
- * 全清静默：一屏之内只留一个视觉重心。
- * 全清后若"待做"还顶着醒目的靛蓝、"可提交"还留着金描边，会与"任务做完了"的语义打架，
- * 所以这两卡主动退成弱化色，只留「已完成」一卡有颜色。
- */
-.all-done .genso-stat.is-active .genso-stat-value,
-.all-done .genso-stat.is-ready .genso-stat-value {
-  color: rgb(var(--c-ink-4));
-}
-
-.all-done .genso-stat.is-ready {
-  border-color: rgb(var(--c-line-soft));
 }
 
 /**

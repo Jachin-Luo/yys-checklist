@@ -14,12 +14,7 @@ import { useBreakpoint } from '../../hooks/useBreakpoint';
  * ## 移动：金券条（参考稿 `.voucher`，则①「页名进应用栏」的另一半）
  * 页名已经上了应用栏（`MobileShell`），这里不再渲染题头 —— 退化为一条横贯的
  * 金券条：**用途 · 等宽大字 · 绝对时刻**。全页依旧只有它有等宽数字。
- * 没有倒计时的页（限时）只渲染 `action`（筛选入口的落点），页面从正文直接开始。
- *
- * ## 为什么 `action` 插槽两个形态都保留
- *
- * 它是移动端 `ViewBar` 的落点（2026-09-23：一整行只换来一颗按钮，收进页头省一整行）。
- * 桌面端目前没有调用方传它，但插槽留着 —— 恢复筛选时不必回来改四个页面。
+ * 没有倒计时的页（限时）移动端整条不渲染，页面从正文直接开始。
  *
  * 日期本身是**自然日历**（纯展示，`domain/dateLabel`），与"还有多久被重置"的
  * 勾选语义不同源 —— 两者在书眉/金券条里并列，正是为了把这件事摆在一处说清。
@@ -29,23 +24,17 @@ export default function PageHead({
   detail,
   countdown,
   countdownLabel = '重置倒计时',
-  aside,
-  action,
 }: {
   title: string;
   detail?: ReactNode;
   countdown?: string | null;
   countdownLabel?: string;
-  /** 标题下方的附加内容（如今日页的达摩） */
-  aside?: ReactNode;
-  /** 与标题同行的附加控件（移动端的筛选入口）—— 不额外占高度 */
-  action?: ReactNode;
 }) {
   const variant = useBreakpoint();
 
   /* ── 移动：金券条 ── */
   if (variant === 'mobile') {
-    if (!countdown && !action) return null;
+    if (!countdown) return null;
     return (
       <div className="mx-3.5 mt-3 flex items-center gap-2">
         {countdown ? (
@@ -60,7 +49,6 @@ export default function PageHead({
             ) : null}
           </div>
         ) : null}
-        {action}
       </div>
     );
   }
@@ -73,10 +61,8 @@ export default function PageHead({
           <h1 className="min-w-0 truncate font-serif text-3xl leading-tight tracking-label text-ink">
             {title}
           </h1>
-          {action}
         </div>
         {detail ? <p className="mt-1.5 text-sm text-ink-3">{detail}</p> : null}
-        {aside}
       </div>
       {countdown ? (
         <div className="flex-none border-l border-line-soft pl-5 text-right">

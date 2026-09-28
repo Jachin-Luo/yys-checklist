@@ -61,6 +61,25 @@ describe('mergeChecked：时间戳比对归零 + 清理过期键', () => {
     const out = mergeChecked({ d1: new Date(2026, 8, 9, 6, 0).getTime() }, [item({ id: 'd1' })], now, CTX);
     expect(out.d1).toBeUndefined();
   });
+
+  /* 2026-09-28 子组：子步骤 id 不在条目顶层，一度被当成"已下线条目"清掉 ——
+     周期还没翻篇，进度就没了。存活集合必须按**步骤 id**建，周期按父条目算 */
+  it('子步骤的进度不能被当成孤儿清掉（周期按父条目算）', () => {
+    const demon = item({
+      id: 'demon',
+      children: [{ id: 'demon_1' }, { id: 'demon_2' }, { id: 'demon_3' }],
+    });
+    const at = new Date(2026, 8, 10, 5, 30).getTime();
+    const out = mergeChecked({ demon_1: at, demon_2: at }, [demon], now, CTX);
+    expect(out.demon_1).toBe(at);
+    expect(out.demon_2).toBe(at);
+  });
+
+  it('已删除的子步骤照样清理（不留无限膨胀的孤儿键）', () => {
+    const demon = item({ id: 'demon', children: [{ id: 'demon_1' }] });
+    const out = mergeChecked({ demon_9: 1 }, [demon], now, CTX);
+    expect(out.demon_9).toBeUndefined();
+  });
 });
 
 describe('isArchived：until 当天仍显示，次日归档', () => {
@@ -138,22 +157,18 @@ describe('buildComparator：优先级 ① 一键入口 → ② 置顶 → ③ so
   });
 });
 
-describe('isVisible：showKinds / days（D4）', () => {
-  const base = { showKinds: [], today: 4 };
+describe('isVisible：days（D4）', () => {
+  const base = { today: 4 };
   const daily = item({ id: 'd', gainKind: ['jade'] });
 
   /* 2026-09-15：原先的「minWeight 门槛」用例随该门槛删除 —— 痛感只作默认排序键，不再是筛选维度。
      2026-09-24：「hideDone / keepDone」用例随那两个字段一起删除 —— 它的唯一作用是
-     "按勾选状态把条目从列表里抽走"，正是"分组被静默拆散"的成因之一，删掉后没有可断言的行为。 */
-  it('一键日常入口豁免全部筛选（showKinds / days 都不作用在它身上）', () => {
+     "按勾选状态把条目从列表里抽走"，正是"分组被静默拆散"的成因之一，删掉后没有可断言的行为。
+     2026-09-28：「showKinds / 奖励类型筛选」用例随该字段一并删除 —— 它是 `SHOW_KIND_FILTER`
+     开关拴着的最后一段代码，删掉后这里不再有"按类型筛"的行为可断言（剩 `days` 一条）。 */
+  it('一键日常入口豁免全部筛选（days 不作用在它身上）', () => {
     const hub = item({ id: 'hub', isAutoHub: true });
-    expect(isVisible(hub, { ...base, showKinds: ['soul'], today: 1 })).toBe(true);
-  });
-
-  it('showKinds 空数组 = 全部显示；非空则取交集', () => {
-    expect(isVisible(daily, base)).toBe(true);
-    expect(isVisible(daily, { ...base, showKinds: ['soul'] })).toBe(false);
-    expect(isVisible(daily, { ...base, showKinds: ['jade'] })).toBe(true);
+    expect(isVisible(hub, { ...base, today: 1 })).toBe(true);
   });
 
   it('已勾条目照常可见 —— 可见性不再吃勾选状态（"沉下去但仍在"是本项目的既定表达）', () => {
@@ -209,10 +224,9 @@ describe('mergeItems / effectiveView：种子 + 覆盖层 → 有效数据（§2
   });
 
   it('effectiveView：账号偏好缺字段时回落默认值', () => {
-    const defaults: ViewDefaults = { sortBy: 'weight', showKinds: [], minWeight: 0, pinned: [] };
-    const v = effectiveView(defaults, { profileId: 'p', sortBy: 'name', showKinds: ['jade'] });
+    const defaults: ViewDefaults = { sortBy: 'weight', minWeight: 0, pinned: [] };
+    const v = effectiveView(defaults, { profileId: 'p', sortBy: 'name' });
     expect(v.sortBy).toBe('name');
-    expect(v.showKinds).toEqual(['jade']);
     expect(v.minWeight).toBe(0);
     expect(v.coverMode).toBe('dim');
   });

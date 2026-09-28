@@ -102,7 +102,7 @@ TypeScript 为严格模式（`tsconfig.app.json`），`npm run build` 会先跑 
 | `domain/dateLabel.test.ts` | 10 |
 | `domain/domain.test.ts` | 33（reset / sort / weight / merge / countdown 跨天跨周跨月边界 + 限时永不自动重置 + 预设改写合并） |
 | `domain/itemPatch.test.ts` | 8（稀疏覆盖：键不存在 / `null` / 有值三态；对着种子求差；外部脏值净化） |
-| `domain/grouping.test.ts` | 16 |
+| `domain/steps.test.ts` | 15（子步骤派生：单条与多次的步数 / 完成判定 / 当前步 / 缺省继承父） |
 | `domain/guildTime.test.ts` | 10 |
 | `domain/itemDraft.test.ts` | 4（草稿 → 条目的字段映射与归一：空白串、空 `gainKind`、整体覆盖、收益清洗） |
 | `domain/nurture.test.ts` | 41 |

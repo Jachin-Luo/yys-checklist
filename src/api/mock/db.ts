@@ -13,14 +13,12 @@ import metaDbRaw from '../../db/meta.db.json';
 import itemsDbRaw from '../../db/items.db.json';
 import limitedDbRaw from '../../db/limited.db.json';
 import usersDbRaw from '../../db/users.db.json';
-import dataVersionDbRaw from '../../db/dataVersion.db.json';
 import type {
   BountyDb,
   Item,
   MetaDbFile,
   SoulsDb,
   UsersDbFile,
-  VersionRow,
   YuhunDb,
 } from '../types';
 
@@ -39,9 +37,6 @@ export const seedItems = [...itemsDbRaw.items, ...limitedDbRaw.items] as unknown
 
 /** 用户库种子（只读；用户数据实际读写走 localStorage 分片键） */
 export const seedUsersDb = usersDbRaw as unknown as UsersDbFile;
-
-/** 版本库 */
-export const seedVersions = dataVersionDbRaw.versions as unknown as VersionRow[];
 
 /* ── 工具模块：动态 import，首屏 bundle 不含 ── */
 
