@@ -110,7 +110,7 @@ npm run dev          # http://localhost:5173/
 
 | 项 | 内容 |
 | --- | --- |
-| 触点文件 | `src/styles/layout.ts`（共享容器类，如 `CHECKLIST_GRID`）、`src/styles/tokens.ts`、`src/styles/base.css` / `index.css`、`src/components/mobile/MobileShell.tsx`、`src/components/desktop/DesktopShell.tsx` |
+| 触点文件 | `src/styles/layout.ts`（共享容器类，如 `CHECKLIST_GRID`）、`tailwind.config.ts` / `src/styles/theme.css`（令牌）、`src/styles/base.css` / `index.css`、`src/components/mobile/MobileShell.tsx`、`src/components/desktop/DesktopShell.tsx` |
 | 断点 | 只有 `src/hooks/useBreakpoint.ts`（`matchMedia('(min-width: 768px)')`）读窗口宽度 —— **不要新增第二个读屏宽的地方**，页面内部也不要自己判断 |
 | 必须跑 | `npm run lint` → `npm run build` |
 | 验证 | 1280 / 768 / 390 三种宽度下无横向滚动；手机端刘海区与底部 Tab 不被遮挡（`safe-*` 类 + `dvh`） |

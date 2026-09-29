@@ -611,11 +611,3 @@ export interface UsersDbFile {
   itemOverrides: ItemOverrides[];
   sessions: Session[];
 }
-
-export interface VersionRow {
-  db: string;
-  version: string;
-  updated: string;
-  snapshot?: string;
-  checksum?: string;
-}

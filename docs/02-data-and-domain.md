@@ -37,7 +37,7 @@
 | `BootstrapPayload` | 首屏聚合载荷（meta + items + session + state + view + overrides + **log**） |
 | `ItemDraft` / `ProfileDraft` | 新增/编辑入参 |
 | `UserDataBundle` | 备份载体（导入导出用）：每个账号含 state / view / overrides / **log**（勾选日志） |
-| `MetaDbFile` / `UsersDbFile` / `VersionRow` | 种子文件形状 |
+| `MetaDbFile` / `UsersDbFile` | 种子文件形状 |
 | 工具资料 | `Dungeon` / `DungeonMode` / `DayTip` / `YuhunDb`、`Shikigami` / `Spot` / `ShikigamiSpot` / `ShikigamiClue` / `BountyDb`、`SoulRow` / `SoulsDb` |
 
 ### 1.3 适配器切换 `src/api/index.ts`
@@ -114,7 +114,7 @@ VITE_API_MODE === 'http' ? new HttpApi(baseURL) : new MockApi()
 | `bounty.db.json` | `shikigami[]`、`spots[]`、`shikigamiSpots[]`、`shikigamiClues[]` | 式神 **39**、地点 **64**、出处关系 **148**、线索词 **116** |
 | `meta.db.json` | `meta`、`dicts[]`、`sortOptions[]`、`viewDefaults` | 字典 **47** 行（cycle 4 + gainKind 18 + weekday 7 + yuhunSection 5 + spotKind 6 + soulCategory 7）、排序选项 5 |
 | `users.db.json` | `users`、`profiles`、`states`、`viewPrefs`、`itemOverrides`、`sessions` | 各 1 条（`u_local` / `p_main`） |
-| `dataVersion.db.json` | `versions: VersionRow[]` | **7** 条（对应 meta / items / limited / yuhun / bounty / souls / users） |
+| `dataVersion.db.json` | `versions[]`：`db` / `version` / `updated`（可选 `snapshot` / `checksum`） | **7** 条（对应 meta / items / limited / yuhun / bounty / souls / users） |
 
 常驻 + 活动总计 **107 条**条目。
 
@@ -242,7 +242,7 @@ src/domain/enums.ts 的字面量联合类型  ←── 双向校验 ──→  
 - **上方日历**：`domain/calendar.buildMonthGrid` 排版 + `domain/checkLog.dayCount` 取每天条数，按**当月单日最大值**相对分 4 档着色（类贡献图）；
 - **下方区间收益**：`domain/stats.summarizeRangeGain(items, log, fromKey, toKey)` —— 输入是**勾选日志**而非 `checked`（后者只留最近一次，回答不了"近 7 天"），同一条目多天各完成一次就累计多次，因此没有"总量 / 已得 / 还差"。口径仍是只吃固定数值的 `gain`。
 
-保留但**当前无页面消费**：`summarizeGain` / `PERIOD_META`（周期进度口径）与 `missGroups`（漏失分级），以及 `components/common/GainBar.tsx` / `ProgressBar.tsx` —— 都有单测保护，想恢复"周期进度条"时只改页面。
+保留但**当前无页面消费**：`summarizeGain`（周期进度口径，有单测保护；`AGENTS.md` 口径纪律里"只统计固定数值"一条正是它的规则）。**已删除的同批**：`PERIOD_META` / `missGroups`（2026-09-28）与 `components/common/GainBar.tsx` / `ProgressBar.tsx`（2026-09-29，连同只服务它的 `src/styles/tokens.ts`）—— "有单测保护、想恢复时只改页面"这个保留理由，在连续两轮里都没兑现，零件本身反而成了无人调用的形状。
 
 ## 8. 数据录入流程（改数据的标准路径）
 

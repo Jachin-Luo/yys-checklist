@@ -61,9 +61,9 @@ yys-checklist/
 | `src/stores/` | Zustand 状态容器（按领域分片） | `session.ts`、`items.ts`、`check.ts`、`view.ts`、`device.ts`、`ui.ts`、`tools.ts`、`nurture.ts` + 5 个 `*.test.ts` |
 | `src/hooks/` | 编排与副作用封装（竞态、首屏、断点、焦点、周期刷新） | `useApi.ts`、`useBootstrap.ts`、`useChecklist.ts`、`useAutoDaily.ts`、`useBreakpoint.ts`、`useDevicePrefs.ts`、`useModalFocus.ts`、`usePeriodRefresh.ts`、`useScope.ts` + `usePeriodRefresh.test.ts` |
 | `src/pages/` | 页面容器（只管排列） | `TodayPage.tsx`、`WeekPage.tsx`、`MonthPage.tsx`、`LimitedPage.tsx`、`StatsPage.tsx`、`ToolsPage.tsx`、`MePage.tsx`；`pages/settings/`：`ProfileSection.tsx`、`AutoDailySection.tsx`、`ItemManagerSection.tsx`、`GuildTimeSection.tsx`；`pages/tools/`：`YuhunSection.tsx`、`BountySection.tsx`、`NurtureSection.tsx` |
-| `src/components/` | 展示原子件与布局骨架 | `common/`（26）：`Alert.tsx`、`BackToTop.tsx`、`CheckBox.tsx`、`ChecklistEntry.tsx`、`ChecklistGroupCard.tsx`、`ChecklistItem.tsx`、`CollapsibleSection.tsx`、`ConfirmDialog.tsx`、`EmptyState.tsx`、`GainBadges.tsx`、`HubCard.tsx`、`ItemField.tsx`、**`Modal.tsx`**（2026-09-28 抽出的弹层外壳）、`NavContent.tsx`、`NurtureBadge.tsx`、`OnboardingDialog.tsx`、`PageHead.tsx`、`ProfilePickDialog.tsx`、`ProfileSwitcher.tsx`、`ProgressBar.tsx`、`SaveErrorNotice.tsx`、`Segmented.tsx`、`SettingRow.tsx`、`SummaryBar.tsx`、`Tags.tsx`、`ThemeToggle.tsx`；`desktop/DesktopShell.tsx`；`mobile/MobileShell.tsx`；`settings/AboutSection.tsx`、`settings/BackupSection.tsx`、`settings/DataVersionSection.tsx`、`settings/`**`ItemForm.tsx`**（条目新建 / 编辑表单，弹层形态） |
+| `src/components/` | 展示原子件与布局骨架 | `common/`（25）：`Alert.tsx`、`BackToTop.tsx`、`CheckBox.tsx`、`ChecklistEntry.tsx`、`ChecklistGroupCard.tsx`、`ChecklistItem.tsx`、`CollapsibleSection.tsx`、`ConfirmDialog.tsx`、`EmptyState.tsx`、`GainBadges.tsx`、`HubCard.tsx`、`ItemField.tsx`、**`Modal.tsx`**（2026-09-28 抽出的弹层外壳）、`NavContent.tsx`、`NurtureBadge.tsx`、`OnboardingDialog.tsx`、`PageHead.tsx`、`ProfilePickDialog.tsx`、`ProfileSwitcher.tsx`、`SaveErrorNotice.tsx`、`Segmented.tsx`、`SettingRow.tsx`、`SummaryBar.tsx`、`Tags.tsx`、`ThemeToggle.tsx`；`desktop/DesktopShell.tsx`；`mobile/MobileShell.tsx`；`settings/AboutSection.tsx`、`settings/BackupSection.tsx`、`settings/DataVersionSection.tsx`、`settings/`**`ItemForm.tsx`**（条目新建 / 编辑表单，弹层形态） |
 | `src/services/` | 跨域用例编排与基础设施 | `localStore.ts`、`backupService.ts`、`clipboard.ts` + `localStore.test.ts` |
-| `src/styles/` | 设计令牌与共享容器类 | `index.css`、`base.css`、`layout.ts`、`tokens.ts` |
+| `src/styles/` | 设计令牌与共享容器类 | `index.css`、`base.css`、`layout.ts`（`tokens.ts` 这个 JS 侧令牌镜像已于 2026-09-29 随唯一消费方 `ProgressBar` 删除） |
 | `src/test/` | 单测垫片 | `memoryStorage.ts` |
 
 > 注意一处**目录归属不对称**（历史遗留，非 bug）：`BackupSection` 与 `DataVersionSection` 在 `src/components/settings/`，其余四个设置分区在 `src/pages/settings/`。新增设置分区时**跟随 `pages/settings/`**，不要扩大不对称。
@@ -210,7 +210,7 @@ api.getBootstrap
 ## 9. 两套布局的共享与差异
 
 - **共享**：数据层、状态层、领域逻辑、原子件（`ChecklistItem`、`HubCard` 等两端同款）。
-- **差异**：只有排列方式。栅格在 `src/styles/layout.ts`（`CHECKLIST_GRID` 等容器类），令牌在 `src/styles/tokens.ts`，全局基样式在 `src/styles/base.css` / `index.css`。
+- **差异**：只有排列方式。栅格在 `src/styles/layout.ts`（`CHECKLIST_GRID` 等容器类），令牌在 `tailwind.config.ts` 与 `src/styles/theme.css`，全局基样式在 `src/styles/base.css` / `index.css`。
 - 移动端为单列 + 底部固定 Tab；桌面端为左侧固定导航 + 多列栅格。
 - 可访问性约定：全局 `:focus-visible` 焦点环（组件内不写 `outline-none`）、模态焦点管理（`hooks/useModalFocus.ts`）、勾选卡整行命中、图标按钮带 `aria-label`。
 

@@ -8,8 +8,9 @@ import animate from 'tailwindcss-animate';
  *
  *   1. 组件里禁止出现 `#RRGGBB` 字面量，颜色只能走令牌类（如 `text-ink-3`）；
  *   2. 禁止 `text-[13px]` 之类任意值 —— 字号、圆角、字距、阴影都走令牌；
- *   3. 需要动态计算时（进度条宽度、状态色）用 `style`，值从 `src/styles/tokens.ts` 取，
- *      保证 JS 与 CSS 同源。
+ *   3. 需要动态计算时（如进度条宽度）用 `style`，值引用这里的同名 CSS 变量，保证 JS 与
+ *      CSS 同源。（`src/styles/tokens.ts` 这个 JS 侧镜像已于 2026-09-29 随它唯一的消费方
+ *      `ProgressBar` 一并删除 —— 目前没有"只能用 JS 表达"的动态值场景，需要时从 git 取回。）
  *
  * ## 2026-09-24 换代：方正 → 圆润
  *
