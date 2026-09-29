@@ -422,7 +422,7 @@ export default function ItemForm({
           />
         </Row>
 
-        <Row label="周期" hint="决定它出现在哪一页、多久翻篇一次">
+        <Row label="周期" hint="决定它进哪一页、多久翻篇一次：每日→今日 / 每周→本周 / 每月→本月 / 限时→限时页">
           {/* 宽度由外层定宽盒给：`input.base` 自带 `w-full`，
               两个宽度类同时挂在控件上谁生效取决于样式表顺序，不能赌 */}
           <span className="block w-28">
@@ -441,7 +441,7 @@ export default function ItemForm({
           </span>
         </Row>
 
-        <Row label="起始" hint="活动开始的那天；到日子才会在卡片上提示「开启」">
+        <Row label="起始" hint="开始生效的那天；到日子才在卡片上提示「开启」">
           <input
             value={f.start}
             onChange={(e) => set('start', e.target.value)}
@@ -473,10 +473,10 @@ export default function ItemForm({
 
         {/* 这一句讲的是**两个字段的组合**，挂在任何单行下都读不通，故单独一行 */}
         <p className={`${tx.note} text-ink-3`}>
-          周期选「每日 / 每周 / 每月」再填<b className="font-medium text-ink-2">截止日或归档日</b>，
-          它就是<b className="font-medium text-ink-2">有期限的条目</b>：到归档日自动下线。
-          活动期的每日任务请直接把周期选成<b className="font-medium text-ink-2">限时</b> ——
-          今日页按周期取条目（只列常驻），限时页不翻篇，配合子步骤用次数记"还要做几次"。
+          每日 / 每周 / 每月各按自己的周期翻篇（今日页只列每日、本周页只列每周、本月页只列每月）；
+          <b className="font-medium text-ink-2">限时</b>进限时页、<b className="font-medium text-ink-2">不翻篇</b> ——
+          勾上就一直勾着，要做几次就在下面加几步<b className="font-medium text-ink-2">子步骤</b>，要下线就填归档日。
+          任何周期再填<b className="font-medium text-ink-2">截止日或归档日</b>，它就是<b className="font-medium text-ink-2">有期限的条目</b>：到归档日自动下线。
           两个日期都不填就是常驻。
         </p>
 
@@ -736,7 +736,7 @@ export default function ItemForm({
                 className={`${input.base} ${input.md}`}
               />
             </Row>
-            <Row group label="开放" hint="日常类每天几点到几点能玩；只做提示，不限制勾选">
+            <Row group label="开放" hint="每天几点到几点能玩；只做提示，不限制勾选">
               <span className="flex flex-wrap items-center gap-2">
                 <span className="w-24 flex-none">
                   <input

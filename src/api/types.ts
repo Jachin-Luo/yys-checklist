@@ -100,9 +100,9 @@ export interface Item {
   timeNote?: string;
   /** true = 时间由所在寮自定 */
   isGuildTime?: boolean;
-  /** 活动类开始日 */
+  /** 开始生效日（`start` 到点前卡片提示「开启」） */
   start?: string;
-  /** 活动类截止时间（仍要提示去领） */
+  /** 截止时间（到点仍要提示去领，不会让条目消失） */
   deadline?: string;
   /** 条目下线日，过期自动归档。与 deadline 语义不同 */
   until?: string;
@@ -535,9 +535,9 @@ export interface ItemDraft {
   name: string;
   cycle: Cycle;
   gainKind: GainKind[];
-  /** 活动类开始日 */
+  /** 开始生效日 */
   start?: string;
-  /** 活动类截止时间 */
+  /** 截止时间（到点仍要提示去领，不会让条目消失） */
   deadline?: string;
   /** 条目下线日（过期自动归档）；与 `deadline` 语义不同 */
   until?: string;
