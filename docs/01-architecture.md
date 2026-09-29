@@ -32,7 +32,7 @@ npm run db:check     # node tools/build.js
 npm run db:calibrate # node tools/calibrate-report.js
 ```
 
-构建产物在 `dist/`；`reports/` 是工具脚本产物目录，已被 `.gitignore` 忽略。
+构建产物在 `dist/`（**随发布入库**，2026-09-29 起不再被 `.gitignore` 忽略：服务器上有本机部署脚本直接取这份产物、不在服务器上二次构建，因此每次 `npm run build` 后都要把 `dist/` 一并提交，包括换了名字的 `assets/index-<hash>.js` / `.css`）；`reports/` 是工具脚本产物目录，已被 `.gitignore` 忽略。
 
 ## 2. 目录地图
 

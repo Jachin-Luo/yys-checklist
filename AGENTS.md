@@ -119,7 +119,7 @@ npm ci                    # 按 lockfile 安装（Node 18+，实测 Node 22）
 npm run dev               # 开发服务，默认 http://localhost:5173/
 npm test                  # vitest run，单元测试（21 文件 / 302 用例）
 npm run lint              # eslint
-npm run build             # tsc -b && vite build
+npm run build             # tsc -b && vite build → dist/（**随发布入库**，产物要一并提交）
 npm run db:check          # 数据校验 + 枚举双轨对齐，产物 reports/data-check.md
 npm run db:calibrate      # 数据核对报告，产物 reports/pending-review.*、reports/calibration.md
 node tools/verify.js      # 一键验收：tsc + eslint + vitest + build + db:check，产物 reports/verify-<date>.md
@@ -137,6 +137,7 @@ node tools/verify.js      # 一键验收：tsc + eslint + vitest + build + db:ch
 | `src/db/*.db.json`、`src/domain/enums.ts` | `npm run db:check` |
 | `src/domain/**`、`src/stores/**`、`src/api/**` | `npm test`（必要时补测试） |
 | 页面 / 组件 | `npm run lint` + `npm run build` |
+| 任何会进产物的改动（源码 / 数据 / 样式） | 提交前跑 `npm run build` 并把 **`dist/` 一起提交**（它随发布入库，漏了就是"线上 index.html 指向不存在的文件"） |
 | 准备提交前 | `node tools/verify.js` |
 
 ---

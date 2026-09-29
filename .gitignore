@@ -1,5 +1,8 @@
 node_modules
-dist
+# dist **随发布入库**（2026-09-29 起不再忽略）：服务器上跑的本机部署脚本（`update.sh`，
+# 已按绝对路径排除在本仓库外）直接取这份产物，不在服务器上重装依赖再构建一次。
+# 代价与义务：每次 `npm run build` 后都要把 `dist/` 一起提交 —— 入口文件带内容 hash
+# （`assets/index-<hash>.js` / `.css`），不提交就是"index.html 指向一个不存在的文件"。
 dist-ssr
 *.local
 
