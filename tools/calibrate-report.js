@@ -147,12 +147,14 @@ writeFile('tools/templates/version-intake.md', [
   '1. 更新 `src/db/limited.db.json` 里当期版本的条目（2026-09-28 起版本活动与限时活动同属 `limited`，没有单独的版本周期）；',
   '2. 活动结束的条目填 `until`（到期自动归档下线）—— 合并后**不再有"随版本锚点自动翻篇"**这回事，翻篇只能靠 `until`。',
   '',
+  '> 旧的 `meta.periods` 锚点机制已随周期合并整体删除，别再去找它。',
+  '',
   '## 1. 录入清单',
   '',
   '| 步骤 | 动作 | 校验点 |',
   '|---|---|---|',
   '| ① 归档 | 上一版本条目：确认 `until` 已过，或补上 `until` | `npm run db:check` 无「应归档」提示 |',
-  '| ② 新增 | 复制下方模板到 `src/db/items.db.json` 的 `items` 数组 | `id` 唯一、`^[a-z0-9_]+$` |',
+  '| ② 新增 | 复制下方模板到 `src/db/limited.db.json` 的 `items` 数组（版本活动条目属 `limited`） | `id` 唯一、`^[a-z0-9_]+$` |',
   '| ③ 枚举 | `cycle` / `gainKind` 只能取 `src/domain/enums.ts` 中的值 | 双轨校验通过 |',
   '| ④ 时间 | 活动类填 `start` + `deadline`（+`until`）；日常类填 `time` + `timeEnd` | `deadline ≥ start`、`timeEnd > time` |',
   '| ⑤ 收益 | 只填**保底固定值**；浮动的只标 `gainKind` 不填 `gain` | `gain` 与 `gainKind` 对应关系校验 |',
@@ -170,7 +172,8 @@ writeFile('tools/templates/version-intake.md', [
   '- `value`（S/A/B/C）/ `time2` / `source` **已删除**，不得再录入；',
   '- 一天两次的条目**必须拆成两条**（如 `xxx_am` / `xxx_pm`），两条 `gain` 之和须等于原条目总量；',
   '- `gainKind` **必须逐条人工指定**，禁止用正则从任何文本字段推断（Q14 纪律；`reward` 字段已于 2026-09-11 删除）；',
-  '- `until` ≠ `deadline`：前者是「从清单下线」，后者是「活动截止仍要提示」。',
+  '- `until` ≠ `deadline`：前者是「从清单下线」，后者是「活动截止仍要提示」；',
+  '- `note` / `condition` **只写玩家可见的事实**，不写维护口径（步数怎么算出来的、改在哪个界面、依据哪篇攻略、这条什么时候由谁删）。用户会在清单卡片上逐字读到它们；「子步骤 = 剩余可做次数（自 9/28 起 3 次，可在「条目管理」里改）」这类话 2026-09-29 已从 `limited.db.json` 清理，录入时别再写回来。',
   '',
 ].join('\n'));
 writeFile('tools/templates/new-items.draft.json', `${JSON.stringify({
@@ -180,7 +183,11 @@ writeFile('tools/templates/new-items.draft.json', `${JSON.stringify({
 
 /* ---------- 输出 ---------- */
 console.log(`S1.5 数据校准完成：待核 ${total} 项`);
-console.log(`  收益数值 ${groups.gain.length} · 截止日 ${groups.deadline.length} · 时间窗 ${groups.timeWindow.length} · 周期锚点 ${groups.anchor.length}`);
+/* 2026-09-29 修：这里原有一处 `groups.anchor.length`（"周期锚点"）—— 锚点机制
+   2026-09-28 删除时只清了 `groups` 的定义与报告小节，漏了这句汇总，脚本一跑就
+   `TypeError: Cannot read properties of undefined`（写在模板与报告之后，所以文件都生成了、
+   命令却以失败退出）。同批删掉的还有本行的第 4 段计数。 */
+console.log(`  收益数值 ${groups.gain.length} · 截止日 ${groups.deadline.length} · 时间窗 ${groups.timeWindow.length}`);
 console.log('  已生成 reports/pending-review.md（可导出清单）');
 console.log('  已生成 reports/pending-review.json');
 console.log('  已生成 reports/calibration.md（汇总 + data-check）');
