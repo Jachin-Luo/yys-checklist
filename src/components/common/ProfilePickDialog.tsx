@@ -122,7 +122,7 @@ export default function ProfilePickDialog() {
                     type="button"
                     aria-pressed={on}
                     onClick={() => toggle(p.id)}
-                    className={`${option.base} ${on ? option.on : option.off}`}
+                    className={`${option.base} ${option.md} ${on ? option.on : option.off}`}
                   >
                     {/* 圆角方块 + 勾号（参考稿 §10 `.cb`）。2026-09-24 圆润版把**表单类多选**从
                         菱形符格改成它：菱形是**任务卡**的符格语言（示例文件里"点一次菱形推进一步"

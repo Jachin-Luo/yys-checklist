@@ -144,9 +144,22 @@ export const tag = {
   active: 'border-state-active/40 bg-state-active/10 text-state-active',
 } as const;
 
-/** 选项行（参考稿 §10 `.opt`）：单选 / 多选的整行形态 */
+/**
+ * 选项行（参考稿 §10 `.opt`）：单选 / 多选的整行形态。
+ *
+ * 尺寸档与 `btn` / `input` 同一条纪律（圆角与内缩**只在尺寸档里**，`base` 一份都不放）——
+ * 2026-09-29 加 `sm` 时才补上这层：原来内缩写在 `base` 里，浮层里的列表想要紧凑一档，
+ * 就只能去和 `base` 的 `px-3.5 py-2.5` 打架，而同属性类名相撞由 Tailwind 生成顺序决胜，不能赌。
+ */
 export const option = {
-  base: 'flex w-full cursor-pointer items-center gap-2.5 rounded-md border px-3.5 py-2.5 text-left transition-colors duration-220 ease-genso',
+  base: 'flex w-full cursor-pointer items-center gap-2.5 border text-left transition-colors duration-220 ease-genso',
+  /** 常规档：整行选项（账号选择这类"大点击目标"），参考稿 `.opt` 原规格 */
+  md: 'rounded-md px-3.5 py-2.5',
+  /**
+   * 紧凑档：**浮层里的列表**（条目表单的奖励类型 18 项）。常规档一行 40px，
+   * 200px 高的面板只放得下五行；这里 32px + 12px 字，同屏能看七行。
+   */
+  sm: 'h-8 rounded-sm px-3 text-sm',
   off: 'border-line bg-fill hover:bg-fill-2',
   on: 'border-line bg-fill-2 shadow-ring',
 } as const;

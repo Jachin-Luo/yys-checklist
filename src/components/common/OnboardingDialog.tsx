@@ -77,7 +77,7 @@ export default function OnboardingDialog() {
                       key={p.id}
                       type="button"
                       onClick={() => void switchProfile(p.id)}
-                      className={`${option.base} ${active ? option.on : option.off}`}
+                      className={`${option.base} ${option.md} ${active ? option.on : option.off}`}
                     >
                       <span className="min-w-0 flex-1 truncate text-lg text-ink">{p.name}</span>
                       <span className="text-sm text-ink-3">

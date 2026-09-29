@@ -566,7 +566,7 @@ export default function ItemForm({
                       onClick={() =>
                         set('kinds', on ? f.kinds.filter((x) => x !== k) : [...f.kinds, k])
                       }
-                      className={`${option.base} ${on ? option.on : option.off}`}
+                      className={`${option.base} ${option.sm} ${on ? option.on : option.off}`}
                     >
                       {/* 未选中行留一个空位（`opacity-0`）而不是不渲染：否则行文字会左右跳 */}
                       <Icon
