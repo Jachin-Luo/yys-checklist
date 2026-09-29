@@ -54,7 +54,7 @@ TypeScript 为严格模式（`tsconfig.app.json`），`npm run build` 会先跑 
 
 | # | 纪律 | 落点 |
 | --- | --- | --- |
-| 1 | 只统计固定数值（浮动收益不进分子分母） | `domain/stats.ts` `summarizeGain`（按 `gain` 过滤）、`PERIOD_META` |
+| 1 | 只统计固定数值（浮动收益不进分子分母） | `domain/stats.ts` `summarizeRangeGain`（按 `gain` 过滤；`PERIOD_META` 与周期口径 `summarizeGain` 已分别于 2026-09-28 / 09-29 删除，纪律不变） |
 | 2 | 覆盖 / 隐藏只影响渲染，绝不影响统计 | `domain/stats.ts`（不读 `coverMode`）、`hooks/useChecklist.ts`（`hiddenByCover` 只作用于列表）、`domain/autoDaily.ts` |
 | 3 | 统计不受列表筛选影响 | `pages/StatsPage.tsx` 直接吃原始 `checked`，不经过 `domain/sort.isVisible`（该函数按勾选状态过滤的口子与 `keepDone` 已于 2026-09-24 删除） |
 | 4 | 时间字段只提示，不限制勾选 | `domain/countdown.ts`；到期条目在数据层被 `domain/reset.activeItems` 过滤，不在渲染层判 |

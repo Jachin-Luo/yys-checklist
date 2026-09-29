@@ -3,7 +3,8 @@
  *
  * 三条口径纪律：
  *   1. **只统计固定数值**（`gain`）。浮动收益（只有 `gainKind`）不进分子分母 ——
- *      不能把"看打掉几个"当保底算（需求 F21）。
+ *      不能把"看打掉几个"当保底算（需求 F21）。（2026-09-29 周期口径删除后，本文件在跑的
+ *      实现只剩 `summarizeRangeGain`，纪律不变。）
  *   2. **被覆盖项照样计入**：`coverMode`（dim/hide）只决定列表怎么渲染，
  *      绝不参与本文件的计算，否则"隐藏 = 少算收益"，那是数据错误。
  *   3. **不受任何列表筛选影响**：本文件直接吃原始 `checked`，不经过 `domain/sort.isVisible`
@@ -14,90 +15,19 @@
  * 2026-09-15：原先末尾那条「漏失明细只列事实、不折算、不估算」（Q6）随 `missGroups` 一并删除 ——
  * 详见文件下半部分的说明。
  */
-import type { Gain, Item } from '../api/types';
+import type { Item } from '../api/types';
 import { eachDay, type LogDays } from './checkLog';
-import { stepView } from './steps';
-import type { Cycle } from './enums';
 
-export type StatPeriod = 'day' | 'week' | 'month';
-
-/**
- * 各统计口径覆盖的周期：本日 = 日常；本周 = 周常；本月 = 每月。
- *
- * 2026-09-28 收窄：此前本月口径还含 `version` / `season`，因为那两类有锚点（有周期起点，
- * "本周期完成了几成"才成立）。两者并入 `limited` 之后，`periodStartOf('limited')` 恒为 0 ——
- * **没有周期起点就没有"本期进度"**，硬塞进本月口径会算出一个没有分母含义的百分比，
- * 故不再计入（限时/版本活动的收益仍照旧进统计页的**区间收益**：那条路径按勾选日志算，与周期无关）。
- */
-const PERIOD_CYCLES: Record<StatPeriod, Cycle[]> = {
-  day: ['daily'],
-  week: ['weekly'],
-  month: ['monthly'],
-};
-
-export interface GainSummary {
-  got: number;
-  total: number;
-  left: number;
-  /** 完成百分比（0–100，整数） */
-  pct: number;
-}
-
-export interface GainReport {
-  jade: GainSummary;
-  blackFrag: GainSummary;
-  blueTicket: GainSummary;
-}
-/* 2026-09-28：原先的 `rows`（每个条目的收益明细行）**整块删除** —— 它算出了一份
-   明细，而统计页一次都没渲染过它，全库只有它自己的单测在断言（零消费，与 2026-09-11
-   删掉的 `entry` / `action` / `reward` 同一类）。删掉之后，"子步骤在明细里怎么排"
-   这个问题也就不存在了：统计只汇总三币种，不做逐条明细。 */
+/* 2026-09-29：**周期进度口径整块删除** —— `StatPeriod` / `PERIOD_CYCLES` / `periodItems` /
+   `summarizeGain` 与 `GainSummary` / `GainReport`（原本排在这里）。自 2026-09-15 统计页改版
+   起它就没有页面消费了（页面只剩"按日期区间"的收益这一条路径），全库只有它自己的单测在断言 ——
+   与 2026-09-28 删掉的 `GainRow` / `GainReport.rows` 同一类（"没有消费者的数据不留"）。
+   本文件现在只剩区间收益一条统计路径，纪律 ① 仍由它守住；纪律 ②③（被覆盖项照样计入 /
+   不受列表筛选影响）原本是靠"周期口径直接吃原始 `checked`"钉住的，而区间收益的数据源是
+   **勾选日志**、本就不经过任何筛选 —— 字面表述保留在文件头，但不再有专门用例（需要时从 git 取回）。 */
 
 /** 黑碎存在 0.5 这类小数，统一保留 1 位，避免 0.1+0.2 的浮点噪声 */
 const round1 = (n: number): number => Math.round(n * 10) / 10;
-
-/** 该统计口径下的条目（不限是否有固定收益） */
-export function periodItems(items: Item[], period: StatPeriod): Item[] {
-  const cycles = PERIOD_CYCLES[period];
-  return items.filter((it) => cycles.includes(it.cycle));
-}
-
-/** 固定收益汇总：三币种的「已得 / 总量 / 还差 / 完成度」 */
-export function summarizeGain(
-  items: Item[],
-  checked: Record<string, number>,
-  period: StatPeriod,
-): GainReport {
-  /* 统计吃的是"叶子"：有子步骤的父条目**自身不参与**（收益记在子步骤上），
-     否则「地域鬼王」这类 N 次任务整组的收益会凭空消失 —— 父条目常常没写 `gain`。
-     子步骤没写 `gain` 就继承父的（`stepView` 是"缺省继承父"的唯一实现处）。 */
-  const rows: { gain: Gain; done: boolean }[] = periodItems(items, period).flatMap((it) => {
-    if (!it.children?.length) {
-      return it.gain ? [{ gain: it.gain, done: checked[it.id] !== undefined }] : [];
-    }
-    return it.children
-      .map((_, i) => stepView(it, i))
-      .filter((v) => v.gain)
-      .map((v) => ({ gain: v.gain as Gain, done: checked[v.id] !== undefined }));
-  });
-
-  const summaryOf = (key: keyof Gain): GainSummary => {
-    const total = round1(rows.reduce((s, r) => s + (r.gain[key] || 0), 0));
-    const got = round1(rows.reduce((s, r) => s + (r.done ? r.gain[key] || 0 : 0), 0));
-    return {
-      got,
-      total,
-      left: round1(Math.max(total - got, 0)),
-      pct: total > 0 ? Math.round((got / total) * 100) : 0,
-    };
-  };
-
-  return {
-    jade: summaryOf('jade'),
-    blackFrag: summaryOf('blackFrag'),
-    blueTicket: summaryOf('blueTicket'),
-  };
-}
 
 /* 2026-09-15：原先的「漏失明细」整块（`MissLevel` / `MissItem` / `MissGroup` / `LEVEL_LABEL` / `missGroups`）
    已删除 —— 它按痛感分给漏掉的条目分级（高 / 中 / 低），是痛感在排序之外的第二个用途，
@@ -126,9 +56,8 @@ export interface RangeGain {
 /**
  * 按**日期区间**汇总固定收益（统计页的「近 7 天 / 近 30 天 / 某一天」）。
  *
- * 与 `summarizeGain` 的区别：那个按**周期**（本日 / 本周 / 本月）算"当前周期的完成进度"
- * （分子分母都限定在周期内，有"总量 / 还差"）；这个算"这段时间里实际拿到了多少" ——
- * 同一条目多天各勾一次就计多次（每日签到 7 天就是 7 份），因此没有总量与百分比。
+ * 算的是"这段时间里实际拿到了多少" —— 同一条目多天各勾一次就计多次（每日签到 7 天就是 7 份），
+ * 因此没有总量与百分比（"周期进度"口径已于 2026-09-29 删除，见文件上方说明）。
  *
  * 数据源是**勾选日志**（`CheckLog.days`）：`checked` 只留最近一次，回答不了区间问题。
  * 口径纪律不变：只统计 `gain` 里的固定数值，浮动收益不折算。

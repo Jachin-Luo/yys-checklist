@@ -162,7 +162,7 @@ src/domain/enums.ts 的字面量联合类型  ←── 双向校验 ──→  
 | `weight.ts` | `weightOf`、`cycleRank`、`WEIGHT_LEGEND` | 痛感分计算与图例 |
 | `sort.ts` | `SortContext`、`effectiveSortBy`、`seedOrder`、`moveBefore`、`moveAfter`、`moveWithinGroup`、`buildComparator`、`VisibilityContext`、`isVisible` | 排序、置顶、自定义顺序、可见性 |
 | `countdown.ts` | `parseTs`、`daysLeft`、`DeadlineLevel`、`DeadlineBadge`、`deadlineBadge`、`TimeWindowState`、`TimeWindow`、`timeWindow`、`appliesToday` | 截止倒计时与时间窗状态（**只提示，不限制勾选**） |
-| `stats.ts` | `StatPeriod`、`GainSummary` / `GainRow` / `GainReport`、`periodItems`、`summarizeGain`、`RangeGain` / `RangeDayGain`、`summarizeRangeGain`、`MissLevel` / `MissItem` / `MissGroup`、`missGroups`、`PERIOD_META` | 周期进度统计（本日 / 本周 / 本月，只吃 `gain`）、**按日期区间**的收益累计（统计页改版后由它承担）、漏失分级 |
+| `stats.ts` | `RangeGain` / `RangeDayGain`、`summarizeRangeGain`（**周期进度口径 `StatPeriod` / `GainSummary` / `GainReport` / `periodItems` / `summarizeGain` 已于 2026-09-29 删除**：自 2026-09-15 改版起无页面消费，只剩自己的单测） | **按日期区间**的收益累计（统计页改版后的唯一统计路径，只吃 `gain`） |
 | `checkLog.ts` | `LogDays`、`LOG_KEEP_DAYS`(90)、`dayKeyOf` / `dayKey` / `keyToTs` / `shiftDayKey`、`dayCount`、`addEntry`、`removeEntrySince` / `removeEntriesSince`、`pruneDays`、`eachDay` | 勾选日志（按日期分桶的历史）：幂等写入、按周期起点回退、90 天修剪、区间枚举 |
 | `calendar.ts` | `CalendarCell` / `MonthGrid`、`WEEKDAY_HEAD`、`monthTitle`、`buildMonthGrid` | 月历网格排版（周一起始、固定 6 行、含前后补位格） |
 | `autoDaily.ts` | `hubItem`、`isAutoDailyCandidate`、`dataDefaultAutoSet`、`effectiveAutoSet`、`isCovered`、`hiddenByCover`、`cascadeTargets`、`cascadeBatch` | 一键日常覆盖集合与级联 |
@@ -242,7 +242,7 @@ src/domain/enums.ts 的字面量联合类型  ←── 双向校验 ──→  
 - **上方日历**：`domain/calendar.buildMonthGrid` 排版 + `domain/checkLog.dayCount` 取每天条数，按**当月单日最大值**相对分 4 档着色（类贡献图）；
 - **下方区间收益**：`domain/stats.summarizeRangeGain(items, log, fromKey, toKey)` —— 输入是**勾选日志**而非 `checked`（后者只留最近一次，回答不了"近 7 天"），同一条目多天各完成一次就累计多次，因此没有"总量 / 已得 / 还差"。口径仍是只吃固定数值的 `gain`。
 
-保留但**当前无页面消费**：`summarizeGain`（周期进度口径，有单测保护；`AGENTS.md` 口径纪律里"只统计固定数值"一条正是它的规则）。**已删除的同批**：`PERIOD_META` / `missGroups`（2026-09-28）与 `components/common/GainBar.tsx` / `ProgressBar.tsx`（2026-09-29，连同只服务它的 `src/styles/tokens.ts`）—— "有单测保护、想恢复时只改页面"这个保留理由，在连续两轮里都没兑现，零件本身反而成了无人调用的形状。
+**已删除（无页面消费）**：周期进度口径 `summarizeGain` / `periodItems` / `StatPeriod` / `GainSummary` / `GainReport`（2026-09-29）、`PERIOD_META` / `missGroups`（2026-09-28）、`components/common/GainBar.tsx` / `ProgressBar.tsx` 与只服务它的 `src/styles/tokens.ts`（2026-09-29）—— "有单测保护、想恢复时只改页面"这个保留理由在连续两轮里都没兑现，零件本身反而成了无人调用的形状。`domain/stats` 只剩**按日期区间**的 `summarizeRangeGain` 一条路径，"只统计固定数值"的口径纪律不变（见 `AGENTS.md` 与 `docs/03` 的口径表）。
 
 ## 8. 数据录入流程（改数据的标准路径）
 

@@ -149,7 +149,7 @@ npm run dev          # http://localhost:5173/
 | --- | --- | --- |
 | 首屏一直骨架屏 / 停在 ErrorScreen | `hooks/useBootstrap.ts`、`stores/ui.ts` 的 `bootstrapLoading` / `bootstrapError` | Mock 失败注入（`?__fail=1`、`VITE_API_FAIL`）；契约方法抛错 |
 | 页面顶部出现「保存失败」提示 | `components/common/SaveErrorNotice.tsx`（聚合 5 处 `error`） | `localStorage` 配额 / 权限问题（`services/localStore.ts` 已转成可读文案）；写队列中的契约错误 |
-| 勾选了但统计页不变 | `domain/stats.ts` `summarizeGain` | 该条目没有固定数值 `gain` —— 这是口径，不是 bug |
+| 勾选了但统计页不变 | `domain/stats.ts` `summarizeRangeGain` | 该条目没有固定数值 `gain` —— 这是口径，不是 bug（周期进度口径已于 2026-09-29 删除，统计页只走区间收益） |
 | 勾选后条目仍在列表里 | （设计如此，非故障） | 「已完成」的表达是**沉下去但仍在**（`card-done` + 划朱线），另有独立「已完成」分区；不复存在"勾了就消失"的开关（`hideDone` 已于 2026-09-24 删除） |
 | 到了新的一天 / 新的一周，勾选没归零 | `hooks/usePeriodRefresh.ts`、`domain/reset.ts` | 前台未触发刷新（切到后台再回来会重估）；或条目自带 `until` 被 `activeItems` 过滤下线 |
 | 报 `E_FORBIDDEN` / 越权 | `api/mock/userStore.ts` `assertScope` | `DataScope` 传了空 `userId` / `profileId`，或账号未加载完成就发起写操作 |

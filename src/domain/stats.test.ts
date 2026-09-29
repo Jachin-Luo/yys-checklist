@@ -1,13 +1,15 @@
 /**
- * 统计单测。重点锁定三条口径纪律：
- *   ① 只统计固定数值（浮动收益不进分子分母）
- *   ② 被覆盖项照样计入（coverMode 不参与计算）
- *   ③ 不受任何列表筛选影响 —— 已勾条目的收益必须算进「已获得」，否则会归零
+ * 统计单测。重点锁定口径纪律①：只统计固定数值（浮动收益不进分子分母）。
  *
  * 2026-09-15：漏失明细（`missGroups`）与其用例已随「痛感只用于默认排序」删除。
+ * 2026-09-29：周期进度口径（`periodItems` / `summarizeGain`）连同它的 8 条用例删除 ——
+ * 它自 2026-09-15 起就没有页面消费，只剩自己的单测在断言。纪律 ②③（被覆盖项照样计入 /
+ * 不受列表筛选影响）的用例随之消失：它们原本是靠"周期口径直接吃原始 `checked`"钉住的，
+ * 而本文件剩下的区间收益数据源是**勾选日志**，本就不经过任何筛选 —— 没有可断言的通路了。
+ * 三条纪律的字面表述仍在 `stats.ts` 文件头。
  */
 import { describe, expect, it } from 'vitest';
-import { periodItems, summarizeGain, summarizeRangeGain } from './stats';
+import { summarizeRangeGain } from './stats';
 import type { Item } from '../api/types';
 
 const mk = (over: Partial<Item>): Item => ({
@@ -26,100 +28,6 @@ const ITEMS: Item[] = [
   /* 每月：25 黑碎（1 整颗黑蛋） */
   mk({ id: 'm_shop', name: '秘卷屋礼盒', cycle: 'monthly', gain: { blackFrag: 25 }, gainKind: ['blackDaruma'], deadline: '2026-10-06' }),
 ];
-
-describe('periodItems：统计口径的周期范围', () => {
-  it('本日 = 日常；本周 = 周常；本月 = 每月', () => {
-    expect(periodItems(ITEMS, 'day').map((i) => i.id)).toContain('d_card');
-    expect(periodItems(ITEMS, 'day').map((i) => i.id)).not.toContain('w_medal');
-    expect(periodItems(ITEMS, 'week').map((i) => i.id)).toEqual(['w_medal']);
-    expect(periodItems(ITEMS, 'month').map((i) => i.id)).toEqual(['m_shop']);
-  });
-
-  it('限时（含并入的版本 / 赛季活动）不进任何周期口径 —— 没有周期起点就没有"本期进度"', () => {
-    const lim = mk({ id: 'l_event', name: '当期活动', cycle: 'limited', gain: { jade: 5 } });
-    const all = [...ITEMS, lim];
-    for (const p of ['day', 'week', 'month'] as const) {
-      expect(periodItems(all, p).map((i) => i.id)).not.toContain('l_event');
-    }
-  });
-});
-
-describe('summarizeGain：固定收益汇总', () => {
-  it('只统计有 gain 的条目；浮动收益条目不进分母', () => {
-    const r = summarizeGain(ITEMS, {}, 'day');
-    expect(r.jade.total).toBe(20);
-    expect(r.blackFrag.total).toBe(0.5);
-    expect(r.jade.got).toBe(0);
-    expect(r.jade.left).toBe(20);
-    expect(r.jade.pct).toBe(0);
-  });
-
-  it('已勾条目计入「已获得」（不吃任何列表筛选）', () => {
-    const r = summarizeGain(ITEMS, { d_card: Date.now() }, 'day');
-    expect(r.jade.got).toBe(20);
-    expect(r.jade.left).toBe(0);
-    expect(r.jade.pct).toBe(100);
-    /* 未勾的黑碎仍算在分母里 */
-    expect(r.blackFrag.total).toBe(0.5);
-    expect(r.blackFrag.got).toBe(0);
-  });
-
-  it('黑碎小数聚合无浮点噪声', () => {
-    const extra = mk({ id: 'm_shop2', name: '另一黑蛋', cycle: 'monthly', gain: { blackFrag: 25 }, gainKind: ['blackDaruma'] });
-    const r = summarizeGain([...ITEMS, extra], { m_shop: Date.now(), m_shop2: Date.now() }, 'month');
-    expect(r.blackFrag.total).toBe(50);
-    expect(r.blackFrag.got).toBe(50);
-    expect(r.blackFrag.pct).toBe(100);
-  });
-
-  it('被一键日常覆盖的条目照样计入 —— coverMode 不参与计算', () => {
-    const covered = { d_daruma: Date.now() };
-    const r = summarizeGain(ITEMS, covered, 'day');
-    /* d_daruma 在覆盖集合里（autoDaily），但收益必须照常计入 */
-    expect(r.blackFrag.total).toBe(0.5);
-    expect(r.blackFrag.got).toBe(0.5);
-  });
-
-  it('总量为 0 时百分比为 0（不产生 NaN）', () => {
-    const r = summarizeGain([mk({ id: 'only_kind', gainKind: ['jade'] })], {}, 'day');
-    expect(r.jade).toEqual({ got: 0, total: 0, left: 0, pct: 0 });
-  });
-});
-
-describe('summarizeGain：子组（N 次任务）统计口径', () => {
-  const demon: Item = mk({
-    id: 'demon',
-    name: '地域鬼王',
-    gain: { jade: 20 },
-    gainKind: ['jade'],
-    children: [{ id: 'demon_1' }, { id: 'demon_2' }, { id: 'demon_3' }],
-  });
-
-  it('按步计收益 —— 父条目自己不再进统计，三步就是三份', () => {
-    const r = summarizeGain([demon], {}, 'day');
-    expect(r.jade.total).toBe(60);
-    expect(r.jade.got).toBe(0);
-  });
-
-  it('勾一步算一步的收益（做了一半只拿一半）', () => {
-    const r = summarizeGain([demon], { demon_1: Date.now() }, 'day');
-    expect(r.jade.got).toBe(20);
-    expect(r.jade.left).toBe(40);
-    expect(r.jade.pct).toBe(33);
-  });
-
-  it('子步骤覆盖了收益时各算各的', () => {
-    const mixed: Item = mk({
-      id: 'mixed',
-      gain: { jade: 10 },
-      gainKind: ['jade'],
-      children: [{ id: 'mixed_1' }, { id: 'mixed_2', gain: { jade: 30 } }],
-    });
-    const r = summarizeGain([mixed], { mixed_1: Date.now(), mixed_2: Date.now() }, 'day');
-    expect(r.jade.total).toBe(40);
-    expect(r.jade.got).toBe(40);
-  });
-});
 
 describe('summarizeRangeGain：按日期区间的收益（统计页改版 2026-09-15）', () => {
   it('同一条目多天各勾一次就累计多次（每日签到 7 天 = 7 份）', () => {

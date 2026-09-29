@@ -58,7 +58,7 @@ Mock 的分片键由 `src/api/mock/persist.ts` 封装（`KEY` / `removeProfileSh
 
 | 纪律 | 含义 | 落点 |
 | --- | --- | --- |
-| 只统计固定数值 | 浮动收益（只有类型没有数值）不进分子分母 | `domain/stats.ts` `summarizeGain` |
+| 只统计固定数值 | 浮动收益（只有类型没有数值）不进分子分母 | `domain/stats.ts` `summarizeRangeGain`（周期进度口径 `summarizeGain` 已于 2026-09-29 删除） |
 | 覆盖 / 隐藏只影响渲染 | 绝不影响统计口径 | `domain/stats.ts`、`hooks/useChecklist.ts` |
 | 统计不受列表筛选影响 | 统计直接吃原始勾选状态，不经过 `isVisible` | `pages/StatsPage.tsx` |
 | 时间只提示不限制勾选 | 到期条目在**数据层**过滤，不在渲染层判 | `domain/reset.ts` `activeItems`、`domain/countdown.ts` |
