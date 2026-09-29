@@ -120,27 +120,32 @@ writeFile('reports/calibration.md', [
 ].join('\n'));
 
 /* ---------- ⑤ 新版本录入门架 ---------- */
+/* 2026-09-29 修：这份模板曾是 `cycle: 'version'` + `id: version_xxx_yyy`（版本周期还在时写的），
+   周期合并后照抄会得到一个非法/无家可归的条目；`gain: { jade: 0 }` 与 `time: '00:00'` /
+   `timeEnd: '00:00'` 也都会被 `db:check` 直接判错（gain 三项全 0；timeEnd 不晚于 time）。
+   现值是"复制即可通过校验"的形状，逐项含义见 `docs/06-limited-intake.md`。 */
 const templateItem = {
-  id: 'version_xxx_yyy',
+  id: 'ltd_xxx_yyy',
   name: '（新条目名，2–24 字）',
-  cycle: 'version',
+  cycle: 'limited',
   path: '（入口路径，≤40 字）',
   gainKind: ['jade', 'other'],
-  gain: { jade: 0 },
-  gainNote: '（口径说明，≤40 字；浮动收益写「不计入」）',
+  gainNote: '（口径说明，≤40 字；浮动收益写「不计入固定收益」）',
   condition: '（触发条件，可选）',
-  time: '00:00',
-  timeEnd: '00:00',
+  time: '20:00',
+  timeEnd: '21:00',
   start: '2026-09-09',
   deadline: '2026-10-06 23:59',
   until: '2026-10-07',
-  note: '（提醒备注，≤60 字）',
+  note: '（提醒备注，≤60 字；只写玩家可见的事实）',
   origin: 'preset',
 };
 writeFile('tools/templates/version-intake.md', [
   '# 新版本条目录入门架（K6 / S1.5 ⑤）',
   '',
   '版本更新时按此流程录入，**目标是「宁可少而准，不要多而错」**。',
+  '',
+  '> 完整规范（字段逐个说明、收益口径、子步骤写法、踩过的坑）见 `docs/06-limited-intake.md`。',
   '',
   '## 0. 前置',
   '',

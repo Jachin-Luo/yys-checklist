@@ -534,26 +534,54 @@
       "origin": "preset"
     },
     {
-      "id": "weekly_honor_shop",
-      "name": "荣誉商店兑换",
+      "id": "weekly_honor_frag",
+      "name": "荣誉商店·黑碎（5400）",
       "cycle": "weekly",
       "path": "商店 → 荣誉商店",
       "gainKind": [
-        "blackFrag",
+        "blackFrag"
+      ],
+      "gain": {
+        "blackFrag": 1
+      },
+      "gainNote": "540 荣誉 = 1 片，每周可换 2 片",
+      "children": [
+        {
+          "id": "weekly_honor_frag_1"
+        },
+        {
+          "id": "weekly_honor_frag_2"
+        }
+      ],
+      "origin": "preset"
+    },
+    {
+      "id": "weekly_honor_ticket",
+      "name": "荣誉商店·蓝票（1500）",
+      "cycle": "weekly",
+      "path": "商店 → 荣誉商店",
+      "gainKind": [
         "blueTicket"
       ],
       "gain": {
-        "blackFrag": 2,
-        "blueTicket": 2
+        "blueTicket": 1
       },
-      "gainNote": "固定 2 黑碎 + 1500 荣誉=1 蓝票（每周 2 张）；540 荣誉=1 黑碎（每周 2 片）",
+      "gainNote": "1500 荣誉 = 1 张，每周可换 2 张",
+      "children": [
+        {
+          "id": "weekly_honor_ticket_1"
+        },
+        {
+          "id": "weekly_honor_ticket_2"
+        }
+      ],
       "origin": "preset"
     },
     {
       "id": "weekly_medal_blue",
       "name": "勋章商店·蓝票(180)",
       "cycle": "weekly",
-      "path": "商店 → 勋章商店",
+      "path": "商店 → 杂货铺 → 勋章商店",
       "gainKind": [
         "blueTicket"
       ],
@@ -568,7 +596,7 @@
       "id": "weekly_medal_black",
       "name": "勋章商店·黑蛋(480)",
       "cycle": "weekly",
-      "path": "商店 → 勋章商店",
+      "path": "商店 → 杂货铺 → 勋章商店",
       "gainKind": [
         "blackFrag"
       ],
@@ -580,18 +608,49 @@
       "origin": "preset"
     },
     {
-      "id": "weekly_guild_medal_shop",
-      "name": "寮功勋商店兑换",
+      "id": "weekly_guild_medal_ticket",
+      "name": "寮功勋商店·蓝票",
       "cycle": "weekly",
       "path": "阴阳寮 → 功勋商店",
       "gainKind": [
         "blueTicket"
       ],
       "gain": {
-        "blueTicket": 2
+        "blueTicket": 1
       },
-      "gainNote": "蓝票 ×2·随寮等级",
-      "note": "4 级寮 240 功勋 = 2 蓝票；5 级寮 200 功勋 = 3–5 黑碎；6 级寮 50 功勋 = 皮肤券（NGA 口径）",
+      "gainNote": "4 级寮 240 功勋 = 1 张，每周可换 2 张",
+      "children": [
+        {
+          "id": "weekly_guild_medal_ticket_1"
+        },
+        {
+          "id": "weekly_guild_medal_ticket_2"
+        }
+      ],
+      "origin": "preset"
+    },
+    {
+      "id": "weekly_guild_medal_frag",
+      "name": "寮功勋商店·黑碎",
+      "cycle": "weekly",
+      "path": "阴阳寮 → 功勋商店",
+      "gainKind": [
+        "blackFrag"
+      ],
+      "gainNote": "5 级寮 200 功勋 = 3–5 片（区间，不计入固定收益）",
+
+      "origin": "preset"
+    },
+    {
+      "id": "weekly_guild_medal_skin",
+      "name": "寮功勋商店·皮肤券",
+      "cycle": "weekly",
+      "path": "阴阳寮 → 功勋商店",
+      "gainKind": [
+        "skinTicket"
+      ],
+      "gainNote": "6 级寮 50 功勋 = 皮肤券（不计入固定收益）",
+      
       "origin": "preset"
     },
     {
@@ -667,9 +726,8 @@
       "cycle": "weekly",
       "path": "探索 → 秘闻副本",
       "gainKind": [
-        "skin",
         "jade",
-        "daruma"
+        "gold"
       ],
       "note": "十层首通给皮肤、约 375 勾；打前记得开金币加成",
       "origin": "preset"
@@ -702,7 +760,7 @@
         "jade": 20
       },
       "gainNote": "每周首次分享20勾",
-      "note": "每周只有一次，别按每天算（v3 曾误迁到 daily，已订正）",
+      "note": "每周只有一次",
       "origin": "preset"
     },
     {
@@ -759,18 +817,6 @@
       "path": "商店 → 秘卷屋",
       "gainKind": [
         "soul"
-      ],
-      "origin": "preset"
-    },
-    {
-      "id": "weekly_zahuo",
-      "name": "杂货铺兑换",
-      "cycle": "weekly",
-      "path": "商店 → 杂货铺",
-      "gainKind": [
-        "blueTicket",
-        "blackFrag",
-        "stamina"
       ],
       "origin": "preset"
     },
@@ -832,17 +878,6 @@
       "origin": "preset"
     },
     {
-      "id": "weekly_yingjie",
-      "name": "英杰试炼（兵藏/梦墟秘境）",
-      "cycle": "weekly",
-      "path": "探索 → 英杰试炼",
-      "gainKind": [
-        "soul",
-        "daruma"
-      ],
-      "origin": "preset"
-    },
-    {
       "id": "weekly_sakura",
       "name": "樱灯饰(周上限7000)",
       "cycle": "weekly",
@@ -880,20 +915,6 @@
       "origin": "preset"
     },
     {
-      "id": "weekly_huntun_500",
-      "name": "周五魂土500次",
-      "cycle": "weekly",
-      "days": [
-        5
-      ],
-      "path": "探索 → 御魂副本(周五)",
-      "gainKind": [
-        "soul"
-      ],
-      "condition": "体力充足时",
-      "origin": "preset"
-    },
-    {
       "id": "weekly_yingling_skill",
       "name": "英灵技能本（源赖光/藤原）",
       "cycle": "weekly",
@@ -912,8 +933,7 @@
       "path": "活动页 → 花合战 → 花札手册",
       "gainKind": [
         "skin",
-        "blueTicket",
-        "other"
+        "blueTicket"
       ],
       "gainNote": "免费档无固定勾玉蓝票；墨染花札满级1黑蛋",
       "note": "每月一期过期作废；21级起礼盒三选一（勾玉20/黑碎1等）",
@@ -926,8 +946,7 @@
       "path": "礼包屋 → 月运势礼包",
       "gainKind": [
         "jade",
-        "blueTicket",
-        "other"
+        "blueTicket"
       ],
       "gainNote": "付费项，不计入",
       "premium": true,

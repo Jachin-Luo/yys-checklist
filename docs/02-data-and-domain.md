@@ -107,8 +107,8 @@ VITE_API_MODE === 'http' ? new HttpApi(baseURL) : new MockApi()
 
 | 文件 | 顶层 key | 规模 |
 | --- | --- | --- |
-| `items.db.json` | `items: Item[]` | **73 条**真正的常驻（每日 38 / 每周 31 / 每月 4） |
-| `limited.db.json` | `items: Item[]` | **34 条**非常驻（活动期每日 4 / 限时活动 30 —— 含 2026-09-28 并入的版本 / 赛季活动 6 条；带 `until` 的到期自动下线） |
+| `items.db.json` | `items: Item[]` | **66 条**真正的常驻（每日 33 / 每周 29 / 每月 4） |
+| `limited.db.json` | `items: Item[]` | **21 条**非常驻（全部 `cycle: limited`，含 2026-09-28 并入的版本 / 赛季活动；带 `until` 的到期自动下线）。**录入规范见 `06`** |
 | `yuhun.db.json` | `dungeons[]`、`dayTips[]`、`excluded[]` | 副本 **11**、日提示 **10**、排除项 **8** |
 | `souls.db.json` | `rows: SoulRow[]` | **70** 种御魂（`effect2` 70 条；`effect4` 57 条，13 种首领御魂无四件套） |
 | `bounty.db.json` | `shikigami[]`、`spots[]`、`shikigamiSpots[]`、`shikigamiClues[]` | 式神 **39**、地点 **64**、出处关系 **148**、线索词 **116** |
@@ -116,7 +116,7 @@ VITE_API_MODE === 'http' ? new HttpApi(baseURL) : new MockApi()
 | `users.db.json` | `users`、`profiles`、`states`、`viewPrefs`、`itemOverrides`、`sessions` | 各 1 条（`u_local` / `p_main`） |
 | `dataVersion.db.json` | `versions[]`：`db` / `version` / `updated`（可选 `snapshot` / `checksum`） | **7** 条（对应 meta / items / limited / yuhun / bounty / souls / users） |
 
-常驻 + 活动总计 **107 条**条目。
+常驻 + 活动总计 **87 条**条目（改动数据后以 `npm run db:check` 的输出为准 —— 这两份库随活动增删）。
 
 `meta` 关键字段：`version`（应用版本，如 `1.4.0`）、`dataVersion`（如 `2026.09.28-周期收口为四类`）、`resetHour`（= 0）。
 （`periods` 版本 / 赛季锚点已于 2026-09-28 随周期合并删除，见 §7.1。）

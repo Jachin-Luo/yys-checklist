@@ -9,7 +9,7 @@
  *   - **空白字符串一律归 `undefined`**：表单里的空输入框给的是 `''`，直接落库会在 JSON 里
  *     留下一串 `""`，而 `it.note ? …` 这类判断又会把 `''` 当"没填" —— 两份事实必然漂移。
  *   - **`gain` 只留三币种里大于 0 的有限数**：`0` 的语义是"没有这个收益"，与缺省同义；
- *     留着会让 `GainBadges` 渲染出 "+0"。
+ *     留着会让 `RewardBadges` 渲染出 "+0"。
  */
 import type { Gain, Item, ItemDraft, SubItem } from '../api/types';
 import { GAIN_CURRENCY } from './enums';
@@ -75,7 +75,7 @@ export function applyDraft(draft: ItemDraft): Omit<Item, 'id' | 'origin'> {
     note: opt(draft.note),
     gainNote: opt(draft.gainNote),
     /* 空的 gainKind 归 undefined 而不是留 `[]`：`[]` 与"没有奖励类型"在数据上是两回事，
-       而所有消费者（`KindBadges` 的 `kinds.length`、筛选的 `includes`）都只认后者 */
+       而所有消费者（`RewardBadges` 的 `kinds.length`、筛选的 `includes`）都只认后者 */
     gainKind: draft.gainKind.length ? [...draft.gainKind] : undefined,
     gain: cleanGain(draft.gain),
     /* 空（没有 / 空数组）= 单条条目（不留 `[]`：`isGroup` 只看长度，留空数组等于给自己埋一个

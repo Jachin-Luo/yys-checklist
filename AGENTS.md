@@ -137,8 +137,16 @@ node tools/verify.js      # 一键验收：tsc + eslint + vitest + build + db:ch
 | `src/db/*.db.json`、`src/domain/enums.ts` | `npm run db:check` |
 | `src/domain/**`、`src/stores/**`、`src/api/**` | `npm test`（必要时补测试） |
 | 页面 / 组件 | `npm run lint` + `npm run build` |
+| 视觉 / 布局改动 | 见下表后的「AI 助手注意」—— **不要靠开浏览器截图** |
 | 任何会进产物的改动（源码 / 数据 / 样式） | 提交前跑 `npm run build` 并把 **`dist/` 一起提交**（它随发布入库，漏了就是"线上 index.html 指向不存在的文件"） |
 | 准备提交前 | `node tools/verify.js` |
+
+> **AI 助手注意（2026-09-29）**：视觉 / 布局改动的自检**不要开浏览器截图** —— 本机
+> `agent-browser` / Chromium 冷启动会卡住（用户要等着），而且截图**并不是当前会话模型能真正
+> 解析的输入**，"我截图看过了"不构成证据。请改用可复算的手段：
+> ① **类串静态核对** —— 例如"第一排是否共用同一个 `h-5` / `leading-5` 基准""手调 `mt` 是否已清零"；
+> ② **按令牌与配方数值算** —— 对比度用色值算（如 `--c-jade` 的 5.66:1）、尺寸用间距阶算，不靠目测；
+> ③ 观感类问题（间距舒不舒服、层级清不清楚）**直接说"需要你看一眼"**，不要用截图冒充验证。
 
 ---
 
@@ -151,5 +159,7 @@ node tools/verify.js      # 一键验收：tsc + eslint + vitest + build + db:ch
 | `docs/02-data-and-domain.md` | 数据契约、Mock 适配器与分片持久化、8 个 db.json 结构与规模、16 个 domain 模块导出表、特殊机制（一键日常 / 卡片显示 / 寮时间 / 备份 / 寄养 / 账号同步 / 御魂 / 悬赏） |
 | `docs/03-conventions-and-tests.md` | 分层约束的强制手段、口径纪律逐条落点、测试体系与写法、数据录入流程、工具脚本、常见坑 |
 | `docs/04-handover-guide.md` | 环境准备、6 类改动任务手册、未完成项与路线图、问题排查、「不要这样做」清单 |
+| `docs/05-icon-inventory.md` | 图标槽位清单（重设计底稿）：36 枚符号的语义、名不副实的三处系统性诊断、重设计分组与两种改动口径 |
+| `docs/06-limited-intake.md` | **限时条目录入规范**：一条数据怎么进 `limited.db.json`（字段表、收益口径、子步骤、时间三兄弟与归档）、录入七步、强制校验 vs 约定的速查、踩过的坑 |
 
 面向玩家的功能说明、FAQ、数据说明与免责在根目录 `README.md`；本文件与 `docs/` 只讲开发所需的事实，不重复玩家向内容。

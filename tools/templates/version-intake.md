@@ -2,6 +2,8 @@
 
 版本更新时按此流程录入，**目标是「宁可少而准，不要多而错」**。
 
+> 完整规范（字段逐个说明、收益口径、子步骤写法、踩过的坑）见 `docs/06-limited-intake.md`。
+
 ## 0. 前置
 
 1. 更新 `src/db/limited.db.json` 里当期版本的条目（2026-09-28 起版本活动与限时活动同属 `limited`，没有单独的版本周期）；
@@ -25,25 +27,22 @@
 
 ```jsonc
 {
-  "id": "version_xxx_yyy",
+  "id": "ltd_xxx_yyy",
   "name": "（新条目名，2–24 字）",
-  "cycle": "version",
+  "cycle": "limited",
   "path": "（入口路径，≤40 字）",
   "gainKind": [
     "jade",
     "other"
   ],
-  "gain": {
-    "jade": 0
-  },
-  "gainNote": "（口径说明，≤40 字；浮动收益写「不计入」）",
+  "gainNote": "（口径说明，≤40 字；浮动收益写「不计入固定收益」）",
   "condition": "（触发条件，可选）",
-  "time": "00:00",
-  "timeEnd": "00:00",
+  "time": "20:00",
+  "timeEnd": "21:00",
   "start": "2026-09-09",
   "deadline": "2026-10-06 23:59",
   "until": "2026-10-07",
-  "note": "（提醒备注，≤60 字）",
+  "note": "（提醒备注，≤60 字；只写玩家可见的事实）",
   "origin": "preset"
 }
 ```

@@ -9,7 +9,7 @@ import { dictIndexOf, useItemStore } from '../../stores/items';
 import { useUiStore } from '../../stores/ui';
 import { useViewStore } from '../../stores/view';
 import CheckBox from './CheckBox';
-import { CoveredTag, GainBadges, KindBadges, PremiumTag } from './GainBadges';
+import { CoveredTag, PremiumTag, RewardBadges } from './RewardBadges';
 import { Field, FieldBlock } from './ItemField';
 import { DeadlineTag, TimeTag } from './Tags';
 import Icon, { type IconName } from '../icons/Icon';
@@ -164,7 +164,7 @@ function ChecklistItem({
       className={[
         /* 账目行（册页稿 `.entry`）：不再是卡 —— 行直接铺在册页上，行间分隔线由
            `CHECKLIST_GRID` 容器给（每行 `border-t`、首行豁免），hover 铺填充底 */
-        'group no-press-select relative flex cursor-pointer items-start gap-2.5 rounded-sm border-t border-line-soft px-3 py-2.5 transition-colors duration-150 ease-genso first:border-t-0',
+        'group no-press-select relative flex cursor-pointer items-start gap-1.5 rounded-sm border-t border-line-soft px-3 py-2.5 transition-colors duration-150 ease-genso first:border-t-0',
         checked ? 'bg-card-done' : 'hover:bg-fill',
         isHighlight ? 'bg-gold-soft ring-1 ring-gold-line' : '',
         pressing ? 'scale-[0.985]' : '',
@@ -205,31 +205,43 @@ function ChecklistItem({
         />
       </span>
 
-      <CheckBox
-        checked={checked}
-        onToggle={() => {
-          if (swallowClick()) return;
-          handleToggle();
-        }}
-        label={`${checked ? '取消完成' : '标记完成'}：${item.name}`}
-      />
+      {/* ⚠️ 第一排的对齐基准：**框高 20px、内容在框内居中**（2026-09-29 用户第三次提"没对齐"）。
+          菱形 18px / 周期符 17px / 标题首行 / 行内标签 h-5 / 置顶按钮，高度天生各不相同 ——
+          只靠"顶对齐 + 各自居中"时中线会各落一处（9 / 8.5 / 8.94px，标题一换行、字号一动继续漂），
+          这也是之前那个 `mt-0.5` 想手调却调错位的地方。
+          现在统一：外框 `h-5`、标题行高 `leading-5`、置顶按钮 `h-5`，**五件的中线都在 10px**。
+          ⚠️ 基准值就是 `h-5` / `leading-5` —— 改一处必须同时改这几处，别再用手调 `mt` 去凑。
+          横向间距另有一档：外层容器的 `gap-1.5`（6px，2026-09-29 由 10px 收到 6px ——
+          符号框 20px 里墨迹只有 17~18px，再叠 10px 空隙，"菱形 / 图标 / 名称"之间就空得发散了）。
+          `gap` 只作用在左侧这三件：body 是 `flex-1`，它与右侧置顶按钮的距离不受影响。
+          三张卡同口径（`ChecklistGroupCard` 与 `HubCard` 的 `gap-x`）*/}
+      <span className="flex h-5 flex-none items-center">
+        <CheckBox
+          checked={checked}
+          onToggle={() => {
+            if (swallowClick()) return;
+            handleToggle();
+          }}
+          label={`${checked ? '取消完成' : '标记完成'}：${item.name}`}
+        />
+      </span>
 
       {/* 周期符独占一列（参考稿 `.entry .glyph` 的站位）：标题与其下所有行都从 body
-          左缘起 —— 之前它挤在标题行里，标题被顶右、下面的行缩回去，正是"没对齐"的来源。
-          ⚠️ **不要给它加 mt**：行首三件（菱形 18px / 图标 17px / 标题首行 ~17.9px）都是
-          `items-start` 顶对齐，各自在自身框内居中 —— 三者中线分别落在 9 / 8.5 / 8.94px，
-          已在半像素内。此前那个 `mt-0.5` 把图标中线推到 10.5px，与另两件错开 1.5px */}
-      <Icon
-        name={CYCLE_ICON[item.cycle]}
-        size={17}
-        /* 已完成侧 `text-ink-3` / 未完成侧 `text-gold-hi` —— 调色口径见文件头换肤一节 */
-        className={`flex-none ${checked ? 'text-ink-3' : 'text-gold-hi'}`}
-      />
+          左缘起 —— 之前它挤在标题行里，标题被顶右、下面的行缩回去，正是"没对齐"的来源 */}
+      <span className="flex h-5 flex-none items-center">
+        <Icon
+          name={CYCLE_ICON[item.cycle]}
+          size={17}
+          /* 已完成侧 `text-ink-3` / 未完成侧 `text-gold-hi` —— 调色口径见文件头换肤一节 */
+          className={`flex-none ${checked ? 'text-ink-3' : 'text-gold-hi'}`}
+        />
+      </span>
 
       <div className="min-w-0 flex-1">
         {/* `break-words` 给超长不可断串兜底：名称里塞英文串 / UID 时，双列每列只有 ~390px */}
         <h3
-            className={`flex min-w-0 flex-wrap items-center gap-1.5 break-words text-base font-semibold leading-snug tracking-card ${
+            /* `leading-5`（20px）是第一排的对齐基准，与左右两件的外框 `h-5` 同高 —— 见菱形那处的说明 */
+            className={`flex min-h-5 min-w-0 flex-wrap items-center gap-1.5 break-words text-base font-semibold leading-5 tracking-card ${
               /* 已完成**任务名**同样提到 `ink-3`：它才是读者最需要看清的那行字，
                  裸 `ink-4` 在卡片上只有 3.56（暗版 3.14）。划线 + 卡底色已足够表达"已完成" */
               checked ? 'text-ink-3 line-through decoration-crimson decoration-1' : 'text-ink'
@@ -249,14 +261,16 @@ function ChecklistItem({
             {card.tags ? <TimeTag item={item} /> : null}
         </h3>
 
-        {/* 收益徽章：移动端留在正文流；桌面端挪到下面的右列（`.pay`） */}
+        {/* 收益徽章（2026-09-29 起固定与浮动合成一串、不再有前导文字）：
+            移动端留在正文流；桌面端挪到下面的右列（`.pay`）。
+            两个显示开关注入的是 `undefined`，各自仍然有效 */}
         {!payColumn ? (
-          <>
-            {card.gain ? <GainBadges gain={item.gain} note={item.gainNote} /> : null}
-            {card.kinds ? (
-              <KindBadges kinds={item.gainKind} gain={item.gain} labels={labelMap} />
-            ) : null}
-          </>
+          <RewardBadges
+            gain={card.gain ? item.gain : undefined}
+            kinds={card.kinds ? item.gainKind : undefined}
+            labels={labelMap}
+            note={item.gainNote}
+          />
         ) : null}
 
         {/* 这三行是卡片高度的主要来源，也是「只想打卡」时最不需要的内容 —— 逐项可关。
@@ -270,14 +284,17 @@ function ChecklistItem({
         ) : null}
       </div>
 
-      {/* 桌面右列（册页稿 `.entry .pay`）：标签在上、徽章右对齐 ——
-          不占正文宽度，说明文字不再因为徽章换行而提前折行 */}
+      {/* 桌面右列（册页稿 `.entry .pay`）：整串徽章右对齐 —— 不占正文宽度，
+          说明文字不再因为徽章换行而提前折行 */}
       {payColumn ? (
         <div className="flex-none">
-          {card.gain ? <GainBadges gain={item.gain} note={item.gainNote} column /> : null}
-          {card.kinds ? (
-            <KindBadges kinds={item.gainKind} gain={item.gain} labels={labelMap} column />
-          ) : null}
+          <RewardBadges
+            gain={card.gain ? item.gain : undefined}
+            kinds={card.kinds ? item.gainKind : undefined}
+            labels={labelMap}
+            note={item.gainNote}
+            column
+          />
         </div>
       ) : null}
 
@@ -291,7 +308,8 @@ function ChecklistItem({
           e.stopPropagation();
           void togglePin(item.id);
         }}
-        className={`mt-0.5 flex-none cursor-pointer rounded-full p-1 transition-colors duration-150 ease-genso hover:bg-fill ${
+        /* `h-5` + `items-center`：星标中线与第一排其余元素同为 10px（不再用 `mt-0.5` 手调） */
+        className={`flex h-5 flex-none cursor-pointer items-center rounded-full px-1 transition-colors duration-150 ease-genso hover:bg-fill ${
           pinned ? 'text-gold-hi' : 'text-ink-4 hover:text-gold-hi'
         }`}
       >

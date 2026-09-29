@@ -23,7 +23,7 @@ import Icon, { type IconName } from '../icons/Icon';
  *
  * > **原先这里还有第四类「奖励」**，2026-09-11 随 `Item.reward` 字段一起删除 ——
  * > 那行渲染的是自由文本奖励描述，与 `gainKind` 徽章信息重叠。奖励信息现在完全由
- * > `GainBadges` / `KindBadges` 两组徽章承担。
+ * > `RewardBadges` 那一串徽章承担。
  *
  * ## 无障碍：中文标签没有消失，只是藏起来了
  *

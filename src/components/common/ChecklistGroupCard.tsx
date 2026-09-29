@@ -8,7 +8,7 @@ import { useCheckStore } from '../../stores/check';
 import { dictIndexOf, useItemStore } from '../../stores/items';
 import { useUiStore } from '../../stores/ui';
 import { useViewStore } from '../../stores/view';
-import { CoveredTag, GainBadges, KindBadges, PremiumTag } from './GainBadges';
+import { CoveredTag, PremiumTag, RewardBadges } from './RewardBadges';
 import { Field, FieldBlock } from './ItemField';
 import { DeadlineTag, TimeTag } from './Tags';
 import Icon, { type IconName } from '../icons/Icon';
@@ -157,7 +157,7 @@ function ChecklistGroupCard({
       className={[
         /* 账目行（册页稿 `.entry`）：与单条行同构；进度不再画底轨 —— 标题行里的
            菱形进度格 + `cur/total` 已经把"走到第几步"说清了 */
-        'group no-press-select relative flex cursor-pointer items-start gap-2.5 rounded-sm border-t border-line-soft px-3 py-2.5 transition-colors duration-150 ease-genso first:border-t-0',
+        'group no-press-select relative flex cursor-pointer items-start gap-1.5 rounded-sm border-t border-line-soft px-3 py-2.5 transition-colors duration-150 ease-genso first:border-t-0',
         done ? 'bg-card-done' : 'hover:bg-fill',
         isHighlight ? 'bg-gold-soft ring-1 ring-gold-line' : '',
         pressing ? 'scale-[0.985]' : '',
@@ -188,37 +188,44 @@ function ChecklistGroupCard({
         />
       </span>
 
-      {/* 推进器：语义控件仍是 button（可聚焦、可键盘操作），点它 = 推进一步 */}
-      <button
-        type="button"
-        aria-label={`${done ? '取消完成' : `推进到第 ${cur + 1} 步`}：${item.name}`}
-        aria-pressed={done}
-        onClick={(e) => {
-          e.stopPropagation();
-          if (swallowClick()) return;
-          onMain();
-        }}
-        className="group/dia flex h-4.5 w-4.5 flex-none cursor-pointer items-center justify-center"
-      >
-        <i
-          className={`flex h-3 w-3 rotate-45 items-center justify-center border transition-colors duration-220 ease-genso ${mark} group-hover/dia:bg-crimson/15`}
+      {/* 推进器：语义控件仍是 button（可聚焦、可键盘操作），点它 = 推进一步。
+          与单条卡的菱形同规格：**20px 外框内居中**（第一排对齐基准） */}
+      <span className="flex h-5 flex-none items-center">
+        <button
+          type="button"
+          aria-label={`${done ? '取消完成' : `推进到第 ${cur + 1} 步`}：${item.name}`}
+          aria-pressed={done}
+          onClick={(e) => {
+            e.stopPropagation();
+            if (swallowClick()) return;
+            onMain();
+          }}
+          className="group/dia flex h-4.5 w-4.5 flex-none cursor-pointer items-center justify-center"
         >
-          {/* 进行中的内芯：不靠颜色深浅说谎，明确表示"走到一半" */}
-          {cur > 0 && !done ? <i className="block h-1 w-1 bg-crimson" /> : null}
-        </i>
-      </button>
+          <i
+            className={`flex h-3 w-3 rotate-45 items-center justify-center border transition-colors duration-220 ease-genso ${mark} group-hover/dia:bg-crimson/15`}
+          >
+            {/* 进行中的内芯：不靠颜色深浅说谎，明确表示"走到一半" */}
+            {cur > 0 && !done ? <i className="block h-1 w-1 bg-crimson" /> : null}
+          </i>
+        </button>
+      </span>
 
       {/* 组图标独占一列 —— 与单条卡同站位（参考稿 `.entry .glyph`），标题与下各行左对齐。
-          同样**不加 mt**：行首三件顶对齐、各自居中，中线才落在一条线上（见 `ChecklistItem`） */}
-      <Icon
-        name={CYCLE_ICON[item.cycle]}
-        size={17}
-        className={`flex-none ${done ? 'text-ink-3' : 'text-gold-hi'}`}
-      />
+          第一排的对齐基准同样是 **20px 框内居中**（推进器 / 组图标 / 标题首行 / 行内标签 /
+          置顶按钮的中线都落在 10px），口径与理由见 `ChecklistItem` 菱形那处 */}
+      <span className="flex h-5 flex-none items-center">
+        <Icon
+          name={CYCLE_ICON[item.cycle]}
+          size={17}
+          className={`flex-none ${done ? 'text-ink-3' : 'text-gold-hi'}`}
+        />
+      </span>
 
       <div className="min-w-0 flex-1">
         <h3
-            className={`flex min-w-0 flex-wrap items-center gap-1.5 break-words text-base font-semibold leading-snug tracking-card ${
+            /* `leading-5`（20px）= 第一排对齐基准，与左右两件的外框 `h-5` 同高（见单条卡同名说明） */
+            className={`flex min-h-5 min-w-0 flex-wrap items-center gap-1.5 break-words text-base font-semibold leading-5 tracking-card ${
               done ? 'text-ink-3 line-through decoration-crimson decoration-1' : 'text-ink'
             }`}
           >
@@ -267,12 +274,15 @@ function ChecklistGroupCard({
         </h3>
 
         {/* 收益取**当前步**的：逐次不同的奖励写在子步骤上，走一步换一份 ——
-            提示文案沿用 `gainNote`（如"每只 20 勾"，它本来就说明这是**单次**收益） */}
-        {!payColumn && card.gain && step.gain ? (
-          <GainBadges gain={step.gain} note={step.gainNote} />
-        ) : null}
-        {!payColumn && card.kinds && step.gainKind ? (
-          <KindBadges kinds={step.gainKind} gain={step.gain} labels={kindLabels} />
+            提示文案沿用 `gainNote`（如"每只 20 勾"，它本来就说明这是**单次**收益）。
+            固定与浮动合成一串（2026-09-29），两个显示开关仍各自生效 */}
+        {!payColumn ? (
+          <RewardBadges
+            gain={card.gain ? step.gain : undefined}
+            kinds={card.kinds ? step.gainKind : undefined}
+            labels={kindLabels}
+            note={step.gainNote}
+          />
         ) : null}
 
         {/* 入口读父（子步骤不覆盖）；条件与备注读**当前步**的原文：走一步换一条，
@@ -289,10 +299,13 @@ function ChecklistGroupCard({
       {/* 桌面右列（册页稿 `.entry .pay`）—— 与单条卡同一站位 */}
       {payColumn ? (
         <div className="flex-none">
-          {card.gain && step.gain ? <GainBadges gain={step.gain} note={step.gainNote} column /> : null}
-          {card.kinds && step.gainKind ? (
-            <KindBadges kinds={step.gainKind} gain={step.gain} labels={kindLabels} column />
-          ) : null}
+          <RewardBadges
+            gain={card.gain ? step.gain : undefined}
+            kinds={card.kinds ? step.gainKind : undefined}
+            labels={kindLabels}
+            note={step.gainNote}
+            column
+          />
         </div>
       ) : null}
 
@@ -308,7 +321,8 @@ function ChecklistGroupCard({
           e.stopPropagation();
           void setPinned([item.id], !allPinned);
         }}
-        className={`mt-0.5 flex-none cursor-pointer rounded-full p-1 transition-colors duration-150 ease-genso hover:bg-fill ${
+        /* `h-5` + `items-center`：星标中线与第一排其余元素同为 10px（不再用 `mt-0.5` 手调） */
+        className={`flex h-5 flex-none cursor-pointer items-center rounded-full px-1 transition-colors duration-150 ease-genso hover:bg-fill ${
           allPinned ? 'text-gold-hi' : 'text-ink-4 hover:text-gold-hi'
         }`}
       >

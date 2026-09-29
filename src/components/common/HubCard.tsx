@@ -63,7 +63,7 @@ export default function HubCard({ item }: { item: Item }) {
         if (swallowClick()) return;
         toggleHub();
       }}
-      className={`group no-press-select relative mx-3.5 mt-2.5 flex cursor-pointer items-start gap-x-2.5 rounded-sm border border-gold-line/40 bg-gradient-to-r from-gold-soft to-fill px-3.5 pb-4 pt-3 transition-all duration-300 ease-genso ${
+      className={`group no-press-select relative mx-3.5 mt-2.5 flex cursor-pointer items-start gap-x-1.5 rounded-sm border border-gold-line/40 bg-gradient-to-r from-gold-soft to-fill px-3.5 pb-4 pt-3 transition-all duration-300 ease-genso ${
         pressing ? 'scale-[0.985]' : ''
       }`}
     >
@@ -89,28 +89,33 @@ export default function HubCard({ item }: { item: Item }) {
         />
       </span>
 
-      <CheckBox
-        checked={checked}
-        onToggle={() => {
-          if (swallowClick()) return;
-          toggleHub();
-        }}
-        label={label}
-      />
+      {/* 第一排对齐基准：**20px 框内居中**（与两张清单卡同一口径，见 `ChecklistItem` 菱形那处） */}
+      <span className="flex h-5 flex-none items-center">
+        <CheckBox
+          checked={checked}
+          onToggle={() => {
+            if (swallowClick()) return;
+            toggleHub();
+          }}
+          label={label}
+        />
+      </span>
 
       {/* 周期符独占一列（与 `ChecklistItem` / `ChecklistGroupCard` 同站位）——
           **这是"错行"的根因**：此前它塞在 h3 里，标题被图标顶右，而下面的「路径 + 覆盖计数」
           与「备注」从 body 左缘起，两行比标题靠左半个图标宽。图标挪出来后三行同左缘。
           配色也随之显式给出（原先是继承 h3 的文字色） */}
-      <Icon
-        name="suzu"
-        size={17}
-        className={`flex-none ${checked ? 'text-ink-3' : 'text-gold-hi'}`}
-      />
+      <span className="flex h-5 flex-none items-center">
+        <Icon
+          name="suzu"
+          size={17}
+          className={`flex-none ${checked ? 'text-ink-3' : 'text-gold-hi'}`}
+        />
+      </span>
 
       <div className="min-w-0 flex-1">
         <h3
-          className={`flex min-w-0 items-center gap-2.5 break-words font-serif text-base leading-snug tracking-card ${
+          className={`flex min-h-5 min-w-0 items-center gap-2.5 break-words font-serif text-base leading-5 tracking-card ${
             checked ? 'text-ink-3 line-through decoration-crimson decoration-1' : 'text-gold-hi'
           }`}
         >
@@ -140,20 +145,25 @@ export default function HubCard({ item }: { item: Item }) {
         </FieldBlock>
       </div>
 
-      <button
-        type="button"
-        /* 与 `ChecklistItem` 的星标同理：独立控件按下就阻止冒泡，避免在它身上按住触发整卡的长按 */
-        onPointerDown={(e) => e.stopPropagation()}
-        onClick={(e) => {
-          /* 按钮在可点击的 article 内部：必须阻止冒泡，否则会连带触发整卡的勾选 */
-          e.stopPropagation();
-          requestNav({ nav: 'me', section: 'autoDaily' });
-        }}
-        title="去「设置」配置被一键日常覆盖的条目"
-        className="mt-0.5 flex-none cursor-pointer rounded-sm border border-line px-2 py-1 text-sm text-gold-hi transition-colors duration-120 hover:border-gold-hi hover:bg-surface"
-      >
-        去设置
-      </button>
+      {/* 「去设置」也在第一排（右侧）：它与标题行同一基准 —— 20px 框内居中。
+          这颗按钮本身比 20px 高（28px），所以**居中而不是缩高**：去掉原来的 `mt-0.5` 手调，
+          上下各溢出 4px 正是等分的结果，中线才与标题、菱形、周期符落在同一条上 */}
+      <span className="flex h-5 flex-none items-center">
+        <button
+          type="button"
+          /* 与 `ChecklistItem` 的星标同理：独立控件按下就阻止冒泡，避免在它身上按住触发整卡的长按 */
+          onPointerDown={(e) => e.stopPropagation()}
+          onClick={(e) => {
+            /* 按钮在可点击的 article 内部：必须阻止冒泡，否则会连带触发整卡的勾选 */
+            e.stopPropagation();
+            requestNav({ nav: 'me', section: 'autoDaily' });
+          }}
+          title="去「设置」配置被一键日常覆盖的条目"
+          className="flex-none cursor-pointer rounded-sm border border-line px-2 py-1 text-sm text-gold-hi transition-colors duration-120 hover:border-gold-hi hover:bg-surface"
+        >
+          去设置
+        </button>
+      </span>
     </article>
   );
 }
