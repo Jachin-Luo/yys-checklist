@@ -9,6 +9,7 @@ import MobileShell from './components/mobile/MobileShell';
 import { useBootstrap } from './hooks/useBootstrap';
 import { useBreakpoint } from './hooks/useBreakpoint';
 import { usePeriodRefresh } from './hooks/usePeriodRefresh';
+import { initPwa } from './services/pwa';
 import { useDeviceStore } from './stores/device';
 import { useThemeStore } from './stores/theme';
 import { useUiStore } from './stores/ui';
@@ -54,6 +55,13 @@ export default function App() {
   useEffect(() => {
     hydrate();
   }, [hydrate]);
+
+  /* 离线能力：注册 Service Worker（更新时机交给用户，见 `services/pwa`）。
+     这里只负责"握手"，发现新版由设置页的「应用更新」行提示、由用户点重启。
+     开发态拿到的是插件给的空实现、不会注册，故不必按环境分叉。 */
+  useEffect(() => {
+    initPwa();
+  }, []);
 
   useEffect(() => {
     if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return;

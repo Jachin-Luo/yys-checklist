@@ -8,7 +8,7 @@
 
 | 项 | 说明 |
 | --- | --- |
-| 依赖 | Node 18+（Vite 5 要求；仓库未声明 `engines`，实测在 Node 22 下跑通）。若 `node -v` 提示找不到命令，先安装 Node（官方安装包或 nvm-windows / fnm 等版本管理器） |
+| 依赖 | Node 20+（Vite 8 与 `workbox-build` 均要求 Node ≥ 20；仓库未声明 `engines`，实测在 Node 22 下跑通）。若 `node -v` 提示找不到命令，先安装 Node（官方安装包或 nvm-windows / fnm 等版本管理器） |
 | 包管理 | npm（仓库有 `package-lock.json`，用 `npm ci` 保证与锁文件一致） |
 | 后端 | **不需要**。默认 `VITE_API_MODE` 未设置 → 走本地 Mock，数据在浏览器 `localStorage` |
 | 端口 | `npm run dev` 默认 `5173` |
@@ -120,7 +120,7 @@ npm run dev          # http://localhost:5173/
 | 项 | 现状 | 位置 |
 | --- | --- | --- |
 | Http Adapter | 空壳，全部方法抛 `NOT_IMPLEMENTED`，端点映射已写在注释里 | `src/api/http/adapter.ts` |
-| PWA 打包 | **暂缓但未取消**：已有图标与移动端适配（`safe-area` / `dvh`），缺 `manifest`、Service Worker、安装图标；`main.tsx` 明确不注册 SW | `index.html`、`src/main.tsx`、`src/styles/base.css` |
+| PWA / 离线 | **已接入**（2026-09-29，不再是待办）：`vite-plugin-pwa`（`generateSW`）产出 `sw.js` + `manifest.webmanifest`、19 条 precache；图标由 `npm run icons` 从 `favicon.svg` 生成；更新时机交给用户（`registerType: 'prompt'` + 设置页「应用更新」），**不静默刷新** | `vite.config.ts`、`src/services/pwa.ts`、`src/stores/pwa.ts`、`tools/make-icons.mjs`、`index.html` |
 | 数据快照热更新 | 不做：条目库随包发布 | `src/components/settings/DataVersionSection.tsx` |
 | 提醒能力 | 2026-09-11 已整体下线（非待办）：无浏览器通知，相关存储键已删 | —— |
 | 排序控件 | 按产品决策取消：排序由「默认痛感 + 置顶 + 自定义顺序」决定；`ViewPrefs.sortBy` 字段保留在数据层 | `src/domain/sort.ts`（原控件 `ViewBar` 已于 2026-09-28 删除） |

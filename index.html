@@ -18,8 +18,24 @@
       content="囤囤鼠 · 阴阳师任务清单 —— 纯手动记录工具，不读取任何游戏数据。回答：此刻我还有什么奖励没拿。"
     />
 
-    <!-- 普通网页图标（SVG，无二进制资源）。PWA 打包（manifest / Service Worker / 安装图标）暂缓 -->
+    <!--
+      普通网页图标（SVG）。2026-09-29 起本站同时是 PWA：
+        - manifest 由 `vite-plugin-pwa` 在构建时注入（`vite.config.ts`）；
+        - 四张 PNG 图标（192 / 512 / maskable / apple-touch）由 `npm run icons`
+          从这枚 SVG 生成，**不手工做** —— 各档比例与理由见 `tools/make-icons.mjs`；
+        - Service Worker 注册在 `src/services/pwa.ts`，更新时机由用户在设置页决定。
+    -->
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+
+    <!--
+      iOS 专属：Safari 不吃 manifest 的部分字段，"添加到主屏"要看这几条。
+      `status-bar-style` 取 default 而不是 black-translucent —— 后者让网页铺到状态栏下，
+      而本站亮色主题是米白底、系统状态栏文字为白，会读不出来。
+    -->
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="囤囤鼠" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
 
     <title>囤囤鼠 · 阴阳师任务清单</title>
   </head>

@@ -1,4 +1,5 @@
 /// <reference types="vite/client" />
+/// <reference types="vite-plugin-pwa/client" />
 
 interface ImportMetaEnv {
   /** 数据通道选择：mock（本期默认）| http（后期接后端）—— 设计文档 §5.4 */

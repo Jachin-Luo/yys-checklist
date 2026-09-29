@@ -10,12 +10,13 @@
 | 运行时 | Node 18+（实测 Node 22） | `package.json` |
 | 框架 | React 18 + ReactDOM 18 | `package.json` dependencies |
 | 语言 | TypeScript 严格模式 | `tsconfig.app.json` |
-| 构建 | Vite 5 | `vite.config.ts` |
+| 构建 | Vite 8 | `vite.config.ts` |
 | 样式 | Tailwind CSS 3（+ `tailwindcss-animate`）；颜色槽写成 `rgb(var(--c-x) / <alpha-value>)`，取值随主题变 | `tailwind.config.ts`、`postcss.config.js`、`src/styles/theme.css` |
 | 主题 | 明暗双主题（设备级键 `yys:theme`；初始值优先本机存档、其次跟随 `prefers-color-scheme`、默认明版） | `src/stores/theme.ts`、`src/styles/theme.css` |
 | 状态 | Zustand 5 | `src/stores/` |
-| 测试 | Vitest 2，`environment: 'node'`，`include: ['src/**/*.test.ts']` | `vite.config.ts` |
+| 测试 | Vitest 5，`environment: 'node'`，`include: ['src/**/*.test.ts']` | `vite.config.ts` |
 | 图标 | 自建和风图标库（`<symbol>` sprite，无第三方图标依赖） | `src/components/icons/` |
+| PWA / 离线 | `vite-plugin-pwa`（`generateSW`；`registerType: 'prompt'` —— 更新由用户在设置页触发，**不静默刷新**） | `vite.config.ts`、`src/services/pwa.ts`、`src/stores/pwa.ts`、`tools/make-icons.mjs` |
 | 路径别名 | `@` → `./src` | `vite.config.ts`、`tsconfig.app.json` |
 | 其他运行时依赖 | `nanoid`（id 生成）、`tailwind-merge`（类名合并） | `package.json` |
 
@@ -30,6 +31,7 @@ npm test             # vitest run
 npm run test:watch   # vitest
 npm run db:check     # node tools/build.js
 npm run db:calibrate # node tools/calibrate-report.js
+npm run icons        # node tools/make-icons.mjs 生成 PWA 图标（改 favicon.svg 后重跑）
 ```
 
 构建产物在 `dist/`（**随发布入库**，2026-09-29 起不再被 `.gitignore` 忽略：服务器上有本机部署脚本直接取这份产物、不在服务器上二次构建，因此每次 `npm run build` 后都要把 `dist/` 一并提交，包括换了名字的 `assets/index-<hash>.js` / `.css`）；`reports/` 是工具脚本产物目录，已被 `.gitignore` 忽略。
@@ -40,9 +42,9 @@ npm run db:calibrate # node tools/calibrate-report.js
 
 ```text
 yys-checklist/
-├── index.html            # 单页挂载点 #root，只挂 SVG favicon（PWA manifest / SW 未做）
+├── index.html            # 单页挂载点 #root；挂 SVG favicon + iOS 专属 meta（manifest 由构建注入）
 ├── src/
-├── public/
+├── public/               # 站点图标 favicon.svg + 四张 PWA 图标（PNG，由 `npm run icons` 从它生成）
 ├── schema/item.schema.json   # 条目 JSON Schema，仅供编辑器提示；运行时校验以 tools/build.js + domain/enums.ts 为准
 ├── tools/                # 数据校验、核对报告、一键验收、录入模板
 ├── docs/                 # 本套交接文档

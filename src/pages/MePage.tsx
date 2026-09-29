@@ -6,6 +6,7 @@ import { sectionNo } from '../components/common/sectionNo';
 import AboutSection from '../components/settings/AboutSection';
 import BackupSection from '../components/settings/BackupSection';
 import DataVersionSection from '../components/settings/DataVersionSection';
+import UpdateSection from '../components/settings/UpdateSection';
 import { useItemStore } from '../stores/items';
 import { useThemeStore, type Theme } from '../stores/theme';
 import AutoDailySection from './settings/AutoDailySection';
@@ -126,6 +127,7 @@ export default function MePage() {
         关于
       </SectionTitle>
       <div className={rows}>
+        <UpdateSection />
         <AboutSection />
       </div>
 
