@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import type { Gain, Item, ItemDraft, SubItem } from '../../api/types';
 import { newId } from '../../domain/ids';
 import type { Cycle, GainCurrency, GainKind } from '../../domain/enums';
@@ -6,7 +6,7 @@ import { CYCLE, GAIN_CURRENCY, GAIN_KIND } from '../../domain/enums';
 import { parseTs } from '../../domain/countdown';
 import Icon from '../icons/Icon';
 import Modal from '../common/Modal';
-import { btn, chip, input, tx } from '../common/controls';
+import { btn, input, option, popover, tx } from '../common/controls';
 
 /**
  * 条目表单（**新建 / 编辑共用一份**），以**弹层**形态出现（2026-09-28）。
@@ -228,6 +228,43 @@ export default function ItemForm({
       ),
   );
   const [err, setErr] = useState('');
+  /* 「奖励类型」下拉（2026-09-29 用户要求：18 项改下拉框多选）。
+     为什么不用原生 `<select multiple>`：它在移动端是"按住 + 系统抽屉"的另一套交互，
+     而且原生列表无法走 `input` 配方（`bg-surface` / 描边 / 圆角在部分浏览器覆盖不掉）。
+     形态与 `ProfileSwitcher` 同一套：触发器 + 浮层面板，面板里每行一个选项。 */
+  const [kindsOpen, setKindsOpen] = useState(false);
+  const kindsRef = useRef<HTMLDivElement | null>(null);
+  const kindsBtnRef = useRef<HTMLButtonElement | null>(null);
+
+  useEffect(() => {
+    if (!kindsOpen) return undefined;
+    const box = kindsRef.current;
+    const onDown = (e: MouseEvent) => {
+      if (box && !box.contains(e.target as Node)) setKindsOpen(false);
+    };
+    /**
+     * Escape 走**捕获阶段**并中止传播：`Modal` 的 Escape 监听挂在弹层面板上（`useModalFocus`），
+     * 我这里若只挂在自己身上等冒泡，原生监听会**先**跑到它 —— 按一下 Esc 会把整个表单弹层
+     * 连同面板一起关掉。捕获阶段在弹层面板之前拿到事件，才能做到"先关下拉、再关弹层"。
+     * 只在面板打开时挂，故焦点不在面板里时 Esc 仍是原来的行为（关掉整个表单）。
+     */
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== 'Escape') return;
+      e.stopPropagation();
+      setKindsOpen(false);
+      kindsBtnRef.current?.focus();
+    };
+    document.addEventListener('mousedown', onDown);
+    box?.addEventListener('keydown', onKey, true);
+    return () => {
+      document.removeEventListener('mousedown', onDown);
+      box?.removeEventListener('keydown', onKey, true);
+    };
+  }, [kindsOpen]);
+  /** 触发器上的一句话摘要：全选了会很长，交给 `truncate` 裁（点开就看得到全量） */
+  const kindSummary = f.kinds.length
+    ? f.kinds.map((k) => kindLabels.get(k)?.label ?? k).join(' · ')
+    : '未选（只有浮动收益）';
   /* 「直接设成 N 步」的输入：**独立一份字符串**，不跟着 `subs` 走 ——
      跟着走的话，用户点一次「加一步」就看到框里的数字自己变了，反而像出了问题 */
   const [bulk, setBulk] = useState('');
@@ -483,24 +520,80 @@ export default function ItemForm({
         <Row
           group
           label="奖励类型"
-          hint="会掉哪些东西，可多选；数量浮动就只勾类型（有保底数值的填在下一行）"
+          hint="点开勾选，可多选；数量浮动就只勾类型（有保底数值的填在下一行）"
         >
-          <div role="group" aria-label="奖励类型（可多选）" className="flex flex-wrap gap-1.5">
-            {GAIN_KIND.map((k) => {
-              const on = f.kinds.includes(k);
-              return (
-                <button
-                  key={k}
-                  type="button"
-                  aria-pressed={on}
-                  disabled={busy}
-                  onClick={() => set('kinds', on ? f.kinds.filter((x) => x !== k) : [...f.kinds, k])}
-                  className={`${chip.base} ${chip.sm} ${on ? chip.on : chip.off}`}
-                >
-                  {kindLabels.get(k)?.label ?? k}
-                </button>
-              );
-            })}
+          <div ref={kindsRef} className="relative">
+            <button
+              ref={kindsBtnRef}
+              type="button"
+              aria-haspopup="listbox"
+              aria-expanded={kindsOpen}
+              aria-label="奖励类型（可多选）"
+              disabled={busy}
+              onClick={() => setKindsOpen((v) => !v)}
+              className={`${input.base} ${input.md} flex cursor-pointer items-center gap-2 text-left`}
+            >
+              <span className={`min-w-0 flex-1 truncate ${f.kinds.length ? '' : 'text-ink-4'}`}>
+                {kindSummary}
+              </span>
+              <Icon
+                name="chevron-down"
+                size={12}
+                className={`flex-none text-ink-4 transition-transform duration-120 ${
+                  kindsOpen ? 'rotate-180' : ''
+                }`}
+              />
+            </button>
+
+            {kindsOpen ? (
+              /* 多选**点完不关面板** —— 一次通常会勾好几项；18 项一列，靠自身滚动限高
+                 （与 `ProfileSwitcher` 同一处理：面板够高时会被弹层的滚动容器裁掉） */
+              <div
+                role="listbox"
+                aria-multiselectable="true"
+                aria-label="奖励类型（可多选）"
+                className={`${popover} absolute left-0 right-0 top-full z-40 mt-1 flex max-h-52 flex-col gap-1 overflow-y-auto`}
+              >
+                {GAIN_KIND.map((k) => {
+                  const on = f.kinds.includes(k);
+                  return (
+                    <button
+                      key={k}
+                      type="button"
+                      role="option"
+                      aria-selected={on}
+                      disabled={busy}
+                      onClick={() =>
+                        set('kinds', on ? f.kinds.filter((x) => x !== k) : [...f.kinds, k])
+                      }
+                      className={`${option.base} ${on ? option.on : option.off}`}
+                    >
+                      {/* 未选中行留一个空位（`opacity-0`）而不是不渲染：否则行文字会左右跳 */}
+                      <Icon
+                        name="check"
+                        size={12}
+                        className={`flex-none transition-opacity duration-120 ${
+                          on ? 'text-gold-hi opacity-100' : 'opacity-0'
+                        }`}
+                      />
+                      <span className="min-w-0 flex-1">{kindLabels.get(k)?.label ?? k}</span>
+                    </button>
+                  );
+                })}
+
+                {f.kinds.length ? (
+                  <button
+                    type="button"
+                    disabled={busy}
+                    onClick={() => set('kinds', [])}
+                    className={`${btn.base} ${btn.sm} ${btn.ghost} self-start`}
+                  >
+                    <Icon name="restore" size={12} />
+                    清空已选（{f.kinds.length}）
+                  </button>
+                ) : null}
+              </div>
+            ) : null}
           </div>
         </Row>
 
