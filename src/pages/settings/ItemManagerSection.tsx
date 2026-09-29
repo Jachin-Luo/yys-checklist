@@ -281,6 +281,9 @@ export default function ItemManagerSection() {
 
   /** 档内 ▲▼：档边界不动作 —— 这里的"组"就是当前页签的那一档（含合并档的两类周期） */
   const moveInGroup = (group: Item[], id: string, dir: -1 | 1) => {
+    /* 一键日常入口锁死（2026-09-29 用户要求"禁止修改和移动顺序"）—— 理由见 `dropOn` 与本行的
+       `isAutoHub` 分支：它恒第 0 位，写进 `order` 唯一的效果是把排序模式切成"自定义" */
+    if (items.some((x) => x.id === id && x.isAutoHub)) return;
     void saveOrder(
       moveWithinGroup(
         order,
@@ -297,6 +300,16 @@ export default function ItemManagerSection() {
     const from = dragId ? items.find((x) => x.id === dragId) : undefined;
     setDragId(null);
     if (!from || from.id === target.id) return;
+    /**
+     * 一键日常入口**既不可被拖走、也不接受落点**（2026-09-29 用户要求"禁止修改和移动顺序"）。
+     *
+     * 不只是"拖了没用"：`domain/merge.effectiveView` 的 `order` 一旦非空，
+     * `domain/sort.effectiveSortBy` 就判定为 `custom` —— 而 hub 自己受 `buildComparator`
+     * 的前置特判保护、**恒第 0 位、不读 `order`**。于是拖它的实际结果是：
+     * 列表顺序一点没变，整页排序却从"默认痛感"悄悄切成了"自定义"（用户改不动的东西
+     * 反而改掉了他没打算改的东西）。落点侧同理 —— 拖别的条目到它上面也会写进 `order`。
+     */
+    if (from.isAutoHub || target.isAutoHub) return;
     if (!inTab(from.cycle) || !inTab(target.cycle)) return;
     void saveOrder(moveBefore(order, from.id, target.id, seed));
   };
@@ -358,7 +371,9 @@ export default function ItemManagerSection() {
         </span>
         <span className={`${tx.note} text-ink-3`}>
           带<b className="font-medium text-ink-2">日常覆盖</b>标记的条目属于一键日常的覆盖集合，
-          勾选今日页入口时会一并勾选（在「一键日常覆盖」里调整）
+          勾选今日页入口时会一并勾选（在「一键日常覆盖」里调整）；
+          带<b className="font-medium text-ink-2">一键入口</b>标记的那一条是今日页的入口卡本身，
+          恒排首位、不参与调序，所以不可编辑与拖动
         </span>
       </div>
 
@@ -395,39 +410,61 @@ export default function ItemManagerSection() {
       {/* ── 本档的条目（可调序 / 编辑 / 隐藏 / 删除）── */}
       <div className="px-3 py-2">
         {shown.length ? (
-          shown.map((it, idx) => (
+          shown.map((it, idx) => {
+            /**
+             * 一键日常入口（`isAutoHub`）在这一页是**只读行**（2026-09-29 用户要求
+             * "禁止修改和移动顺序"）：不渲染拖动柄与 ▲▼、不给 ✎。
+             *
+             * 为什么不是"直接隐藏"：它确实在今日页首屏，藏起来会让"共 N 条"与能数到的行数对不上，
+             * 用户第一反应是"条目丢了"而不是"它被保护了"。留一行只读 + 一句为什么，比消失更省解释。
+             */
+            const isHub = Boolean(it.isAutoHub);
+            return (
             <div
               key={it.id}
-              draggable
-              onDragStart={() => setDragId(it.id)}
+              draggable={!isHub}
+              onDragStart={() => {
+                if (!isHub) setDragId(it.id);
+              }}
               onDragOver={(e) => e.preventDefault()}
-              onDrop={() => dropOn(it)}
+              onDrop={() => {
+                if (!isHub) dropOn(it);
+              }}
               className="flex flex-wrap items-center gap-2 rounded-sm px-1 py-1.5 transition-colors duration-120 hover:bg-surface-3"
             >
               {/* 首行：拖动柄 + ▲▼ + 名称 + 标记 + 操作（这一层原样不动） */}
-              <Icon name="grip" size={14} className="flex-none cursor-grab text-line" />
-              <div className="flex flex-none flex-col">
-                <button
-                  type="button"
-                  aria-label={`在「${active?.label ?? ''}」内上移：${it.name}`}
-                  title="在本档内上移"
-                  disabled={idx === 0}
-                  onClick={() => moveInGroup(shown, it.id, -1)}
-                  className="cursor-pointer text-ink-4 transition-colors duration-120 hover:text-ink-2 disabled:cursor-not-allowed disabled:opacity-30"
-                >
-                  <Icon name="chevron-up" size={13} />
-                </button>
-                <button
-                  type="button"
-                  aria-label={`在「${active?.label ?? ''}」内下移：${it.name}`}
-                  title="在本档内下移"
-                  disabled={idx === shown.length - 1}
-                  onClick={() => moveInGroup(shown, it.id, 1)}
-                  className="cursor-pointer text-ink-4 transition-colors duration-120 hover:text-ink-2 disabled:cursor-not-allowed disabled:opacity-30"
-                >
-                  <Icon name="chevron-down" size={13} />
-                </button>
-              </div>
+              {isHub ? (
+                /* 占位宽与拖动柄等宽（`grip` 的 14px），保住后面各列的对齐 */
+                <span className="w-3.5 flex-none" aria-hidden />
+              ) : (
+                <Icon name="grip" size={14} className="flex-none cursor-grab text-line" />
+              )}
+              {isHub ? (
+                <span className="w-3.5 flex-none" aria-hidden />
+              ) : (
+                <div className="flex flex-none flex-col">
+                  <button
+                    type="button"
+                    aria-label={`在「${active?.label ?? ''}」内上移：${it.name}`}
+                    title="在本档内上移"
+                    disabled={idx === 0}
+                    onClick={() => moveInGroup(shown, it.id, -1)}
+                    className="cursor-pointer text-ink-4 transition-colors duration-120 hover:text-ink-2 disabled:cursor-not-allowed disabled:opacity-30"
+                  >
+                    <Icon name="chevron-up" size={13} />
+                  </button>
+                  <button
+                    type="button"
+                    aria-label={`在「${active?.label ?? ''}」内下移：${it.name}`}
+                    title="在本档内下移"
+                    disabled={idx === shown.length - 1}
+                    onClick={() => moveInGroup(shown, it.id, 1)}
+                    className="cursor-pointer text-ink-4 transition-colors duration-120 hover:text-ink-2 disabled:cursor-not-allowed disabled:opacity-30"
+                  >
+                    <Icon name="chevron-down" size={13} />
+                  </button>
+                </div>
+              )}
               <span className={`min-w-0 flex-1 break-words ${tx.rowName} text-ink`}>{it.name}</span>
               {/* 多次任务标出步数：子步骤**不单独成行**，不标的话从这一行看不出它要做 N 次
                   （清单页那张卡有菱形进度格，这里只有一行字，所以补一个标记） */}
@@ -464,16 +501,26 @@ export default function ItemManagerSection() {
                 </span>
               ) : null}
               {/* 编辑：**自建与预设都开放**（2026-09-28）。预设走的是一层字段改写，
-                  种子数据本身不动 —— 理由见 `domain/itemPatch` */}
-              <button
-                type="button"
-                title={`编辑条目：${it.name}`}
-                aria-label={`编辑条目：${it.name}`}
-                onClick={() => setEditingItem(it)}
-                className="flex-none cursor-pointer rounded-sm p-1 text-ink-4 transition-colors duration-120 hover:text-gold-hi"
-              >
-                <Icon name="fude" size={13} />
-              </button>
+                  种子数据本身不动 —— 理由见 `domain/itemPatch`。
+                  一键日常入口除外：它由数据维护，改了名字 / 备注只会让今日页那张卡与覆盖说明对不上 */}
+              {isHub ? (
+                <span
+                  title="一键日常入口：内容随数据版本发布，恒排在本档第一位、不参与排序。要调整它覆盖哪些条目，去「一键日常覆盖」分区"
+                  className={`${tag.base} ${tag.gold}`}
+                >
+                  一键入口 · 固定首位
+                </span>
+              ) : (
+                <button
+                  type="button"
+                  title={`编辑条目：${it.name}`}
+                  aria-label={`编辑条目：${it.name}`}
+                  onClick={() => setEditingItem(it)}
+                  className="flex-none cursor-pointer rounded-sm p-1 text-ink-4 transition-colors duration-120 hover:text-gold-hi"
+                >
+                  <Icon name="fude" size={13} />
+                </button>
+              )}
               {it.origin === 'custom' ? (
                 <button
                   type="button"
@@ -504,7 +551,8 @@ export default function ItemManagerSection() {
                 </button>
               )}
             </div>
-          ))
+            );
+          })
         ) : (
           <p className={`px-1 py-3 ${tx.note} text-ink-3`}>{emptyText}</p>
         )}

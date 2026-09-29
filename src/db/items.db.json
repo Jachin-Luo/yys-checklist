@@ -65,7 +65,7 @@
         "blackFrag": 0.5
       },
       "gainNote": "50天1个完整黑蛋=25片，折0.5片/天",
-      "note": "签到满50天给完整黑蛋，期间也出几片；零成本但不能断签",
+      "note": "签到满50天给完整黑蛋",
       "origin": "preset"
     },
     {
@@ -165,9 +165,7 @@
       "path": "探索 → 结界突破",
       "gainKind": [
         "jade",
-        "medal",
-        "stamina",
-        "exp"
+        "medal"
       ],
       "gainNote": "随突破完成次数浮动，不计入固定收益",
       "note": "结界突破券至多30张/日；突3胜5勾、9胜10勾（社区另有整轮15勾一说），打满30券约50勾/天；打不过可3胜即刷新，实际随胜场浮动",
@@ -180,8 +178,7 @@
       "path": "探索 → 寮突破",
       "gainKind": [
         "jade",
-        "medal",
-        "other"
+        "medal"
       ],
       "gainNote": "有勾玉，随突破个数浮动，不计入统计",
       "origin": "preset"
@@ -193,7 +190,6 @@
       "path": "町中 → 逢魔之时",
       "gainKind": [
         "bossSoul",
-        "other",
         "jade"
       ],
       "gainNote": "勾玉随机，不计入固定收益",
@@ -253,17 +249,6 @@
       "gainNote": "协战被用满50次给50勾（350勾/周）",
       "condition": "需好友/小号配合",
       "note": "必做：稳定勾玉来源；没有固定队友可大小号互刷，锁阵容连退15次，几分钟刷完（NGA口径）",
-      "origin": "preset"
-    },
-    {
-      "id": "daily_hyakki",
-      "name": "百鬼夜行 ×10",
-      "cycle": "daily",
-      "path": "町中 → 百鬼夜行",
-      "gainKind": [
-        "shard"
-      ],
-      "note": "前几次收益最高",
       "origin": "preset"
     },
     {
@@ -350,7 +335,7 @@
       ],
       "path": "阴阳寮 → 狭间暗域",
       "gainKind": [
-        "medal",
+        "blackFrag",
         "blueTicket"
       ],
       "condition": "周五至周日，寮自定时间",
@@ -475,9 +460,7 @@
       "cycle": "daily",
       "path": "网易大神 App → 阴阳师 → 签到",
       "gainKind": [
-        "daruma",
-        "blackFrag",
-        "other"
+        "blackFrag"
       ],
       "note": "独立于游戏内签到：日 1 灰票；每周签 3 天 1 蓝蛋、5 天金币加成 50% 1h、7 天 1 片黑碎；累计 100/200 天有头像框",
       "origin": "preset"
@@ -494,7 +477,7 @@
         "jade": 20
       },
       "gainNote": "满100活跃度给20勾",
-      "note": "战令漏一天掉一档；每日满100活跃领20勾，合计140勾/周；每期花札满30级，勾玉礼包全换共60勾",
+      "note": "每日满100活跃领20勾，合计140勾/周；每期花札满30级，勾玉礼包全换共60勾",
       "origin": "preset"
     },
     {
@@ -524,17 +507,6 @@
       "origin": "preset"
     },
     {
-      "id": "daily_yuhun",
-      "name": "御魂副本",
-      "cycle": "daily",
-      "path": "探索 → 御魂副本",
-      "gainKind": [
-        "soul"
-      ],
-      "condition": "体力富余时",
-      "origin": "preset"
-    },
-    {
       "id": "daily_guild_stamina",
       "name": "寮补给领体力",
       "cycle": "daily",
@@ -543,17 +515,6 @@
         "stamina"
       ],
       "autoDaily": true,
-      "origin": "preset"
-    },
-    {
-      "id": "daily_jade_misc",
-      "name": "勾玉杂项（随机收入）",
-      "cycle": "daily",
-      "gainKind": [
-        "jade"
-      ],
-      "gainNote": "随机或有条件收入，不计入固定收益",
-      "note": "顺手领取：好友抽到SSR/SP时点赞祝福，社区均值约15勾/天；御魂奉纳随机返勾玉；探索小怪/宝箱；大触觉醒投票约40勾/天（2023社区口径，现版本待核）；月卡20勾/天（充值类）",
       "origin": "preset"
     },
     {
