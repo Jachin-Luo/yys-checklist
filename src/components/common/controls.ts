@@ -145,40 +145,83 @@ export const tag = {
 } as const;
 
 /**
- * 选项行（参考稿 §10 `.opt`）：单选 / 多选的整行形态。
+ * 选项行（参考稿 §10 `.opt`）：**弹层里成组出现的大行**（账号选择 / 账号勾选）。
+ * 行与行是并列的小卡片，所以各自带描边与填充底。
  *
- * 尺寸档与 `btn` / `input` 同一条纪律（圆角与内缩**只在尺寸档里**，`base` 一份都不放）——
- * 2026-09-29 加 `sm` 时才补上这层：原来内缩写在 `base` 里，浮层里的列表想要紧凑一档，
- * 就只能去和 `base` 的 `px-3.5 py-2.5` 打架，而同属性类名相撞由 Tailwind 生成顺序决胜，不能赌。
+ * ⚠️ 浮层里的列表（下拉菜单）**不用这一支**，那是 `select.option` —— 外层浮层已经有描边与
+ * 底色，行再画一圈框就是"盒子里套盒子"（2026-09-29 用户反馈"选项外面还套了一层"）。
  */
 export const option = {
-  /** 骨架：不含圆角、内缩与描边 —— 那三样归尺寸档与状态档（见文件头纪律 2） */
   base: 'flex w-full cursor-pointer items-center gap-2.5 text-left transition-colors duration-220 ease-genso',
-  /** 常规档：整行选项（账号选择这类"大点击目标"），参考稿 `.opt` 原规格 */
   md: 'rounded-md px-3.5 py-2.5',
-  /**
-   * 紧凑档：**浮层里的列表**（条目表单的奖励类型 18 项）。常规档一行 40px，
-   * 200px 高的面板只放得下五行；这里 32px + 12px 字，同屏能看七行。
-   */
-  sm: 'h-8 rounded-sm px-3 text-sm',
-  /**
-   * 描边形态 —— 成组出现在弹层里的大行（账号选择 / 账号勾选）：行与行是**并列的卡片**，
-   * 需要各自一圈框来分界，底色与描边都由行自己画。
-   */
   off: 'border border-line bg-fill hover:bg-fill-2',
   on: 'border border-line bg-fill-2 shadow-ring',
-  /**
-   * 扁平形态 —— **浮层列表内**的行（下拉菜单）：外层浮层已经有描边、底色与阴影，
-   * 行再画一圈框就是"盒子里套盒子"（用户 2026-09-29 反馈"选项外面还套了一层"）。
-   * 分界改由 hover / 选中的底色承担：hover 填一档，选中转金（与 `chip.on` 同一套"选中=金"）。
-   */
-  flat: 'rounded-sm hover:bg-fill-2',
-  flatOn: 'rounded-sm bg-gold-soft text-gold-hi',
 } as const;
 
-/** 浮层（参考稿 §9 `.sel-p` / §11 `.md-note` / `.pop-b`） */
+/**
+ * 浮层（参考稿 §9 `.sel-p` / §11 `.md-note` / `.pop-b`）：`panel-2` 底 + 强描边 + `shadow-pop`。
+ *
+ * ⚠️ 底色这里**换算过一档**，不是直接抄参考稿：`.sel-p` 的 `panel-2` 是相对**页面底**
+ * （panel）更亮一档才浮得起来；而本项目浮层的落点常常是**弹层面板**（`surface-3` = 同一个
+ * `panel-2`）—— 照抄就是"同色叠同色"，只见描边不见层（2026-09-29 截图实测）。
+ * 故取 `surface`（卡片底，最亮一档）：在弹层上与在页面上都能浮起来。
+ */
 export const popover =
-  'rounded-lg border border-line bg-surface-3 p-1.5 shadow-pop animate-pop' as const;
+  'rounded-lg border border-line bg-surface p-1.5 shadow-pop animate-pop' as const;
+
+/**
+ * 下拉框（参考稿 §9 SELECT：触发器 `.sel-b` / 面板 `.sel-p` / 选项 `.sel-o` / 底栏 `.sel-foot`）。
+ *
+ * ⚠️ 为什么自绘而不是用原生 `<select>`：参考稿那一节的第一句就是"自绘 · 原生 select 在圆润
+ * 风格里无法驯服" —— 触发器的圆角 / 描边 / 展开态光环覆盖不掉，多选（`multiple`）在移动端
+ * 更是另一套"按住 + 系统抽屉"的交互。**多选的一处行为差别**：原生是"选完就关"，下拉是
+ * "点完留在面板里"（一次通常要勾好几项），底栏给"清空"这类整表动作。
+ *
+ * 规格逐条对参考稿（数值换算到本项目的令牌与间距阶，**不另发明尺寸**）：
+ *   - 触发器 `height:42 / padding:0 14 / font-size:13` → 取 `input.md` 的 **36px**：
+ *     "同一排不出现一高一矮"是本项目 2026-09-28 定的，优先于参考稿的绝对高度；
+ *   - 选项行 `padding:9px 11px / font-size:12.5px` → `h-9 px-3 text-base`（13px，与设置页
+ *     行名同档；12.5px 在本项目的字号阶上没有对应档）；
+ *   - 选中 / hover 照抄 `.sel-o`：常态 `ink-2`，hover 填一档（`fill-2`），选中 **`fill` + 金**；
+ *   - 面板 `.sel-p` 的 `padding:7 / panel-2 底 / line-2 描边 / max-height:238` →
+ *     `popover`（p-1.5 / surface-3 = panel-2）+ `max-h-60`（240px）；
+ *   - 底栏 `.sel-foot`：`margin-top:6 / 上边金线 / 内缩 9-11-5` → `mt-1.5 border-t border-line pt-2`。
+ */
+export const select = {
+  /** 触发器：复用 `input` 的骨架与高度档，只补"按钮化"的行为类 */
+  trigger: `${input.base} ${input.md} flex cursor-pointer items-center gap-2 text-left`,
+  /** 触发器（展开中）—— 参考稿 `.sel.is-open .sel-b`：描边转金线、底色沉一档 */
+  triggerOpen: 'border-gold-line bg-fill-2',
+  /**
+   * 面板：通用浮层配方 + 参考稿 `.sel-p` 的 238px 限高（`.sel-p.max`）。
+   *
+   * ⚠️ 这里**不能用 `flex flex-col`**：面板一旦限高，flex 子项默认 `flex-shrink:1`，
+   * 选项行会被**压扁成"叠在一起的几行字"**（2026-09-29 实测截图发现），而参考稿 `.sel-p`
+   * 是普通块流 —— 照它来即可，行高由行自己定。
+   *
+   * 展开方向不在这里定，见 `panelDown` / `panelUp`。
+   */
+  panel: `${popover} absolute left-0 right-0 z-40 max-h-60 overflow-y-auto`,
+  /** 向下弹（参考稿 `.sel-p` 的 `top: calc(100% + 8px)`） */
+  panelDown: 'top-full mt-2',
+  /**
+   * 向上弹（参考稿 `.sel.down-up .sel-p`）—— 触发器离视口底不足一屏时会用到：
+   * 表单弹层的主体是 `overflow-y-auto`，向下弹会被弹层底缘**裁掉**（2026-09-29 截图实测）。
+   */
+  panelUp: 'bottom-full mb-2',
+  /**
+   * 选项行（`.sel-o`）—— **不描边、不铺底**：面板本身已是那个"框"。
+   * hover 只改底色：`.sel-o:hover` 里还有一处 `color:ink`，但选中行在参考稿里靠**特异性**
+   * 压住了它；Tailwind 里 `hover:text-ink` 与选中态的 `text-gold-hi` 会撞在同一个属性上
+   * （谁生效由生成顺序定，不能赌），所以这里只留底色变化。
+   */
+  option:
+    'flex h-9 w-full cursor-pointer items-center gap-2.5 rounded-sm px-3 text-base text-ink-2 transition-colors duration-120 ease-genso hover:bg-fill-2',
+  /** 选项行（已选）—— 金字 + 填充底（与 `chip.on` 是同一套"选中=金"的语言） */
+  optionOn: 'bg-fill text-gold-hi',
+  /** 底栏：与选项之间拉一条金线，放"清空已选"这类整表动作 */
+  foot: 'mt-1.5 flex flex-none gap-2 border-t border-line px-2.5 pt-2',
+} as const;
 
 /** 卡片 / 折叠分组外壳（参考稿 §13 `.fl`） */
 export const cardBox = {

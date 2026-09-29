@@ -6,7 +6,7 @@ import { CYCLE, GAIN_CURRENCY, GAIN_KIND } from '../../domain/enums';
 import { parseTs } from '../../domain/countdown';
 import Icon from '../icons/Icon';
 import Modal from '../common/Modal';
-import { btn, input, option, popover, tx } from '../common/controls';
+import { btn, input, select, tx } from '../common/controls';
 
 /**
  * 条目表单（**新建 / 编辑共用一份**），以**弹层**形态出现（2026-09-28）。
@@ -233,8 +233,20 @@ export default function ItemForm({
      而且原生列表无法走 `input` 配方（`bg-surface` / 描边 / 圆角在部分浏览器覆盖不掉）。
      形态与 `ProfileSwitcher` 同一套：触发器 + 浮层面板，面板里每行一个选项。 */
   const [kindsOpen, setKindsOpen] = useState(false);
+  /** 面板向上弹还是向下弹（参考稿 `.sel.down-up` 的同一判断）：表单在弹层里，
+      弹层主体是滚动容器，向下弹放不下时会被裁掉一截 */
+  const [kindsUp, setKindsUp] = useState(false);
   const kindsRef = useRef<HTMLDivElement | null>(null);
   const kindsBtnRef = useRef<HTMLButtonElement | null>(null);
+
+  /** 面板高 240（`select.panel` 的 `max-h-60`）+ 视口余量，放不下就朝上开 */
+  const toggleKinds = () => {
+    const box = kindsBtnRef.current;
+    if (!kindsOpen && box) {
+      setKindsUp(window.innerHeight - box.getBoundingClientRect().bottom < 300);
+    }
+    setKindsOpen((v) => !v);
+  };
 
   useEffect(() => {
     if (!kindsOpen) return undefined;
@@ -530,8 +542,8 @@ export default function ItemForm({
               aria-expanded={kindsOpen}
               aria-label="奖励类型（可多选）"
               disabled={busy}
-              onClick={() => setKindsOpen((v) => !v)}
-              className={`${input.base} ${input.md} flex cursor-pointer items-center gap-2 text-left`}
+              onClick={toggleKinds}
+              className={`${select.trigger} ${kindsOpen ? select.triggerOpen : ''}`}
             >
               <span className={`min-w-0 flex-1 truncate ${f.kinds.length ? '' : 'text-ink-4'}`}>
                 {kindSummary}
@@ -552,7 +564,7 @@ export default function ItemForm({
                 role="listbox"
                 aria-multiselectable="true"
                 aria-label="奖励类型（可多选）"
-                className={`${popover} absolute left-0 right-0 top-full z-40 mt-1 flex max-h-52 flex-col overflow-y-auto`}
+                className={`${select.panel} ${kindsUp ? select.panelUp : select.panelDown}`}
               >
                 {GAIN_KIND.map((k) => {
                   const on = f.kinds.includes(k);
@@ -566,7 +578,7 @@ export default function ItemForm({
                       onClick={() =>
                         set('kinds', on ? f.kinds.filter((x) => x !== k) : [...f.kinds, k])
                       }
-                      className={`${option.base} ${option.sm} ${on ? option.flatOn : option.flat}`}
+                      className={`${select.option} ${on ? select.optionOn : ''}`}
                     >
                       {/* 未选中行留一个空位（`opacity-0`）而不是不渲染：否则行文字会左右跳 */}
                       <Icon
@@ -582,13 +594,13 @@ export default function ItemForm({
                 })}
 
                 {f.kinds.length ? (
-                  /* 与上面的选项之间拉一条细线：它是另一种动作，不该被读成"列表里的第 19 项" */
-                  <div className="mt-0.5 border-t border-line-faint pt-1">
+                  /* 放底栏（参考稿 `.sel-foot`）：它是整表动作，不该被读成"列表里的第 19 项" */
+                  <div className={select.foot}>
                     <button
                       type="button"
                       disabled={busy}
                       onClick={() => set('kinds', [])}
-                      className={`${btn.base} ${btn.sm} ${btn.ghost} self-start`}
+                      className={`${btn.base} ${btn.sm} ${btn.ghost}`}
                     >
                       <Icon name="restore" size={12} />
                       清空已选（{f.kinds.length}）
