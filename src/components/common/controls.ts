@@ -152,7 +152,8 @@ export const tag = {
  * 就只能去和 `base` 的 `px-3.5 py-2.5` 打架，而同属性类名相撞由 Tailwind 生成顺序决胜，不能赌。
  */
 export const option = {
-  base: 'flex w-full cursor-pointer items-center gap-2.5 border text-left transition-colors duration-220 ease-genso',
+  /** 骨架：不含圆角、内缩与描边 —— 那三样归尺寸档与状态档（见文件头纪律 2） */
+  base: 'flex w-full cursor-pointer items-center gap-2.5 text-left transition-colors duration-220 ease-genso',
   /** 常规档：整行选项（账号选择这类"大点击目标"），参考稿 `.opt` 原规格 */
   md: 'rounded-md px-3.5 py-2.5',
   /**
@@ -160,8 +161,19 @@ export const option = {
    * 200px 高的面板只放得下五行；这里 32px + 12px 字，同屏能看七行。
    */
   sm: 'h-8 rounded-sm px-3 text-sm',
-  off: 'border-line bg-fill hover:bg-fill-2',
-  on: 'border-line bg-fill-2 shadow-ring',
+  /**
+   * 描边形态 —— 成组出现在弹层里的大行（账号选择 / 账号勾选）：行与行是**并列的卡片**，
+   * 需要各自一圈框来分界，底色与描边都由行自己画。
+   */
+  off: 'border border-line bg-fill hover:bg-fill-2',
+  on: 'border border-line bg-fill-2 shadow-ring',
+  /**
+   * 扁平形态 —— **浮层列表内**的行（下拉菜单）：外层浮层已经有描边、底色与阴影，
+   * 行再画一圈框就是"盒子里套盒子"（用户 2026-09-29 反馈"选项外面还套了一层"）。
+   * 分界改由 hover / 选中的底色承担：hover 填一档，选中转金（与 `chip.on` 同一套"选中=金"）。
+   */
+  flat: 'rounded-sm hover:bg-fill-2',
+  flatOn: 'rounded-sm bg-gold-soft text-gold-hi',
 } as const;
 
 /** 浮层（参考稿 §9 `.sel-p` / §11 `.md-note` / `.pop-b`） */

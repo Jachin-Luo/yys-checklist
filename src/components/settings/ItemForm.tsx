@@ -552,7 +552,7 @@ export default function ItemForm({
                 role="listbox"
                 aria-multiselectable="true"
                 aria-label="奖励类型（可多选）"
-                className={`${popover} absolute left-0 right-0 top-full z-40 mt-1 flex max-h-52 flex-col gap-1 overflow-y-auto`}
+                className={`${popover} absolute left-0 right-0 top-full z-40 mt-1 flex max-h-52 flex-col overflow-y-auto`}
               >
                 {GAIN_KIND.map((k) => {
                   const on = f.kinds.includes(k);
@@ -566,7 +566,7 @@ export default function ItemForm({
                       onClick={() =>
                         set('kinds', on ? f.kinds.filter((x) => x !== k) : [...f.kinds, k])
                       }
-                      className={`${option.base} ${option.sm} ${on ? option.on : option.off}`}
+                      className={`${option.base} ${option.sm} ${on ? option.flatOn : option.flat}`}
                     >
                       {/* 未选中行留一个空位（`opacity-0`）而不是不渲染：否则行文字会左右跳 */}
                       <Icon
@@ -582,15 +582,18 @@ export default function ItemForm({
                 })}
 
                 {f.kinds.length ? (
-                  <button
-                    type="button"
-                    disabled={busy}
-                    onClick={() => set('kinds', [])}
-                    className={`${btn.base} ${btn.sm} ${btn.ghost} self-start`}
-                  >
-                    <Icon name="restore" size={12} />
-                    清空已选（{f.kinds.length}）
-                  </button>
+                  /* 与上面的选项之间拉一条细线：它是另一种动作，不该被读成"列表里的第 19 项" */
+                  <div className="mt-0.5 border-t border-line-faint pt-1">
+                    <button
+                      type="button"
+                      disabled={busy}
+                      onClick={() => set('kinds', [])}
+                      className={`${btn.base} ${btn.sm} ${btn.ghost} self-start`}
+                    >
+                      <Icon name="restore" size={12} />
+                      清空已选（{f.kinds.length}）
+                    </button>
+                  </div>
                 ) : null}
               </div>
             ) : null}
