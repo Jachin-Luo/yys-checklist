@@ -28,7 +28,7 @@
 
 | 类型 | 说明 |
 | --- | --- |
-| `Item` | 条目实体（周期、痛感来源字段、`gain`、时间窗、`isAutoHub` 等）。**注意：字段 `reward` / `entry` / `action` 已被有意删除**，文件内有长注释说明原因 |
+| `Item` | 条目实体（周期、奖励类型与 `gain`、时间窗、`isAutoHub` 等）。**注意：字段 `reward` / `entry` / `action` 已被有意删除**，文件内有长注释说明原因 |
 | `Gain` | 固定（保底）收益，三个可选数值字段：`jade`（勾玉）、`blackFrag`（黑碎）、`blueTicket`（蓝票）。**缺省 = 收益浮动，不进统计** |
 | `Meta` | 元数据：`version`、`dataVersion`、`resetHour`（= 0）、`dicts` 等 |
 | `DictEntry` / `SortOption` / `ViewDefaults` | 字典行、排序选项、视图默认值 |
@@ -155,19 +155,18 @@ src/domain/enums.ts 的字面量联合类型  ←── 双向校验 ──→  
 
 | 模块 | 导出符号 | 用途 |
 | --- | --- | --- |
-| `enums.ts` | `CYCLE` / `Cycle`、`EVENT_CYCLE`、`GAIN_KIND` / `GainKind`、`TOP_GAIN_KIND`、`SORT_BY` / `SortBy`、`DICT_TYPE`、`ORIGIN` / `Origin`、`GAIN_CURRENCY` / `GainCurrency` | 编译期唯一的枚举真相（`DICT_TYPE` 常量本身被 `tools/build.js` 提取做双向校验，故即使无 TS 引用也保留） |
+| `enums.ts` | `CYCLE` / `Cycle`、`GAIN_KIND` / `GainKind`、`SORT_BY` / `SortBy`、`DICT_TYPE`、`ORIGIN` / `Origin`、`GAIN_CURRENCY` / `GainCurrency` | 编译期唯一的枚举真相（`DICT_TYPE` 常量本身被 `tools/build.js` 提取做双向校验，故即使无 TS 引用也保留）。⚠️ `EVENT_CYCLE` / `TOP_GAIN_KIND` 已于 2026-09-28 退场、`GAIN_KIND` 于 2026-09-30 由 18 类收口到 9 类 —— 别再按旧口径引用 |
 | `reset.ts` | `ResetCtx`、`periodStartOf`、`periodEndOf`、`mergeChecked`、`isArchived`、`activeItems` | 周期重置（**时间戳比对，不用定时器**）与到期过滤 |
 | `merge.ts` | `mergeItems`、`effectiveView`、`emptyOverrides`、`buildMeta`；再导出 `mergeChecked`、`ResetCtx` | 种子 + 覆盖层合并规则（全项目唯一）：隐藏 → 盖预设改写 → 追加自建 |
 | `itemDraft.ts` / `itemPatch.ts` | `applyDraft` / `draftFromItem` / `cleanGain`；`applyPatch` / `diffPatch` / `sanitizePatches` / `hasPatch` | 录入草稿与预设改写的**数据规则**（空值语义、改写求差、外部字节净化），Mock 与备份导入共用 |
-| `weight.ts` | `weightOf`、`cycleRank`、`WEIGHT_LEGEND` | 痛感分计算与图例 |
-| `sort.ts` | `SortContext`、`effectiveSortBy`、`seedOrder`、`moveBefore`、`moveAfter`、`moveWithinGroup`、`buildComparator`、`VisibilityContext`、`isVisible` | 排序、置顶、自定义顺序、可见性 |
+| `sort.ts` | `SortContext`（含 `dbIndex`）、`effectiveSortBy`、`seedOrder`、`moveBefore`、`moveAfter`、`moveWithinGroup`、`cycleRank`、`buildComparator`、`VisibilityContext`、`isVisible` | 排序（**默认按条目库顺序**）、置顶、自定义顺序、可见性。`weight.ts` 已于 2026-09-30 随痛感分退场删除（`cycleRank` 迁入本文件） |
 | `countdown.ts` | `parseTs`、`daysLeft`、`DeadlineLevel`、`DeadlineBadge`、`deadlineBadge`、`TimeWindowState`、`TimeWindow`、`timeWindow`、`appliesToday` | 截止倒计时与时间窗状态（**只提示，不限制勾选**） |
 | `stats.ts` | `RangeGain` / `RangeDayGain`、`summarizeRangeGain`（**周期进度口径 `StatPeriod` / `GainSummary` / `GainReport` / `periodItems` / `summarizeGain` 已于 2026-09-29 删除**：自 2026-09-15 改版起无页面消费，只剩自己的单测） | **按日期区间**的收益累计（统计页改版后的唯一统计路径，只吃 `gain`） |
 | `checkLog.ts` | `LogDays`、`LOG_KEEP_DAYS`(90)、`dayKeyOf` / `dayKey` / `keyToTs` / `shiftDayKey`、`dayCount`、`addEntry`、`removeEntrySince` / `removeEntriesSince`、`pruneDays`、`eachDay` | 勾选日志（按日期分桶的历史）：幂等写入、按周期起点回退、90 天修剪、区间枚举 |
 | `calendar.ts` | `CalendarCell` / `MonthGrid`、`WEEKDAY_HEAD`、`monthTitle`、`buildMonthGrid` | 月历网格排版（周一起始、固定 6 行、含前后补位格） |
 | `autoDaily.ts` | `hubItem`、`isAutoDailyCandidate`、`dataDefaultAutoSet`、`effectiveAutoSet`、`isCovered`、`hiddenByCover`、`cascadeTargets`、`cascadeBatch` | 一键日常覆盖集合与级联 |
 | `backup.ts` | `MAX_BUNDLE_CHARS`(4_000_000)、`STALE_DAYS`(45)、`BundleSummary`（含 `logDays` / `guildTime` / `plans`）、`ValidateResult`、`summarize`、`validateBundle`、`Freshness`、`dataFreshness`、`serializeBundle`、`parseBundleText` | 备份文本的校验、归一化与新鲜度。缺字段一律补空值而非判为损坏（旧备份没有 `log` / `guildTime` / `plans`）；寄养记录**逐条校验必需字段**（畸形记录会进 `recordPoints` 递推，宁可少几条） |
-| `cardDisplay.ts` | `DEFAULT_CARD_DISPLAY`、`CardPresetKey` / `CardPreset` / `CARD_PRESETS`（极简 / 简要 / 完整）、`CARD_FIELDS`、`effectiveCardDisplay`、`matchPreset`、`hiddenFieldCount` | 清单卡片**显示哪些字段**（2026-09-16 新增，存在 `view.card`）。预设只是"一次设六项"的快捷键，改任一项后 `matchPreset` 返回 null；默认 = 全部显示，故不改变既有观感 |
+| `cardDisplay.ts` | `DEFAULT_CARD_DISPLAY`、`CardPresetKey` / `CardPreset` / `CARD_PRESETS`（极简 / 简要 / 完整）、`CARD_FIELDS`、`CardScope` / `CARD_SCOPES` / `CARD_SCOPE_KEYS`、`effectiveCardDisplay`、`effectiveCardByScope`、`matchPreset`、`hiddenFieldCount` | 清单卡片**显示哪些字段**（2026-09-16 新增，存在 `view.card`）。**2026-09-30 起按页面四套**（`CardScope` = 今日 / 本周 / 本月 / 限时，与 `NavKey` 同名）：`effectiveCardByScope` 把"缺页 / 缺字段 / 旧单份形状"一律归一成四页各一份**独立副本**（改一页连坐另外三页是这个功能最容易出的静默 bug）。预设只是"一次设六项"的快捷键，改任一项后 `matchPreset` 返回 null；默认 = 全部显示，故不改变既有观感 |
 | `guildTime.ts` | `GuildTimePrefs`（类型在 `api/types`，此处 re-export）、`isValidHm`、`guildTimeTargets`、`configuredCount`、`applyGuildTime`、`applyGuildTimeAll`、`withGuildTime` | 寮时间在展示层叠加（**不写回主数据**）。2026-09-16 起配置本身是**账号级**分片 |
 | `sync.ts` | `SyncPartKey` / `SyncPart` / `SYNC_PARTS`、`SyncSource` / `SyncPatch`、`defaultSyncKeys`、`applyParts`、`describeKeys` | 账号间配置同步：可同步内容清单 + **字段级接管**规则（只勾「一键日常覆盖」时不动目标的筛选与置顶）。勾选状态与日志刻意不在清单内 |
 | `steps.ts` | `isGroup`、`stepIds`、`stepTotal`、`doneSteps`、`isCardDone`、`currentStepIndex`、`stepView` | **子步骤派生**（2026-09-28，取代旧的 `grouping.ts`）：「做 N 次」写进数据（`Item.children`），一张卡 = 一个条目、一格 = 一步。进度 = 真实已完成的步数；`stepView` 是"子步骤缺省继承父"的唯一实现处。旧版按名字 `k/N` 猜分组 + 一整套缺员补丁随本版删除 |
@@ -185,20 +184,33 @@ src/domain/enums.ts 的字面量联合类型  ←── 双向校验 ──→  
 - 前台刷新由 `hooks/usePeriodRefresh.ts` 在分钟边界 / 窗口聚焦 / 可见性变化时触发，只重算内存态、不写盘。
 - 结论：**不要在页面里判周期**，也不要在 store 里存「今天是否重置过」。
 
-### 7.2 痛感分与排序
+### 7.2 排序
 
-```text
-痛感分 = 周期权重 + 稀缺性加成 + 固定收益加成
-周期：限时 40  >  每月 30  >  每周 20  >  每日 10
-稀缺性：有 deadline 或 until  +15
-固定收益：标注了 gain（具体数值）  +10
-```
-
-- 实现在 `domain/weight.weightOf` / `cycleRank`。**痛感只用于排序**（2026-09-15 收敛）：
-  原先的 `minWeight` 筛选门槛、今日页「本周高痛感还剩 N 项」警示条、`missGroups` 漏失分级
-  与 `WEIGHT_LEGEND` 图例均已删除 —— 界面里除了「默认排序」不会再出现痛感的任何出口。
-- 一键日常入口恒排第 0 位：`domain/sort.buildComparator` 的前置特判，**不参与上面的比较**。
-- 排序优先级：星标置顶 > （自定义顺序若已调过则接管）> 痛感分；同分兜底依次为截止日 → 周期 → 自定义顺序。
+- **默认排序 = 条目库顺序**（2026-09-30，用户："默认排序不用痛感算法了，就按照 db 的顺序来"）：
+  即 `items.db.json` / `limited.db.json` 里的**书写顺序**（活动批就按活动批的顺序）。
+  实现在 `domain/sort.buildComparator` 的默认分支（`sortBy === 'db'`，比较 `ctx.dbIndex` ——
+  由调用方现算的 `items` 下标）。排列这件事由此完全交还给**数据文件的作者**：
+  **想调顺序就改数据文件，不要为此加排序特判**。已按这个口径做过一次：2026-09-30 把 daily 段
+  14 条 `autoDaily: true`（被「一键日常」覆盖的那批）挪到段末，让需要手动处理的排在前面。
+  ⚠️ 它只决定**默认排序** —— 用户拖过顺序（`overrides.order` 非空）时自定义顺序接管，
+  数据文件里的位置对他不生效。
+- 优先级（`buildComparator` 的三个分支，顺序不可换）：
+  **一键日常入口恒第 0 位**（前置特判，不参与任何比较）> **星标置顶**（压过排序规则）>
+  **按 `sortBy`**：库顺序（默认）/ 周期 / 截止 / 自定义 / 名称。
+  后几种"规则排序"的次键也一律取库内序号 —— 它们早已不是可用选项，只为让结果确定。
+- **自定义顺序接管默认**：用户一旦在「设置 → 条目管理」调过顺序（`overrides.order` 非空），
+  `domain/sort.effectiveSortBy` 判定为 `custom` 并直接接管；清空后自动退回库顺序。
+  清空入口是条目管理标题右侧的「**恢复默认顺序**」（2026-09-30 新增，只在 `order` 非空时出现，
+  只清 `order`、不动自建条目 / 隐藏记录 / 预设改写）—— 此前**没有单清顺序的退路**，
+  用户"看不到库顺序"时只能去清掉整个覆盖层（那会连自建条目一起没）。
+- **痛感分已整体退场**（2026-09-30）：原先 `weightOf` = 周期权重（限时 40 > 每月 30 > 每周 20 > 每日 10）
+  + 稀缺性（有 `deadline` / `until` +15）+ 固定收益（有 `gain` +10），是默认排序的唯一依据。
+  它在库里**没有作者** —— 分数是派生的、用户改不了，也无从预期"为什么这条在上面"，
+  于是连函数带 `domain/weight.ts` 一起删除（`cycleRank` → `domain/sort.ts`，只作兜底）。
+  历史的三个出口更早退场：`minWeight` 门槛、今日页「本周高痛感还剩 N 项」警示条、
+  `missGroups` 漏失分级与 `WEIGHT_LEGEND` 图例（2026-09-15 / 09-28）。
+  数据层的痕迹同步清掉：`meta.weightNote` 字段与 `Meta` 类型定义删除，排序口径并入 `meta.viewNote`；
+  `sortOptions` 的 `weight` 项改为 `db`；`viewDefaults.sortBy` 与 `users.db.json` 的 `viewPrefs.sortBy` 一并改为 `db`。
 - 可见性：`domain/sort.isVisible`（只剩「今天是否适用」`days` 一条）与 `domain/autoDaily.hiddenByCover`（一键日常覆盖导致隐藏）。两条"界面碰不到却仍在生效"的筛选已按同一理由整体删除：**「隐藏已完成」**（2026-09-24，当时已无 UI 却仍在过滤里生效，会在按次数聚合之前抽走已勾条目）与**「按奖励类型筛选」`showKinds`**（2026-09-28，随 `SHOW_KIND_FILTER` 开关连契约字段一起退场，此前因"不动契约形状"暂留数据层）—— 都属"用户改不了、也看不出"的隐患。
 
 ### 7.3 一键日常：配置 ≠ 状态

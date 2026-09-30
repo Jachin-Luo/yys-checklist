@@ -18,6 +18,7 @@
  * 真正读目标账号、写目标账号的编排在 `services/profileSync`。
  */
 import type { GuildTimePrefs, ItemOverrides, NurturePlans, ViewPrefs } from '../api/types';
+import { effectiveCardByScope } from './cardDisplay';
 
 export type SyncPartKey =
   | 'guildTime'
@@ -143,8 +144,10 @@ export function applyParts(
     }
     if (pick.has('viewPrefs')) {
       view.pinned = [...source.view.pinned];
-      /* 卡片信息密度也属于"清单显示偏好"：多号对"卡片要多详细"的偏好通常一致 */
-      view.card = source.view.card ? { ...source.view.card } : undefined;
+      /* 卡片信息密度也属于"清单显示偏好"：多号对"卡片要多详细"的偏好通常一致。
+         用 `effectiveCardByScope` 重建而不是浅拷外层 —— 直接 `{ ...card }` 会让两个账号
+         共享同一批内层对象（四页各一个），改一页两边一起变 */
+      view.card = source.view.card ? effectiveCardByScope(source.view.card) : undefined;
     }
     patch.view = view;
   }

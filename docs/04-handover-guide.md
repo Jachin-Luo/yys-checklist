@@ -36,7 +36,7 @@ npm run dev          # http://localhost:5173/
    - 勾一条看勾选是否落盘（刷新页面仍在）、统计页进度条是否变化；
    - 在「设置 · 数据备份」导出一次，确认文本能出现；
    - 切到手机宽度（< 768px）确认切到底部 Tab 布局。
-4. 需要理解数据时，直接从 `src/db/items.db.json` 挑一条对照 `domain/weight.ts` 算一遍痛感分。
+4. 需要理解数据时，直接打开 `src/db/items.db.json` —— **清单的默认顺序就是它里面的书写顺序**（2026-09-30 起），挑一条对着字段表读即可。
 
 ## 3. 改动任务手册
 
@@ -47,7 +47,7 @@ npm run dev          # http://localhost:5173/
 | 触点文件 | `src/db/items.db.json`（真正的常驻：每日 / 每周 / 每月）、`src/db/limited.db.json`（非常驻：活动期每日 / 限时活动，含版本活动）、`src/db/dataVersion.db.json`（版本行）、`src/db/meta.db.json`（`meta.dataVersion`） |
 | 需要同步 | 若新增字段 → `tools/build.js` 的字段白名单 + `schema/item.schema.json`；若引入新枚举 code → `src/domain/enums.ts` 与 `meta.db.json` 的 `dicts` 两侧同步；若带固定收益 → 填 `gain` 的 `jade` / `blackFrag` / `blueTicket` 数值（`gainKind` 是奖励类型枚举，与 `GAIN_KIND` 对齐；不写 `gain` 即视为浮动、不进统计） |
 | 必须跑 | `npm run db:check` → `npm test` → `node tools/verify.js` |
-| 验证 | 开发服务里能在对应页面看到条目；痛感分排序与 `weightOf` 预期一致；带 `gain` 的条目会让统计页对应进度条变化 |
+| 验证 | 开发服务里能在对应页面看到条目；**清单里的先后与数据文件里的书写顺序一致**（默认排序，2026-09-30 起）；带 `gain` 的条目会让统计页对应进度条变化 |
 
 硬性约束（`tools/build.js` 会拦）：
 
@@ -123,8 +123,8 @@ npm run dev          # http://localhost:5173/
 | PWA / 离线 | **已接入**（2026-09-29，不再是待办）：`vite-plugin-pwa`（`generateSW`）产出 `sw.js` + `manifest.webmanifest`、19 条 precache；图标由 `npm run icons` 从 `favicon.svg` 生成；更新时机交给用户（`registerType: 'prompt'` + 设置页「应用更新」），**不静默刷新** | `vite.config.ts`、`src/services/pwa.ts`、`src/stores/pwa.ts`、`tools/make-icons.mjs`、`index.html` |
 | 数据快照热更新 | 不做：条目库随包发布 | `src/components/settings/DataVersionSection.tsx` |
 | 提醒能力 | 2026-09-11 已整体下线（非待办）：无浏览器通知，相关存储键已删 | —— |
-| 排序控件 | 按产品决策取消：排序由「默认痛感 + 置顶 + 自定义顺序」决定；`ViewPrefs.sortBy` 字段保留在数据层 | `src/domain/sort.ts`（原控件 `ViewBar` 已于 2026-09-28 删除） |
-| 痛感的其他出口 | 2026-09-15 收敛为「只作默认排序键」：`minWeight` 门槛（筛选项 + `isVisible` 判断）、今日页高痛感警示条（原 `SHOW_WEEKLY_ALERT`）、`missGroups` 漏失分级、`WEIGHT_LEGEND` 图例 **全部删除**（不是隐藏） | `domain/sort.ts`、`domain/stats.ts`、`domain/weight.ts`、`pages/TodayPage.tsx`、`components/common/OnboardingDialog.tsx` |
+| 排序控件 | 按产品决策取消：排序由「**默认按条目库顺序** + 置顶 + 自定义顺序」决定（2026-09-30 起默认不再是痛感分）；`ViewPrefs.sortBy` 字段保留在数据层 | `src/domain/sort.ts`（原控件 `ViewBar` 已于 2026-09-28 删除） |
+| 痛感的其他出口 | 2026-09-15 收敛为「只作默认排序键」：`minWeight` 门槛（筛选项 + `isVisible` 判断）、今日页高痛感警示条（原 `SHOW_WEEKLY_ALERT`）、`missGroups` 漏失分级、`WEIGHT_LEGEND` 图例 **全部删除**（不是隐藏）。**2026-09-30 连痛感分本体也退场**：默认排序改按条目库顺序，`domain/weight.ts` 整个文件删除 | `pages/TodayPage.tsx`、`components/common/OnboardingDialog.tsx`、原 `domain/weight.ts`（已删）、`domain/sort.ts`（`cycleRank` 迁入） |
 | 读取游戏数据 | **长期不做**，属于产品定位而非待办 | `README.md` |
 
 ### 已登记但暂不修复的技术债（2026-09-14 评估）

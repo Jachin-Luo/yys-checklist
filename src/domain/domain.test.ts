@@ -5,7 +5,6 @@
 import { describe, expect, it } from 'vitest';
 import { isArchived, mergeChecked, periodEndOf, periodStartOf, type ResetCtx } from './reset';
 import { buildComparator, isVisible } from './sort';
-import { weightOf } from './weight';
 import { effectiveView, mergeItems } from './merge';
 import { appliesToday, deadlineBadge, formatRemain, parseTs, timeWindow } from './countdown';
 import type { Item, ViewDefaults } from '../api/types';
@@ -91,21 +90,9 @@ describe('isArchived：until 当天仍显示，次日归档', () => {
   });
 });
 
-describe('weightOf：痛感分派生（取代主观价值档）', () => {
-  it('周期权重 + 稀缺性 + 固定收益', () => {
-    expect(weightOf(item({ cycle: 'daily' }))).toBe(10);
-    expect(weightOf(item({ cycle: 'weekly' }))).toBe(20);
-    expect(weightOf(item({ cycle: 'monthly' }))).toBe(30);
-    expect(weightOf(item({ cycle: 'daily', deadline: '2026-10-06' }))).toBe(25);
-    expect(weightOf(item({ cycle: 'monthly', gain: { jade: 20 } }))).toBe(40);
-    expect(weightOf(item({ cycle: 'limited', until: '2026-10-07', gain: { jade: 20 } }))).toBe(65);
-  });
-
-  it('isAutoHub 虽只有 10 分，但不靠它排序（由 compare 特判）', () => {
-    const hub = item({ id: 'hub', isAutoHub: true });
-    expect(weightOf(hub)).toBe(10);
-  });
-});
+/* 2026-09-30：原先的「weightOf 痛感分派生」整组用例删除 —— 痛感分不再是排序依据，
+   函数本身也随 `domain/weight.ts` 一起退场（用户："默认排序不用痛感算法了，就按照 db 的顺序来"）。
+   默认排序改按**条目库顺序**，所以下面每个用例都要给 `dbIndex`（库内序号）。 */
 
 describe('buildComparator：优先级 ① 一键入口 → ② 置顶 → ③ sortBy（D1）', () => {
   const hub = item({ id: 'hub', name: '一键日常', isAutoHub: true });
@@ -113,47 +100,79 @@ describe('buildComparator：优先级 ① 一键入口 → ② 置顶 → ③ so
   const low = item({ id: 'daily1', name: '每日', cycle: 'daily' });
   const pinned = item({ id: 'pin1', name: '置顶项', cycle: 'daily' });
 
-  it('isAutoHub 恒第 0 位，即使痛感分最低', () => {
-    const cmp = buildComparator({ sortBy: 'weight', pinned: [], order: [] });
+  /** 库内序号：按给定顺序生成 —— 这个顺序就是"数据文件里的书写顺序" */
+  const dbOf = (...list: Item[]) => new Map(list.map((it, i) => [it.id, i] as const));
+
+  it('isAutoHub 恒第 0 位 —— 即使它在库里排最后', () => {
+    const cmp = buildComparator({ sortBy: 'db', pinned: [], order: [], dbIndex: dbOf(high, low, hub) });
     const sorted = [high, low, hub].sort(cmp);
     expect(sorted[0].id).toBe('hub');
     expect(cmp(hub, high)).toBeLessThan(0);
   });
 
-  it('☆ 置顶压过排序规则，但压不过一键入口', () => {
-    const cmp = buildComparator({ sortBy: 'weight', pinned: ['pin1'], order: [] });
+  it('☆ 置顶压过排序规则（其余按库顺序），但压不过一键入口', () => {
+    const cmp = buildComparator({
+      sortBy: 'db',
+      pinned: ['pin1'],
+      order: [],
+      dbIndex: dbOf(low, high, pinned, hub),
+    });
     const sorted = [low, high, pinned, hub].sort(cmp);
-    expect(sorted.map((i) => i.id)).toEqual(['hub', 'pin1', 'lim1', 'daily1']);
+    /* 变量名 low / high 对应的 id 是 daily1 / lim1 —— 置顶之后按库内顺序（daily1 在前） */
+    expect(sorted.map((i) => i.id)).toEqual(['hub', 'pin1', 'daily1', 'lim1']);
   });
 
-  it('weight 降序；同分时 deadline 近的靠前', () => {
-    const cmp = buildComparator({ sortBy: 'weight', pinned: [], order: [] });
-    const a = item({ id: 'a', cycle: 'daily', deadline: '2026-09-20' });
-    const b = item({ id: 'b', cycle: 'daily', deadline: '2026-09-12' });
-    expect([a, b].sort(cmp)[0].id).toBe('b');
+  it('默认（db）：原样保持条目库顺序 —— 周期 / 收益 / 截止都不参与比较', () => {
+    const first = item({ id: 'a', cycle: 'daily' });
+    const second = item({ id: 'b', cycle: 'limited', gain: { jade: 99 }, deadline: '2026-09-30' });
+    const third = item({ id: 'c', cycle: 'monthly' });
+    const cmp = buildComparator({ sortBy: 'db', pinned: [], order: [], dbIndex: dbOf(first, second, third) });
+    /* 故意打乱输入顺序：排完必须回到库里的 a → b → c（痛感分时代这里会是 c → b → a） */
+    expect([third, first, second].sort(cmp).map((i) => i.id)).toEqual(['a', 'b', 'c']);
+    expect(cmp(second, first)).toBeGreaterThan(0);
   });
 
   it('deadline 排序：有截止的按剩余天数升序，无截止一律沉底', () => {
-    const cmp = buildComparator({ sortBy: 'deadline', pinned: [], order: [] });
     const none = item({ id: 'none', name: '无截止' });
     const far = item({ id: 'far', deadline: '2026-12-31' });
     const near = item({ id: 'near', deadline: '2026-09-12' });
+    const cmp = buildComparator({
+      sortBy: 'deadline',
+      pinned: [],
+      order: [],
+      dbIndex: dbOf(none, far, near),
+    });
     expect([none, far, near].sort(cmp).map((i) => i.id)).toEqual(['near', 'far', 'none']);
   });
 
-  it('name 按字典序；cycle 按周期顺序', () => {
-    expect([item({ id: 'b', name: 'B项' }), item({ id: 'a', name: 'A项' })]
-      .sort(buildComparator({ sortBy: 'name', pinned: [], order: [] })).map((i) => i.id)).toEqual(['a', 'b']);
-    const byCycle = [item({ id: 'd', cycle: 'daily' }), item({ id: 'o', cycle: 'limited' })]
-      .sort(buildComparator({ sortBy: 'cycle', pinned: [], order: [] }));
+  it('name 按字典序；cycle 按周期顺序（次键一律库内顺序）', () => {
+    const b = item({ id: 'b', name: 'B项' });
+    const a = item({ id: 'a', name: 'A项' });
+    expect(
+      [b, a]
+        .sort(buildComparator({ sortBy: 'name', pinned: [], order: [], dbIndex: dbOf(b, a) }))
+        .map((i) => i.id),
+    ).toEqual(['a', 'b']);
+
+    const d = item({ id: 'd', cycle: 'daily' });
+    const o = item({ id: 'o', cycle: 'limited' });
+    const byCycle = [d, o].sort(
+      buildComparator({ sortBy: 'cycle', pinned: [], order: [], dbIndex: dbOf(d, o) }),
+    );
     expect(byCycle[0].cycle).toBe('limited');
   });
 
-  it('custom：按 order 全序，新条目（不在 order 里）沉底', () => {
-    const cmp = buildComparator({ sortBy: 'custom', pinned: [], order: ['d', 'o'] });
+  it('custom：按 order 全序，不在 order 里的新条目按库内顺序排在后面', () => {
+    const o = item({ id: 'o' });
+    const d = item({ id: 'd' });
     const fresh = item({ id: 'fresh', cycle: 'daily', name: '新条目' });
-    const sorted = [fresh, item({ id: 'o' }), item({ id: 'd' })].sort(cmp);
-    expect(sorted.map((i) => i.id)).toEqual(['d', 'o', 'fresh']);
+    const cmp = buildComparator({
+      sortBy: 'custom',
+      pinned: [],
+      order: ['d', 'o'],
+      dbIndex: dbOf(fresh, o, d),
+    });
+    expect([fresh, o, d].sort(cmp).map((i) => i.id)).toEqual(['d', 'o', 'fresh']);
   });
 });
 
@@ -224,7 +243,7 @@ describe('mergeItems / effectiveView：种子 + 覆盖层 → 有效数据（§2
   });
 
   it('effectiveView：账号偏好缺字段时回落默认值', () => {
-    const defaults: ViewDefaults = { sortBy: 'weight', minWeight: 0, pinned: [] };
+    const defaults: ViewDefaults = { sortBy: 'db', minWeight: 0, pinned: [] };
     const v = effectiveView(defaults, { profileId: 'p', sortBy: 'name' });
     expect(v.sortBy).toBe('name');
     expect(v.minWeight).toBe(0);

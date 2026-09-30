@@ -8,18 +8,28 @@ const CURRENCY_LABEL: Record<string, string> = {
 };
 
 /**
- * 币种三色徽章：**细描边 + 极淡同色底**，不做实心色块。
- * 三色本身保留（勾玉 / 黑碎 / 蓝票是业务语义，不能为了统一而抹掉区分度），
- * 但色阶都压进朱红金箔能共处的低饱和宝色区间。
+ * 有色徽章：**细描边 + 极淡同色底**，不做实心色块。
+ * 色阶都压进朱红金箔能共处的低饱和宝色区间。
  *
- * 色值在 `theme.css` 的 `--c-jade` / `--c-frag` / `--c-ticket`（**勾玉 2026-09-29 由墨绿改朱砂红**，
- * 取值依据与对比度算在那一处）。**有数值的与只有类型的徽章共用这一份映射** ——
- * 同一个币种在这一串里必须同色，分两份写迟早漂移。
+ * 色值在 `theme.css` 的 `--c-jade` / `--c-frag` / `--c-ticket` / `--c-tangerine` 与
+ * `--c-gold-hi`（**勾玉 2026-09-29 由墨绿改朱砂红**，取值依据与对比度都算在那一处）。
+ * **有数值的与只有类型的徽章共用这一份映射** —— 同一个类型在这一串里必须同色，
+ * 分两份写迟早漂移。
+ *
+ * 覆盖范围 2026-09-30 扩过一次（用户："给金币加上金色，体力加上橘色"）：此前**只有币种三色**
+ * 上色、其余一律中性灰，理由是"颜色在本项目是币种的读法"；扩到五支后口径改为
+ * **暖色 = 攒起来的东西**（币种 + 金币 + 体力），御魂 / 皮肤券 / SSR/SP 等仍走中性灰 ——
+ * 颜色要保有区分力，就不能人人都有。
+ *
+ * ⚠️ 金币用 `text-gold-hi` 而**不是** `text-gold`：`--c-gold` 是描边 / 纹样用的中间明度，
+ * 当 11px 文字用对比度不够（明版仅 ≈2.8:1）；`gold-hi` 那一档本就是"文字金"（明版 5.35:1）。
  */
-const CURRENCY_STYLE: Record<string, string> = {
+const KIND_STYLE: Record<string, string> = {
   jade: 'border-jade/40 bg-jade/10 text-jade',
   blackFrag: 'border-frag/40 bg-frag/10 text-frag',
   blueTicket: 'border-ticket/40 bg-ticket/10 text-ticket',
+  gold: 'border-gold/40 bg-gold/10 text-gold-hi',
+  stamina: 'border-tangerine/40 bg-tangerine/10 text-tangerine',
 };
 
 /**
@@ -40,8 +50,8 @@ const CURRENCY_STYLE: Record<string, string> = {
  *
  * ## 两条保留
  *
- * - **非币种类型仍用中性灰**（御魂 / 达摩 / 皮肤券 / 体力 / 经验…）：颜色在本项目是"币种"的
- *   读法，硬凑颜色会让那条读法失效；
+ * - **其余类型仍用中性灰**（御魂 / 皮肤券 / SSR/SP…）：颜色要保有区分力，就不能人人都有
+ *   （2026-09-30 口径放宽为"暖色 = 攒起来的东西"，金币与体力因此上色 —— 见上方 `KIND_STYLE`）；
  * - **`gain` 与 `kinds` 的显示开关各自独立**（`card.gain` / `card.kinds`）：调用方按开关传
  *   `undefined`，合并渲染不等于把两个开关并成一个。
  *
@@ -92,7 +102,7 @@ export function RewardBadges({
            * 数值单独走等宽（`font-mono` 用在这里 —— 保数字对齐，中文不跟着变宽）。
            */
           className={`inline-flex h-5 items-center rounded-full border px-2 text-xs ${
-            CURRENCY_STYLE[k] ?? 'border-line bg-fill text-ink-2'
+            KIND_STYLE[k] ?? 'border-line bg-fill text-ink-2'
           }`}
         >
           {CURRENCY_LABEL[k] ?? k}{' '}
@@ -108,7 +118,7 @@ export function RewardBadges({
              **漏写字号的元素不会报错，只会悄悄变成 16px**。
              册页稿后奖励块统一到 11px（`text-xs`）一族 */
           className={`inline-flex h-5 items-center rounded-full border border-dashed px-2 font-normal text-xs ${
-            CURRENCY_STYLE[k] ?? 'border-line text-ink-2'
+            KIND_STYLE[k] ?? 'border-line text-ink-2'
           }`}
         >
           {labels.get(k) ?? k}

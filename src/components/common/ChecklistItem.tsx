@@ -1,7 +1,7 @@
 import { memo } from 'react';
 import type { Item } from '../../api/types';
-import { DEFAULT_CARD_DISPLAY } from '../../domain/cardDisplay';
 import type { Cycle } from '../../domain/enums';
+import { useCardDisplay, type CardScope } from '../../hooks/useCardDisplay';
 import { LONG_PRESS_MS, useLongPress } from '../../hooks/useLongPress';
 import { useBreakpoint } from '../../hooks/useBreakpoint';
 import { useCheckStore } from '../../stores/check';
@@ -30,7 +30,7 @@ import { SnakeEye } from '../ornament';
  * | 通道 | 未完成 | 已完成 |
  * |---|---|---|
  * | 左侧 3px 竖条 + 上下菱形挂角 → 2026-09-24 起只留**圆头竖条** | `state-active` 靛蓝 | `crimson-soft` 暗朱 |
- * | 卡片底 | `surface`（纯白浮起） | `card-done`（主动沉下去） |
+ * | 行底 | `surface`（= `--c-card` 册页本色 —— 2026-09-30 起**行自带底**，行间仍靠行自己的 `border-t` 分隔） | `card-done`（主动沉下去） |
  * | 任务名 | 衬线 14.5px + 字距 .6px，`ink` | `ink-4` + 朱红划除线 |
  * | 底轨 2px | 空槽 | 朱红满格 |
  *
@@ -76,6 +76,11 @@ interface Props {
   item: Item;
   /** 在**标题行内**显示截止徽章（限时页用）—— 不独占右侧列，避免压窄正文导致备注提前折行 */
   showDeadline?: boolean;
+  /**
+   * 取哪一页的卡片显示配置（2026-09-30 按页拆分后新增）。**只有设置页的效果预览需要传**
+   * —— 清单页里卡片与页面一一对应，缺省由 `useCardDisplay` 从导航派生。
+   */
+  cardScope?: CardScope;
   dimmed?: boolean;
   /** 本页的「唯一高亮位」（金描边 + 淡金底）。全屏最多一处，已完成项自动失效 */
   highlight?: boolean;
@@ -103,6 +108,7 @@ const CYCLE_ICON: Record<Cycle, IconName> = {
 function ChecklistItem({
   item,
   showDeadline = false,
+  cardScope,
   dimmed = false,
   highlight = false,
   onToggle,
@@ -113,9 +119,10 @@ function ChecklistItem({
   const meta = useItemStore((s) => s.meta);
   const pinned = useViewStore((s) => s.view.pinned.includes(item.id));
   const togglePin = useViewStore((s) => s.togglePin);
-  /* 卡片显示哪些字段（2026-09-16 用户需求，设置页「视图偏好」）。
-     `?? DEFAULT` 只是类型兜底：store 里的 view 已过 `effectiveView`，实际总带 card。 */
-  const card = useViewStore((s) => s.view.card) ?? DEFAULT_CARD_DISPLAY;
+  /* 卡片显示哪些字段（2026-09-16；2026-09-30 起**按页面四套**、由 `useCardDisplay` 统一出口）。
+     不传 `cardScope` 就按当前页面取（hook 从导航派生）；设置页的「效果预览」必须显式传 ——
+     那时导航停在 `me`，不传就会拿到今日页那一套，而不是预览页签那一套。 */
+  const card = useCardDisplay(cardScope);
 
   const askPick = useUiStore((s) => s.askPick);
   const toggleInProfiles = useCheckStore((s) => s.toggleInProfiles);
@@ -162,11 +169,20 @@ function ChecklistItem({
       {...handlers}
       data-state={checked ? 'done' : 'open'}
       className={[
-        /* 账目行（册页稿 `.entry`）：不再是卡 —— 行直接铺在册页上，行间分隔线由
-           `CHECKLIST_GRID` 容器给（每行 `border-t`、首行豁免），hover 铺填充底 */
-        'group no-press-select relative flex cursor-pointer items-start gap-1.5 rounded-sm border-t border-line-soft px-3 py-2.5 transition-colors duration-150 ease-genso first:border-t-0',
-        checked ? 'bg-card-done' : 'hover:bg-fill',
-        isHighlight ? 'bg-gold-soft ring-1 ring-gold-line' : '',
+        /* 账目行（册页稿 `.entry`）：不再是卡 —— 行直接铺在册页上。
+           2026-09-30（用户："移动端滑动时没背景色容易晕"）：**每行自带册页底**
+           （`bg-surface` = `--c-card`；未完成最亮、已完成沉成 `card-done`），
+           行间**仍靠这行自己的 `border-t`** 分隔 —— 中途试过改成容器 `gap-px` 露画布色，
+           用户反馈"纯背景没边框很奇怪"：有底色之后，这根线正是让它读成**账目行**的那一笔。
+           三个底色**互斥写成一条三元**：Tailwind 里 `bg-surface` / `bg-card-done` /
+           `bg-gold-soft` 是同属性类，同时出现时谁生效由生成顺序决定，不能赌。
+           另：有底色后行不再要 `rounded-sm` —— 圆角会在相邻两行之间露出画布色的小弧口。 */
+        'group no-press-select relative flex cursor-pointer items-start gap-1.5 border-t border-line-soft px-3 py-2.5 transition-colors duration-150 ease-genso first:border-t-0',
+        isHighlight
+          ? 'bg-gold-soft ring-1 ring-gold-line'
+          : checked
+            ? 'bg-card-done'
+            : 'bg-surface hover:bg-fill',
         pressing ? 'scale-[0.985]' : '',
         opacity,
       ].join(' ')}

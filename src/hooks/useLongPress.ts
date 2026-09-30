@@ -6,23 +6,48 @@ import { useCallback, useEffect, useRef, useState } from 'react';
  * ## 为什么必须自己写
  *
  * 卡片本身「整卡点击 = 勾选」（产品决策），长按要在同一个元素上叠一层，两者必须互不干扰。
- * 三条规则都不能省：
+ * 四条规则都不能省：
  *
  *   1. **位移即取消**：触摸列表里"按住"和"开始滚动"的起始动作一模一样，
  *      不给位移设阈值（默认 8px）会把每一次滚动都变成一次长按；
- *   2. **触发后吞掉尾随 click**：`pointerup` 之后浏览器仍会派发一次 `click`，
+ *   2. **进入按压态前先静默一段**（2026-09-30 加，见 `PRESS_DELAY_MS`）——
+ *      只靠第 1 条挡不住滑动，理由写在那条常量的注释里；
+ *   3. **触发后吞掉尾随 click**：`pointerup` 之后浏览器仍会派发一次 `click`，
  *      不吞掉的话用户"长按选账号"会顺手把**当前账号**也勾上 —— 这是最隐蔽的一类 bug；
- *   3. **右键直接触发**（PC，2026-09-16 用户确认要支持）：右键本身已是明确意图，
+ *   4. **右键直接触发**（PC，2026-09-16 用户确认要支持）：右键本身已是明确意图，
  *      不用等 500ms，也不该走进度条 —— 那只会让"按下到弹层"多出一次无谓等待。
  *
  * ## 视觉反馈
  *
- * hook 只暴露 `pressing` 状态（"正按住、尚未达成"），样式留在调用方 ——
+ * hook 只暴露 `pressing` 状态（"按住且已过预备期、尚未达成"），样式留在调用方 ——
  * 它对"长按"这件事是通用的，不该内嵌某张卡片的样式。
  * 达成时顺带触发一次短震动（`navigator.vibrate` 在 iOS Safari 不存在，静默跳过），
  * 让"手指遮住屏幕"的情况下也能确认操作已生效。
  */
 export const LONG_PRESS_MS = 500;
+/**
+ * 进入按压态前的**静默预备期**（2026-09-30 加）。
+ *
+ * 熬过它才 `setPressing(true)`、进度条才开始跑；期间若发生位移或 `pointercancel`，
+ * 一切静默收场 —— 进度条与卡片缩放**一次都不会出现**。
+ *
+ * ## 为什么非加不可
+ *
+ * 只靠"位移即取消"挡不住滑动：**浏览器要先判定出滚动，才会派发 `pointercancel`**，
+ * 而 `pointermove` 在那之前可能一次都不派发（滚动已被浏览器接管的部分不再上报）。
+ * 于是原先"`pointerdown` 即显示按压态"的写法，在**每一次上下滑动**时都会先闪一下
+ * 进度条 + 卡片缩一下，等 `pointercancel` 到达才收回 —— 用户反馈的原话是
+ * "长按容易误触，上下滑动时就会出现进度条"。真实滚动判定落在几十到一百多毫秒之间，
+ * 这段静默期正好把它盖住。
+ *
+ * ## 与 `LONG_PRESS_MS` 的分工
+ *
+ * 触发总时长 = `PRESS_DELAY_MS + LONG_PRESS_MS`（约 0.62s）。
+ * **进度条动画时长仍是 `LONG_PRESS_MS`** —— 它从预备期结束才开始跑，跑满那一刻正好达成，
+ * 所以调用方（`transition-[width] duration-500`）不需要任何改动，视觉与行为也不会错位。
+ * "点一下"（远短于预备期就抬手）完全不受影响，仍是普通勾选。
+ */
+export const PRESS_DELAY_MS = 120;
 /** 按住途中的位移容差：超过它视为滚动，取消长按 */
 const MOVE_TOLERANCE = 8;
 
@@ -50,7 +75,7 @@ export interface LongPressResult {
     onPointerLeave: () => void;
     onContextMenu: (e: React.MouseEvent) => void;
   };
-  /** 正在按住（未达成）—— 调用方据此渲染按压态与进度条 */
+  /** 正按住**且已熬过预备期**（未达成）—— 调用方据此渲染按压态与进度条 */
   pressing: boolean;
   /**
    * 长按**刚触发过** → 这次 click 是它的副作用，调用方应直接 return。
@@ -65,11 +90,18 @@ export function useLongPress({
   enabled = true,
 }: LongPressOptions): LongPressResult {
   const [pressing, setPressing] = useState(false);
+  /* 两个计时器必须分开：预备期与达成期的语义完全不同（"开始显示"vs"已达成"），
+     合成一个 ref 的话 `cancel` 无从判断该清哪一段、也无法表达"正在预备" */
+  const delayTimer = useRef<number | null>(null);
   const timer = useRef<number | null>(null);
   const origin = useRef<{ x: number; y: number } | null>(null);
   const fired = useRef(false);
 
   const cancel = useCallback(() => {
+    if (delayTimer.current !== null) {
+      window.clearTimeout(delayTimer.current);
+      delayTimer.current = null;
+    }
     if (timer.current !== null) {
       window.clearTimeout(timer.current);
       timer.current = null;
@@ -88,14 +120,20 @@ export function useLongPress({
       if (e.button !== 0 || !e.isPrimary) return;
       fired.current = false;
       origin.current = { x: e.clientX, y: e.clientY };
-      setPressing(true);
-      timer.current = window.setTimeout(() => {
-        timer.current = null;
-        fired.current = true;
-        setPressing(false);
-        if (typeof navigator.vibrate === 'function') navigator.vibrate(10);
-        onLongPress();
-      }, duration);
+      /* 先静默熬过预备期，**这期间不进按压态** —— 滑动就是在这段时间里被
+         `onPointerMove`（位移超阈值）或 `pointercancel`（滚动被接管）打断的，
+         进度条因此一次都不会出现。熬过去才开始计时与显示。 */
+      delayTimer.current = window.setTimeout(() => {
+        delayTimer.current = null;
+        setPressing(true);
+        timer.current = window.setTimeout(() => {
+          timer.current = null;
+          fired.current = true;
+          setPressing(false);
+          if (typeof navigator.vibrate === 'function') navigator.vibrate(10);
+          onLongPress();
+        }, duration);
+      }, PRESS_DELAY_MS);
     },
     [duration, enabled, onLongPress],
   );

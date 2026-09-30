@@ -61,7 +61,7 @@ yys-checklist/
 | `src/db/` | 种子主数据，只允许被 `api/mock/db.ts` import | `items.db.json`、`limited.db.json`、`yuhun.db.json`、`souls.db.json`、`bounty.db.json`、`meta.db.json`、`users.db.json`、`dataVersion.db.json` |
 | `src/domain/` | 纯函数业务规则（无 IO，全部可单测） | `enums.ts`、`reset.ts`、`merge.ts`、`weight.ts`、`sort.ts`、`countdown.ts`、`stats.ts`、`autoDaily.ts`、`backup.ts`、`guildTime.ts`、`nurture.ts`、`yuhun.ts`、`bounty.ts`、`dateLabel.ts`、`checkLog.ts`、`calendar.ts` + 12 个 `*.test.ts` |
 | `src/stores/` | Zustand 状态容器（按领域分片） | `session.ts`、`items.ts`、`check.ts`、`view.ts`、`device.ts`、`ui.ts`、`tools.ts`、`nurture.ts` + 5 个 `*.test.ts` |
-| `src/hooks/` | 编排与副作用封装（竞态、首屏、断点、焦点、周期刷新） | `useApi.ts`、`useBootstrap.ts`、`useChecklist.ts`、`useAutoDaily.ts`、`useBreakpoint.ts`、`useDevicePrefs.ts`、`useModalFocus.ts`、`usePeriodRefresh.ts`、`useScope.ts` + `usePeriodRefresh.test.ts` |
+| `src/hooks/` | 编排与副作用封装（竞态、首屏、断点、焦点、周期刷新、卡片配置出口） | `useBootstrap.ts`、`useBreakpoint.ts`、`useCardDisplay.ts`、`useChecklist.ts`、`useAutoDaily.ts`、`useDevicePrefs.ts`、`useModalFocus.ts`、`usePeriodRefresh.ts` + `usePeriodRefresh.test.ts`（`useApi.ts` / `useScope.ts` 已随 2026-09-28 的死符号清理删除） |
 | `src/pages/` | 页面容器（只管排列） | `TodayPage.tsx`、`WeekPage.tsx`、`MonthPage.tsx`、`LimitedPage.tsx`、`StatsPage.tsx`、`ToolsPage.tsx`、`MePage.tsx`；`pages/settings/`：`ProfileSection.tsx`、`AutoDailySection.tsx`、`ItemManagerSection.tsx`、`GuildTimeSection.tsx`；`pages/tools/`：`YuhunSection.tsx`、`BountySection.tsx`、`NurtureSection.tsx` |
 | `src/components/` | 展示原子件与布局骨架 | `common/`（25）：`Alert.tsx`、`BackToTop.tsx`、`CheckBox.tsx`、`ChecklistEntry.tsx`、`ChecklistGroupCard.tsx`、`ChecklistItem.tsx`、`CollapsibleSection.tsx`、`ConfirmDialog.tsx`、`EmptyState.tsx`、`HubCard.tsx`、`ItemField.tsx`、**`Modal.tsx`**（2026-09-28 抽出的弹层外壳）、`NavContent.tsx`、`NurtureBadge.tsx`、`OnboardingDialog.tsx`、`PageHead.tsx`、`ProfilePickDialog.tsx`、`ProfileSwitcher.tsx`、`RewardBadges.tsx`（2026-09-29 由 `GainBadges` + `KindBadges` 合并）、`SaveErrorNotice.tsx`、`Segmented.tsx`、`SettingRow.tsx`、`SummaryBar.tsx`、`Tags.tsx`、`ThemeToggle.tsx`；`desktop/DesktopShell.tsx`；`mobile/MobileShell.tsx`；`settings/AboutSection.tsx`、`settings/BackupSection.tsx`、`settings/DataVersionSection.tsx`、`settings/`**`ItemForm.tsx`**（条目新建 / 编辑表单，弹层形态） |
 | `src/services/` | 跨域用例编排与基础设施 | `localStore.ts`、`backupService.ts`、`clipboard.ts` + `localStore.test.ts` |
@@ -114,7 +114,7 @@ sequenceDiagram
 | 环节 | 位置 | 说明 |
 | --- | --- | --- |
 | HTML 挂载点 | `index.html` | `#root` + `<script type="module" src="/src/main.tsx">`；注释说明 PWA 打包暂缓 |
-| 根渲染 | `src/main.tsx` | `React.StrictMode`，**不注册 Service Worker** |
+| 根渲染 | `src/main.tsx` | `React.StrictMode`；Service Worker 的注册在 `src/App.tsx` 挂载时调 `services/pwa.initPwa()`（2026-09-29 接入 PWA，开发态是空实现、不注册） |
 | 首屏聚合 | `src/App.tsx` → `hooks/useBootstrap.ts` | 首屏唯一入口；切号 / `bootstrapTick` 变化时全量重载 |
 | 周期刷新 | `hooks/usePeriodRefresh.ts` | 每分钟边界 + 窗口聚焦 + 可见性变化时重估周期状态，**不写盘** |
 | 设备级状态 | `src/App.tsx` 挂载时 `hydrate()` → `stores/device.ts` | **只剩引导标记**（2026-09-16 起）。寮时间迁至 `stores/guildTime`、寄养迁至 `stores/nurture`，两者都改为**账号级**并随 `getBootstrap` 下发 |
@@ -222,8 +222,8 @@ api.getBootstrap
 | --- | --- |
 | 一键日常入口永远排第 0 位 | `domain/sort.ts` 的前置特判，不参与 `weightOf` 比较 |
 | 日期显示与勾选重置口径不一致 | 顶部日期纯展示（`domain/dateLabel.ts`），重置按周期口径（`domain/reset.ts`） |
-| `ViewPrefs.sortBy` / `minWeight` 有字段但 UI 不写 | 排序已由「默认痛感 + 置顶 + 自定义顺序」决定；痛感自 2026-09-15 起只作排序键。两个字段保留在数据层（不动契约形状），**勿据此新增控件** |
-| 界面里找不到任何「痛感」字样 | 2026-09-15 收敛：今日页「本周高痛感还剩 N 项」警示条已删除，`minWeight` 门槛与 `WEIGHT_LEGEND` 图例一并移除 —— 痛感只剩「默认排序」一个出口 |
+| `ViewPrefs.sortBy` / `minWeight` 有字段但 UI 不写 | 排序已由「**默认按条目库顺序** + 置顶 + 自定义顺序」决定（2026-09-30 起默认不再是痛感分；痛感自 2026-09-15 起只作排序键，如今连排序键也不是 —— `domain/weight.ts` 已随本次改动删除）。两个字段保留在数据层（不动契约形状），**勿据此新增控件** |
+| 界面里找不到任何「痛感」字样 | 2026-09-15 收敛：今日页「本周高痛感还剩 N 项」警示条已删除，`minWeight` 门槛与 `WEIGHT_LEGEND` 图例一并移除 —— 当时痛感只剩「默认排序」一个出口；**2026-09-30 连那个出口也没了**（默认排序改按条目库顺序），`domain/weight.ts` 随之删除 |
 | `api/http/adapter.ts` 全是「未实现」 | 本期只留类型占位，接后端时替换，见 `docs/04-handover-guide.md` |
 | `stores/*` 里的 `CheckState` / `ItemState` 等接口没有导出 | 属内部实现细节，新增对外符号请显式 export |
 

@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { api } from '../api';
-import type { CardDisplay, ViewDefaults, ViewPrefs } from '../api/types';
-import { DEFAULT_CARD_DISPLAY, effectiveCardDisplay } from '../domain/cardDisplay';
+import type { CardDisplay, CardScope, ViewDefaults, ViewPrefs } from '../api/types';
+import { defaultCardByScope, effectiveCardDisplay } from '../domain/cardDisplay';
 import type { SortBy } from '../domain/enums';
 
 import { useSessionStore } from './session';
@@ -45,10 +45,11 @@ interface ViewState {
   /** 被覆盖项的显示方式：dim 弱化 / hide 隐藏（只影响列表，不影响统计口径） */
   setCoverMode: (coverMode: CoverMode) => Promise<void>;
   /**
-   * 卡片字段显示（2026-09-16）：只传要改的项，其余保持 —— 设置页的逐项开关
-   * 与三档预设都走这一个 action（预设 = 一次传六项）。
+   * 卡片字段显示（2026-09-16；2026-09-30 起**按页面四套**）：`scope` 说改哪一页，
+   * `patch` 说改哪几项（其余保持）。设置页的逐项开关与三档预设都走这一个 action
+   * （预设 = 一次传六项），**只写这一页**，另外三页原样不动。
    */
-  setCardDisplay: (patch: Partial<CardDisplay>) => Promise<void>;
+  setCardDisplay: (scope: CardScope, patch: Partial<CardDisplay>) => Promise<void>;
   /** 覆盖集合显式快照（用户逐项配置后写全量数组） */
   setAutoSet: (autoSet: string[]) => Promise<void>;
   /** 恢复数据默认：把覆盖集合退回 `undefined`（跟随 `items.autoDaily`） */
@@ -57,11 +58,13 @@ interface ViewState {
 
 const FALLBACK: ViewPrefs = {
   profileId: '',
-  sortBy: 'weight',
+  /* 默认排序 = 条目库顺序（2026-09-30 起不再是痛感分） */
+  sortBy: 'db',
   minWeight: 0,
   pinned: [],
   coverMode: 'dim',
-  card: DEFAULT_CARD_DISPLAY,
+  /* 四页各一份独立副本（`defaultCardByScope` 每次新建，避免把模块常量存进 state） */
+  card: defaultCardByScope(),
   updatedAt: '',
 };
 
@@ -119,10 +122,15 @@ export const useViewStore = create<ViewState>((set, get) => {
 
     setCoverMode: (coverMode) => persist({ ...get().view, coverMode }),
 
-    setCardDisplay: (patch) =>
+    setCardDisplay: (scope, patch) =>
       persist({
         ...get().view,
-        card: effectiveCardDisplay({ ...get().view.card, ...patch }),
+        /* 只换这一页；另三页原样带过去 —— 每页在 `effectiveCardByScope` 里都是独立副本，
+           所以改一页不会连坐另外三页（那是这个功能最容易出的静默 bug） */
+        card: {
+          ...get().view.card,
+          [scope]: effectiveCardDisplay({ ...get().view.card?.[scope], ...patch }),
+        },
       }),
 
     setAutoSet: (autoSet) => persist({ ...get().view, autoSet: [...new Set(autoSet)] }),
@@ -137,4 +145,3 @@ export const resetViewMemory = (): void => {
   writeSeq += 1;
   useViewStore.setState({ view: FALLBACK, defaults: null, error: null });
 };
-

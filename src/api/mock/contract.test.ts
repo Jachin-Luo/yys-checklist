@@ -36,7 +36,7 @@ describe('getBootstrap：首屏聚合（§3.3）', () => {
     expect(b.items).toEqual(activeItems(seed, new Date()));
     expect(b.session).toEqual({ userId: 'u_local', profileId: 'p_main', authType: 'local' });
     expect(b.state.checked).toEqual({});
-    expect(b.view.sortBy).toBe('weight');
+    expect(b.view.sortBy).toBe('db');
     expect(b.overrides.custom).toEqual([]);
     /* 首屏只读，不产生任何写 */
     expect(storage.written).toEqual([]);

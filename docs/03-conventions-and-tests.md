@@ -61,7 +61,7 @@ TypeScript 为严格模式（`tsconfig.app.json`），`npm run build` 会先跑 
 | 5 | 单一数据出口（页面不直连种子） | `src/api/index.ts` 唯一入口；`src/api/contract.ts` 唯一定义 |
 
 > 2026-09-15 删去原第 3 条「漏失明细只列事实，不折算不估算」—— `missGroups` 已随
-> 「痛感只用于默认排序」一并删除（统计页自 2026-09-14 起也不再展示漏失明细）。
+> 「痛感只用于默认排序」一并删除（统计页自 2026-09-14 起也不再展示漏失明细）。**2026-09-30 起连"默认排序"也不再由痛感决定**（改按条目库顺序），本表已无痛感相关行。
 
 ## 3. 周期与重置口径
 
@@ -97,7 +97,7 @@ TypeScript 为严格模式（`tsconfig.app.json`），`npm run build` 会先跑 
 | `domain/backup.test.ts` | 30 |
 | `domain/bounty.test.ts` | 21 |
 | `domain/calendar.test.ts` | 7 |
-| `domain/cardDisplay.test.ts` | 10 |
+| `domain/cardDisplay.test.ts` | 16 |
 | `domain/checkLog.test.ts` | 17 |
 | `domain/dateLabel.test.ts` | 10 |
 | `domain/domain.test.ts` | 33（reset / sort / weight / merge / countdown 跨天跨周跨月边界 + 限时永不自动重置 + 预设改写合并） |

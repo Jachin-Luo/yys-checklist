@@ -1,7 +1,7 @@
 import { memo } from 'react';
 import type { Item } from '../../api/types';
-import { DEFAULT_CARD_DISPLAY } from '../../domain/cardDisplay';
 import { currentStepIndex, doneSteps, stepIds, stepView } from '../../domain/steps';
+import { useCardDisplay } from '../../hooks/useCardDisplay';
 import { LONG_PRESS_MS, useLongPress } from '../../hooks/useLongPress';
 import { useBreakpoint } from '../../hooks/useBreakpoint';
 import { useCheckStore } from '../../stores/check';
@@ -93,7 +93,8 @@ function ChecklistGroupCard({
   const setMany = useCheckStore((s) => s.setMany);
   const toggleInProfiles = useCheckStore((s) => s.toggleInProfiles);
   const meta = useItemStore((s) => s.meta);
-  const card = useViewStore((s) => s.view.card) ?? DEFAULT_CARD_DISPLAY;
+  /* 多次卡只出现在四个清单页里，按当前页面取自 `useCardDisplay`（设置页不预览它） */
+  const card = useCardDisplay();
   const pinnedIds = useViewStore((s) => s.view.pinned);
   const setPinned = useViewStore((s) => s.setPinned);
   const askPick = useUiStore((s) => s.askPick);
@@ -156,10 +157,15 @@ function ChecklistGroupCard({
       data-total={steps.length}
       className={[
         /* 账目行（册页稿 `.entry`）：与单条行同构；进度不再画底轨 —— 标题行里的
-           菱形进度格 + `cur/total` 已经把"走到第几步"说清了 */
-        'group no-press-select relative flex cursor-pointer items-start gap-1.5 rounded-sm border-t border-line-soft px-3 py-2.5 transition-colors duration-150 ease-genso first:border-t-0',
-        done ? 'bg-card-done' : 'hover:bg-fill',
-        isHighlight ? 'bg-gold-soft ring-1 ring-gold-line' : '',
+           菱形进度格 + `cur/total` 已经把"走到第几步"说清了。
+           底色与分隔口径与 `ChecklistItem` **逐字一致**（底色互斥三元 + 行自己的
+           `border-t` 分界，理由见那一处注释）—— 两种行在同一屏相邻出现，规则必须是一份。 */
+        'group no-press-select relative flex cursor-pointer items-start gap-1.5 border-t border-line-soft px-3 py-2.5 transition-colors duration-150 ease-genso first:border-t-0',
+        isHighlight
+          ? 'bg-gold-soft ring-1 ring-gold-line'
+          : done
+            ? 'bg-card-done'
+            : 'bg-surface hover:bg-fill',
         pressing ? 'scale-[0.985]' : '',
         opacity,
       ].join(' ')}

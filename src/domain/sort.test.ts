@@ -1,7 +1,10 @@
 /**
  * 排序相关纯函数单测：
- *   - `effectiveSortBy`：产品决策 —— 不再让用户选排序，默认痛感，自定义顺序直接接管
+ *   - `effectiveSortBy`：产品决策 —— 不再让用户选排序，**默认按条目库顺序**，自定义顺序直接接管
  *   - `seedOrder` / `moveWithinGroup` / `moveBefore` / `moveAfter`：F20 自定义排序（新条目自动沉底）
+ *
+ * 2026-09-30（用户："默认排序不用痛感算法了，就按照 db 的顺序来"）：默认排序由痛感分降序改为
+ * **条目库的书写顺序**，所以 `seedOrder` 的期望值也随之从"痛感降序"变成"库顺序"。
  */
 import { describe, expect, it } from 'vitest';
 import { effectiveSortBy, moveAfter, moveBefore, moveWithinGroup, seedOrder } from './sort';
@@ -11,6 +14,7 @@ const mk = (over: Partial<Item>): Item => ({
   id: 'x', name: '条目', cycle: 'daily', origin: 'preset', ...over,
 });
 
+/** 数组顺序 = 数据文件里的书写顺序：low → high → hub */
 const ITEMS: Item[] = [
   mk({ id: 'low', name: '每日金币', cycle: 'daily' }),
   mk({ id: 'high', name: '月度黑蛋', cycle: 'monthly', gain: { blackFrag: 1 } }),
@@ -18,23 +22,24 @@ const ITEMS: Item[] = [
 ];
 
 describe('effectiveSortBy', () => {
-  it('没有自定义顺序 → 痛感（默认）', () => {
-    expect(effectiveSortBy([])).toBe('weight');
+  it('没有自定义顺序 → 库顺序（默认）', () => {
+    expect(effectiveSortBy([])).toBe('db');
   });
 
   it('有自定义顺序 → 自定义接管默认（不再看 view.sortBy）', () => {
     expect(effectiveSortBy(['daily_sign', 'daily_free_draw'])).toBe('custom');
   });
 
-  it('自定义顺序被清空（恢复默认条目库）→ 退回痛感', () => {
+  it('自定义顺序被清空（恢复默认条目库）→ 退回库顺序', () => {
     expect(effectiveSortBy(['daily_sign'])).toBe('custom');
-    expect(effectiveSortBy([])).toBe('weight');
+    expect(effectiveSortBy([])).toBe('db');
   });
 });
 
 describe('seedOrder：首次进入自定义排序的全序种子', () => {
-  it('按痛感降序铺全序，入口仍恒第 0 位', () => {
-    expect(seedOrder(ITEMS)).toEqual(['hub', 'high', 'low']);
+  it('按库顺序铺全序（不再按痛感分），入口仍恒第 0 位', () => {
+    /* `ITEMS` 的书写顺序是 low → high → hub，入口特判把它提到最前 */
+    expect(seedOrder(ITEMS)).toEqual(['hub', 'low', 'high']);
   });
 
   it('生成的是完整全序（不是空数组），否则用户点 ▲▼ 看不到任何变化', () => {

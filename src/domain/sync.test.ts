@@ -13,7 +13,7 @@ import { SYNC_PARTS, applyParts, defaultSyncKeys, describeKeys, type SyncSource 
 
 const view = (patch: Partial<ViewPrefs> = {}): ViewPrefs => ({
   profileId: 'p',
-  sortBy: 'weight',
+  sortBy: 'db',
   minWeight: 0,
   pinned: [],
   updatedAt: '',

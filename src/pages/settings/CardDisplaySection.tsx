@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import Icon from '../../components/icons/Icon';
 import ChecklistItem from '../../components/common/ChecklistItem';
 import CollapsibleSection from '../../components/common/CollapsibleSection';
@@ -8,76 +8,121 @@ import { tx } from '../../components/common/controls';
 import {
   CARD_FIELDS,
   CARD_PRESETS,
-  effectiveCardDisplay,
+  CARD_SCOPES,
   hiddenFieldCount,
   matchPreset,
   type CardPresetKey,
 } from '../../domain/cardDisplay';
+import type { Cycle } from '../../domain/enums';
+import { useCardDisplay, type CardScope } from '../../hooks/useCardDisplay';
 import { useItemStore } from '../../stores/items';
 import { useViewStore } from '../../stores/view';
 
 /**
- * 「设置 · 卡片显示字段」（2026-09-16 用户需求；2026-09-23 随设置页重构改形态）。
+ * 「设置 · 卡片显示字段」（2026-09-16 用户需求；2026-09-23 随设置页重构改形态；
+ * **2026-09-30 起按页面四套**）。
  *
  * 控制**每张清单卡片里显示哪些字段**。默认口径是"全部显示"（= 引入本功能前的观感），
  * 嫌卡片太高的人可以切「简要」去掉三行长文本，或切「极简」只留名称 ——
  * 「打开就打卡」时一屏能扫到最多条目。
  *
- * ## 为什么拆成"一行 + 一个折叠"
+ * ## 为什么按页面分开设（2026-09-30 用户需求）
  *
- * 上一版整块收在一个折叠卡里，展开后是 3 个预设行 + 6 个逐项行 + 1 张预览卡 ——
- * 大约 560px，是全页最高的一块。但用户真正高频做的只有**切档位**这一件事。
- * 所以现在：**档位平铺成一行分段控件**（一眼可见、一次点击），
- * **逐项微调与预览收进折叠**（低频，但要保留 —— 见下）。
+ * 原话："今日 / 本周 / 本月 / 限时分别设置，有时候会出现每日想简要看、限时活动详细看的情况。"
+ * 一个开关管四页，等于逼用户为最啰嗦的那一页设一个全局值 —— 而四页的读法本来就不同：
+ * 今日是"打卡流水"（扫得快最重要），限时是"这批活动还剩几天、条件是什么"（越全越好）。
  *
- * ## 两处设计（未变）
+ * ## 版面：**一张卡 + 一个折叠**（页签与档位必须同处一卡）
  *
- *   1. **预设与逐项开关是同一份数据**：预设只是"一次设六项"的快捷键。改任意一项后
- *      `matchPreset` 返回 null，分段控件**三档都不高亮**（`value={null}`）——
- *      不会出现"预设说 A、开关说 B"；把"自定义"错显示成某一档，是这个功能最容易误导人的地方。
- *   2. **带真实预览**：用清单里信息最全的那一条渲染一张真卡（`pointer-events-none`，
- *      点不动），所见即所得。光看开关名字很难想象"关掉备注后长什么样"。
+ * 拆页面维度时我一度把它做成了**两张卡**（上卡放页签、下卡放档位），用户当即指出"太分离"——
+ * 对：**预设只是"一次设六项"的快捷键，不是独立模式**（见 `domain/cardDisplay` 顶部），
+ * 而"改哪一页"与"这一页要多详细"更是同一件事的两层限定。拆成两张卡会让人以为它们是两件
+ * 可以各自为政的事。现在的落点是：
+ *
+ *   1. `SettingRow` 的右侧控件位 —— **三档预设**（高频动作，回到它原来的位置）；
+ *   2. 同一张卡的 `children`（行下方）—— **页面页签**，带一个"作用页面"小标签。
+ *      `SettingRow` 的 `children` 本来就是给"与标题同属一个信息单元"的附属内容准备的
+ *      （原始用例是「数据版本」的键值明细）；
+ *   3. 低频的逐项微调与预览仍收在折叠里（展开约 560px）。
+ *
+ * 两处控件都读**同一份** `card`（`useCardDisplay(scope)`），所以档位、逐项开关、预览
+ * 三者不可能对不上；切页签时三处一起换，这也正是把页签留在卡内的原因。
+ *
+ * ## 一条不变的设计
+ *
+ * **预设与逐项开关是同一份数据**：改任意一项后 `matchPreset` 返回 null，分段控件
+ * **三档都不高亮**（`value={null}`）—— 不会出现"预设说 A、开关说 B"；
+ * 把"自定义"错显示成某一档，是这个功能最容易误导人的地方。
+ *
+ * **预览用真实卡片**（`pointer-events-none`，点不动）：光看开关名字很难想象"关掉备注后
+ * 长什么样"。它必须显式传 `cardScope` —— 这时导航停在"设置"页，不传就会拿到今日页那一套。
  *
  * 名称、勾选框、☆ 置顶不可关 —— 理由见 `domain/cardDisplay` 顶部注释。
  */
+const SCOPE_LABEL = new Map(CARD_SCOPES.map((s) => [s.key, s.label] as const));
+
+/** 每个清单页对应哪个周期 —— 预览要找"这一页真的会出现"的条目 */
+const SCOPE_CYCLE: Record<CardScope, Cycle> = {
+  today: 'daily',
+  week: 'weekly',
+  month: 'monthly',
+  limited: 'limited',
+};
+
 export default function CardDisplaySection() {
-  const view = useViewStore((s) => s.view);
   const setCardDisplay = useViewStore((s) => s.setCardDisplay);
   const items = useItemStore((s) => s.items);
+  const [scope, setScope] = useState<CardScope>('today');
 
-  const card = effectiveCardDisplay(view.card);
+  /* 当前页签那一套配置 —— 档位、逐项开关、预览三处都读它，不可能对不上 */
+  const card = useCardDisplay(scope);
   const activePreset = matchPreset(card);
   const hidden = hiddenFieldCount(card);
   const preset = CARD_PRESETS.find((p) => p.key === activePreset) ?? null;
+  const scopeLabel = SCOPE_LABEL.get(scope) ?? '';
 
-  /* 预览挑"信息最全"的那条：只有它才能体现关掉某一项之后卡片变成什么样 */
-  const sample = useMemo(
-    () => items.find((it) => it.path && it.note && it.gainKind?.length) ?? items[0] ?? null,
-    [items],
-  );
+  /* 预览挑"该页信息最全"的那条：只有它才能体现关掉某一项之后卡片变成什么样 */
+  const sample = useMemo(() => {
+    const cycle = SCOPE_CYCLE[scope];
+    const inScope = items.filter((it) => it.cycle === cycle);
+    return inScope.find((it) => it.path && it.note && it.gainKind?.length) ?? inScope[0] ?? null;
+  }, [items, scope]);
 
   return (
     <>
       <SettingRow
         title="卡片显示字段"
-        /* 说明随选中档位变化：切到哪一档就说清那一档长什么样，
-           比罗列三档的描述省一半高度，也不会出现"描述与当前不符" */
-        desc={preset ? preset.desc : `自定义组合 · 已隐藏 ${hidden} 项，逐项开关见下方`}
+        /* 说明先说"当前在改哪一页"，再说这一页现在长什么样 ——
+           把四页的现状都罗列出来反而看不清自己正在改哪一套 */
+        desc={`${scopeLabel}页 · ${
+          preset ? preset.desc : `自定义组合 · 已隐藏 ${hidden} 项，逐项开关见下方`
+        }`}
         control={
           <Segmented<CardPresetKey>
-            label="卡片显示字段"
+            label={`${scopeLabel}页的卡片详细程度`}
             value={activePreset}
             onChange={(key) => {
               const next = CARD_PRESETS.find((p) => p.key === key);
-              if (next) void setCardDisplay(next.value);
+              if (next) void setCardDisplay(scope, next.value);
             }}
             options={CARD_PRESETS.map((p) => ({ value: p.key, label: p.label }))}
           />
         }
-      />
+      >
+        {/* 作用页面：与档位同处一卡，说明"上面那组开关在改哪一页" */}
+        <div className="flex items-center gap-2.5">
+          <span className={`flex-none ${tx.note} text-ink-3`}>作用页面</span>
+          <Segmented<CardScope>
+            label="卡片显示字段的作用页面"
+            value={scope}
+            onChange={setScope}
+            options={CARD_SCOPES.map((s) => ({ value: s.key, label: s.label }))}
+          />
+        </div>
+      </SettingRow>
 
       <CollapsibleSection
-        title="逐项调整与预览"
+        title={`逐项调整与预览（${scopeLabel}）`}
         summary={
           preset
             ? `当前「${preset.label}」，可再逐项微调`
@@ -93,7 +138,7 @@ export default function CardDisplaySection() {
                   key={f.key}
                   type="button"
                   aria-pressed={on}
-                  onClick={() => void setCardDisplay({ [f.key]: !on })}
+                  onClick={() => void setCardDisplay(scope, { [f.key]: !on })}
                   className="flex w-full cursor-pointer items-center gap-2.5 border-b border-line-faint py-2 text-left last:border-0 transition-colors duration-120 hover:bg-surface-3"
                 >
                   <span
@@ -119,14 +164,20 @@ export default function CardDisplaySection() {
 
           {sample ? (
             <div className="mt-3.5">
-              <p className={`${tx.label} text-ink-2`}>效果预览（示例条目，点不动）</p>
+              <p className={`${tx.label} text-ink-2`}>
+                效果预览（{scopeLabel}页的示例条目，点不动）
+              </p>
               {/* `pointer-events-none`：预览用真实卡片组件，但它不该能被勾选 / 置顶 ——
                   设置页里点一下就把某条标成已完成，是最让人意外的一类副作用 */}
               <div className="pointer-events-none mt-1.5" aria-hidden="true">
-                <ChecklistItem item={sample} onToggle={() => undefined} />
+                <ChecklistItem item={sample} cardScope={scope} onToggle={() => undefined} />
               </div>
             </div>
-          ) : null}
+          ) : (
+            <p className={`mt-3.5 ${tx.note} text-ink-3`}>
+              {scopeLabel}页暂时没有可用来预览的条目。
+            </p>
+          )}
         </div>
       </CollapsibleSection>
     </>

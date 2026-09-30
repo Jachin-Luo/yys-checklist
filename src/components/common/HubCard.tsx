@@ -1,10 +1,9 @@
 import type { Item } from '../../api/types';
-import { DEFAULT_CARD_DISPLAY } from '../../domain/cardDisplay';
+import { useCardDisplay } from '../../hooks/useCardDisplay';
 import { LONG_PRESS_MS, useLongPress } from '../../hooks/useLongPress';
 import { useAutoDaily } from '../../hooks/useAutoDaily';
 import { useCheckStore } from '../../stores/check';
 import { useUiStore } from '../../stores/ui';
-import { useViewStore } from '../../stores/view';
 import CheckBox from './CheckBox';
 import { FieldBlock, FieldIcon } from './ItemField';
 import Icon from '../icons/Icon';
@@ -35,7 +34,8 @@ import Icon from '../icons/Icon';
 export default function HubCard({ item }: { item: Item }) {
   const checked = useCheckStore((s) => s.checked[item.id] !== undefined);
   const toggleInProfiles = useCheckStore((s) => s.toggleInProfiles);
-  const card = useViewStore((s) => s.view.card) ?? DEFAULT_CARD_DISPLAY;
+  /* 入口卡只出现在今日页，按当前页面取（`useCardDisplay` 从导航派生） */
+  const card = useCardDisplay();
   const { toggleHub, coveredCount, coveredIds } = useAutoDaily();
   const requestNav = useUiStore((s) => s.requestNav);
   const askPick = useUiStore((s) => s.askPick);

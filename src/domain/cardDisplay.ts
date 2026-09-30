@@ -22,8 +22,17 @@
  *
  * 即当前项目的既有口径 —— 引入这个功能不该静默改变任何人的观感。
  * 想紧凑的人自己去设置页切「简要」，而不是被替他决定。
+ *
+ * ## 2026-09-30：从"一套配置"改为"**按页面四套**"
+ *
+ * 用户原话："今日 / 本周 / 本月 / 限时分别设置，有时候会出现每日想简要看、限时活动详细看的情况。"
+ * 一个开关管四页，实际上是在逼用户为最啰嗦的那一页设一个全局值 —— 而四页的读法本来不同：
+ * 今日是"打卡流水"（扫得快最重要），限时是"这批活动还剩几天、条件是什么"（信息越全越好）。
+ *
+ * 同时用户明确"**无需兼容之前的**"：不做数据迁移 —— 旧的单份 `card` 不再被读取
+ * （`effectiveCardByScope` 只认页键，页键缺失即回落默认），旧字段留着既不报错也不生效。
  */
-import type { CardDisplay } from '../api/types';
+import type { CardDisplay, CardScope } from '../api/types';
 
 export const DEFAULT_CARD_DISPLAY: CardDisplay = {
   tags: true,
@@ -76,9 +85,19 @@ export const CARD_FIELDS: ReadonlyArray<{ key: keyof CardDisplay; label: string;
 ];
 
 /**
- * 归一化：缺字段补默认（老数据没有 `card` 字段），非布尔值一律忽略。
- * 与 `domain/merge.effectiveView` 同一规则 —— 那里也调它，两处不会漂移。
+ * 四个作用范围 —— 页名与 `NavKey` 的那四个清单页同名（统计 / 工具 / 设置页不显示清单卡）。
+ * `label` 同时是设置页的页签文字，也是 `desc` 里说"当前改的是哪一页"时用的词。
  */
+export const CARD_SCOPES: ReadonlyArray<{ key: CardScope; label: string }> = [
+  { key: 'today', label: '今日' },
+  { key: 'week', label: '本周' },
+  { key: 'month', label: '本月' },
+  { key: 'limited', label: '限时' },
+];
+
+export const CARD_SCOPE_KEYS: readonly CardScope[] = CARD_SCOPES.map((s) => s.key);
+
+/** 归一化单页配置：缺字段补默认，非布尔值一律忽略 */
 export function effectiveCardDisplay(card?: Partial<CardDisplay> | null): CardDisplay {
   /* 返回**副本**而不是常量本身：调用方（store / merge）会把它存进 state，
      共享模块级常量意味着"某处顺手改一下返回对象"就改掉了全局默认值 */
@@ -90,6 +109,23 @@ export function effectiveCardDisplay(card?: Partial<CardDisplay> | null): CardDi
   }
   return out;
 }
+
+/**
+ * 归一化到"四页各一套"：缺的页（含 `undefined`、含旧的单份形状）补默认，
+ * 每页各返回**独立副本**（别让四页共享同一个对象 —— 改一页会连坐另外三页）。
+ *
+ * 与 `domain/merge.effectiveView` 同一规则：那里也调它，两处不会漂移。
+ */
+export function effectiveCardByScope(
+  card?: Partial<Record<CardScope, Partial<CardDisplay>>> | null,
+): Record<CardScope, CardDisplay> {
+  const out = {} as Record<CardScope, CardDisplay>;
+  for (const key of CARD_SCOPE_KEYS) out[key] = effectiveCardDisplay(card?.[key]);
+  return out;
+}
+
+/** 四页都取默认（store 的初值 / 兜底用） */
+export const defaultCardByScope = (): Record<CardScope, CardDisplay> => effectiveCardByScope();
 
 /** 当前配置**完全等于**哪一档预设；都不等则 null（UI 据此决定高亮哪一档） */
 export function matchPreset(card: CardDisplay): CardPresetKey | null {

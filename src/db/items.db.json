@@ -5,9 +5,6 @@
       "name": "庭院事务·一键日常",
       "cycle": "daily",
       "path": "庭院 → 事务 → 一键日常",
-      "gainKind": [
-        "other"
-      ],
       "isAutoHub": true,
       "note": "先点这个，再回来核对下面被覆盖的项",
       "origin": "preset"
@@ -29,31 +26,6 @@
       "origin": "preset"
     },
     {
-      "id": "daily_sign",
-      "name": "每日签到",
-      "cycle": "daily",
-      "path": "庭院 → 签到小纸人",
-      "gainKind": [
-        "gold",
-        "jade",
-        "daruma"
-      ],
-      "autoDaily": true,
-      "note": "月度累计另有奖励；累计签到10天另给30勾；一键代办覆盖",
-      "origin": "preset"
-    },
-    {
-      "id": "daily_free_draw",
-      "name": "每日免费一抽",
-      "cycle": "daily",
-      "path": "召唤 → 免费召唤",
-      "gainKind": [
-        "shard"
-      ],
-      "autoDaily": true,
-      "origin": "preset"
-    },
-    {
       "id": "daily_free_black_daruma",
       "name": "免费黑蛋礼包",
       "cycle": "daily",
@@ -69,65 +41,18 @@
       "origin": "preset"
     },
     {
-      "id": "daily_friendship",
-      "name": "好友互赠友情点",
+      "id": "daily_hanagassen",
+      "name": "花合战每日进度",
       "cycle": "daily",
-      "path": "好友 → 一键赠送",
+      "path": "活动页 → 花合战",
       "gainKind": [
-        "other"
-      ],
-      "autoDaily": true,
-      "origin": "preset"
-    },
-    {
-      "id": "daily_jiwen",
-      "name": "吉闻送祝福",
-      "cycle": "daily",
-      "path": "好友 → 吉闻",
-      "gainKind": [
-        "other"
-      ],
-      "autoDaily": true,
-      "origin": "preset"
-    },
-    {
-      "id": "daily_wish_fragment",
-      "name": "寮祈愿换片",
-      "cycle": "daily",
-      "path": "阴阳寮 → 祈愿",
-      "gainKind": [
-        "shard"
-      ],
-      "note": "满羁绊好友可另送一片",
-      "origin": "preset"
-    },
-    {
-      "id": "daily_guild_fund",
-      "name": "寮资金领取",
-      "cycle": "daily",
-      "path": "阴阳寮 → 资金",
-      "gainKind": [
-        "merit",
-        "other",
-        "gold",
         "jade"
       ],
-      "gainNote": "寮包勾玉随机，社区均值不计入固定收益",
-      "autoDaily": true,
-      "note": "寮资金和寮包可领；寮包可随机开出勾玉，社区均值约50勾/天，非保底；一键代办覆盖",
-      "origin": "preset"
-    },
-    {
-      "id": "daily_guild_30",
-      "name": "寮集体任务(寮30)",
-      "cycle": "daily",
-      "path": "阴阳寮 → 集体任务",
-      "gainKind": [
-        "merit",
-        "other"
-      ],
-      "autoDaily": true,
-      "note": "未手动领取会在24h内进邮件",
+      "gain": {
+        "jade": 20
+      },
+      "gainNote": "满100活跃度给20勾",
+      "note": "每日满100活跃领20勾，合计140勾/周；每期花札满30级，勾玉礼包全换共60勾",
       "origin": "preset"
     },
     {
@@ -172,24 +97,12 @@
       "origin": "preset"
     },
     {
-      "id": "daily_break_guild",
-      "name": "阴阳寮突破",
-      "cycle": "daily",
-      "path": "探索 → 寮突破",
-      "gainKind": [
-        "jade",
-        "medal"
-      ],
-      "gainNote": "有勾玉，随突破个数浮动，不计入统计",
-      "origin": "preset"
-    },
-    {
       "id": "daily_fengmo",
       "name": "逢魔之时",
       "cycle": "daily",
       "path": "町中 → 逢魔之时",
       "gainKind": [
-        "bossSoul",
+        "soul",
         "jade"
       ],
       "gainNote": "勾玉随机，不计入固定收益",
@@ -197,58 +110,6 @@
       "timeEnd": "23:00",
       "timeNote": "17:00 开门 · 23:00 关闭",
       "note": "现世逢魔4下 + 首领必打，黑碎来源之一；宝箱、小纸人、密信答题可得随机勾玉；逢魔密信答对10勾，答题/神秘任务社区均值约50勾/周，非保底",
-      "origin": "preset"
-    },
-    {
-      "id": "daily_bounty_am",
-      "name": "悬赏封印（5:00）",
-      "cycle": "daily",
-      "path": "庭院 → 悬赏封印",
-      "gainKind": [
-        "jade",
-        "stamina",
-        "shard"
-      ],
-      "gainNote": "勾玉任务单次30勾，任务随机，不计入固定收益",
-      "condition": "每 12 小时刷新一次",
-      "time": "05:00",
-      "timeNote": "5:00 刷新 · 每 12 小时一次",
-      "autoDaily": true,
-      "note": "抽到勾玉任务时单次30勾，可与好友互接；勾协/现世悬赏任务也各30勾，任务类型随机",
-      "origin": "preset"
-    },
-    {
-      "id": "daily_bounty_pm",
-      "name": "悬赏封印（18:00）",
-      "cycle": "daily",
-      "path": "庭院 → 悬赏封印",
-      "gainKind": [
-        "jade",
-        "stamina",
-        "shard"
-      ],
-      "gainNote": "勾玉任务单次30勾，任务随机，不计入固定收益",
-      "condition": "每 12 小时刷新一次",
-      "time": "18:00",
-      "timeNote": "18:00 刷新 · 每 12 小时一次",
-      "autoDaily": true,
-      "note": "抽到勾玉任务时单次30勾，可与好友互接；勾协/现世悬赏任务也各30勾，任务类型随机",
-      "origin": "preset"
-    },
-    {
-      "id": "daily_coop_50",
-      "name": "协战 50 次",
-      "cycle": "daily",
-      "path": "探索 → 组队协战",
-      "gainKind": [
-        "jade"
-      ],
-      "gain": {
-        "jade": 50
-      },
-      "gainNote": "协战被用满50次给50勾（350勾/周）",
-      "condition": "需好友/小号配合",
-      "note": "必做：稳定勾玉来源；没有固定队友可大小号互刷，锁阵容连退15次，几分钟刷完（NGA口径）",
       "origin": "preset"
     },
     {
@@ -263,7 +124,6 @@
       ],
       "path": "阴阳寮 → 狩猎战",
       "gainKind": [
-        "merit",
         "medal",
         "soul",
         "blackFrag"
@@ -354,59 +214,13 @@
       ],
       "path": "阴阳寮 → 首领退治",
       "gainKind": [
-        "merit"
+        "medal"
       ],
       "condition": "仅周六，寮自定时间",
       "time": "19:00",
       "timeEnd": "21:00",
       "timeNote": "官方 19:00–21:00 可开启区间 · 实际以会长开启为准（社区常见 20:00）",
       "isGuildTime": true,
-      "origin": "preset"
-    },
-    {
-      "id": "daily_douji",
-      "name": "斗技",
-      "cycle": "daily",
-      "path": "町中 → 斗技",
-      "gainKind": [
-        "blackFrag",
-        "jade"
-      ],
-      "condition": "每周 5 胜另有固定 1 黑碎（见周常）",
-      "time": "12:00",
-      "timeEnd": "22:00",
-      "timeNote": "12:00–14:00 / 20:00–22:00 两段 · 1–9 段匹配可至 23:00",
-      "note": "荣誉可换黑碎/两面佛碎片；段位勾玉浮动。1–9 段匹配 2022-07 起延长至 23:00",
-      "origin": "preset"
-    },
-    {
-      "id": "daily_kekkai",
-      "name": "结界寄养/收卡",
-      "cycle": "daily",
-      "path": "庭院 → 结界",
-      "gainKind": [
-        "exp",
-        "stamina",
-        "jade"
-      ],
-      "autoDaily": true,
-      "note": "一天可收取三次",
-      "origin": "preset"
-    },
-    {
-      "id": "daily_pet",
-      "name": "溜猫逗狗（宠物喂养·宠物协战）",
-      "cycle": "daily",
-      "path": "庭院 → 后院",
-      "gainKind": [
-        "gold",
-        "exp",
-        "jade",
-        "blueTicket"
-      ],
-      "gainNote": "勾玉和蓝票随机掉落，不计入固定收益",
-      "autoDaily": true,
-      "note": "带秋田犬协战打御魂本，战斗后随机掉10–15勾（社区均值约11勾/天），小概率掉一整张蓝票；顺手捡宠物掉落物",
       "origin": "preset"
     },
     {
@@ -426,6 +240,206 @@
       "gainNote": "库存随机，不计入",
       "condition": "仅周三、周六开放",
       "note": "一周只有两天，极易漏；金币类无脑买（满 10 次保底 1 片黑碎）；勾玉只买 50 勾蓝票 / 30 勾黑碎，45 勾以上黑碎不买、90 勾蓝票不买；75 勾四星太鼓可买",
+      "origin": "preset"
+    },
+    {
+      "id": "daily_dashen_sign",
+      "name": "大神签到（网易大神App）",
+      "cycle": "daily",
+      "path": "网易大神 App → 阴阳师 → 签到",
+      "gainKind": [
+        "blackFrag"
+      ],
+      "note": "独立于游戏内签到：日 1 灰票；每周签 3 天 1 蓝蛋、5 天金币加成 50% 1h、7 天 1 片黑碎；累计 100/200 天有头像框",
+      "origin": "preset"
+    },
+    {
+      "id": "daily_wish_fragment",
+      "name": "寮祈愿换片",
+      "cycle": "daily",
+      "path": "阴阳寮 → 祈愿",
+      "note": "满羁绊好友可另送一片",
+      "origin": "preset"
+    },
+    {
+      "id": "daily_break_guild",
+      "name": "阴阳寮突破",
+      "cycle": "daily",
+      "path": "探索 → 寮突破",
+      "gainKind": [
+        "jade",
+        "medal"
+      ],
+      "gainNote": "有勾玉，随突破个数浮动，不计入统计",
+      "origin": "preset"
+    },
+    {
+      "id": "daily_coop_50",
+      "name": "协战 50 次",
+      "cycle": "daily",
+      "path": "探索 → 组队协战",
+      "gainKind": [
+        "jade"
+      ],
+      "gain": {
+        "jade": 50
+      },
+      "gainNote": "协战被用满50次给50勾（350勾/周）",
+      "condition": "需好友/小号配合",
+      "note": "必做：稳定勾玉来源；没有固定队友可大小号互刷，锁阵容连退15次，几分钟刷完（NGA口径）",
+      "origin": "preset"
+    },
+    {
+      "id": "daily_douji",
+      "name": "斗技",
+      "cycle": "daily",
+      "path": "町中 → 斗技",
+      "gainKind": [
+        "blackFrag",
+        "jade"
+      ],
+      "condition": "每周 5 胜另有固定 1 黑碎（见周常）",
+      "time": "12:00",
+      "timeEnd": "22:00",
+      "timeNote": "12:00–14:00 / 20:00–22:00 两段 · 1–9 段匹配可至 23:00",
+      "note": "荣誉可换黑碎/两面佛碎片；段位勾玉浮动。1–9 段匹配 2022-07 起延长至 23:00",
+      "origin": "preset"
+    },
+    {
+      "id": "daily_exp_gold_yokai",
+      "name": "经验/金币妖怪副本",
+      "cycle": "daily",
+      "path": "探索 → 妖怪副本",
+      "gainKind": [
+        "gold"
+      ],
+      "condition": "各2次",
+      "origin": "preset"
+    },
+    {
+      "id": "daily_sign",
+      "name": "每日签到",
+      "cycle": "daily",
+      "path": "庭院 → 签到小纸人",
+      "gainKind": [
+        "gold",
+        "jade"
+      ],
+      "autoDaily": true,
+      "note": "月度累计另有奖励；累计签到10天另给30勾；一键代办覆盖",
+      "origin": "preset"
+    },
+    {
+      "id": "daily_free_draw",
+      "name": "每日免费一抽",
+      "cycle": "daily",
+      "path": "召唤 → 免费召唤",
+      "autoDaily": true,
+      "origin": "preset"
+    },
+    {
+      "id": "daily_friendship",
+      "name": "好友互赠友情点",
+      "cycle": "daily",
+      "path": "好友 → 一键赠送",
+      "autoDaily": true,
+      "origin": "preset"
+    },
+    {
+      "id": "daily_jiwen",
+      "name": "吉闻送祝福",
+      "cycle": "daily",
+      "path": "好友 → 吉闻",
+      "autoDaily": true,
+      "origin": "preset"
+    },
+    {
+      "id": "daily_guild_fund",
+      "name": "寮资金领取",
+      "cycle": "daily",
+      "path": "阴阳寮 → 资金",
+      "gainKind": [
+        "medal",
+        "gold",
+        "jade"
+      ],
+      "gainNote": "寮包勾玉随机，社区均值不计入固定收益",
+      "autoDaily": true,
+      "note": "寮资金和寮包可领；寮包可随机开出勾玉，社区均值约50勾/天，非保底；一键代办覆盖",
+      "origin": "preset"
+    },
+    {
+      "id": "daily_guild_30",
+      "name": "寮集体任务(寮30)",
+      "cycle": "daily",
+      "path": "阴阳寮 → 集体任务",
+      "gainKind": [
+        "medal"
+      ],
+      "autoDaily": true,
+      "note": "未手动领取会在24h内进邮件",
+      "origin": "preset"
+    },
+    {
+      "id": "daily_bounty_am",
+      "name": "悬赏封印（5:00）",
+      "cycle": "daily",
+      "path": "庭院 → 悬赏封印",
+      "gainKind": [
+        "jade",
+        "stamina"
+      ],
+      "gainNote": "勾玉任务单次30勾，任务随机，不计入固定收益",
+      "condition": "每 12 小时刷新一次",
+      "time": "05:00",
+      "timeNote": "5:00 刷新 · 每 12 小时一次",
+      "autoDaily": true,
+      "note": "抽到勾玉任务时单次30勾，可与好友互接；勾协/现世悬赏任务也各30勾，任务类型随机",
+      "origin": "preset"
+    },
+    {
+      "id": "daily_bounty_pm",
+      "name": "悬赏封印（18:00）",
+      "cycle": "daily",
+      "path": "庭院 → 悬赏封印",
+      "gainKind": [
+        "jade",
+        "stamina"
+      ],
+      "gainNote": "勾玉任务单次30勾，任务随机，不计入固定收益",
+      "condition": "每 12 小时刷新一次",
+      "time": "18:00",
+      "timeNote": "18:00 刷新 · 每 12 小时一次",
+      "autoDaily": true,
+      "note": "抽到勾玉任务时单次30勾，可与好友互接；勾协/现世悬赏任务也各30勾，任务类型随机",
+      "origin": "preset"
+    },
+    {
+      "id": "daily_kekkai",
+      "name": "结界寄养/收卡",
+      "cycle": "daily",
+      "path": "庭院 → 结界",
+      "gainKind": [
+        "stamina",
+        "jade"
+      ],
+      "autoDaily": true,
+      "note": "一天可收取三次",
+      "origin": "preset"
+    },
+    {
+      "id": "daily_pet",
+      "name": "溜猫逗狗（宠物喂养·宠物协战）",
+      "cycle": "daily",
+      "path": "庭院 → 后院",
+      "gainKind": [
+        "gold",
+        "jade",
+        "blueTicket"
+      ],
+      "gainNote": "勾玉和蓝票随机掉落，不计入固定收益",
+      "autoDaily": true,
+      "note": "带秋田犬协战打御魂本，战斗后随机掉10–15勾（社区均值约11勾/天），小概率掉一整张蓝票；顺手捡宠物掉落物",
       "origin": "preset"
     },
     {
@@ -455,55 +469,15 @@
       "origin": "preset"
     },
     {
-      "id": "daily_dashen_sign",
-      "name": "大神签到（网易大神App）",
-      "cycle": "daily",
-      "path": "网易大神 App → 阴阳师 → 签到",
-      "gainKind": [
-        "blackFrag"
-      ],
-      "note": "独立于游戏内签到：日 1 灰票；每周签 3 天 1 蓝蛋、5 天金币加成 50% 1h、7 天 1 片黑碎；累计 100/200 天有头像框",
-      "origin": "preset"
-    },
-    {
-      "id": "daily_hanagassen",
-      "name": "花合战每日进度",
-      "cycle": "daily",
-      "path": "活动页 → 花合战",
-      "gainKind": [
-        "jade"
-      ],
-      "gain": {
-        "jade": 20
-      },
-      "gainNote": "满100活跃度给20勾",
-      "note": "每日满100活跃领20勾，合计140勾/周；每期花札满30级，勾玉礼包全换共60勾",
-      "origin": "preset"
-    },
-    {
       "id": "daily_delegate",
       "name": "式神委派",
       "cycle": "daily",
       "path": "庭院 → 式神委派",
       "gainKind": [
-        "exp",
-        "gold",
-        "other"
+        "gold"
       ],
       "autoDaily": true,
       "note": "给樱饼的任务优先做",
-      "origin": "preset"
-    },
-    {
-      "id": "daily_exp_gold_yokai",
-      "name": "经验/金币妖怪副本",
-      "cycle": "daily",
-      "path": "探索 → 妖怪副本",
-      "gainKind": [
-        "exp",
-        "gold"
-      ],
-      "condition": "各2次",
       "origin": "preset"
     },
     {
@@ -535,9 +509,9 @@
     },
     {
       "id": "weekly_honor_frag",
-      "name": "荣誉商店·黑碎（5400）",
+      "name": "荣誉商店·黑碎（540）",
       "cycle": "weekly",
-      "path": "商店 → 荣誉商店",
+      "path": "商店 → 杂货铺 → 斗技 → 常驻",
       "gainKind": [
         "blackFrag"
       ],
@@ -559,7 +533,7 @@
       "id": "weekly_honor_ticket",
       "name": "荣誉商店·蓝票（1500）",
       "cycle": "weekly",
-      "path": "商店 → 荣誉商店",
+      "path": "商店 → 杂货铺 → 斗技 → 常驻",
       "gainKind": [
         "blueTicket"
       ],
@@ -581,7 +555,7 @@
       "id": "weekly_medal_blue",
       "name": "勋章商店·蓝票(180)",
       "cycle": "weekly",
-      "path": "商店 → 杂货铺 → 勋章商店",
+      "path": "商店 → 杂货铺 → 勋章",
       "gainKind": [
         "blueTicket"
       ],
@@ -596,7 +570,7 @@
       "id": "weekly_medal_black",
       "name": "勋章商店·黑蛋(480)",
       "cycle": "weekly",
-      "path": "商店 → 杂货铺 → 勋章商店",
+      "path": "商店 → 杂货铺 → 勋章",
       "gainKind": [
         "blackFrag"
       ],
@@ -609,7 +583,7 @@
     },
     {
       "id": "weekly_guild_medal_ticket",
-      "name": "寮功勋商店·蓝票",
+      "name": "寮功勋商店·蓝票（240）",
       "cycle": "weekly",
       "path": "阴阳寮 → 功勋商店",
       "gainKind": [
@@ -631,93 +605,24 @@
     },
     {
       "id": "weekly_guild_medal_frag",
-      "name": "寮功勋商店·黑碎",
+      "name": "寮功勋商店·黑碎（200）",
       "cycle": "weekly",
       "path": "阴阳寮 → 功勋商店",
       "gainKind": [
         "blackFrag"
       ],
       "gainNote": "5 级寮 200 功勋 = 3–5 片（区间，不计入固定收益）",
-
       "origin": "preset"
     },
     {
       "id": "weekly_guild_medal_skin",
-      "name": "寮功勋商店·皮肤券",
+      "name": "寮功勋商店·皮肤券（50）",
       "cycle": "weekly",
       "path": "阴阳寮 → 功勋商店",
       "gainKind": [
         "skinTicket"
       ],
       "gainNote": "6 级寮 50 功勋 = 皮肤券（不计入固定收益）",
-      
-      "origin": "preset"
-    },
-    {
-      "id": "weekly_qiling",
-      "name": "契灵之境",
-      "cycle": "weekly",
-      "path": "探索 → 契灵之境",
-      "gainKind": [
-        "soul",
-        "other"
-      ],
-      "condition": "需一定练度，周刷满100御魂",
-      "note": "可挂饼挂机；契灵首领 3 只；有「非探查优先」的说法",
-      "origin": "preset"
-    },
-    {
-      "id": "weekly_qiyi_shop",
-      "name": "契忆商店兑换",
-      "cycle": "weekly",
-      "path": "商店 → 契忆商店",
-      "gainKind": [
-        "soul",
-        "daruma"
-      ],
-      "origin": "preset"
-    },
-    {
-      "id": "weekly_zhenshe",
-      "name": "真·八岐大蛇",
-      "cycle": "weekly",
-      "path": "探索 → 真·八岐大蛇",
-      "gainKind": [
-        "soul",
-        "other"
-      ],
-      "children": [
-        {
-          "id": "weekly_zhenshe_1",
-          "note": "重复出框给 100 勾；NGA 列为体力最高优先"
-        },
-        {
-          "id": "weekly_zhenshe_2",
-          "note": "可用摸鱼行动存次数下双倍"
-        }
-      ],
-      "origin": "preset"
-    },
-    {
-      "id": "weekly_liudao",
-      "name": "六道之门",
-      "cycle": "weekly",
-      "path": "探索 → 六道之门",
-      "gainKind": [
-        "bossSoul"
-      ],
-      "note": "每周免费 2 次双倍（免费双倍箱 2 个）；不能挂机；练度要求较高",
-      "origin": "preset"
-    },
-    {
-      "id": "weekly_yongsheng",
-      "name": "永生之海(魂海)",
-      "cycle": "weekly",
-      "path": "探索 → 永生之海",
-      "gainKind": [
-        "bossSoul"
-      ],
-      "note": "可挂饼挂机；每周 30 次加成，周五刷完即收手",
       "origin": "preset"
     },
     {
@@ -782,9 +687,6 @@
       "name": "阴阳寮抽奖箱",
       "cycle": "weekly",
       "path": "阴阳寮 → 抽奖箱",
-      "gainKind": [
-        "other"
-      ],
       "note": "会长/副会长消耗 1500 寮勋章采办；本周寮勋章达标者按数值获得抽奖次数",
       "origin": "preset"
     },
@@ -800,14 +702,76 @@
       "origin": "preset"
     },
     {
-      "id": "weekly_jishou",
-      "name": "寄售屋换寄售券",
+      "id": "weekly_zhenshe",
+      "name": "真·八岐大蛇",
       "cycle": "weekly",
-      "path": "商店 → 寄售屋",
+      "path": "探索 → 真·八岐大蛇",
       "gainKind": [
-        "token"
+        "soul"
       ],
-      "note": "用勾玉兑换",
+      "children": [
+        {
+          "id": "weekly_zhenshe_1",
+          "note": "重复出框给 100 勾；NGA 列为体力最高优先"
+        },
+        {
+          "id": "weekly_zhenshe_2",
+          "note": "可用摸鱼行动存次数下双倍"
+        }
+      ],
+      "origin": "preset"
+    },
+    {
+      "id": "weekly_banquet",
+      "name": "阴阳寮宴会",
+      "cycle": "weekly",
+      "path": "阴阳寮 → 宴会",
+      "gainKind": [
+        "blueTicket",
+        "blackFrag"
+      ],
+      "time": "20:00",
+      "isGuildTime": true,
+      "note": "高等级宴会务必参加",
+      "children": [
+        {
+          "id": "weekly_banquet_1",
+          "condition": "每周第一次，寮自定时间",
+          "timeNote": "寮自定 ·「多在周三」属社区经验，非官方"
+        },
+        {
+          "id": "weekly_banquet_2",
+          "condition": "每周第二次，寮自定时间",
+          "timeNote": "寮自定 ·「多在周六」属社区经验，非官方"
+        }
+      ],
+      "origin": "preset"
+    },
+    {
+      "id": "weekly_yingling_skill",
+      "name": "英灵技能本（源赖光/藤原）",
+      "cycle": "weekly",
+      "path": "探索 → 英灵技能本",
+      "condition": "源赖光 / 藤原各 50 次",
+      "note": "NGA 2026-09 补入周常",
+      "origin": "preset"
+    },
+    {
+      "id": "weekly_sakura",
+      "name": "樱灯饰(周上限7000)",
+      "cycle": "weekly",
+      "path": "组队带新人 / 借出式神",
+      "origin": "preset"
+    },
+    {
+      "id": "weekly_yongsheng",
+      "name": "永生之海(魂海)",
+      "cycle": "weekly",
+      "path": "探索 → 永生之海",
+      "gainKind": [
+        "soul"
+      ],
+      "note": "可挂饼挂机；每周 30 次加成，周五刷完即收手",
       "origin": "preset"
     },
     {
@@ -825,9 +789,47 @@
       "name": "杂货铺·御灵境之匙",
       "cycle": "weekly",
       "path": "商店 → 杂货铺 → 特殊",
+      "origin": "preset"
+    },
+    {
+      "id": "weekly_jishou",
+      "name": "寄售屋换寄售券",
+      "cycle": "weekly",
+      "path": "商店 → 寄售屋",
+      "note": "用勾玉兑换",
+      "origin": "preset"
+    },
+    {
+      "id": "weekly_qiling",
+      "name": "契灵之境",
+      "cycle": "weekly",
+      "path": "探索 → 契灵之境",
       "gainKind": [
-        "other"
+        "soul"
       ],
+      "condition": "需一定练度，周刷满100御魂",
+      "note": "可挂饼挂机；契灵首领 3 只；有「非探查优先」的说法",
+      "origin": "preset"
+    },
+    {
+      "id": "weekly_qiyi_shop",
+      "name": "契忆商店兑换",
+      "cycle": "weekly",
+      "path": "商店 → 契忆商店",
+      "gainKind": [
+        "soul"
+      ],
+      "origin": "preset"
+    },
+    {
+      "id": "weekly_liudao",
+      "name": "六道之门",
+      "cycle": "weekly",
+      "path": "探索 → 六道之门",
+      "gainKind": [
+        "soul"
+      ],
+      "note": "每周免费 2 次双倍（免费双倍箱 2 个）；不能挂机；练度要求较高",
       "origin": "preset"
     },
     {
@@ -835,10 +837,6 @@
       "name": "魅力商店",
       "cycle": "weekly",
       "path": "商店 → 魅力商店",
-      "gainKind": [
-        "skin",
-        "other"
-      ],
       "origin": "preset"
     },
     {
@@ -878,61 +876,11 @@
       "origin": "preset"
     },
     {
-      "id": "weekly_sakura",
-      "name": "樱灯饰(周上限7000)",
-      "cycle": "weekly",
-      "path": "组队带新人 / 借出式神",
-      "gainKind": [
-        "other"
-      ],
-      "origin": "preset"
-    },
-    {
-      "id": "weekly_banquet",
-      "name": "阴阳寮宴会",
-      "cycle": "weekly",
-      "path": "阴阳寮 → 宴会",
-      "gainKind": [
-        "blueTicket",
-        "blackFrag",
-        "exp"
-      ],
-      "time": "20:00",
-      "isGuildTime": true,
-      "note": "高等级宴会务必参加",
-      "children": [
-        {
-          "id": "weekly_banquet_1",
-          "condition": "每周第一次，寮自定时间",
-          "timeNote": "寮自定 ·「多在周三」属社区经验，非官方"
-        },
-        {
-          "id": "weekly_banquet_2",
-          "condition": "每周第二次，寮自定时间",
-          "timeNote": "寮自定 ·「多在周六」属社区经验，非官方"
-        }
-      ],
-      "origin": "preset"
-    },
-    {
-      "id": "weekly_yingling_skill",
-      "name": "英灵技能本（源赖光/藤原）",
-      "cycle": "weekly",
-      "path": "探索 → 英灵技能本",
-      "gainKind": [
-        "other"
-      ],
-      "condition": "源赖光 / 藤原各 50 次",
-      "note": "NGA 2026-09 补入周常",
-      "origin": "preset"
-    },
-    {
       "id": "monthly_hanagassen",
       "name": "花合战（战令）全档",
       "cycle": "monthly",
       "path": "活动页 → 花合战 → 花札手册",
       "gainKind": [
-        "skin",
         "blueTicket"
       ],
       "gainNote": "免费档无固定勾玉蓝票；墨染花札满级1黑蛋",

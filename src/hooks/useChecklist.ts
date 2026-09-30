@@ -61,6 +61,9 @@ export function useChecklist(target: ChecklistTarget): Checklist {
       sortBy: effectiveSortBy(orderList),
       pinned: view.pinned,
       order: orderList,
+      /* 库内序号：默认排序就按它（2026-09-30 起不再是痛感分）。
+         在此现算而不是从外面传 —— 它就是 `items` 的数组下标，多一层传递只会漂移 */
+      dbIndex: new Map(items.map((it, i) => [it.id, i] as const)),
     });
     const visibility = { today: now.getDay() };
 

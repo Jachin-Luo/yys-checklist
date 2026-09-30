@@ -34,9 +34,6 @@
       "name": "十载焕新礼",
       "cycle": "limited",
       "path": "活动页 → 十载焕新礼",
-      "gainKind": [
-        "skin"
-      ],
       "start": "2026-09-09",
       "deadline": "2026-10-06 23:59",
       "until": "2026-10-07",
@@ -48,10 +45,6 @@
       "name": "秘闻副本·棺中奇梦",
       "cycle": "limited",
       "path": "探索 → 秘闻副本",
-      "gainKind": [
-        "skin",
-        "daruma"
-      ],
       "start": "2026-09-16",
       "deadline": "2026-10-16 23:59",
       "until": "2026-10-17",
@@ -64,8 +57,7 @@
       "cycle": "limited",
       "path": "商店 → 寻契心缘",
       "gainKind": [
-        "ssr",
-        "token"
+        "ssr"
       ],
       "start": "2026-09-09",
       "deadline": "2026-10-06 23:59",
@@ -78,9 +70,6 @@
       "name": "金石礼帖领奖",
       "cycle": "limited",
       "path": "活动页 → 金石礼帖",
-      "gainKind": [
-        "daruma"
-      ],
       "start": "2026-09-09",
       "deadline": "2026-10-06 23:59",
       "until": "2026-10-07",
@@ -92,9 +81,6 @@
       "name": "纪念服护肝活动",
       "cycle": "limited",
       "path": "活动页 → 护肝活动",
-      "gainKind": [
-        "other"
-      ],
       "start": "2026-09-09",
       "deadline": "2026-10-18 23:59",
       "until": "2026-10-19",
@@ -135,7 +121,6 @@
       "cycle": "limited",
       "path": "庭院小纸人 / 商店 → 奉为达摩",
       "gainKind": [
-        "skin",
         "skinTicket"
       ],
       "start": "2026-09-16",
@@ -149,9 +134,6 @@
       "name": "灵狐新梦·晴明皮肤免费领",
       "cycle": "limited",
       "path": "活动页 → 灵狐新梦",
-      "gainKind": [
-        "skin"
-      ],
       "start": "2026-09-09",
       "deadline": "2026-10-06 23:59",
       "until": "2026-10-07",
@@ -163,11 +145,6 @@
       "name": "天域回响·皮肤祈愿",
       "cycle": "limited",
       "path": "活动页 → 天域回响",
-      "gainKind": [
-        "skin",
-        "token",
-        "daruma"
-      ],
       "start": "2026-09-16",
       "deadline": "2026-10-20 23:59",
       "until": "2026-10-21",
@@ -179,11 +156,6 @@
       "name": "为崽而战·浮世之航",
       "cycle": "limited",
       "path": "庭院 → 小纸人 → 为崽而战",
-      "gainKind": [
-        "token",
-        "daruma",
-        "other"
-      ],
       "gainNote": "随应援与结算浮动，不计入固定收益",
       "start": "2026-09-23",
       "deadline": "2026-10-20 23:59",
@@ -197,10 +169,7 @@
       "cycle": "limited",
       "path": "活动页 → 江山锐意",
       "gainKind": [
-        "skin",
-        "token",
-        "blackFrag",
-        "other"
+        "blackFrag"
       ],
       "gainNote": "誓言之匙祈愿浮动，碎片用于兑换",
       "start": "2026-09-23",
@@ -214,9 +183,6 @@
       "name": "对弈竞猜",
       "cycle": "limited",
       "path": "庭院小纸人 / 町中 → 对弈竞猜",
-      "gainKind": [
-        "other"
-      ],
       "start": "2026-09-30",
       "deadline": "2026-10-06 23:59",
       "until": "2026-10-07",
@@ -251,9 +217,6 @@
       "name": "对弈竞猜商店",
       "cycle": "limited",
       "path": "对弈竞猜 → 商店",
-      "gainKind": [
-        "other"
-      ],
       "start": "2026-09-30",
       "deadline": "2026-10-13 23:59",
       "until": "2026-10-14",
@@ -265,9 +228,6 @@
       "name": "平安祈福庙",
       "cycle": "limited",
       "path": "活动页 → 平安祈福庙",
-      "gainKind": [
-        "other"
-      ],
       "start": "2026-09-30",
       "deadline": "2026-10-06 23:59",
       "until": "2026-10-07",
@@ -340,8 +300,7 @@
       "cycle": "limited",
       "path": "活动页 → 青蛙瓷器挑战赛",
       "gainKind": [
-        "soul",
-        "other"
+        "soul"
       ],
       "start": "2026-09-30",
       "deadline": "2026-10-06 23:59",
@@ -377,9 +336,6 @@
       "name": "结缘·百鬼夜行概率UP",
       "cycle": "limited",
       "path": "町中 → 百鬼夜行",
-      "gainKind": [
-        "shard"
-      ],
       "start": "2026-09-30",
       "deadline": "2026-10-06 23:59",
       "until": "2026-10-07",
@@ -451,9 +407,6 @@
       "name": "雅艺竞风流·皮肤",
       "cycle": "limited",
       "path": "皮肤屋 → 雅艺竞风流",
-      "gainKind": [
-        "skin"
-      ],
       "start": "2026-09-30",
       "deadline": "2026-10-10 07:59",
       "until": "2026-10-11",
@@ -481,7 +434,7 @@
       "path": "活动页 → 相逢集结",
       "gainKind": [
         "blueTicket",
-        "blackDaruma",
+        "blackFrag",
         "gold"
       ],
       "gain": {
@@ -500,7 +453,6 @@
       "cycle": "limited",
       "path": "广场 → 诞生庆典",
       "gainKind": [
-        "other",
         "gold"
       ],
       "start": "2026-10-10",

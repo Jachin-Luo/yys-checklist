@@ -42,7 +42,13 @@ export default function LimitedPage() {
       .filter((it) => it.cycle === 'limited')
       .filter((it) => isVisible(it, visibility))
       .sort(
-        buildComparator({ sortBy: 'deadline', pinned: view.pinned, order: overrides?.order ?? [] }),
+        buildComparator({
+          sortBy: 'deadline',
+          pinned: view.pinned,
+          order: overrides?.order ?? [],
+          /* 限时页固定按剩余天数排，库内序号只作次键（同一截止日的保持库顺序） */
+          dbIndex: new Map(items.map((it, i) => [it.id, i] as const)),
+        }),
       );
 
     const undone = list.filter((it) => checked[it.id] === undefined);

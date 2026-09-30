@@ -277,7 +277,6 @@ export interface Meta {
   resetNote?: string;
   disclaimer: string;
   gainKindNote?: string;
-  weightNote?: string;
   viewNote?: string;
   stateKeySpec?: string;
   dicts: DictEntry[];
@@ -358,21 +357,25 @@ export interface ViewPrefs {
   profileId: string;
   /**
    * ⚠️ 已不再由 UI 写入（产品决策：取消排序切换）。
-   * 生效排序由 `domain/sort.effectiveSortBy(order)` 派生：默认痛感分，有自定义顺序则自定义接管。
+   * 生效排序由 `domain/sort.effectiveSortBy(order)` 派生：**默认按条目库顺序**
+   * （2026-09-30 起不再是痛感分），有自定义顺序则自定义接管。
    * 字段与 `meta.sortOptions` 保留是为了不动契约形状与既有校验，勿据此新增排序 UI。
    */
   sortBy: SortBy;
   minWeight: number;
   pinned: string[];
   /**
-   * 清单卡片里显示哪些字段（2026-09-16 用户需求）。
+   * 清单卡片里显示哪些字段（2026-09-16 用户需求；**2026-09-30 起按页面四套**）。
    *
    * 一张卡默认渲染「名称 + 四类徽章 + 入口 + 条件 + 备注」，信息完整但很高 ——
-   * 只想打个卡的用户要划很久。这里让用户自己决定卡片内容，关掉长文本后一屏能多看几条。
-   * 缺省（老数据）由 `domain/cardDisplay.effectiveCardDisplay` 补成"全部显示"，
-   * 因此**不改变任何现有观感**。
+   * 只想打个卡的用户要划很久。现在四个清单页各持一份：今日想扫得快就切「简要」，
+   * 限时要看清条件 / 截止就留「完整」。
+   *
+   * **有意不兼容**（用户 2026-09-30："无需兼容之前的"）：旧的单份形状不再被读取，
+   * 各页一律回落默认（= 全部显示）—— 旧字段留着不报错也不生效，**不做数据迁移**。
+   * 归一化在 `domain/cardDisplay.effectiveCardByScope`。
    */
-  card?: CardDisplay;
+  card?: Partial<Record<CardScope, Partial<CardDisplay>>>;
   /** 被一键日常覆盖项的处理：`dim` 弱化（保留条目）/ `hide` 隐藏（不渲染）。**只影响列表显示，不影响统计口径** */
   coverMode?: 'dim' | 'hide';
   /**
@@ -387,6 +390,17 @@ export interface ViewPrefs {
   autoSet?: string[];
   updatedAt: string;
 }
+
+/**
+ * 卡片显示偏好的**作用范围 = 四个清单页**（2026-09-30 用户需求）。
+ *
+ * 为什么按页拆：同一套开关在两个页面上的最优解本来就不同 —— 今日是"打卡流水"
+ * （扫得快最重要），限时是"这批活动还剩几天、条件是什么"（信息越全越好）。
+ * 一个开关管四页，等于逼用户为最啰嗦的那一页设一个全局值。
+ *
+ * 与 `NavKey` 的四个清单页同名；统计 / 工具 / 设置页不显示清单卡，不在其中。
+ */
+export type CardScope = 'today' | 'week' | 'month' | 'limited';
 
 /**
  * 清单卡片里显示哪些块（2026-09-16 用户需求）。

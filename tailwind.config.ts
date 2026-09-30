@@ -120,6 +120,9 @@ export default {
         frag: c('frag'),
         ticket: c('ticket'),
 
+        /* 色·橘（2026-09-30 新增）：体力徽章用。取值与色相依据见 `theme.css` 的 `--c-tangerine` */
+        tangerine: c('tangerine'),
+
         /* 色·底轨空槽（进度条 / 卡片底轨） */
         track: c('track'),
 

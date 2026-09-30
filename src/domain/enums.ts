@@ -26,26 +26,35 @@
 export const CYCLE = ['daily', 'weekly', 'monthly', 'limited'] as const;
 export type Cycle = (typeof CYCLE)[number];
 
-/** 奖励类型（18 类）：数量可能浮动，但类型固定（需求 F21 / 设计 §4.2） */
+/**
+ * 奖励类型（9 类 = 币种 + 兑换券 + 三类产出）：数量可能浮动，但类型固定（需求 F21 / 设计 §4.2）。
+ *
+ * 2026-09-30 **由 18 类收口到 9 类**（用户看过全量明细后逐类判断，全程见 CHANGELOG）：
+ *   - **并**：`blackDaruma` → `blackFrag`（1 黑蛋折算 25 黑碎 —— 黑蛋没有独立的数值口径，
+ *     单列只会让"到底算不算"反复出现）；
+ *   - **并**：`merit` → `medal`（标签改「勋章·功勋」：两者在游戏里同属"打出来的货币"，
+ *     用户按自己的记账习惯合并）；
+ *   - **并**：`bossSoul` → `soul`（首领御魂本就是御魂的子类）；
+ *   - **删**：`daruma` / `shard` / `skin` / `token` / `other` / `exp` —— 前四个各自是"某一类
+ *     物品"的筐（达摩 / 碎片 / 皮肤外观 / 兑换材料），`other` 是最大的筐（21 次引用里混着
+ *     "真杂项"与"有名字却没类型"两种东西），`exp` 则是用户随后追加的判断（经验几乎总与
+ *     金币同来，单列换不到区分度）。留下的口径是：**说不清的不再编码成数据**。
+ *     代价已如实记下：整轮迁移后有 23 条条目**不再有任何奖励类型**（卡片上不出徽章）；
+ *     摘 `exp` 这一步本身不新增任何空条目（那 5 条都还挂着金币等）。
+ *
+ * ⚠️ 前三个（`jade` / `blueTicket` / `blackFrag`）与 `GAIN_CURRENCY` 是同一批 code ——
+ * 它们既是类型、又是 `gain` 对象的键，**动它们等于动数据结构**，不要合并或删除。
+ */
 export const GAIN_KIND = [
   'jade',
   'blueTicket',
   'blackFrag',
-  'blackDaruma',
   'skinTicket',
   'medal',
-  'merit',
   'soul',
-  'bossSoul',
-  'daruma',
   'gold',
   'stamina',
-  'exp',
-  'shard',
   'ssr',
-  'skin',
-  'token',
-  'other',
 ] as const;
 export type GainKind = (typeof GAIN_KIND)[number];
 
@@ -57,8 +66,15 @@ export type GainKind = (typeof GAIN_KIND)[number];
    89 条数据里 92% 的 `entry` 恰好等于 `path` 的第一段。
    详见 `api/types.ts` 里 `Item` 处的删除说明与设计文档 v1.4.1 修订 #46。 */
 
-/** 排序方式（`value` 已换成 `weight` 痛感分） */
-export const SORT_BY = ['weight', 'cycle', 'deadline', 'custom', 'name'] as const;
+/**
+ * 排序方式。
+ *
+ * 2026-09-30（用户："默认排序不用痛感算法了，就按照 db 的顺序来"）：删 `weight`（痛感分），
+ * 默认改为 `db` —— **条目库（`items.db.json` / `limited.db.json`）里的书写顺序**。
+ * 痛感分连同它的派生函数（`domain/weight.weightOf`）一并退场。
+ * UI 依旧不写这个字段（排序不由用户选），生效值一律由 `domain/sort.effectiveSortBy` 派生。
+ */
+export const SORT_BY = ['db', 'cycle', 'deadline', 'custom', 'name'] as const;
 export type SortBy = (typeof SORT_BY)[number];
 
 /** 字典表的类别（6 类，全量；`entry` / `action` 于 2026-09-11 随字段一起删除） */

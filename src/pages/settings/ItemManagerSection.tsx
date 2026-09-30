@@ -30,7 +30,8 @@ const rowBtn = `${btn.base} ${btn.sm} ${btn.out}`;
  * 「设置 · 条目管理」（F20 条目自定义）。
  *
  * 这里同时也是**自定义排序的唯一入口**：排序控件已按产品决策取消，
- * 一旦用户在此调整顺序，`order` 非空 → `effectiveSortBy` 判定为 custom → 直接接管默认痛感排序。
+ * 一旦用户在此调整顺序，`order` 非空 → `effectiveSortBy` 判定为 custom → 直接接管默认的
+ * **条目库顺序**（2026-09-30 起；此前接管的是"痛感分降序"）。
  *
  * **列表按周期分组展示、调序也限制在组内**：
  * 分组依据就是条目自身的 `cycle`（档间顺序取 `dicts.cycle` 的 sort —— 每日 → 每周 → 每月 → 限时），
@@ -113,7 +114,12 @@ export default function ItemManagerSection() {
     /* 用 orderKey 还原一份数组，避免把 `order` 引用写进依赖（它每次渲染都是新数组） */
     const orderList = orderKey ? orderKey.split(',') : [];
     return [...items].sort(
-      buildComparator({ sortBy: effectiveSortBy(orderList), pinned: [...pinned], order: orderList }),
+      buildComparator({
+        sortBy: effectiveSortBy(orderList),
+        pinned: [...pinned],
+        order: orderList,
+        dbIndex: new Map(items.map((it, i) => [it.id, i] as const)),
+      }),
     );
   }, [items, orderKey, pinned]);
 
@@ -306,7 +312,7 @@ export default function ItemManagerSection() {
      * 不只是"拖了没用"：`domain/merge.effectiveView` 的 `order` 一旦非空，
      * `domain/sort.effectiveSortBy` 就判定为 `custom` —— 而 hub 自己受 `buildComparator`
      * 的前置特判保护、**恒第 0 位、不读 `order`**。于是拖它的实际结果是：
-     * 列表顺序一点没变，整页排序却从"默认痛感"悄悄切成了"自定义"（用户改不动的东西
+     * 列表顺序一点没变，整页排序却从"默认（库顺序）"悄悄切成了"自定义"（用户改不动的东西
      * 反而改掉了他没打算改的东西）。落点侧同理 —— 拖别的条目到它上面也会写进 `order`。
      */
     if (from.isAutoHub || target.isAutoHub) return;
@@ -333,6 +339,31 @@ export default function ItemManagerSection() {
             <Icon name="plus" size={12} />
             新建条目
           </button>
+          {/* 恢复默认顺序（2026-09-30）：只清 `overrides.order`。
+              为什么需要它：`order` 一旦非空，`domain/sort.effectiveSortBy` 就判成 `custom`
+              并**接管默认排序** —— 用户此时在清单页看到的顺序与条目库无关，
+              而此前除了"清掉整个覆盖层"（下面那颗「恢复默认」）没有任何退路。
+              这颗按钮与它的分工：只动顺序，自建条目 / 隐藏记录 / 预设改写一概不碰。
+              **只在真调过顺序时出现** —— 否则它是一颗点了没反应的按钮。 */}
+          {order.length ? (
+            <button
+              type="button"
+              disabled={busy}
+              onClick={async () => {
+                const ok = await askConfirm({
+                  title: '恢复默认顺序？',
+                  body: '会清空你拖拽 / ▲▼ 调过的自定义顺序，列表回到条目库的书写顺序。自建条目、隐藏记录与预设改写都不受影响。',
+                  confirmLabel: '恢复默认顺序',
+                  tone: 'danger',
+                });
+                if (ok) void saveOrder([]);
+              }}
+              className={rowBtn}
+            >
+              <Icon name="undo" size={12} />
+              恢复默认顺序
+            </button>
+          ) : null}
           <button
             type="button"
             disabled={busy}

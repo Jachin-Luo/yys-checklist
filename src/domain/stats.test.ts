@@ -17,16 +17,17 @@ const mk = (over: Partial<Item>): Item => ({
 });
 
 const ITEMS: Item[] = [
-  mk({ id: 'hub', name: '一键日常', isAutoHub: true, gainKind: ['other'] }),
+  /* 入口卡：入口本身不标奖励类型（2026-09-30 奖励类型收口后，原先用来兜底的 `other` 已不存在） */
+  mk({ id: 'hub', name: '一键日常', isAutoHub: true }),
   /* 日常：固定 20 勾玉 + 0.5 黑碎（小数必须被正确处理） */
   mk({ id: 'd_card', name: '永久勾玉卡', gain: { jade: 20 }, gainNote: '每6h返5勾', gainKind: ['jade'] }),
   mk({ id: 'd_daruma', name: '免费黑蛋礼包', gain: { blackFrag: 0.5 }, gainKind: ['blackFrag'], autoDaily: true }),
   /* 只有浮动收益 → 不进统计 */
-  mk({ id: 'd_fengmo', name: '逢魔之时', gainKind: ['bossSoul'], autoDaily: true }),
+  mk({ id: 'd_fengmo', name: '逢魔之时', gainKind: ['soul'], autoDaily: true }),
   /* 周常：1 蓝票 */
   mk({ id: 'w_medal', name: '勋章商店蓝票', cycle: 'weekly', gain: { blueTicket: 1 }, gainKind: ['blueTicket'] }),
-  /* 每月：25 黑碎（1 整颗黑蛋） */
-  mk({ id: 'm_shop', name: '秘卷屋礼盒', cycle: 'monthly', gain: { blackFrag: 25 }, gainKind: ['blackDaruma'], deadline: '2026-10-06' }),
+  /* 每月：25 黑碎（= 1 整颗黑蛋；2026-09-30 起黑蛋按此折算并入黑碎） */
+  mk({ id: 'm_shop', name: '秘卷屋礼盒', cycle: 'monthly', gain: { blackFrag: 25 }, gainKind: ['blackFrag'], deadline: '2026-10-06' }),
 ];
 
 describe('summarizeRangeGain：按日期区间的收益（统计页改版 2026-09-15）', () => {
