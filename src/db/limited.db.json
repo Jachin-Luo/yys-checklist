@@ -1,239 +1,6 @@
 {
   "items": [
     {
-      "id": "ltd_shiguang_sign",
-      "name": "拾光永恒·神木补给签到",
-      "cycle": "limited",
-      "path": "活动页 → 拾光永恒 → 神木补给",
-      "gainKind": [
-        "other"
-      ],
-      "start": "2026-09-09",
-      "deadline": "2026-09-29 23:59",
-      "until": "2026-09-30",
-      "note": "每日登录领取，累计最多 14 次，别断签；活动 9/29 结束后归档。",
-      "children": [
-        {
-          "id": "ltd_shiguang_sign_1"
-        },
-        {
-          "id": "ltd_shiguang_sign_2"
-        },
-        {
-          "id": "ltd_shiguang_sign_3"
-        },
-        {
-          "id": "ltd_shiguang_sign_4"
-        },
-        {
-          "id": "ltd_shiguang_sign_5"
-        },
-        {
-          "id": "ltd_shiguang_sign_6"
-        },
-        {
-          "id": "ltd_shiguang_sign_7"
-        },
-        {
-          "id": "ltd_shiguang_sign_8"
-        },
-        {
-          "id": "ltd_shiguang_sign_9"
-        },
-        {
-          "id": "ltd_shiguang_sign_10"
-        },
-        {
-          "id": "ltd_shiguang_sign_11"
-        },
-        {
-          "id": "ltd_shiguang_sign_12"
-        },
-        {
-          "id": "ltd_shiguang_sign_13"
-        },
-        {
-          "id": "ltd_shiguang_sign_14"
-        }
-      ],
-      "origin": "preset"
-    },
-    {
-      "id": "ltd_shiguang_xuwei",
-      "name": "拾光永恒·虚无精锐",
-      "cycle": "limited",
-      "path": "活动页 → 拾光永恒 → 虚无精锐",
-      "gainKind": [
-        "soul",
-        "token"
-      ],
-      "start": "2026-09-09",
-      "deadline": "2026-09-29 23:59",
-      "until": "2026-09-30",
-      "note": "每日签到给「金花灵符」，通关定向掉 4 种指定御魂 + 磐长花币；额外挑战耗体力/卷轴，量力而行。",
-      "children": [
-        {
-          "id": "ltd_shiguang_xuwei_1"
-        },
-        {
-          "id": "ltd_shiguang_xuwei_2"
-        },
-        {
-          "id": "ltd_shiguang_xuwei_3"
-        },
-        {
-          "id": "ltd_shiguang_xuwei_4"
-        },
-        {
-          "id": "ltd_shiguang_xuwei_5"
-        },
-        {
-          "id": "ltd_shiguang_xuwei_6"
-        },
-        {
-          "id": "ltd_shiguang_xuwei_7"
-        },
-        {
-          "id": "ltd_shiguang_xuwei_8"
-        },
-        {
-          "id": "ltd_shiguang_xuwei_9"
-        },
-        {
-          "id": "ltd_shiguang_xuwei_10"
-        },
-        {
-          "id": "ltd_shiguang_xuwei_11"
-        },
-        {
-          "id": "ltd_shiguang_xuwei_12"
-        },
-        {
-          "id": "ltd_shiguang_xuwei_13"
-        },
-        {
-          "id": "ltd_shiguang_xuwei_14"
-        }
-      ],
-      "origin": "preset"
-    },
-    {
-      "id": "ltd_shiguang_river",
-      "name": "拾光永恒·巡于黄金之河",
-      "cycle": "limited",
-      "path": "活动页 → 拾光永恒 → 巡于黄金之河",
-      "gainKind": [
-        "other"
-      ],
-      "start": "2026-09-09",
-      "deadline": "2026-09-29 23:59",
-      "until": "2026-09-30",
-      "note": "每日开放新地图区块，探索事件招募伙伴、提升探索效率。",
-      "children": [
-        {
-          "id": "ltd_shiguang_river_1"
-        },
-        {
-          "id": "ltd_shiguang_river_2"
-        },
-        {
-          "id": "ltd_shiguang_river_3"
-        },
-        {
-          "id": "ltd_shiguang_river_4"
-        },
-        {
-          "id": "ltd_shiguang_river_5"
-        },
-        {
-          "id": "ltd_shiguang_river_6"
-        },
-        {
-          "id": "ltd_shiguang_river_7"
-        },
-        {
-          "id": "ltd_shiguang_river_8"
-        },
-        {
-          "id": "ltd_shiguang_river_9"
-        },
-        {
-          "id": "ltd_shiguang_river_10"
-        },
-        {
-          "id": "ltd_shiguang_river_11"
-        },
-        {
-          "id": "ltd_shiguang_river_12"
-        },
-        {
-          "id": "ltd_shiguang_river_13"
-        },
-        {
-          "id": "ltd_shiguang_river_14"
-        }
-      ],
-      "origin": "preset"
-    },
-    {
-      "id": "ltd_shiguang_tower",
-      "name": "拾光永恒·亘地回响爬塔",
-      "cycle": "limited",
-      "path": "活动页 → 拾光永恒 → 亘地回响",
-      "gainKind": [
-        "other"
-      ],
-      "start": "2026-09-09",
-      "deadline": "2026-09-29 23:59",
-      "until": "2026-09-30",
-      "note": "999 体力爬塔，掉白石晶（集 150 开宝箱）与灵彩（喂百鬼夜行图）；有体力尽量刷完，紧张时优先虚无精锐。",
-      "children": [
-        {
-          "id": "ltd_shiguang_tower_1"
-        },
-        {
-          "id": "ltd_shiguang_tower_2"
-        },
-        {
-          "id": "ltd_shiguang_tower_3"
-        },
-        {
-          "id": "ltd_shiguang_tower_4"
-        },
-        {
-          "id": "ltd_shiguang_tower_5"
-        },
-        {
-          "id": "ltd_shiguang_tower_6"
-        },
-        {
-          "id": "ltd_shiguang_tower_7"
-        },
-        {
-          "id": "ltd_shiguang_tower_8"
-        },
-        {
-          "id": "ltd_shiguang_tower_9"
-        },
-        {
-          "id": "ltd_shiguang_tower_10"
-        },
-        {
-          "id": "ltd_shiguang_tower_11"
-        },
-        {
-          "id": "ltd_shiguang_tower_12"
-        },
-        {
-          "id": "ltd_shiguang_tower_13"
-        },
-        {
-          "id": "ltd_shiguang_tower_14"
-        }
-      ],
-      "origin": "preset"
-    },
-    {
       "id": "ltd_shichangji",
       "name": "石长姬登录即领",
       "cycle": "limited",
@@ -260,23 +27,6 @@
       "deadline": "2026-10-06 23:59",
       "until": "2026-10-07",
       "note": "首次SSR/SP必出未收录",
-      "origin": "preset"
-    },
-    {
-      "id": "ltd_shiguang_yongheng",
-      "name": "拾光永恒 版本活动",
-      "cycle": "limited",
-      "path": "活动页 → 拾光永恒",
-      "gainKind": [
-        "skin",
-        "blueTicket",
-        "blackDaruma",
-        "other"
-      ],
-      "start": "2026-09-09",
-      "deadline": "2026-09-29 23:59",
-      "until": "2026-09-30",
-      "note": "重点：SP 少羽大天狗皮肤「樱时之忆」、SSR/SP 召唤券、契约书·御行达摩、动态头像框；二阶段首领战「炼石成金」9/16–9/19；磐语商店兑换延至 10/13，金石礼帖领奖延至 10/6；本体 9/29 结束，爬塔积分清零",
       "origin": "preset"
     },
     {
@@ -324,31 +74,17 @@
       "origin": "preset"
     },
     {
-      "id": "ltd_fushen_baochuan",
-      "name": "福神宝船·拾光游宴",
-      "cycle": "limited",
-      "path": "活动页 → 福神宝船",
-      "gainKind": [
-        "skin"
-      ],
-      "start": "2026-09-09",
-      "deadline": "2026-09-29 23:59",
-      "until": "2026-09-30",
-      "note": "重点：外观；注意 9/23 19:00 庆典演出节点",
-      "origin": "preset"
-    },
-    {
       "id": "ltd_jinshi_litie",
-      "name": "金石礼帖",
+      "name": "金石礼帖领奖",
       "cycle": "limited",
       "path": "活动页 → 金石礼帖",
       "gainKind": [
         "daruma"
       ],
       "start": "2026-09-09",
-      "deadline": "2026-09-29 23:59",
+      "deadline": "2026-10-06 23:59",
       "until": "2026-10-07",
-      "note": "本体 9/29 结束，领奖延至 10/6 23:59；重点：黑蛋等",
+      "note": "只领奖：活动本体 9/29 已结束，奖励领到 10/6 23:59 为止；重点：黑蛋等",
       "origin": "preset"
     },
     {
@@ -373,10 +109,10 @@
       "gainKind": [
         "ssr"
       ],
-      "start": "2026-09-16",
-      "deadline": "2026-09-29 23:59",
-      "until": "2026-09-30",
-      "note": "UP：赤影妖刀姬、云间不见岳、小鹿男、鬼童丸、缘结神、不见岳；礼包屋同步上架推荐礼包",
+      "start": "2026-09-30",
+      "deadline": "2026-10-13 23:59",
+      "until": "2026-10-14",
+      "note": "本期 UP：聆海金鱼姬、寻森小鹿男、葛叶、寻香行、祸津神、龙珏；礼包屋同步上架推荐礼包",
       "origin": "preset"
     },
     {
@@ -439,24 +175,6 @@
       "origin": "preset"
     },
     {
-      "id": "ltd_yueying_qiandeng",
-      "name": "月映千灯·中秋",
-      "cycle": "limited",
-      "path": "庭院 → 小纸人 → 月映千灯",
-      "gainKind": [
-        "skin",
-        "blueTicket",
-        "blackFrag",
-        "other"
-      ],
-      "gainNote": "映月之光每日上限100，靠奖励地图兑换",
-      "start": "2026-09-23",
-      "deadline": "2026-09-29 23:59",
-      "until": "2026-09-30",
-      "note": "9/23–9/29；登录礼 9/25–9/27，百鬼灯谜 3 星给动态头像框「金猫拜月·添香」，奖励地图换饭笥皮肤「秋月新香」、神秘的符咒、御行达摩碎片",
-      "origin": "preset"
-    },
-    {
       "id": "ltd_weizai_fushi",
       "name": "为崽而战·浮世之航",
       "cycle": "limited",
@@ -489,6 +207,306 @@
       "deadline": "2026-10-20 23:59",
       "until": "2026-10-21",
       "note": "异想·誓言第二弹：鬼切「刃影弦动」、炼狱茨木「重音狂潮」、鬼王酒吞「千山炎动」+动态头像；集齐 5 款送背景板「誓响千应」；2027-03 前无其他获取途径",
+      "origin": "preset"
+    },
+    {
+      "id": "ltd_duiyi_jingcai",
+      "name": "对弈竞猜",
+      "cycle": "limited",
+      "path": "庭院小纸人 / 町中 → 对弈竞猜",
+      "gainKind": [
+        "other"
+      ],
+      "start": "2026-09-30",
+      "deadline": "2026-10-06 23:59",
+      "until": "2026-10-07",
+      "note": "每天押一场（押左 / 押右）；猜中拿奖励，头像框「对弈决胜·斗力」可再兑换升级为「入神」，商店开到 10/13（见另一条）。",
+      "children": [
+        {
+          "id": "ltd_duiyi_jingcai_1"
+        },
+        {
+          "id": "ltd_duiyi_jingcai_2"
+        },
+        {
+          "id": "ltd_duiyi_jingcai_3"
+        },
+        {
+          "id": "ltd_duiyi_jingcai_4"
+        },
+        {
+          "id": "ltd_duiyi_jingcai_5"
+        },
+        {
+          "id": "ltd_duiyi_jingcai_6"
+        },
+        {
+          "id": "ltd_duiyi_jingcai_7"
+        }
+      ],
+      "origin": "preset"
+    },
+    {
+      "id": "ltd_duiyi_shangdian",
+      "name": "对弈竞猜商店",
+      "cycle": "limited",
+      "path": "对弈竞猜 → 商店",
+      "gainKind": [
+        "other"
+      ],
+      "start": "2026-09-30",
+      "deadline": "2026-10-13 23:59",
+      "until": "2026-10-14",
+      "note": "兑换窗口比竞猜多一周：用猜胜奖励换「对弈决胜·斗力」头像框，再兑换一次可升级为「入神」。",
+      "origin": "preset"
+    },
+    {
+      "id": "ltd_pingan_qifu",
+      "name": "平安祈福庙",
+      "cycle": "limited",
+      "path": "活动页 → 平安祈福庙",
+      "gainKind": [
+        "other"
+      ],
+      "start": "2026-09-30",
+      "deadline": "2026-10-06 23:59",
+      "until": "2026-10-07",
+      "note": "每件商品每天只能买一次、商品每天刷新 —— 每天来买一次，别攒到最后。",
+      "children": [
+        {
+          "id": "ltd_pingan_qifu_1"
+        },
+        {
+          "id": "ltd_pingan_qifu_2"
+        },
+        {
+          "id": "ltd_pingan_qifu_3"
+        },
+        {
+          "id": "ltd_pingan_qifu_4"
+        },
+        {
+          "id": "ltd_pingan_qifu_5"
+        },
+        {
+          "id": "ltd_pingan_qifu_6"
+        },
+        {
+          "id": "ltd_pingan_qifu_7"
+        }
+      ],
+      "origin": "preset"
+    },
+    {
+      "id": "ltd_yichui_zhilei",
+      "name": "伊吹之擂",
+      "cycle": "limited",
+      "path": "活动页 → 伊吹之擂",
+      "gainKind": [
+        "soul"
+      ],
+      "start": "2026-09-30",
+      "deadline": "2026-10-06 23:59",
+      "until": "2026-10-07",
+      "note": "每天 8:00–23:55 开放；本期强化御魂副属性：速度 / 暴击 / 暴击伤害。狭间幻境同期（耗「鱼香饼」，按每场伤害发奖）。",
+      "children": [
+        {
+          "id": "ltd_yichui_zhilei_1"
+        },
+        {
+          "id": "ltd_yichui_zhilei_2"
+        },
+        {
+          "id": "ltd_yichui_zhilei_3"
+        },
+        {
+          "id": "ltd_yichui_zhilei_4"
+        },
+        {
+          "id": "ltd_yichui_zhilei_5"
+        },
+        {
+          "id": "ltd_yichui_zhilei_6"
+        },
+        {
+          "id": "ltd_yichui_zhilei_7"
+        }
+      ],
+      "origin": "preset"
+    },
+    {
+      "id": "ltd_qingwa_tiaozhan",
+      "name": "青蛙瓷器挑战赛",
+      "cycle": "limited",
+      "path": "活动页 → 青蛙瓷器挑战赛",
+      "gainKind": [
+        "soul",
+        "other"
+      ],
+      "start": "2026-09-30",
+      "deadline": "2026-10-06 23:59",
+      "until": "2026-10-07",
+      "note": "15 级及以上；击败青蛙瓷器即算成功，部分式神出战有加成；「神秘骰子」可换「胜者的御魂礼盒」（随机六星御魂），活动任务给限定表情包「惊吓」。",
+      "children": [
+        {
+          "id": "ltd_qingwa_tiaozhan_1"
+        },
+        {
+          "id": "ltd_qingwa_tiaozhan_2"
+        },
+        {
+          "id": "ltd_qingwa_tiaozhan_3"
+        },
+        {
+          "id": "ltd_qingwa_tiaozhan_4"
+        },
+        {
+          "id": "ltd_qingwa_tiaozhan_5"
+        },
+        {
+          "id": "ltd_qingwa_tiaozhan_6"
+        },
+        {
+          "id": "ltd_qingwa_tiaozhan_7"
+        }
+      ],
+      "origin": "preset"
+    },
+    {
+      "id": "ltd_hyakki_yuan",
+      "name": "结缘·百鬼夜行概率UP",
+      "cycle": "limited",
+      "path": "町中 → 百鬼夜行",
+      "gainKind": [
+        "shard"
+      ],
+      "start": "2026-09-30",
+      "deadline": "2026-10-06 23:59",
+      "until": "2026-10-07",
+      "note": "每天前 5 次百鬼夜行的式神碎片掉落概率提升 —— 按天记，别断。",
+      "children": [
+        {
+          "id": "ltd_hyakki_yuan_1"
+        },
+        {
+          "id": "ltd_hyakki_yuan_2"
+        },
+        {
+          "id": "ltd_hyakki_yuan_3"
+        },
+        {
+          "id": "ltd_hyakki_yuan_4"
+        },
+        {
+          "id": "ltd_hyakki_yuan_5"
+        },
+        {
+          "id": "ltd_hyakki_yuan_6"
+        },
+        {
+          "id": "ltd_hyakki_yuan_7"
+        }
+      ],
+      "origin": "preset"
+    },
+    {
+      "id": "ltd_zhaofu_mihunwu",
+      "name": "招福·秘魂屋打折",
+      "cycle": "limited",
+      "path": "商店 → 秘魂屋",
+      "gainKind": [
+        "soul"
+      ],
+      "start": "2026-09-30",
+      "deadline": "2026-10-06 23:59",
+      "until": "2026-10-07",
+      "note": "每天前十次购买 8 折，另有每天 30 次免费刷新 —— 每天来刷想要的御魂。",
+      "children": [
+        {
+          "id": "ltd_zhaofu_mihunwu_1"
+        },
+        {
+          "id": "ltd_zhaofu_mihunwu_2"
+        },
+        {
+          "id": "ltd_zhaofu_mihunwu_3"
+        },
+        {
+          "id": "ltd_zhaofu_mihunwu_4"
+        },
+        {
+          "id": "ltd_zhaofu_mihunwu_5"
+        },
+        {
+          "id": "ltd_zhaofu_mihunwu_6"
+        },
+        {
+          "id": "ltd_zhaofu_mihunwu_7"
+        }
+      ],
+      "origin": "preset"
+    },
+    {
+      "id": "ltd_yayi_jingfengliu",
+      "name": "雅艺竞风流·皮肤",
+      "cycle": "limited",
+      "path": "皮肤屋 → 雅艺竞风流",
+      "gainKind": [
+        "skin"
+      ],
+      "start": "2026-09-30",
+      "deadline": "2026-10-10 07:59",
+      "until": "2026-10-11",
+      "note": "首周 5 折（皮肤券与魂玉共享折扣）；集齐五款（纺愿缘结神·谁为此弦 / 雪御前·墨成雪骨 / 不知火·舞榭丝阑 / 黑童子·生死方圆 / 萤草·丹青盈荔）解锁风姿度成就与专属插画「雅艺流芳」。",
+      "origin": "preset"
+    },
+    {
+      "id": "ltd_mihunwu_tehui",
+      "name": "秘魂屋特惠",
+      "cycle": "limited",
+      "path": "商店 → 秘魂屋",
+      "gainKind": [
+        "soul"
+      ],
+      "start": "2026-09-30",
+      "deadline": "2026-10-07 07:30",
+      "until": "2026-10-08",
+      "note": "41 级及以上；活动期间秘魂屋刷新的御魂全为六星；「洪福降临」时购买享 7 折（到 10/7 维护前）。",
+      "origin": "preset"
+    },
+    {
+      "id": "ltd_xiangfeng_jijie",
+      "name": "相逢集结（咲耶）",
+      "cycle": "limited",
+      "path": "活动页 → 相逢集结",
+      "gainKind": [
+        "blueTicket",
+        "blackDaruma",
+        "gold"
+      ],
+      "gain": {
+        "blueTicket": 6
+      },
+      "gainNote": "连续登录并参与集结战斗：神秘的符咒 ×6（计入固定收益）、三星奉为达摩 ×3、金币 ×150000（后两项不计入固定收益）",
+      "start": "2026-10-06",
+      "deadline": "2026-10-09 23:59",
+      "until": "2026-10-10",
+      "note": "连续登录并参加集结战斗即可领；SSR 全集赏的大人可直接获得咲耶体验资格，其他人靠好友 / 寮友助力（每次助力有 1 小时冷却）。",
+      "origin": "preset"
+    },
+    {
+      "id": "ltd_shenwuyue_danchen",
+      "name": "神无月诞生庆典",
+      "cycle": "limited",
+      "path": "广场 → 诞生庆典",
+      "gainKind": [
+        "other",
+        "gold"
+      ],
+      "start": "2026-10-10",
+      "deadline": "2026-10-16 23:59",
+      "until": "2026-10-17",
+      "note": "生日派对 10/10、10/11、10/12 的 20:00 开启；为妖刀姬 / 千姬 / 寻香行 / 伊邪那美 / 封阳君 / 平将门庆生领蛋糕与礼物，有机会抽惊喜奖励。",
       "origin": "preset"
     }
   ]

@@ -139,7 +139,7 @@ npm run dev          # http://localhost:5173/
 | 4 | 保留但不可达的开关未在代码内标注：`SHOW_WEEKLY_ALERT`（今日页警示条）、`ViewPrefs.sortBy`（UI 不再写入） | 可读性 | 后来者误以为它在生效，或误删相关逻辑。**`hideDone` 已按此原则于 2026-09-24 整体删除** —— 它没有 UI 却仍在 `domain/sort.isVisible` 里生效，比"保留但不可达"更糟 |
 | 5 | `schema/item.schema.json` 与 `tools/build.js` 双轨校验 | 数据录入体验 | 两处规则漂移时，编辑器提示与运行时校验不一致 |
 | 6 | 三个「版本号」并存：`meta.version`（同时是备份 `schemaVersion`）、`meta.dataVersion`、`dataVersion.db.json` 的行版本 | 认知成本 | 写迁移或备份逻辑时用错号 |
-| 7 | 统计只覆盖 21 条带固定收益的条目（按子步骤算"叶子"，父条目不进统计） | 期望管理 | 不属缺陷，是「只统计固定数值」的既定口径 |
+| 7 | 统计只覆盖 22 条带固定收益的条目（按子步骤算"叶子"，父条目不进统计） | 期望管理 | 不属缺陷，是「只统计固定数值」的既定口径 |
 
 附带记录：仓库内已发现三处过时注释 —— `tools/verify.js` 的「215 测试通过」、`src/domain/reset.ts` 的「当前 89 条」、`src/domain/yuhun.ts` 的「10 副本」，实测分别为 **302 用例 / 103 条 / 11 个副本**。修正它们属于代码改动，本轮未执行。
 
