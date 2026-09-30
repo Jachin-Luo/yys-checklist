@@ -1,6 +1,6 @@
 # 04 · 接手上手与改动任务手册
 
-> 对应数据版本：`2026.09.28-周期收口为四类` ｜ 事实核对日期：2026-09-20
+> 对应数据版本：`2026.09.30-奖励类型收口` ｜ 事实核对日期：2026-09-30
 > 本文回答：**第一次跑起来要做什么、常见改动怎么改、坏了怎么查**。
 > 每步都给出「触点文件 / 需要同步改的位置 / 必须跑的命令 / 怎么验证」。
 
@@ -8,7 +8,7 @@
 
 | 项 | 说明 |
 | --- | --- |
-| 依赖 | Node 20+（Vite 8 与 `workbox-build` 均要求 Node ≥ 20；仓库未声明 `engines`，实测在 Node 22 下跑通）。若 `node -v` 提示找不到命令，先安装 Node（官方安装包或 nvm-windows / fnm 等版本管理器） |
+| 依赖 | Node 20+（Vite 8 与 `workbox-build` 均要求 Node ≥ 20；仓库未声明 `engines`，实测在 Node 24 下跑通）。若 `node -v` 提示找不到命令，先安装 Node（官方安装包或 nvm-windows / fnm 等版本管理器） |
 | 包管理 | npm（仓库有 `package-lock.json`，用 `npm ci` 保证与锁文件一致） |
 | 后端 | **不需要**。默认 `VITE_API_MODE` 未设置 → 走本地 Mock，数据在浏览器 `localStorage` |
 | 端口 | `npm run dev` 默认 `5173` |
@@ -16,7 +16,7 @@
 ```bash
 npm ci
 npm run db:check     # 先确认种子数据自洽（不依赖 node_modules 之外的东西）
-npm test             # 基线：21 文件 / 302 用例应全绿
+npm test             # 基线：27 文件 / 407 用例应全绿
 npm run dev          # http://localhost:5173/
 ```
 
@@ -33,7 +33,7 @@ npm run dev          # http://localhost:5173/
 1. 通读 `AGENTS.md`（红线与导航）→ `docs/01` → `docs/02` → `docs/03` → 本文；顺手看一眼根目录 `CHANGELOG.md`，了解最近改了什么（每次改动都登记在那里）。
 2. `node tools/verify.js` 跑一次完整验收，把 `reports/verify-<date>.md` 当作**基线快照**留档。
 3. `npm run dev` 手动点一遍七个页面（今日 / 本周 / 本月 / 限时 / 统计 / 工具 / 设置），并：
-   - 勾一条看勾选是否落盘（刷新页面仍在）、统计页进度条是否变化；
+   - 勾一条看勾选是否落盘（刷新页面仍在）、统计页区间收益是否变化；
    - 在「设置 · 数据备份」导出一次，确认文本能出现；
    - 切到手机宽度（< 768px）确认切到底部 Tab 布局。
 4. 需要理解数据时，直接打开 `src/db/items.db.json` —— **清单的默认顺序就是它里面的书写顺序**（2026-09-30 起），挑一条对着字段表读即可。
@@ -47,13 +47,12 @@ npm run dev          # http://localhost:5173/
 | 触点文件 | `src/db/items.db.json`（真正的常驻：每日 / 每周 / 每月）、`src/db/limited.db.json`（非常驻：活动期每日 / 限时活动，含版本活动）、`src/db/dataVersion.db.json`（版本行）、`src/db/meta.db.json`（`meta.dataVersion`） |
 | 需要同步 | 若新增字段 → `tools/build.js` 的字段白名单 + `schema/item.schema.json`；若引入新枚举 code → `src/domain/enums.ts` 与 `meta.db.json` 的 `dicts` 两侧同步；若带固定收益 → 填 `gain` 的 `jade` / `blackFrag` / `blueTicket` 数值（`gainKind` 是奖励类型枚举，与 `GAIN_KIND` 对齐；不写 `gain` 即视为浮动、不进统计） |
 | 必须跑 | `npm run db:check` → `npm test` → `node tools/verify.js` |
-| 验证 | 开发服务里能在对应页面看到条目；**清单里的先后与数据文件里的书写顺序一致**（默认排序，2026-09-30 起）；带 `gain` 的条目会让统计页对应进度条变化 |
+| 验证 | 开发服务里能在对应页面看到条目；**清单里的先后与数据文件里的书写顺序一致**（默认排序，2026-09-30 起）；带 `gain` 的条目会让统计页对应币种的区间收益变化 |
 
 硬性约束（`tools/build.js` 会拦）：
 
 - id 全局唯一且格式合规；
 - 全库**恰有 1 条** `isAutoHub`（一键日常入口）；
-- `cycle` 为 `version` / `season` 时 `periods` 锚点必填；
 - 带 `until` 的条目到期后在数据层被 `activeItems` 过滤，不要写「渲染层判断」；
 - 不要写 `reward` / `entry` / `action` 字段（已从白名单移除）。
 
@@ -99,7 +98,7 @@ npm run dev          # http://localhost:5173/
 | 项 | 内容 |
 | --- | --- |
 | 触点文件 | `src/api/http/adapter.ts`（当前所有方法 `this.fail()` 抛 `NOT_IMPLEMENTED`，文件头有端点映射参考与 `TODO(S2 之后 / M2)`） |
-| 需要保持 | ① 契约形状不变（`ApiClient` 32 个方法）；② `DataScope` 显式传 `userId` + `profileId`，服务端据此校验越权；③ 错误统一用 `ApiError`（带 `code`）；④ `listProfiles` 返回**含归档的全部账号**，归档过滤留在 UI |
+| 需要保持 | ① 契约形状不变（`ApiClient` 37 个方法）；② `DataScope` 显式传 `userId` + `profileId`，服务端据此校验越权；③ 错误统一用 `ApiError`（带 `code`）；④ `listProfiles` 返回**含归档的全部账号**，归档过滤留在 UI |
 | 不改的地方 | 页面、store、domain、hooks 一律不动 —— 契约是唯一边界，切换靠 `VITE_API_MODE=http` + `VITE_API_BASE_URL` |
 | 必须跑 | `npm test`（`api/mock/contract.test.ts` 是 Mock 的行为基准，可对照着验证 Http 实现语义一致）；`npm run build` |
 | 验证 | 关掉 Mock（设 `VITE_API_MODE=http`）后七个页面功能等价；离线 / 报错时 `SaveErrorNotice` 与 `ErrorScreen` 有正确表现 |
@@ -133,15 +132,15 @@ npm run dev          # http://localhost:5173/
 
 | # | 问题 | 影响面 | 何时才会真的咬人 |
 | --- | --- | --- | --- |
-| 1 | UI 层零测试（`src/**/*.test.tsx` 为 0，21 个测试文件全在 domain / stores / hooks / services / api） | 组件与双布局无回归网 | 改组件或布局后只能手点验证，问题到线上才暴露 |
+| 1 | UI 层零测试（`src/**/*.test.tsx` 为 0，27 个测试文件全在 domain / stores / hooks / services / api） | 组件与双布局无回归网 | 改组件或布局后只能手点验证，问题到线上才暴露 |
 | 2 | localStorage 分片无版本号与迁移机制（备份 bundle 有 `schemaVersion`，`yys:state\|view\|ovr\|checklog:{profileId}` 没有） | 老用户的本地数据 | 改数据结构并升级版本时，旧分片会被静默读入、不报警 |
 | 3 | `hooks/useBootstrap` 的「按序清空 items → check → view 再写回」是手工维护的隐式契约 | 切号正确性 | 新增 store 时漏改，出现「切号残留上一账号数据」 |
-| 4 | 保留但不可达的开关未在代码内标注：`SHOW_WEEKLY_ALERT`（今日页警示条）、`ViewPrefs.sortBy`（UI 不再写入） | 可读性 | 后来者误以为它在生效，或误删相关逻辑。**`hideDone` 已按此原则于 2026-09-24 整体删除** —— 它没有 UI 却仍在 `domain/sort.isVisible` 里生效，比"保留但不可达"更糟 |
+| 4 | 保留但不可达的字段未在代码内标注：`ViewPrefs.sortBy` / `minWeight`（UI 不再写入） | 可读性 | 后来者误以为它在生效，或误删相关逻辑。**`hideDone` 已按此原则于 2026-09-24 整体删除** —— 它没有 UI 却仍在 `domain/sort.isVisible` 里生效，比"保留但不可达"更糟；`SHOW_WEEKLY_ALERT`（今日页警示条）亦已于 2026-09-15 随痛感收敛删除 |
 | 5 | `schema/item.schema.json` 与 `tools/build.js` 双轨校验 | 数据录入体验 | 两处规则漂移时，编辑器提示与运行时校验不一致 |
 | 6 | 三个「版本号」并存：`meta.version`（同时是备份 `schemaVersion`）、`meta.dataVersion`、`dataVersion.db.json` 的行版本 | 认知成本 | 写迁移或备份逻辑时用错号 |
 | 7 | 统计只覆盖 22 条带固定收益的条目（按子步骤算"叶子"，父条目不进统计） | 期望管理 | 不属缺陷，是「只统计固定数值」的既定口径 |
 
-附带记录：仓库内已发现三处过时注释 —— `tools/verify.js` 的「215 测试通过」、`src/domain/reset.ts` 的「当前 89 条」、`src/domain/yuhun.ts` 的「10 副本」，实测分别为 **302 用例 / 103 条 / 11 个副本**。修正它们属于代码改动，本轮未执行。
+附带记录：仓库内曾发现三处过时注释 —— `tools/verify.js` 的「215 测试通过」、`src/domain/reset.ts` 的「当前 89 条」、`src/domain/yuhun.ts` 的「10 副本」。按 2026-09-30 实测，对应真值分别是 **407 用例 / 91 条 / 11 个副本**；三处注释已于同日的文档一致性核查中一并改正。
 
 ## 5. 问题排查
 

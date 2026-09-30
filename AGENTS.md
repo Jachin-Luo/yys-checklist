@@ -2,12 +2,12 @@
 
 > 本文件写给在本仓库工作的 AI 助手与开发者。**开工前先读本文件**，再按末尾「文档索引」按需深入。
 >
-> 对应数据版本：`2026.09.28-周期收口为四类` ｜ 事实核对日期：2026-09-28 ｜ 详细文档见 `docs/`
+> 对应数据版本：`2026.09.30-奖励类型收口` ｜ 事实核对日期：2026-09-30 ｜ 详细文档见 `docs/`
 
 ## 这个项目是什么
 
 囤囤鼠（阴阳师任务清单）：**纯手动勾选**的自查工具，不登录、不读取游戏账号或游戏内数据、不模拟点击。
-技术栈：React 18 · TypeScript（严格模式）· Vite 5 · Tailwind CSS 3 · Zustand 5 · Vitest 2；无 UI 框架依赖。
+技术栈：React 18 · TypeScript（严格模式）· Vite 8 · Tailwind CSS 3 · Zustand 5 · Vitest 5；无 UI 框架依赖。
 
 保存与数据都在当前浏览器的 `localStorage`（按账号分片），默认走本地 Mock API，不需要后端。
 
@@ -26,7 +26,7 @@
 （同属性类名相撞时按 Tailwind 生成顺序决胜，不由书写顺序定 —— 见该常量的注释）。
 **例外只有一处**：Tailwind 类串表达不了的控件（径向渐变 / `inset` 内圈 / `::after` 外环 / 百分比图标等，
 任意值写法按纪律禁用）改由 `src/styles/theme.css` 的 `.genso-*` 类承担 —— 仍然是"只有一处定义"。
-现有两例：`.genso-daruma`（达摩点睛）、`.genso-rt`（回到顶部朱印按钮）。
+现在只剩一例：`.genso-rt`（回到顶部朱印按钮）—— `.genso-daruma`（达摩点睛）已于 2026-09-28 随该功能整体删除，别照旧文档复活。
 
 ---
 
@@ -115,13 +115,14 @@ git commit --message="..."
 ## 二、常用命令
 
 ```bash
-npm ci                    # 按 lockfile 安装（Node 18+，实测 Node 22）
+npm ci                    # 按 lockfile 安装（Node 18+，实测 Node 24）
 npm run dev               # 开发服务，默认 http://localhost:5173/
-npm test                  # vitest run，单元测试（21 文件 / 302 用例）
+npm test                  # vitest run，单元测试（27 文件 / 407 用例）
 npm run lint              # eslint
 npm run build             # tsc -b && vite build → dist/（**随发布入库**，产物要一并提交）
 npm run db:check          # 数据校验 + 枚举双轨对齐，产物 reports/data-check.md
 npm run db:calibrate      # 数据核对报告，产物 reports/pending-review.*、reports/calibration.md
+npm run icons             # 生成 PWA 四张 PNG 图标（改 favicon.svg 后重跑）
 node tools/verify.js      # 一键验收：tsc + eslint + vitest + build + db:check，产物 reports/verify-<date>.md
 ```
 
@@ -155,11 +156,11 @@ node tools/verify.js      # 一键验收：tsc + eslint + vitest + build + db:ch
 | 文档 | 内容 |
 | --- | --- |
 | `docs/README.md` | 文档总索引、按角色的推荐阅读路径、文档时效与更新约定 |
-| `docs/01-architecture.md` | 目录逐层职责、启动到首屏的渲染链路、导航机制、9 个 store 的职责与依赖方向、双布局差异 |
-| `docs/02-data-and-domain.md` | 数据契约、Mock 适配器与分片持久化、8 个 db.json 结构与规模、16 个 domain 模块导出表、特殊机制（一键日常 / 卡片显示 / 寮时间 / 备份 / 寄养 / 账号同步 / 御魂 / 悬赏） |
+| `docs/01-architecture.md` | 目录逐层职责、启动到首屏的渲染链路、导航机制、11 个 store 的职责与依赖方向、双布局差异 |
+| `docs/02-data-and-domain.md` | 数据契约、Mock 适配器与分片持久化、8 个 db.json 结构与规模、21 个 domain 模块导出表、特殊机制（一键日常 / 卡片显示 / 寮时间 / 备份 / 寄养 / 账号同步 / 御魂 / 悬赏） |
 | `docs/03-conventions-and-tests.md` | 分层约束的强制手段、口径纪律逐条落点、测试体系与写法、数据录入流程、工具脚本、常见坑 |
 | `docs/04-handover-guide.md` | 环境准备、6 类改动任务手册、未完成项与路线图、问题排查、「不要这样做」清单 |
-| `docs/05-icon-inventory.md` | 图标槽位清单（重设计底稿）：36 枚符号的语义、名不副实的三处系统性诊断、重设计分组与两种改动口径 |
+| `docs/05-icon-inventory.md` | 图标槽位清单（重设计底稿）：改版前 36 枚符号的语义与分组（**现用图标以 `sprite.tsx` 的 45 枚为准**）、名不副实的三处系统性诊断、重设计分组与两种改动口径 |
 | `docs/06-limited-intake.md` | **限时条目录入规范**：一条数据怎么进 `limited.db.json`（字段表、收益口径、子步骤、时间三兄弟与归档）、录入七步、强制校验 vs 约定的速查、踩过的坑 |
 
 面向玩家的功能说明、FAQ、数据说明与免责在根目录 `README.md`；本文件与 `docs/` 只讲开发所需的事实，不重复玩家向内容。

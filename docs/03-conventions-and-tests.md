@@ -1,6 +1,6 @@
 # 03 · 约定、测试与工具链
 
-> 对应数据版本：`2026.09.28-周期收口为四类` ｜ 事实核对日期：2026-09-28
+> 对应数据版本：`2026.09.30-奖励类型收口` ｜ 事实核对日期：2026-09-30
 > 本文回答：**哪些约束是被工具强制的、口径纪律落在哪个函数、怎么跑测试、数据怎么录入**。
 
 ## 1. 分层铁律与强制手段
@@ -82,7 +82,7 @@ TypeScript 为严格模式（`tsconfig.app.json`），`npm run build` 会先跑 
 
 | 项 | 值 |
 | --- | --- |
-| 运行器 | Vitest 2，`environment: 'node'`，`include: ['src/**/*.test.ts']` |
+| 运行器 | Vitest 5，`environment: 'node'`，`include: ['src/**/*.test.ts']` |
 | 位置约定 | **测试与被测代码同目录**（无独立 `tests/` 目录） |
 | localStorage 垫片 | `src/test/memoryStorage.ts`（`MemoryStorage` 记录每次 `setItem`；`installMemoryStorage()` 注入 `window.localStorage`） |
 | 总量 | **27 个测试文件 / 407 个用例**（2026-09-28 按 `npm test` 实测重算） |
@@ -91,7 +91,7 @@ TypeScript 为严格模式（`tsconfig.app.json`），`npm run build` 会先跑 
 
 | 测试文件 | 用例数 |
 | --- | --- |
-| `api/mock/contract.test.ts` | 31（含 2026-09-28 新增的 `updateItem` 三条：改写自建 / 改写预设并清除改写 / 未知 id 报错） |
+| `api/mock/contract.test.ts` | 32（含 2026-09-28 新增的 `updateItem` 三条：改写自建 / 改写预设并清除改写 / 未知 id 报错） |
 | `api/mock/persistence.test.ts` | 7 |
 | `domain/autoDaily.test.ts` | 22 |
 | `domain/backup.test.ts` | 30 |
@@ -100,14 +100,14 @@ TypeScript 为严格模式（`tsconfig.app.json`），`npm run build` 会先跑 
 | `domain/cardDisplay.test.ts` | 16 |
 | `domain/checkLog.test.ts` | 17 |
 | `domain/dateLabel.test.ts` | 10 |
-| `domain/domain.test.ts` | 33（reset / sort / weight / merge / countdown 跨天跨周跨月边界 + 限时永不自动重置 + 预设改写合并） |
-| `domain/itemPatch.test.ts` | 8（稀疏覆盖：键不存在 / `null` / 有值三态；对着种子求差；外部脏值净化） |
-| `domain/steps.test.ts` | 15（子步骤派生：单条与多次的步数 / 完成判定 / 当前步 / 缺省继承父） |
+| `domain/domain.test.ts` | 32（reset / sort / merge / countdown 跨天跨周跨月边界 + 限时永不自动重置 + 预设改写合并） |
+| `domain/itemPatch.test.ts` | 12（稀疏覆盖：键不存在 / `null` / 有值三态；对着种子求差；外部脏值净化） |
+| `domain/steps.test.ts` | 13（子步骤派生：单条与多次的步数 / 完成判定 / 当前步 / 缺省继承父） |
 | `domain/guildTime.test.ts` | 10 |
 | `domain/itemDraft.test.ts` | 4（草稿 → 条目的字段映射与归一：空白串、空 `gainKind`、整体覆盖、收益清洗） |
 | `domain/nurture.test.ts` | 41 |
 | `domain/sort.test.ts` | 18 |
-| `domain/stats.test.ts` | 13 |
+| `domain/stats.test.ts` | 6 |
 | `domain/sync.test.ts` | 12 |
 | `domain/yuhun.test.ts` | 15 |
 | `hooks/usePeriodRefresh.test.ts` | 8 |
@@ -128,19 +128,19 @@ TypeScript 为严格模式（`tsconfig.app.json`），`npm run build` 会先跑 
 | api（mock） | 走真实适配器 + 内存 localStorage，断言契约行为与**分片写入**（勾一条只写对应分片）与越权报错 | `api/mock/contract.test.ts` |
 | hooks | 需要 React 渲染环境时慎用（`environment: 'node'`），优先测其纯逻辑部分 | `hooks/usePeriodRefresh.test.ts` |
 
-**新增 domain 模块必须带单测**；新增 store action 建议补测。`domain/` 下没有测试文件的模块历史上只有 `enums.ts`（纯类型）。
+**新增 domain 模块必须带单测**；新增 store action 建议补测。`domain/` 下没有**独立**测试文件的模块只有 `enums.ts`（纯类型）、`ids.ts`、`merge.ts`、`countdown.ts` —— 后三者由消费方（`domain/domain.test.ts` 等）连带覆盖。
 
 ## 5. 工具脚本
 
 | 脚本 | 命令 | 做什么 | 产物 |
 | --- | --- | --- | --- |
 | `tools/build.js` | `npm run db:check` | 校验 `src/db/*.db.json`：枚举双轨对齐、字段白名单、id 唯一、`isAutoHub` 唯一、锚点必填、引用完整性、`dataVersion` 覆盖 | `reports/data-check.md`；有 error → 退出码 1 |
-| `tools/calibrate-report.js` | `npm run db:calibrate` | 汇总待人工核对项（收益 / 截止日 / 时间窗 / 周期锚点），并生成录入模板 | `reports/pending-review.md`、`reports/pending-review.json`、`reports/calibration.md`，并覆盖 `tools/templates/version-intake.md` 与 `tools/templates/new-items.draft.json` |
+| `tools/calibrate-report.js` | `npm run db:calibrate` | 汇总待人工核对项（收益 / 截止日 / 时间窗），并生成录入模板 | `reports/pending-review.md`、`reports/pending-review.json`、`reports/calibration.md`，并覆盖 `tools/templates/version-intake.md` 与 `tools/templates/new-items.draft.json` |
 | `tools/verify.js` | `node tools/verify.js [--quiet] [--output=路径]` | 一键验收，依次跑 `tsc -b` → `eslint .` → `vitest run` → `build` → `db:check`，记录当次真实输出 | `reports/verify-YYYY-MM-DD.md`；任一步失败 → 退出码 1 |
 
 `reports/` 已被 `.gitignore` 忽略（可随时重跑生成），不要把它提交进仓库。
 
-> 提示：`tools/verify.js` 内部注释里的用例数（历史值）可能滞后于真实值，**以 `npm test` 输出为准**（当前 21 文件 / 302 用例）。
+> 提示：`tools/verify.js` 内部注释里的用例数（历史值）可能滞后于真实值，**以 `npm test` 输出为准**（当前 27 文件 / 407 用例）。
 
 ## 6. 数据录入流程
 

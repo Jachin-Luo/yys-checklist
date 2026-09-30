@@ -1,6 +1,6 @@
 # 02 · 数据层与领域逻辑
 
-> 对应数据版本：`2026.09.28-周期收口为四类` ｜ 事实核对日期：2026-09-28
+> 对应数据版本：`2026.09.30-奖励类型收口` ｜ 事实核对日期：2026-09-30
 > 本文回答：**数据长什么样、从哪来、到哪去、规则写在哪个函数里**。
 > 本文只描述结构与规模，不逐条罗列条目明细 —— 明细以 `src/db/*.db.json` 为唯一真值。
 
@@ -11,7 +11,7 @@
 只定义形状，不含实现。两个导出：
 
 - `DataScope`：`{ userId, profileId }` —— **显式双参数**，所有用户数据方法都要求它，Mock 用 `assertScope` 做越权校验。
-- `ApiClient`：32 个方法，分五组（2026-09-15 新增 `saveCheckLog`；2026-09-28 新增 `updateItem`）：
+- `ApiClient`：**37 个方法**，分六组（2026-09-15 新增 `saveCheckLog`；2026-09-16 新增寮时间与寄养四个；2026-09-28 新增 `updateItem`）：
 
 | 组 | 方法 |
 | --- | --- |
@@ -19,7 +19,7 @@
 | 条目 | `listItems`、`getItem`、`addCustomItem`、`updateItem`（自建整体覆盖 / 预设写字段改写）、`removeCustomItem`、`hideItem`、`restoreItem`、`resetItemLibrary`、`saveOrder` |
 | 工具资料 | `getYuhun`、`getBounty`、`getSouls` |
 | 用户与账号 | `getSession`、`updateUser`、`listProfiles`、`createProfile`、`updateProfile`、`deleteProfile`、`switchProfile` |
-| 用户数据（勾选 / 视图 / 覆盖） | `getState`、`setChecked`、`clearChecked`、`clearAllChecked`、`getView`、`saveView`、`getOverrides`、`saveOverrides` |
+| 用户数据（勾选 / 日志 / 视图 / 覆盖 / 寮时间 / 寄养） | `getState`、`setChecked`、`clearChecked`、`clearAllChecked`、`getCheckLog`、`saveCheckLog`、`getView`、`saveView`、`getOverrides`、`saveOverrides`、`getGuildTime`、`saveGuildTime`、`getPlans`、`savePlans` |
 | 导入导出 | `exportUserData`、`importUserData` |
 
 ### 1.2 类型 `src/api/types.ts`
@@ -34,9 +34,9 @@
 | `DictEntry` / `SortOption` / `ViewDefaults` | 字典行、排序选项、视图默认值 |
 | `User` / `Profile` / `Session` | 用户、账号、会话 |
 | `CheckState` / `ViewPrefs` / `ItemOverrides` | 用户数据三件套。`ItemOverrides` = `custom`（自建条目）+ `hidden`（隐藏的预设 id）+ `order`（自定义顺序）+ `patches`（**预设字段改写**，稀疏表：键不存在 = 不改、`null` = 清空该字段，见 `domain/itemPatch`） |
-| `BootstrapPayload` | 首屏聚合载荷（meta + items + session + state + view + overrides + **log**） |
+| `BootstrapPayload` | 首屏聚合载荷（meta + items + session + state + view + overrides + log + **guildTime** + **plans**） |
 | `ItemDraft` / `ProfileDraft` | 新增/编辑入参 |
-| `UserDataBundle` | 备份载体（导入导出用）：每个账号含 state / view / overrides / **log**（勾选日志） |
+| `UserDataBundle` | 备份载体（导入导出用）：每个账号含 state / view / overrides / log（勾选日志）/ **guildTime** / **plans** |
 | `MetaDbFile` / `UsersDbFile` | 种子文件形状 |
 | 工具资料 | `Dungeon` / `DungeonMode` / `DayTip` / `YuhunDb`、`Shikigami` / `Spot` / `ShikigamiSpot` / `ShikigamiClue` / `BountyDb`、`SoulRow` / `SoulsDb` |
 
@@ -67,11 +67,12 @@ VITE_API_MODE === 'http' ? new HttpApi(baseURL) : new MockApi()
 | `state(profileId)` | `yys:state:{profileId}` | 该账号的**当前周期**勾选状态（`itemId → 时间戳`） |
 | `checklog(profileId)` | `yys:checklog:{profileId}` | 该账号的勾选日志（`YYYY-MM-DD → itemId[]`，历史事实，保留 90 天） |
 | `view(profileId)` | `yys:view:{profileId}` | 该账号的视图偏好 |
-| `ovr(profileId)` | `yys:ovr:{profileId}` | 该账号的条目覆盖层（隐藏 / 自建 / 自定义顺序 / 一键日常配置） |
+| `ovr(profileId)` | `yys:ovr:{profileId}` | 该账号的条目覆盖层（隐藏 / 自建 / 自定义顺序 / 一键日常配置 / **预设字段改写 `patches`**） |
 | `guild(profileId)` | `yys:guild:{profileId}` | 该账号的寮时间（`itemId -> HH:mm`）—— **2026-09-16 由设备级升格** |
 | `plans(profileId)` | `yys:plans:{profileId}` | 该账号的结界寄养任务 / 计划 —— **2026-09-16 由设备级升格** |
 
-设备级键（不挂账号，定义在 `services/localStore.ts` 的 `DEVICE_KEY`）：**只剩 `yys:onboarded`**。
+设备级键（不挂账号，定义在 `services/localStore.ts` 的 `DEVICE_KEY`）：**只剩 `yys:onboarded` 与 `yys:theme`**
+（后者是"这台设备偏好明版还是暗版"，与玩哪个号无关，见 `stores/theme`）。
 `yys:guildTime` 与 `yys:plans` 于 2026-09-16 升为上面的两个账号级分片（理由：寮时间取决于所在寮、
 寄养节奏取决于具体号的结界卡，都不是"这台手机的属性"；且只有变成账号级分片，它们才能随备份走）。
 **旧的两个设备级键不做迁移**（用户决策）：新版本不再有读取点，用户重新配置一次，
@@ -93,7 +94,7 @@ VITE_API_MODE === 'http' ? new HttpApi(baseURL) : new MockApi()
 
 为什么故意变慢：如果 Mock 瞬时返回，就会写出「没有 loading 态、没有竞态处理」的 UI，接真实后端那天会全线崩溃。**不要为了「更快」而删掉延迟。**
 
-`hooks/useApi.ts` 是配套的取数 hook：AbortSignal 取消 + requestId 竞态守卫 + 卸载守卫（首屏不走它，首屏走 `useBootstrap`）。
+配套的取数 hook `hooks/useApi.ts`（AbortSignal 取消 + requestId 竞态守卫）已于 2026-09-28 随死符号清理删除 —— 首屏走 `useBootstrap`，其余取数在各自的 store 里做。
 
 ## 3. HTTP 适配器（空壳）
 
@@ -112,13 +113,13 @@ VITE_API_MODE === 'http' ? new HttpApi(baseURL) : new MockApi()
 | `yuhun.db.json` | `dungeons[]`、`dayTips[]`、`excluded[]` | 副本 **11**、日提示 **10**、排除项 **8** |
 | `souls.db.json` | `rows: SoulRow[]` | **70** 种御魂（`effect2` 70 条；`effect4` 57 条，13 种首领御魂无四件套） |
 | `bounty.db.json` | `shikigami[]`、`spots[]`、`shikigamiSpots[]`、`shikigamiClues[]` | 式神 **39**、地点 **64**、出处关系 **148**、线索词 **116** |
-| `meta.db.json` | `meta`、`dicts[]`、`sortOptions[]`、`viewDefaults` | 字典 **47** 行（cycle 4 + gainKind 18 + weekday 7 + yuhunSection 5 + spotKind 6 + soulCategory 7）、排序选项 5 |
+| `meta.db.json` | `meta`、`dicts[]`、`sortOptions[]`、`viewDefaults` | 字典 **38** 行（cycle 4 + gainKind 9 + weekday 7 + yuhunSection 5 + spotKind 6 + soulCategory 7）、排序选项 5 |
 | `users.db.json` | `users`、`profiles`、`states`、`viewPrefs`、`itemOverrides`、`sessions` | 各 1 条（`u_local` / `p_main`） |
 | `dataVersion.db.json` | `versions[]`：`db` / `version` / `updated`（可选 `snapshot` / `checksum`） | **7** 条（对应 meta / items / limited / yuhun / bounty / souls / users） |
 
 常驻 + 活动总计 **91 条**条目（改动数据后以 `npm run db:check` 的输出为准 —— 这两份库随活动增删）。
 
-`meta` 关键字段：`version`（应用版本，如 `1.4.0`）、`dataVersion`（如 `2026.09.30-九三零维护批`）、`resetHour`（= 0）。
+`meta` 关键字段：`version`（应用版本，如 `1.4.0`）、`dataVersion`（如 `2026.09.30-奖励类型收口`）、`resetHour`（= 0）。
 （`periods` 版本 / 赛季锚点已于 2026-09-28 随周期合并删除，见 §7.1。）
 
 ### 4.2 条目字段规格
@@ -141,23 +142,23 @@ src/domain/enums.ts 的字面量联合类型  ←── 双向校验 ──→  
 3. 条目字段白名单（`reward` / `entry` / `action` 已移出白名单，出现即报错）。
 4. id 唯一性与格式。
 5. `isAutoHub` 全局恰有 1 条。
-6. `periods.version` / `periods.season` 锚点必填。
-7. `viewDefaults` / `sortOptions` 合法性。
-8. `yuhun` / `bounty` / `souls` 的引用完整性。
-9. `users` / `sessions` 一致性。
-10. `dataVersion` 覆盖每个 db 文件。
+6. `viewDefaults` / `sortOptions` 合法性。
+7. `yuhun` / `bounty` / `souls` 的引用完整性。
+8. `users` / `sessions` 一致性。
+9. `dataVersion` 覆盖每个 db 文件。
 
 产物：`reports/data-check.md`；有 error 时退出码 1（可直接接 CI）。
 
 **改枚举的正确顺序**：先想清楚语义 → 同步改 `enums.ts` 与 `meta.db.json` 的 `dicts` → 跑 `npm run db:check` → 再跑 `npm test`。
 
-## 6. 领域逻辑 `src/domain/`（14 个模块）
+## 6. 领域逻辑 `src/domain/`（21 个模块）
 
 | 模块 | 导出符号 | 用途 |
 | --- | --- | --- |
 | `enums.ts` | `CYCLE` / `Cycle`、`GAIN_KIND` / `GainKind`、`SORT_BY` / `SortBy`、`DICT_TYPE`、`ORIGIN` / `Origin`、`GAIN_CURRENCY` / `GainCurrency` | 编译期唯一的枚举真相（`DICT_TYPE` 常量本身被 `tools/build.js` 提取做双向校验，故即使无 TS 引用也保留）。⚠️ `EVENT_CYCLE` / `TOP_GAIN_KIND` 已于 2026-09-28 退场、`GAIN_KIND` 于 2026-09-30 由 18 类收口到 9 类 —— 别再按旧口径引用 |
 | `reset.ts` | `ResetCtx`、`periodStartOf`、`periodEndOf`、`mergeChecked`、`isArchived`、`activeItems` | 周期重置（**时间戳比对，不用定时器**）与到期过滤 |
 | `merge.ts` | `mergeItems`、`effectiveView`、`emptyOverrides`、`buildMeta`；再导出 `mergeChecked`、`ResetCtx` | 种子 + 覆盖层合并规则（全项目唯一）：隐藏 → 盖预设改写 → 追加自建 |
+| `ids.ts` | `newId` | id 生成（自建条目与子步骤共用；`custom_` 前缀即"用户自建"的唯一标识） |
 | `itemDraft.ts` / `itemPatch.ts` | `applyDraft` / `draftFromItem` / `cleanGain`；`applyPatch` / `diffPatch` / `sanitizePatches` / `hasPatch` | 录入草稿与预设改写的**数据规则**（空值语义、改写求差、外部字节净化），Mock 与备份导入共用 |
 | `sort.ts` | `SortContext`（含 `dbIndex`）、`effectiveSortBy`、`seedOrder`、`moveBefore`、`moveAfter`、`moveWithinGroup`、`cycleRank`、`buildComparator`、`VisibilityContext`、`isVisible` | 排序（**默认按条目库顺序**）、置顶、自定义顺序、可见性。`weight.ts` 已于 2026-09-30 随痛感分退场删除（`cycleRank` 迁入本文件） |
 | `countdown.ts` | `parseTs`、`daysLeft`、`DeadlineLevel`、`DeadlineBadge`、`deadlineBadge`、`TimeWindowState`、`TimeWindow`、`timeWindow`、`appliesToday` | 截止倒计时与时间窗状态（**只提示，不限制勾选**） |

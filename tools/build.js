@@ -131,7 +131,9 @@ for (const it of items) {
       else if (typeof it.gain[k] !== 'number' || it.gain[k] < 0) err(`${tag} gain.${k} 应为非负数`);
     }
     if (!keys.some((k) => it.gain[k] > 0)) err(`${tag} gain 三项全为 0，等于没标固定收益`);
-    const EQUIV = { jade: ['jade'], blackFrag: ['blackFrag', 'blackDaruma'], blueTicket: ['blueTicket'] };
+    /* 币种 → 可接受的 gainKind。2026-09-30 起 `blackDaruma` 已并入 `blackFrag`
+       （1 黑蛋 = 25 黑碎），此处随之去掉那个备选 —— 留着它就是个永远匹配不到的死项 */
+    const EQUIV = { jade: ['jade'], blackFrag: ['blackFrag'], blueTicket: ['blueTicket'] };
     for (const [gk, alts] of Object.entries(EQUIV)) {
       if (it.gain[gk] > 0 && !(it.gainKind || []).some((k) => alts.includes(k))) {
         err(`${tag} gain.${gk}>0 但 gainKind 未标注（需 ${alts.join('/')}）`);
@@ -166,7 +168,7 @@ for (const it of items) {
             else if (typeof gain[k] !== 'number' || gain[k] < 0) err(`${stag} gain.${k} 应为非负数`);
           }
           if (!Object.keys(gain).some((k) => gain[k] > 0)) err(`${stag} gain 三项全为 0`);
-          const EQUIV_S = { jade: ['jade'], blackFrag: ['blackFrag', 'blackDaruma'], blueTicket: ['blueTicket'] };
+          const EQUIV_S = { jade: ['jade'], blackFrag: ['blackFrag'], blueTicket: ['blueTicket'] };
           for (const [gk, alts] of Object.entries(EQUIV_S)) {
             if (gain[gk] > 0 && !(kinds || []).some((k) => alts.includes(k))) {
               err(`${stag} gain.${gk}>0 但 gainKind 未标注（需 ${alts.join('/')}）`);

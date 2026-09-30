@@ -1,13 +1,13 @@
 # 01 · 架构总览
 
-> 对应数据版本：`2026.09.28-周期收口为四类` ｜ 事实核对日期：2026-09-28
+> 对应数据版本：`2026.09.30-奖励类型收口` ｜ 事实核对日期：2026-09-30
 > 本文回答：**代码放在哪、谁调用谁、一次点击之后发生了什么**。符号名与路径均可在代码中直接跳转核对。
 
 ## 1. 技术栈与工程配置
 
 | 项 | 值 | 位置 |
 | --- | --- | --- |
-| 运行时 | Node 18+（实测 Node 22） | `package.json` |
+| 运行时 | Node 18+（实测 Node 24） | `package.json` |
 | 框架 | React 18 + ReactDOM 18 | `package.json` dependencies |
 | 语言 | TypeScript 严格模式 | `tsconfig.app.json` |
 | 构建 | Vite 8 | `vite.config.ts` |
@@ -59,12 +59,12 @@ yys-checklist/
 | `src/` | 入口与根组件 | `main.tsx`、`App.tsx`、`vite-env.d.ts` |
 | `src/api/` | 唯一的对外数据边界：契约 + 适配器 + DTO | `contract.ts`、`index.ts`、`types.ts`、`http/adapter.ts`、`mock/adapter.ts`、`mock/db.ts`、`mock/userStore.ts`、`mock/persist.ts`、`mock/latency.ts`、`mock/contract.test.ts`、`mock/persistence.test.ts` |
 | `src/db/` | 种子主数据，只允许被 `api/mock/db.ts` import | `items.db.json`、`limited.db.json`、`yuhun.db.json`、`souls.db.json`、`bounty.db.json`、`meta.db.json`、`users.db.json`、`dataVersion.db.json` |
-| `src/domain/` | 纯函数业务规则（无 IO，全部可单测） | `enums.ts`、`reset.ts`、`merge.ts`、`weight.ts`、`sort.ts`、`countdown.ts`、`stats.ts`、`autoDaily.ts`、`backup.ts`、`guildTime.ts`、`nurture.ts`、`yuhun.ts`、`bounty.ts`、`dateLabel.ts`、`checkLog.ts`、`calendar.ts` + 12 个 `*.test.ts` |
-| `src/stores/` | Zustand 状态容器（按领域分片） | `session.ts`、`items.ts`、`check.ts`、`view.ts`、`device.ts`、`ui.ts`、`tools.ts`、`nurture.ts` + 5 个 `*.test.ts` |
-| `src/hooks/` | 编排与副作用封装（竞态、首屏、断点、焦点、周期刷新、卡片配置出口） | `useBootstrap.ts`、`useBreakpoint.ts`、`useCardDisplay.ts`、`useChecklist.ts`、`useAutoDaily.ts`、`useDevicePrefs.ts`、`useModalFocus.ts`、`usePeriodRefresh.ts` + `usePeriodRefresh.test.ts`（`useApi.ts` / `useScope.ts` 已随 2026-09-28 的死符号清理删除） |
-| `src/pages/` | 页面容器（只管排列） | `TodayPage.tsx`、`WeekPage.tsx`、`MonthPage.tsx`、`LimitedPage.tsx`、`StatsPage.tsx`、`ToolsPage.tsx`、`MePage.tsx`；`pages/settings/`：`ProfileSection.tsx`、`AutoDailySection.tsx`、`ItemManagerSection.tsx`、`GuildTimeSection.tsx`；`pages/tools/`：`YuhunSection.tsx`、`BountySection.tsx`、`NurtureSection.tsx` |
-| `src/components/` | 展示原子件与布局骨架 | `common/`（25）：`Alert.tsx`、`BackToTop.tsx`、`CheckBox.tsx`、`ChecklistEntry.tsx`、`ChecklistGroupCard.tsx`、`ChecklistItem.tsx`、`CollapsibleSection.tsx`、`ConfirmDialog.tsx`、`EmptyState.tsx`、`HubCard.tsx`、`ItemField.tsx`、**`Modal.tsx`**（2026-09-28 抽出的弹层外壳）、`NavContent.tsx`、`NurtureBadge.tsx`、`OnboardingDialog.tsx`、`PageHead.tsx`、`ProfilePickDialog.tsx`、`ProfileSwitcher.tsx`、`RewardBadges.tsx`（2026-09-29 由 `GainBadges` + `KindBadges` 合并）、`SaveErrorNotice.tsx`、`Segmented.tsx`、`SettingRow.tsx`、`SummaryBar.tsx`、`Tags.tsx`、`ThemeToggle.tsx`；`desktop/DesktopShell.tsx`；`mobile/MobileShell.tsx`；`settings/AboutSection.tsx`、`settings/BackupSection.tsx`、`settings/DataVersionSection.tsx`、`settings/`**`ItemForm.tsx`**（条目新建 / 编辑表单，弹层形态） |
-| `src/services/` | 跨域用例编排与基础设施 | `localStore.ts`、`backupService.ts`、`clipboard.ts` + `localStore.test.ts` |
+| `src/domain/` | 纯函数业务规则（无 IO，全部可单测） | 21 个模块：`enums.ts`、`reset.ts`、`merge.ts`、`sort.ts`、`countdown.ts`、`stats.ts`、`autoDaily.ts`、`backup.ts`、`cardDisplay.ts`、`guildTime.ts`、`checkLog.ts`、`calendar.ts`、`ids.ts`、`itemDraft.ts`、`itemPatch.ts`、`steps.ts`、`sync.ts`、`nurture.ts`、`yuhun.ts`、`bounty.ts`、`dateLabel.ts` + 17 个 `*.test.ts`（`weight.ts` 已于 2026-09-30 随痛感分退场删除） |
+| `src/stores/` | Zustand 状态容器（按领域分片） | 11 个：`session.ts`、`items.ts`、`check.ts`、`view.ts`、`theme.ts`、`device.ts`、`guildTime.ts`、`ui.ts`、`tools.ts`、`nurture.ts`、`pwa.ts` + 6 个 `*.test.ts` |
+| `src/hooks/` | 编排与副作用封装（竞态、首屏、断点、焦点、周期刷新、长按、卡片配置出口） | 10 个：`useBootstrap.ts`、`useBreakpoint.ts`、`useCardDisplay.ts`、`useChecklist.ts`、`useAutoDaily.ts`、`useDevicePrefs.ts`、`useLongPress.ts`、`useModalFocus.ts`、`usePeriodCountdown.ts`、`usePeriodRefresh.ts` + `usePeriodRefresh.test.ts`（`useApi.ts` / `useScope.ts` 已随 2026-09-28 的死符号清理删除） |
+| `src/pages/` | 页面容器（只管排列） | `TodayPage.tsx`、`WeekPage.tsx`、`MonthPage.tsx`、`LimitedPage.tsx`、`StatsPage.tsx`、`ToolsPage.tsx`、`MePage.tsx`；`pages/settings/`（7）：`ProfileSection.tsx`、`ProfileSyncSection.tsx`、`AutoDailySection.tsx`、`ItemManagerSection.tsx`、`CardDisplaySection.tsx`、`GuildTimeSection.tsx`、`ClearDataSection.tsx`；`pages/tools/`：`YuhunSection.tsx`、`BountySection.tsx`、`NurtureSection.tsx` |
+| `src/components/` | 展示原子件与布局骨架 | `common/`（27）：`Alert.tsx`、`BackToTop.tsx`、`CheckBox.tsx`、`ChecklistEntry.tsx`、`ChecklistGroupCard.tsx`、`ChecklistItem.tsx`、`CollapsibleSection.tsx`、`ConfirmDialog.tsx`、`controls.ts`、`EmptyState.tsx`、`HubCard.tsx`、`ItemField.tsx`、**`Modal.tsx`**（2026-09-28 抽出的弹层外壳）、`NavContent.tsx`、`NurtureBadge.tsx`、`OnboardingDialog.tsx`、`PageHead.tsx`、`ProfilePickDialog.tsx`、`ProfileSwitcher.tsx`、`RewardBadges.tsx`（2026-09-29 由 `GainBadges` + `KindBadges` 合并）、`SaveErrorNotice.tsx`、`sectionNo.ts`、`Segmented.tsx`、`SettingRow.tsx`、`SummaryBar.tsx`、`Tags.tsx`、`ThemeToggle.tsx`；`desktop/DesktopShell.tsx`；`mobile/MobileShell.tsx`；`settings/`（5）：`AboutSection.tsx`、`BackupSection.tsx`、`DataVersionSection.tsx`、**`ItemForm.tsx`**（条目新建 / 编辑表单，弹层形态）、`UpdateSection.tsx`（PWA 更新检查） |
+| `src/services/` | 跨域用例编排与基础设施 | `localStore.ts`、`backupService.ts`、`clipboard.ts`、`pwa.ts`（SW 注册 / 检查更新）+ `localStore.test.ts` |
 | `src/styles/` | 设计令牌与共享容器类 | `index.css`、`base.css`、`layout.ts`（`tokens.ts` 这个 JS 侧令牌镜像已于 2026-09-29 随唯一消费方 `ProgressBar` 删除） |
 | `src/test/` | 单测垫片 | `memoryStorage.ts` |
 
@@ -113,7 +113,7 @@ sequenceDiagram
 
 | 环节 | 位置 | 说明 |
 | --- | --- | --- |
-| HTML 挂载点 | `index.html` | `#root` + `<script type="module" src="/src/main.tsx">`；注释说明 PWA 打包暂缓 |
+| HTML 挂载点 | `index.html` | `#root` + `<script type="module" src="/src/main.tsx">`；另有 favicon SVG 与 iOS 专属 meta（`apple-mobile-web-app-*` / `apple-touch-icon`），manifest 由 PWA 插件在构建期注入 |
 | 根渲染 | `src/main.tsx` | `React.StrictMode`；Service Worker 的注册在 `src/App.tsx` 挂载时调 `services/pwa.initPwa()`（2026-09-29 接入 PWA，开发态是空实现、不注册） |
 | 首屏聚合 | `src/App.tsx` → `hooks/useBootstrap.ts` | 首屏唯一入口；切号 / `bootstrapTick` 变化时全量重载 |
 | 周期刷新 | `hooks/usePeriodRefresh.ts` | 每分钟边界 + 窗口聚焦 + 可见性变化时重估周期状态，**不写盘** |
@@ -132,23 +132,26 @@ sequenceDiagram
 
 > 页面内部不应自行读屏宽 —— 全项目只有 `useBreakpoint` 读窗口宽度。新增布局差异请走 `components/mobile` / `components/desktop` 与 `styles/layout.ts`。
 
-## 6. 状态层：八个 store
+## 6. 状态层：十一个 store
 
 | store | 导出符号 | state | action |
 | --- | --- | --- | --- |
-| `stores/session.ts` | `useSessionStore`、`aliveProfiles`、`currentProfile` | `session`、`profiles`、`error`、`saving` | `applySession`、`loadProfiles`、`switchProfile`、`createProfile`、`updateProfile`、`archiveProfile`、`restoreProfile`、`deleteProfile`、`setError` |
-| `stores/items.ts` | `useItemStore`、`resetItemsMemory`、`dictIndexOf` | `meta`、`items`、`presetItems`、`overrides`、`error` | `applyBootstrap`、`reloadItems`、`loadPreset`、`addItem`、`hideItem`、`restoreItem`、`removeItem`、`saveOrder`、`resetLibrary` |
-| `stores/check.ts` | `useCheckStore`、`resetCheckMemory`、`isChecked` | `checked`、`loading`、`error` | `applyChecked`、`toggle`、`setMany`、`toggleWithCascade`、`clearAll` |
-| `stores/view.ts` | `useViewStore`、`resetViewMemory`、`normalizeView`、`CoverMode` | `view`、`defaults`、`error` | `applyView`、`setSortBy`、`setMinWeight`、`togglePin`、`setCoverMode`、`setAutoSet`、`resetAutoSet` |
-| `stores/device.ts` | `useDeviceStore` | `guildTime`、`onboarded`、`hydrated`、`error` | `hydrate`、`setGuildTime`、`clearGuildTime`、`markOnboarded`、`resetOnboarding` |
-| `stores/ui.ts` | `useUiStore`、`NAV_ITEMS`、`NavKey`、`ConfirmOptions` | `nav`、`navRequest`、`bootstrapLoading`、`bootstrapError`、`confirmState`、`bootstrapTick` | `setNav`、`requestNav`、`clearNavRequest`、`setBootstrapLoading`、`setBootstrapError`、`refreshBootstrap`、`askConfirm`、`answerConfirm` |
+| `stores/session.ts` | `useSessionStore`、`aliveProfiles` | `session`、`profiles`、`error`、`saving` | `applySession`、`loadProfiles`、`switchProfile`、`createProfile`、`updateProfile`、`archiveProfile`、`restoreProfile`、`deleteProfile`、`setError` |
+| `stores/items.ts` | `useItemStore`、`resetItemsMemory`、`dictIndexOf` | `meta`、`items`、`presetItems`、`overrides`、`error` | `applyBootstrap`、`reloadItems`、`loadPreset`、`addItem`、`updateItem`、`hideItem`、`restoreItem`、`removeItem`、`saveOrder`、`resetLibrary` |
+| `stores/check.ts` | `useCheckStore`、`resetCheckMemory` | `checked`、`log`、`loading`、`error` | `applyChecked`、`toggle`、`setMany`、`toggleWithCascade`、`toggleInProfiles`（长按跨账号）、`clearAll` |
+| `stores/view.ts` | `useViewStore`、`resetViewMemory`、`CoverMode` | `view`、`defaults`、`error` | `applyView`、`setSortBy`、`setMinWeight`、`togglePin`、`setPinned`、`setCoverMode`、`setCardDisplay`（带 `scope`，只写一页）、`setAutoSet`、`resetAutoSet` |
+| `stores/theme.ts` | `useThemeStore`、`Theme` | `theme` | `setTheme` |
+| `stores/device.ts` | `useDeviceStore` | `onboarded`、`hydrated`、`error` | `hydrate`、`markOnboarded`、`resetOnboarding` |
+| `stores/guildTime.ts` | `useGuildTimeStore`、`resetGuildTimeMemory` | `guildTime`、`error` | `applyGuildTime`、`setGuildTime`、`clearGuildTime` |
+| `stores/ui.ts` | `useUiStore`、`NAV_ITEMS`、`NavKey`、`ConfirmOptions`、`PickOptions` | `nav`、`navRequest`、`bootstrapLoading`、`bootstrapError`、`confirmState`、`bootstrapTick` | `setNav`、`requestNav`、`clearNavRequest`、`setBootstrapLoading`、`setBootstrapError`、`refreshBootstrap`、`askConfirm`、`answerConfirm`、`askPick`、`answerPick` |
 | `stores/tools.ts` | `useToolsStore`、`ToolTab` | `yuhun`、`souls`、`bounty`、`loading`、`error` | `ensure`（模块级 `inflight` 去重） |
-| `stores/nurture.ts` | `useNurtureStore`、`resetNurtureMemory` | `records`、`hydrated`、`error` | `hydrate`、`add`、`promote`、`remove`、`clearAll` |
+| `stores/nurture.ts` | `useNurtureStore`、`resetNurtureMemory` | `records`、`error` | `applyPlans`、`add`、`promote`、`markPoint`、`clearPoint`、`remove`、`clearAll` |
+| `stores/pwa.ts` | `usePwaStore` | `supported`、`registered`、`needRefresh`、`offlineReady` | `setSupported`、`setRegistered`、`setNeedRefresh`、`setOfflineReady`（**刻意不持久化** —— SW 活在浏览器层，刷新就要重新握手） |
 
 依赖方向（谁调用谁）：
 
 ```text
-hooks/useBootstrap ──> api.getSession / listProfiles / getBootstrap ──> 四个 store（items → check → view → session）
+hooks/useBootstrap ──> api.getSession / listProfiles / getBootstrap ──> 六个 store（items → check → view → session → guildTime → nurture）
 stores/session ──> stores/ui        （切号时点亮骨架 loading）
 stores/items ──> stores/session     （取 DataScope）
 stores/check ──> stores/session, stores/items（currentPeriod 依赖 meta + items）
@@ -196,7 +199,7 @@ api.getBootstrap
 | `LimitedPage.tsx` | `useChecklist`（限时分区，固定按剩余天数升序，无排序控件） |
 | `StatsPage.tsx` | `domain/calendar.buildMonthGrid`（月历）+ `stores/check` 的 `log` + `domain/stats.summarizeRangeGain`（区间收益）—— **不经过 `useChecklist`**，因此不受「覆盖隐藏 / 奖励类型筛选」影响 |
 | `ToolsPage.tsx` | `stores/tools.ensure`（御魂 / 悬赏 / 寄养三段懒加载） |
-| `MePage.tsx` | 设置页：**4 组**（观感 / 委托 / 账号 / 数据）共 9 个分区。来源是 `pages/settings/*` 六个（账号 / 同步到其他账号 / 一键日常 / 条目管理 / 卡片显示字段 / 寮时间）+ `components/settings/*` 两个（数据版本 / 数据备份） |
+| `MePage.tsx` | 设置页：**5 组**（观感 / 委托 / 账号 / 数据 / 关于）。来源是 `pages/settings/*` 七个（游戏账号 / 同步到其他账号 / 一键日常 / 条目管理 / 卡片显示字段 / 寮时间 / 清空记录）+ `components/settings/*` 四个（数据版本 / 数据备份 / 应用更新 / 联系方式），另有一个平铺行（界面主题） |
 
 > **设置页的两级结构与形态口径**（2026-09-23 重构）：组名走清单页同一套分组头 `SectionTitle`
 > （传 `flush` —— 页面容器已自带 `px-3.5`，不传会缩两次）。组内按「**能一行说完的平铺、
@@ -207,7 +210,7 @@ api.getBootstrap
 > 也给出关键结论（"已覆盖 12 项" / "存活 2 个" / "快照更新于 9/9"）。分段选择类控件统一用
 > `components/common/Segmented`（`value` 传 `null` 表示"不属于任何一档"，此时三档都不高亮）。
 
-`hooks/useChecklist.ts` 是清单类页面的公共编排：过滤（`domain/sort.isVisible`）+ 排序（`domain/sort.buildComparator`）+ 分组，导出 `Checklist`、`ChecklistTarget`、`HIGH_WEIGHT`（= 30）。
+`hooks/useChecklist.ts` 是清单类页面的公共编排：过滤（`domain/sort.isVisible`）+ 排序（`domain/sort.buildComparator`）+ 按卡切分（`domain/steps.isCardDone`），导出 `Checklist`、`ChecklistTarget`（`HIGH_WEIGHT` 已随痛感分于 2026-09-30 删除）。
 
 ## 9. 两套布局的共享与差异
 
@@ -220,7 +223,7 @@ api.getBootstrap
 
 | 现象 | 原因与位置 |
 | --- | --- |
-| 一键日常入口永远排第 0 位 | `domain/sort.ts` 的前置特判，不参与 `weightOf` 比较 |
+| 一键日常入口永远排第 0 位 | `domain/sort.ts` 的前置特判，不参与任何比较（`weightOf` 已随 `domain/weight.ts` 于 2026-09-30 删除） |
 | 日期显示与勾选重置口径不一致 | 顶部日期纯展示（`domain/dateLabel.ts`），重置按周期口径（`domain/reset.ts`） |
 | `ViewPrefs.sortBy` / `minWeight` 有字段但 UI 不写 | 排序已由「**默认按条目库顺序** + 置顶 + 自定义顺序」决定（2026-09-30 起默认不再是痛感分；痛感自 2026-09-15 起只作排序键，如今连排序键也不是 —— `domain/weight.ts` 已随本次改动删除）。两个字段保留在数据层（不动契约形状），**勿据此新增控件** |
 | 界面里找不到任何「痛感」字样 | 2026-09-15 收敛：今日页「本周高痛感还剩 N 项」警示条已删除，`minWeight` 门槛与 `WEIGHT_LEGEND` 图例一并移除 —— 当时痛感只剩「默认排序」一个出口；**2026-09-30 连那个出口也没了**（默认排序改按条目库顺序），`domain/weight.ts` 随之删除 |
